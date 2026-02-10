@@ -673,15 +673,6 @@
             }
         }
 
-        function toggleDataAnalysisDropdown() {
-            const dropdown = document.getElementById('dataAnalysisDropdown');
-            const chevron = document.getElementById('dataAnalysisChevron');
-            if (dropdown && chevron) {
-                dropdown.classList.toggle('show');
-                chevron.style.transform = dropdown.classList.contains('show') ? 'rotate(180deg)' : 'rotate(0deg)';
-            }
-        }
-
         function toggleClinicalDropdown() {
             const dropdown = document.getElementById('clinicalDropdown');
             const chevron = document.getElementById('clinicalChevron');
@@ -706,7 +697,6 @@
             const patientDropdown = document.getElementById('patientDropdown');
             const detectionDropdown = document.getElementById('detectionDropdown');
             const treatmentDropdown = document.getElementById('treatmentDropdown');
-            const dataAnalysisDropdown = document.getElementById('dataAnalysisDropdown');
             const clinicalDropdown = document.getElementById('clinicalDropdown');
             const portalDropdown = document.getElementById('portalDropdown');
             
@@ -714,7 +704,6 @@
             const patientButton = e.target.closest('button[onclick="togglePatientDropdown()"]');
             const detectionButton = e.target.closest('button[onclick="toggleDetectionDropdown()"]');
             const treatmentButton = e.target.closest('button[onclick="toggleTreatmentDropdown()"]');
-            const dataAnalysisButton = e.target.closest('button[onclick="toggleDataAnalysisDropdown()"]');
             const clinicalButton = e.target.closest('button[onclick="toggleClinicalDropdown()"]');
             const portalButton = e.target.closest('button[onclick="togglePortalDropdown()"]');
             const themeButton = e.target.closest('button[onclick="toggleTheme()"]');
@@ -740,12 +729,6 @@
             if (!treatmentButton && treatmentDropdown && !treatmentDropdown.contains(e.target)) {
                 treatmentDropdown.classList.remove('show');
                 const chevron = document.getElementById('treatmentChevron');
-                if (chevron) chevron.style.transform = 'rotate(0deg)';
-            }
-            
-            if (!dataAnalysisButton && dataAnalysisDropdown && !dataAnalysisDropdown.contains(e.target)) {
-                dataAnalysisDropdown.classList.remove('show');
-                const chevron = document.getElementById('dataAnalysisChevron');
                 if (chevron) chevron.style.transform = 'rotate(0deg)';
             }
 

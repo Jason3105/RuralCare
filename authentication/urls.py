@@ -44,7 +44,7 @@ urlpatterns = [
     path('doctor/consultations/availability/<uuid:slot_id>/toggle/', doctor_consultation_views.toggle_availability, name='doctor_toggle_availability'),
     path('doctor/consultations/requests/', doctor_consultation_views.doctor_consultation_requests, name='doctor_consultation_requests'),
     path('doctor/consultations/requests/<uuid:request_id>/respond/', doctor_consultation_views.respond_to_request, name='doctor_respond_to_request'),
-    path('doctor/consultations/list/', doctor_consultation_views.doctor_consultations, name='doctor_consultations'),
+    path('doctor/consultations/list/', doctor_consultation_views.doctor_consultation_dashboard, name='doctor_consultations'),
     path('doctor/consultations/<uuid:consultation_id>/', doctor_consultation_views.consultation_detail, name='doctor_consultation_detail'),
     
     # Blockchain status refresh

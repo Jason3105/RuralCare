@@ -350,22 +350,13 @@ def my_consultations(request):
     past = consultations.filter(Q(scheduled_datetime__lt=today_start) | ~Q(status='scheduled'))
     
     # Add can_start_call flag to upcoming consultations
-    # Patients can start a call from scheduled time up to 30 minutes after
+    # Allow calls anytime (no time restrictions)
     upcoming_with_flags = []
     for consultation in upcoming[:5]:
-        scheduled_time = consultation.scheduled_datetime
-        # Allow calls from scheduled time to 30 minutes after
-        call_window_start = scheduled_time
-        call_window_end = scheduled_time + timedelta(minutes=30)
-        can_start_call = call_window_start <= now <= call_window_end
-        
-        # Also set flag for when call will be available (show countdown if before)
-        time_until_call = (call_window_start - now).total_seconds() if now < call_window_start else 0
-        call_expired = now > call_window_end
-        
-        consultation.can_start_call = can_start_call
-        consultation.time_until_call_minutes = max(0, int(time_until_call / 60))
-        consultation.call_expired = call_expired
+        # Always allow calls - no time window restrictions
+        consultation.can_start_call = True
+        consultation.time_until_call_minutes = 0
+        consultation.call_expired = False
         
         # Attach token info for in-person consultations
         try:
@@ -656,12 +647,10 @@ def consultation_hub(request):
 
     upcoming_with_flags = []
     for consultation in upcoming[:5]:
-        scheduled_time = consultation.scheduled_datetime
-        call_window_start = scheduled_time
-        call_window_end = scheduled_time + timedelta(minutes=30)
-        consultation.can_start_call = call_window_start <= now <= call_window_end
-        consultation.time_until_call_minutes = max(0, int((call_window_start - now).total_seconds() / 60)) if now < call_window_start else 0
-        consultation.call_expired = now > call_window_end
+        # Always allow calls - no time window restrictions
+        consultation.can_start_call = True
+        consultation.time_until_call_minutes = 0
+        consultation.call_expired = False
         try:
             consultation.token = consultation.consultation_token
         except ConsultationToken.DoesNotExist:

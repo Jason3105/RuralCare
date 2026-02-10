@@ -496,6 +496,16 @@ def symptom_log_create(request):
         messages.warning(request, 'You have already logged symptoms for today.')
         return redirect('patient_portal:symptom_log_list')
     
+    # Get list of doctors the patient has consulted with
+    from patient_portal.consultation_models import Consultation
+    from datetime import timedelta
+    
+    consulted_doctors = User.objects.filter(
+        user_type='doctor',
+        doctor_consultations__patient=request.user,
+        doctor_consultations__status__in=['scheduled', 'in_progress', 'completed']
+    ).distinct().order_by('first_name', 'last_name')
+    
     if request.method == 'POST':
         # Get treatment plan if any
         plan = PersonalizedTreatmentPlan.objects.filter(
@@ -503,9 +513,19 @@ def symptom_log_create(request):
             status='active'
         ).first()
         
+        # Get selected doctor
+        doctor_id = request.POST.get('doctor')
+        doctor = None
+        if doctor_id:
+            try:
+                doctor = User.objects.get(id=doctor_id, user_type='doctor')
+            except User.DoesNotExist:
+                pass
+        
         # Create symptom log
         log = PatientSymptomLog(
             patient=request.user,
+            doctor=doctor,
             treatment_plan=plan,
             log_date=today,
             log_type=request.POST.get('log_type', 'daily'),
@@ -582,6 +602,7 @@ def symptom_log_create(request):
     context = {
         'today': today,
         'severity_choices': PatientSymptomLog.SEVERITY_CHOICES,
+        'consulted_doctors': consulted_doctors,
     }
     return render(request, 'patient_portal/symptom_log_create.html', context)
 
@@ -942,6 +963,16 @@ def health_hub(request):
 
     # --- Symptom form data ---
     severity_choices = PatientSymptomLog.SEVERITY_CHOICES
+    
+    # Get list of doctors the patient has consulted with
+    from patient_portal.consultation_models import Consultation
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    consulted_doctors = User.objects.filter(
+        user_type='doctor',
+        doctor_consultations__patient=request.user,
+        doctor_consultations__status__in=['scheduled', 'in_progress', 'completed']
+    ).distinct().order_by('first_name', 'last_name')
 
     context = {
         # overview
@@ -959,6 +990,7 @@ def health_hub(request):
         # symptom form
         'today': today,
         'severity_choices': severity_choices,
+        'consulted_doctors': consulted_doctors,
     }
     return render(request, 'patient_portal/health_hub.html', context)
 

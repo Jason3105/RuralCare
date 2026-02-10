@@ -29,6 +29,9 @@ class PatientSymptomLog(models.Model):
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     patient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='symptom_logs')
+    doctor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, 
+                               related_name='doctor_symptom_logs', 
+                               limit_choices_to={'user_type': 'doctor'})
     treatment_plan = models.ForeignKey('cancer_detection.PersonalizedTreatmentPlan',
                                         on_delete=models.SET_NULL, null=True, blank=True,
                                         related_name='patient_symptom_logs')

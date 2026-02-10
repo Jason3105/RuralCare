@@ -27,17 +27,33 @@
             <div class="lg:col-span-1">
                 <div class="bg-card border border-border/50 rounded-xl p-6">
                     <h2 class="text-lg font-semibold text-foreground mb-4">Select Patient</h2>
+                    
+                    <!-- Search Box -->
+                    <div class="mb-3">
+                        <input type="text" id="patient_search" placeholder="Search patients..."
+                               class="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                               onkeyup="filterPatients()">
+                    </div>
+                    
                     <form method="get" class="space-y-4">
-                        <select name="patient" onchange="this.form.submit()" 
+                        <select name="patient" id="patient_select" onchange="this.form.submit()" 
                                 class="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
                             <option value="">Choose a patient...</option>
                             {% for patient in patients %}
-                            <option value="{{ patient.id }}" {% if selected_patient and selected_patient.id == patient.id %}selected{% endif %}>
+                            <option value="{{ patient.id }}" 
+                                    data-name="{{ patient.get_full_name|default:patient.username|lower }}"
+                                    data-email="{{ patient.email|lower }}"
+                                    {% if selected_patient and selected_patient.id == patient.id %}selected{% endif %}>
                                 {{ patient.get_full_name|default:patient.username }}
                             </option>
                             {% endfor %}
                         </select>
                     </form>
+                    
+                    <p class="text-xs text-muted-foreground mt-2">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Showing {{ total_patients }} patient{{ total_patients|pluralize }} from past 30 days
+                    </p>
 
                     {% if selected_patient %}
                     <div class="mt-4 p-4 bg-accent/30 rounded-lg">
@@ -158,4 +174,24 @@
         </div>
     </div>
 </div>
+
+<script>
+function filterPatients() {
+    const searchInput = document.getElementById('patient_search').value.toLowerCase();
+    const select = document.getElementById('patient_select');
+    const options = select.getElementsByTagName('option');
+    
+    for (let i = 1; i < options.length; i++) { // Start from 1 to skip "Choose a patient..."
+        const option = options[i];
+        const name = option.getAttribute('data-name') || '';
+        const email = option.getAttribute('data-email') || '';
+        
+        if (name.includes(searchInput) || email.includes(searchInput)) {
+            option.style.display = '';
+        } else {
+            option.style.display = 'none';
+        }
+    }
+}
+</script>
 {% endblock %}

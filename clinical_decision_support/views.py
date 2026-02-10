@@ -10,7 +10,7 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.http import require_http_methods, require_POST
 from django.core.paginator import Paginator
 from django.utils import timezone
-from django.db.models import Q
+from django.db.models import Q, Max, Count
 import json
 
 from .models import (
@@ -24,8 +24,10 @@ from cancer_detection.models import (
     PersonalizedTreatmentPlan, CancerImageAnalysis,
     HistopathologyReport, GenomicProfile
 )
-from patient_portal.models import PatientSymptomLog
+from patient_portal.models import PatientSymptomLog, PatientAlert
+from patient_portal.consultation_models import Consultation
 from authentication.models import User, DoctorProfile
+from datetime import timedelta
 
 
 def doctor_required(view_func):
@@ -634,31 +636,50 @@ def toxicity_predict(request):
 @login_required
 @doctor_required
 def symptom_monitoring_dashboard(request):
-    """Doctor's symptom monitoring dashboard"""
-    monitors = DoctorSymptomMonitor.objects.select_related(
-        'patient', 'treatment_plan'
-    ).filter(doctor=request.user).order_by('-updated_at')
+    """Doctor's symptom monitoring dashboard - shows patients who have logged symptoms for this doctor"""
     
-    # Filter by alert status
-    alert_status = request.GET.get('alert')
-    if alert_status:
-        monitors = monitors.filter(alert_status=alert_status)
+    # Get all patients who have symptom logs assigned to this doctor
+    patients_with_logs = User.objects.filter(
+        user_type='patient',
+        symptom_logs__doctor=request.user
+    ).distinct().annotate(
+        latest_log_date=Max('symptom_logs__log_date'),
+        total_logs=Count('symptom_logs', filter=Q(symptom_logs__doctor=request.user))
+    ).order_by('-latest_log_date')
     
-    paginator = Paginator(monitors, 10)
+    # Build patient data with their recent logs
+    patient_data = []
+    for patient in patients_with_logs:
+        recent_logs = PatientSymptomLog.objects.filter(
+            patient=patient, 
+            doctor=request.user
+        ).order_by('-log_date')[:5]
+        
+        # Check for severe symptoms in recent logs
+        has_severe = False
+        severe_count = 0
+        for log in recent_logs:
+            severe_symptoms = log.get_severe_symptoms()
+            if severe_symptoms:
+                has_severe = True
+                severe_count += len(severe_symptoms)
+        
+        patient_data.append({
+            'patient': patient,
+            'latest_log_date': patient.latest_log_date,
+            'total_logs': patient.total_logs,
+            'has_severe': has_severe,
+            'severe_count': severe_count,
+        })
+    
+    # Pagination
+    paginator = Paginator(patient_data, 10)
     page = request.GET.get('page')
     page_obj = paginator.get_page(page)
     
-    # Get patients with recent severe symptoms
-    severe_alerts = DoctorSymptomMonitor.objects.filter(
-        doctor=request.user,
-        alert_status__in=['urgent', 'critical']
-    ).count()
-    
     context = {
         'page_obj': page_obj,
-        'alert_statuses': DoctorSymptomMonitor.ALERT_STATUS_CHOICES,
-        'selected_alert': alert_status,
-        'severe_alerts_count': severe_alerts,
+        'total_patients': patients_with_logs.count(),
     }
     return render(request, 'clinical_decision_support/symptom_monitoring_dashboard.html', context)
 
@@ -666,7 +687,7 @@ def symptom_monitoring_dashboard(request):
 @login_required
 @doctor_required
 def symptom_monitoring_patient(request, patient_id):
-    """View symptom details for a specific patient"""
+    """View symptom details for a specific patient - only logs assigned to this doctor"""
     patient = get_object_or_404(User, id=patient_id, user_type='patient')
     
     # Get or create monitor
@@ -676,8 +697,11 @@ def symptom_monitoring_patient(request, patient_id):
         defaults={'alert_status': 'none'}
     )
     
-    # Get symptom logs
-    symptom_logs = PatientSymptomLog.objects.filter(patient=patient).order_by('-log_date')
+    # Get symptom logs - only those assigned to this doctor
+    symptom_logs = PatientSymptomLog.objects.filter(
+        patient=patient, 
+        doctor=request.user
+    ).order_by('-log_date')
     
     # Get treatment plan
     plan = PersonalizedTreatmentPlan.objects.filter(patient=patient).order_by('-created_at').first()
@@ -845,11 +869,28 @@ from patient_portal.models import PatientAlert
 @doctor_required
 def patient_alerts_dashboard(request):
     """Dashboard for doctors to manage patient alerts"""
-    # Get all patients with treatment plans
+    # Get patients who have been consulted in the past 1 month
+    one_month_ago = timezone.now() - timedelta(days=30)
+    consulted_patients = Consultation.objects.filter(
+        doctor=request.user,
+        scheduled_datetime__gte=one_month_ago,
+        status__in=['scheduled', 'completed', 'in_progress']
+    ).values_list('patient_id', flat=True).distinct()
+    
     patients = User.objects.filter(
-        user_type='patient',
-        treatment_plans__isnull=False
-    ).distinct().order_by('username')
+        id__in=consulted_patients,
+        user_type='patient'
+    ).order_by('first_name', 'last_name')
+    
+    # Search functionality
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        patients = patients.filter(
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(email__icontains=search_query) |
+            Q(username__icontains=search_query)
+        )
     
     # Filter by patient if specified
     patient_id = request.GET.get('patient')
@@ -875,6 +916,8 @@ def patient_alerts_dashboard(request):
         'selected_patient': selected_patient,
         'alerts': alerts,
         'recent_sent': recent_sent,
+        'search_query': search_query,
+        'total_patients': patients.count(),
     }
     return render(request, 'clinical_decision_support/patient_alerts_dashboard.html', context)
 
@@ -884,11 +927,28 @@ def patient_alerts_dashboard(request):
 def send_patient_alert(request):
     """Send an alert/notification to a patient"""
     if request.method != 'POST':
-        # Show form for GET request
+        # Show form for GET request - only patients consulted in the past 1 month
+        one_month_ago = timezone.now() - timedelta(days=30)
+        consulted_patients = Consultation.objects.filter(
+            doctor=request.user,
+            scheduled_datetime__gte=one_month_ago,
+            status__in=['scheduled', 'completed', 'in_progress']
+        ).values_list('patient_id', flat=True).distinct()
+        
         patients = User.objects.filter(
-            user_type='patient',
-            treatment_plans__isnull=False
-        ).distinct().order_by('username')
+            id__in=consulted_patients,
+            user_type='patient'
+        ).order_by('first_name', 'last_name')
+        
+        # Search functionality
+        search_query = request.GET.get('search', '').strip()
+        if search_query:
+            patients = patients.filter(
+                Q(first_name__icontains=search_query) |
+                Q(last_name__icontains=search_query) |
+                Q(email__icontains=search_query) |
+                Q(username__icontains=search_query)
+            )
         
         # Pre-select patient if provided
         patient_id = request.GET.get('patient')
@@ -903,6 +963,8 @@ def send_patient_alert(request):
             'patients': patients,
             'selected_patient': selected_patient,
             'alert_types': PatientAlert.ALERT_TYPE_CHOICES,
+            'search_query': search_query,
+            'total_patients': patients.count(),
         }
         return render(request, 'clinical_decision_support/send_patient_alert.html', context)
     

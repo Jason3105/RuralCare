@@ -2,6 +2,7 @@
 Doctor-side Consultation Views
 """
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.http import require_POST
@@ -18,37 +19,63 @@ from patient_portal.consultation_views import doctor_required
 @login_required
 @doctor_required
 def doctor_consultation_dashboard(request):
-    """Doctor's consultation dashboard"""
+    """Doctor's combined consultation dashboard + list"""
+    now = timezone.now()
+    today = now.date()
+    
     # Get pending requests
     pending_requests = ConsultationRequest.objects.filter(
         doctor=request.user,
         status='pending'
     ).select_related('patient').order_by('-requested_at')[:5]
     
-    # Get upcoming consultations
-    upcoming = Consultation.objects.filter(
+    pending_count = ConsultationRequest.objects.filter(
         doctor=request.user,
-        status='scheduled',
-        scheduled_datetime__gte=timezone.now()
-    ).select_related('patient').order_by('scheduled_datetime')[:5]
+        status='pending'
+    ).count()
     
     # Get ALL today's consultations (scheduled, in_progress, and completed)
-    today = timezone.now().date()
     today_consultations = Consultation.objects.filter(
         doctor=request.user,
         scheduled_datetime__date=today
     ).exclude(
         status__in=['cancelled', 'no_show']
-    ).select_related('patient').order_by('scheduled_datetime')
+    ).select_related('patient').prefetch_related('consultation_token').order_by('scheduled_datetime')
     
+    # Full consultation list with filters
+    all_consultations = Consultation.objects.filter(
+        doctor=request.user
+    ).select_related('patient').prefetch_related('consultation_token').order_by('-scheduled_datetime')
+    
+    # Filter by status
+    selected_status = request.GET.get('status')
+    if selected_status:
+        all_consultations = all_consultations.filter(status=selected_status)
+    
+    # Filter by mode
+    selected_mode = request.GET.get('mode')
+    if selected_mode:
+        all_consultations = all_consultations.filter(mode=selected_mode)
+    
+    # Separate upcoming and past
+    upcoming_consultations = list(all_consultations.filter(scheduled_datetime__gte=now, status='scheduled'))
+    past_consultations = list(all_consultations.filter(Q(scheduled_datetime__lt=now) | ~Q(status='scheduled')))
+    
+    # Attach token to each consultation for template access
+    for c in list(today_consultations) + upcoming_consultations + past_consultations:
+        try:
+            c.token = c.consultation_token
+        except Exception:
+            c.token = None
+
     context = {
         'pending_requests': pending_requests,
-        'upcoming_consultations': upcoming,
+        'pending_count': pending_count,
         'today_consultations': today_consultations,
-        'pending_count': ConsultationRequest.objects.filter(
-            doctor=request.user,
-            status='pending'
-        ).count(),
+        'upcoming_consultations': upcoming_consultations,
+        'past_consultations': past_consultations,
+        'selected_status': selected_status,
+        'selected_mode': selected_mode,
     }
     return render(request, 'authentication/doctor/consultation_dashboard.html', context)
 
@@ -465,6 +492,33 @@ def doctor_consultations(request):
 @doctor_required
 def consultation_detail(request, consultation_id):
     """View consultation details"""
+    if request.method == 'POST':
+        # Fetch consultation for updating
+        consultation = get_object_or_404(
+            Consultation,
+            id=consultation_id,
+            doctor=request.user
+        )
+        
+        # Update consultation notes and prescription
+        doctor_notes = request.POST.get('doctor_notes', '')
+        prescription = request.POST.get('prescription', '')
+        
+        consultation.doctor_notes = doctor_notes
+        consultation.prescription = prescription
+        
+        # Check if marking as completed
+        if 'mark_completed' in request.POST:
+            consultation.status = 'completed'
+            consultation.completed_at = timezone.now()
+            messages.success(request, 'Consultation marked as completed successfully.')
+        else:
+            messages.success(request, 'Consultation notes updated successfully.')
+        
+        consultation.save()
+        return redirect('doctor_consultation_detail', consultation_id=consultation_id)
+    
+    # Fetch consultation for display (always for GET requests)
     consultation = get_object_or_404(
         Consultation.objects.prefetch_related('consultation_token'),
         id=consultation_id,
@@ -476,25 +530,6 @@ def consultation_detail(request, consultation_id):
         consultation.token = consultation.consultation_token
     except Exception:
         consultation.token = None
-    
-    if request.method == 'POST':
-        # Update consultation notes
-        doctor_notes = request.POST.get('doctor_notes', '')
-        prescription = request.POST.get('prescription', '')
-        
-        consultation.doctor_notes = doctor_notes
-        consultation.prescription = prescription
-        
-        if request.POST.get('mark_completed'):
-            consultation.status = 'completed'
-            consultation.completed_at = timezone.now()
-            consultation.save()
-            messages.success(request, 'Consultation marked as completed successfully.')
-            return redirect('doctor_consultation_detail', consultation_id=consultation_id)
-        
-        consultation.save()
-        messages.success(request, 'Consultation updated successfully.')
-        return redirect('doctor_consultation_detail', consultation_id=consultation_id)
     
     context = {
         'consultation': consultation,

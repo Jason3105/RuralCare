@@ -17,20 +17,35 @@
             <form method="post" class="space-y-6">
                 {% csrf_token %}
                 
-                <!-- Patient Selection -->
+                <!-- Patient Selection with Search -->
                 <div>
                     <label for="patient_id" class="block text-sm font-medium text-foreground mb-2">
                         Select Patient <span class="text-red-500">*</span>
                     </label>
+                    
+                    <!-- Search Box -->
+                    <div class="mb-3">
+                        <input type="text" id="patient_search" placeholder="Search patients by name or email..."
+                               class="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                               onkeyup="filterPatients()">
+                    </div>
+                    
                     <select name="patient_id" id="patient_id" required
                             class="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
                         <option value="">Choose a patient...</option>
                         {% for patient in patients %}
-                        <option value="{{ patient.id }}" {% if selected_patient and selected_patient.id == patient.id %}selected{% endif %}>
+                        <option value="{{ patient.id }}" 
+                                data-name="{{ patient.get_full_name|default:patient.username|lower }}"
+                                data-email="{{ patient.email|lower }}"
+                                {% if selected_patient and selected_patient.id == patient.id %}selected{% endif %}>
                             {{ patient.get_full_name|default:patient.username }} ({{ patient.email }})
                         </option>
                         {% endfor %}
                     </select>
+                    <p class="text-xs text-muted-foreground mt-1">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Showing patients you've consulted in the past 30 days ({{ total_patients }} total)
+                    </p>
                 </div>
 
                 <!-- Alert Type -->
@@ -158,6 +173,24 @@ function useTemplate(type) {
         alertType.value = templates[type].type;
         title.value = templates[type].title;
         message.value = templates[type].message;
+    }
+}
+
+function filterPatients() {
+    const searchInput = document.getElementById('patient_search').value.toLowerCase();
+    const select = document.getElementById('patient_id');
+    const options = select.getElementsByTagName('option');
+    
+    for (let i = 1; i < options.length; i++) { // Start from 1 to skip "Choose a patient..."
+        const option = options[i];
+        const name = option.getAttribute('data-name') || '';
+        const email = option.getAttribute('data-email') || '';
+        
+        if (name.includes(searchInput) || email.includes(searchInput)) {
+            option.style.display = '';
+        } else {
+            option.style.display = 'none';
+        }
     }
 }
 </script>

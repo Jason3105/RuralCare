@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Consultation Dashboard{% endblock %}
+{% block title %}Consultation Management{% endblock %}
 
 {% block content %}
 <div class="min-h-screen bg-background py-8 fade-in">
@@ -11,13 +11,25 @@
                     <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
                 </a>
             </nav>
-            <h1 class="text-3xl font-bold text-foreground">Consultation Management</h1>
-            <p class="text-muted-foreground mt-1">Manage your consultation requests and appointments</p>
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-foreground">Consultation Management</h1>
+                    <p class="text-muted-foreground mt-1">Manage your consultation requests and appointments</p>
+                </div>
+                <div class="flex gap-2">
+                    <a href="{% url 'doctor_manage_availability' %}" class="px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary font-semibold rounded-lg transition-all inline-flex items-center gap-2">
+                        <i class="fas fa-calendar-alt"></i>Manage Availability
+                    </a>
+                    <a href="{% url 'doctor_consultation_requests' %}" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all inline-flex items-center gap-2">
+                        <i class="fas fa-inbox"></i>View Requests
+                    </a>
+                </div>
+            </div>
         </div>
 
         <!-- Stats Overview -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-            <div class="bg-card border border-border/50 rounded-xl p-6">
+            <div class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-md transition-all">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-muted-foreground mb-1">Pending Requests</p>
@@ -28,8 +40,7 @@
                     </div>
                 </div>
             </div>
-            
-            <div class="bg-card border border-border/50 rounded-xl p-6">
+            <div class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-md transition-all">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-muted-foreground mb-1">Today's Schedule</p>
@@ -40,8 +51,7 @@
                     </div>
                 </div>
             </div>
-            
-            <div class="bg-card border border-border/50 rounded-xl p-6">
+            <div class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-md transition-all">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-muted-foreground mb-1">Upcoming</p>
@@ -54,7 +64,8 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Two-Column: Pending Requests + Today's Schedule -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <!-- Pending Requests -->
             <div class="bg-card border border-border/50 rounded-xl p-6">
                 <div class="flex items-center justify-between mb-6">
@@ -90,7 +101,7 @@
                                 </div>
                             </div>
                             <a href="{% url 'doctor_respond_to_request' request.id %}" 
-                               class="px-3 py-1 bg-primary text-primary-foreground rounded hover:bg-primary/90 text-sm">
+                               class="px-3 py-1.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 text-sm font-medium transition-all">
                                 Respond
                             </a>
                         </div>
@@ -112,15 +123,12 @@
                         <i class="fas fa-calendar-check text-green-600 mr-2"></i>
                         Today's Schedule
                     </h2>
-                    <a href="{% url 'doctor_consultations' %}" class="text-primary hover:underline text-sm">
-                        View All <i class="fas fa-arrow-right ml-1"></i>
-                    </a>
                 </div>
 
                 {% if today_consultations %}
                 <div class="space-y-4">
                     {% for consultation in today_consultations %}
-                    <div class="bg-accent/30 border border-border/50 rounded-lg p-4">
+                    <div class="bg-accent/30 border border-border/50 rounded-lg p-4 hover:shadow-md transition-all">
                         <div class="flex items-start justify-between">
                             <div class="flex items-start space-x-3 flex-1">
                                 {% if consultation.patient.profile_picture %}
@@ -138,8 +146,19 @@
                                     <p class="text-sm text-primary font-medium">
                                         <i class="fas fa-clock mr-1"></i>{{ consultation.scheduled_datetime|time:"g:i A" }}
                                     </p>
-                                    <div class="flex items-center gap-2 mt-1">
-                                        <p class="text-xs text-muted-foreground">{{ consultation.mode|title }} • {{ consultation.duration_minutes }} min</p>
+                                    <div class="flex items-center gap-2 mt-1 flex-wrap">
+                                        <span class="text-xs text-muted-foreground">
+                                            {% if consultation.mode == 'video' %}
+                                            <i class="fas fa-video mr-1"></i>Video
+                                            {% elif consultation.mode == 'phone' %}
+                                            <i class="fas fa-phone mr-1"></i>Phone
+                                            {% elif consultation.mode == 'in_person' %}
+                                            <i class="fas fa-hospital mr-1"></i>In-Person
+                                            {% elif consultation.mode == 'chat' %}
+                                            <i class="fas fa-comments mr-1"></i>Chat
+                                            {% endif %}
+                                            • {{ consultation.duration_minutes }} min
+                                        </span>
                                         {% if consultation.status == 'completed' %}
                                             <span class="px-2 py-0.5 text-xs bg-green-600/20 text-green-600 rounded-full">✓ Completed</span>
                                         {% elif consultation.status == 'in_progress' %}
@@ -150,12 +169,10 @@
                                     </div>
                                 </div>
                             </div>
-                            {% if consultation.meeting_link and consultation.status != 'completed' %}
-                            <a href="{{ consultation.meeting_link }}" target="_blank"
-                               class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm">
-                                <i class="fas fa-video mr-1"></i>Join
+                            <a href="{% url 'doctor_consultation_detail' consultation.id %}"
+                               class="px-3 py-1.5 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 text-sm font-medium transition-all">
+                                View
                             </a>
-                            {% endif %}
                         </div>
                     </div>
                     {% endfor %}
@@ -169,37 +186,130 @@
             </div>
         </div>
 
-        <!-- Upcoming Consultations -->
-        {% if upcoming_consultations %}
-        <div class="mt-8 bg-card border border-border/50 rounded-xl p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-semibold text-foreground flex items-center">
-                    <i class="fas fa-calendar-alt text-blue-600 mr-2"></i>
-                    Upcoming Consultations
-                </h2>
-                <a href="{% url 'doctor_consultations' %}" class="text-primary hover:underline text-sm">
-                    View All <i class="fas fa-arrow-right ml-1"></i>
+        <!-- Filter Tabs -->
+        <div class="mb-6 flex flex-wrap items-center gap-4">
+            <!-- Status Filters -->
+            <div class="bg-card border border-border/50 rounded-xl p-1.5 inline-flex gap-1">
+                <a href="?status={% if selected_mode %}&mode={{ selected_mode }}{% endif %}" 
+                   class="px-4 py-2 rounded-lg text-sm font-medium transition-all {% if not selected_status %}bg-primary text-primary-foreground{% else %}text-muted-foreground hover:bg-accent{% endif %}">
+                    All
+                </a>
+                <a href="?status=scheduled{% if selected_mode %}&mode={{ selected_mode }}{% endif %}" 
+                   class="px-4 py-2 rounded-lg text-sm font-medium transition-all {% if selected_status == 'scheduled' %}bg-primary text-primary-foreground{% else %}text-muted-foreground hover:bg-accent{% endif %}">
+                    Scheduled
+                </a>
+                <a href="?status=completed{% if selected_mode %}&mode={{ selected_mode }}{% endif %}" 
+                   class="px-4 py-2 rounded-lg text-sm font-medium transition-all {% if selected_status == 'completed' %}bg-primary text-primary-foreground{% else %}text-muted-foreground hover:bg-accent{% endif %}">
+                    Completed
+                </a>
+                <a href="?status=cancelled{% if selected_mode %}&mode={{ selected_mode }}{% endif %}" 
+                   class="px-4 py-2 rounded-lg text-sm font-medium transition-all {% if selected_status == 'cancelled' %}bg-primary text-primary-foreground{% else %}text-muted-foreground hover:bg-accent{% endif %}">
+                    Cancelled
                 </a>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Mode Filters -->
+            <div class="bg-card border border-border/50 rounded-xl p-1.5 inline-flex gap-1">
+                <a href="?mode={% if selected_status %}&status={{ selected_status }}{% endif %}" 
+                   class="px-3 py-2 rounded-lg text-sm font-medium transition-all {% if not selected_mode %}bg-primary/10 text-primary{% else %}text-muted-foreground hover:bg-accent{% endif %}">
+                    All Modes
+                </a>
+                <a href="?mode=video{% if selected_status %}&status={{ selected_status }}{% endif %}" 
+                   class="px-3 py-2 rounded-lg text-sm font-medium transition-all {% if selected_mode == 'video' %}bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400{% else %}text-muted-foreground hover:bg-accent{% endif %}">
+                    <i class="fas fa-video mr-1"></i>Video
+                </a>
+                <a href="?mode=phone{% if selected_status %}&status={{ selected_status }}{% endif %}" 
+                   class="px-3 py-2 rounded-lg text-sm font-medium transition-all {% if selected_mode == 'phone' %}bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400{% else %}text-muted-foreground hover:bg-accent{% endif %}">
+                    <i class="fas fa-phone mr-1"></i>Phone
+                </a>
+                <a href="?mode=in_person{% if selected_status %}&status={{ selected_status }}{% endif %}" 
+                   class="px-3 py-2 rounded-lg text-sm font-medium transition-all {% if selected_mode == 'in_person' %}bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400{% else %}text-muted-foreground hover:bg-accent{% endif %}">
+                    <i class="fas fa-hospital mr-1"></i>In-Person
+                </a>
+            </div>
+        </div>
+
+        <!-- Upcoming Consultations -->
+        {% if upcoming_consultations %}
+        <div class="bg-card border border-border/50 rounded-2xl p-6 sm:p-8 mb-8 shadow-sm">
+            <h2 class="text-2xl font-bold text-foreground mb-6 flex items-center gap-3">
+                <div class="bg-green-600/10 p-3 rounded-xl">
+                    <i class="fas fa-calendar-check text-green-600 text-xl"></i>
+                </div>
+                Upcoming Consultations
+                <span class="text-sm font-normal text-muted-foreground ml-2">({{ upcoming_consultations|length }})</span>
+            </h2>
+            <div class="space-y-4">
                 {% for consultation in upcoming_consultations %}
-                <div class="bg-accent/30 border border-border/50 rounded-lg p-4">
-                    <div class="flex items-start space-x-3">
-                        {% if consultation.patient.profile_picture %}
-                        <img src="{{ consultation.patient.profile_picture }}" alt="{{ consultation.patient.first_name }}" 
-                             class="w-10 h-10 rounded-full object-cover">
-                        {% else %}
-                        <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                            <span class="text-sm font-bold text-primary">
-                                {{ consultation.patient.first_name.0 }}{{ consultation.patient.last_name.0 }}
-                            </span>
+                <div class="bg-accent/30 border border-border/50 rounded-xl p-6 hover:shadow-md transition-all">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex items-start gap-4 flex-1">
+                            {% if consultation.patient.profile_picture %}
+                            <img src="{{ consultation.patient.profile_picture }}" alt="{{ consultation.patient.first_name }}" 
+                                 class="w-14 h-14 rounded-full object-cover flex-shrink-0">
+                            {% else %}
+                            <div class="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                                <span class="text-xl font-bold text-primary">
+                                    {{ consultation.patient.first_name.0 }}{{ consultation.patient.last_name.0 }}
+                                </span>
+                            </div>
+                            {% endif %}
+                            <div class="flex-1">
+                                <h3 class="font-bold text-lg text-foreground">{{ consultation.patient.first_name }} {{ consultation.patient.last_name }}</h3>
+                                <p class="text-sm text-muted-foreground">{{ consultation.patient.email }}</p>
+                                <div class="flex flex-wrap gap-3 mt-2">
+                                    <span class="text-sm text-muted-foreground">
+                                        <i class="fas fa-calendar text-primary mr-1"></i>
+                                        {{ consultation.scheduled_datetime|date:"M d, Y" }}
+                                    </span>
+                                    <span class="text-sm text-muted-foreground">
+                                        <i class="fas fa-clock text-primary mr-1"></i>
+                                        {{ consultation.scheduled_datetime|time:"g:i A" }}
+                                    </span>
+                                    <span class="text-sm text-muted-foreground">
+                                        <i class="fas fa-hourglass-half text-primary mr-1"></i>
+                                        {{ consultation.duration_minutes }} mins
+                                    </span>
+                                    <span class="text-sm">
+                                        {% if consultation.mode == 'video' %}
+                                        <i class="fas fa-video text-indigo-500 mr-1"></i>Video Call
+                                        {% elif consultation.mode == 'phone' %}
+                                        <i class="fas fa-phone text-sky-500 mr-1"></i>Phone Call
+                                        {% elif consultation.mode == 'in_person' %}
+                                        <i class="fas fa-hospital text-amber-500 mr-1"></i>In-Person
+                                        {% elif consultation.mode == 'chat' %}
+                                        <i class="fas fa-comments text-purple-500 mr-1"></i>Chat
+                                        {% else %}
+                                        <i class="fas fa-stethoscope text-gray-500 mr-1"></i>{{ consultation.get_mode_display }}
+                                        {% endif %}
+                                    </span>
+                                </div>
+
+                                {% if consultation.mode == 'in_person' and consultation.token %}
+                                <div class="mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                                            <i class="fas fa-ticket-alt mr-1"></i>Token #{{ consultation.token.token_number }}
+                                        </span>
+                                        {% if consultation.token.is_verified %}
+                                        <span class="text-xs text-green-600 dark:text-green-400">
+                                            <i class="fas fa-shield-alt mr-1"></i>Blockchain Verified
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
                         </div>
-                        {% endif %}
-                        <div class="flex-1">
-                            <h3 class="font-semibold text-foreground">{{ consultation.patient.first_name }} {{ consultation.patient.last_name }}</h3>
-                            <p class="text-sm text-muted-foreground">{{ consultation.scheduled_datetime|date:"M d, Y" }}</p>
-                            <p class="text-sm text-primary">{{ consultation.scheduled_datetime|time:"g:i A" }}</p>
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                            <span class="px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-sm font-semibold rounded-lg">
+                                {{ consultation.status|title }}
+                            </span>
+                            <a href="{% url 'doctor_consultation_detail' consultation.id %}" 
+                               class="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-all inline-flex items-center gap-2">
+                                <i class="fas fa-eye"></i>
+                                View Details
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -208,43 +318,117 @@
         </div>
         {% endif %}
 
-        <!-- Quick Actions -->
-        <div class="mt-8 bg-card border border-border/50 rounded-xl p-6">
-            <h2 class="text-xl font-semibold text-foreground mb-4">Quick Actions</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <a href="{% url 'doctor_consultation_requests' %}" 
-                   class="flex items-center space-x-3 p-4 bg-accent/30 rounded-lg hover:bg-accent/50 transition-colors">
-                    <div class="bg-yellow-600/10 p-3 rounded-lg">
-                        <i class="fas fa-inbox text-yellow-600"></i>
+        <!-- Past Consultations -->
+        {% if past_consultations %}
+        <div class="bg-card border border-border/50 rounded-2xl p-6 sm:p-8 shadow-sm">
+            <h2 class="text-2xl font-bold text-foreground mb-6 flex items-center gap-3">
+                <div class="bg-blue-600/10 p-3 rounded-xl">
+                    <i class="fas fa-history text-blue-600 text-xl"></i>
+                </div>
+                Past Consultations
+                <span class="text-sm font-normal text-muted-foreground ml-2">({{ past_consultations|length }})</span>
+            </h2>
+            <div class="space-y-4">
+                {% for consultation in past_consultations %}
+                <div class="bg-accent/30 border border-border/50 rounded-xl p-6 hover:shadow-md transition-all opacity-80">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex items-start gap-4 flex-1">
+                            {% if consultation.patient.profile_picture %}
+                            <img src="{{ consultation.patient.profile_picture }}" alt="{{ consultation.patient.first_name }}" 
+                                 class="w-14 h-14 rounded-full object-cover flex-shrink-0 grayscale">
+                            {% else %}
+                            <div class="w-14 h-14 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                                <span class="text-xl font-bold text-muted-foreground">
+                                    {{ consultation.patient.first_name.0 }}{{ consultation.patient.last_name.0 }}
+                                </span>
+                            </div>
+                            {% endif %}
+                            <div class="flex-1">
+                                <h3 class="font-bold text-lg text-foreground">{{ consultation.patient.first_name }} {{ consultation.patient.last_name }}</h3>
+                                <p class="text-sm text-muted-foreground">{{ consultation.patient.email }}</p>
+                                <div class="flex flex-wrap gap-3 mt-2">
+                                    <span class="text-sm text-muted-foreground">
+                                        <i class="fas fa-calendar text-muted-foreground mr-1"></i>
+                                        {{ consultation.scheduled_datetime|date:"M d, Y" }}
+                                    </span>
+                                    <span class="text-sm text-muted-foreground">
+                                        <i class="fas fa-clock text-muted-foreground mr-1"></i>
+                                        {{ consultation.scheduled_datetime|time:"g:i A" }}
+                                    </span>
+                                    <span class="text-sm text-muted-foreground">
+                                        {% if consultation.mode == 'video' %}
+                                        <i class="fas fa-video mr-1"></i>Video Call
+                                        {% elif consultation.mode == 'phone' %}
+                                        <i class="fas fa-phone mr-1"></i>Phone Call
+                                        {% elif consultation.mode == 'in_person' %}
+                                        <i class="fas fa-hospital mr-1"></i>In-Person
+                                        {% elif consultation.mode == 'chat' %}
+                                        <i class="fas fa-comments mr-1"></i>Chat
+                                        {% else %}
+                                        <i class="fas fa-stethoscope mr-1"></i>{{ consultation.get_mode_display }}
+                                        {% endif %}
+                                    </span>
+                                </div>
+
+                                {% if consultation.mode == 'in_person' and consultation.token %}
+                                <div class="mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                                            <i class="fas fa-ticket-alt mr-1"></i>Token #{{ consultation.token.token_number }}
+                                        </span>
+                                        {% if consultation.token.is_verified %}
+                                        <span class="text-xs text-green-600 dark:text-green-400">
+                                            <i class="fas fa-shield-alt mr-1"></i>Blockchain Verified
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                            <span class="px-4 py-2 {% if consultation.status == 'completed' %}bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400{% elif consultation.status == 'cancelled' %}bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400{% else %}bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400{% endif %} text-sm font-semibold rounded-lg">
+                                {{ consultation.status|title }}
+                            </span>
+                            <a href="{% url 'doctor_consultation_detail' consultation.id %}" 
+                               class="px-4 py-2 bg-muted hover:bg-muted/80 text-foreground font-semibold rounded-lg transition-all inline-flex items-center gap-2">
+                                <i class="fas fa-eye"></i>
+                                View Details
+                            </a>
+                        </div>
                     </div>
-                    <span class="font-medium text-foreground">View Requests</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- No Consultations -->
+        {% if not upcoming_consultations and not past_consultations %}
+        <div class="bg-card border border-border/50 rounded-2xl p-12 text-center shadow-sm">
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-muted/50 mb-6">
+                <i class="fas fa-calendar-times text-4xl text-muted-foreground"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-foreground mb-3">No Consultations Found</h3>
+            <p class="text-muted-foreground mb-8 max-w-md mx-auto">
+                {% if selected_status or selected_mode %}
+                No consultations match the selected filters. Try adjusting your filters.
+                {% else %}
+                You don't have any consultations yet. Check your consultation requests to schedule new appointments.
+                {% endif %}
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="{% url 'doctor_consultation_requests' %}" class="px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-lg transition-all inline-flex items-center justify-center gap-2">
+                    <i class="fas fa-inbox"></i>
+                    View Requests
                 </a>
-                
-                <a href="{% url 'doctor_manage_availability' %}" 
-                   class="flex items-center space-x-3 p-4 bg-accent/30 rounded-lg hover:bg-accent/50 transition-colors">
-                    <div class="bg-blue-600/10 p-3 rounded-lg">
-                        <i class="fas fa-clock text-blue-600"></i>
-                    </div>
-                    <span class="font-medium text-foreground">Manage Availability</span>
-                </a>
-                
-                <a href="{% url 'doctor_consultations' %}" 
-                   class="flex items-center space-x-3 p-4 bg-accent/30 rounded-lg hover:bg-accent/50 transition-colors">
-                    <div class="bg-green-600/10 p-3 rounded-lg">
-                        <i class="fas fa-calendar-alt text-green-600"></i>
-                    </div>
-                    <span class="font-medium text-foreground">All Consultations</span>
-                </a>
-                
-                <a href="{% url 'doctor_dashboard' %}" 
-                   class="flex items-center space-x-3 p-4 bg-accent/30 rounded-lg hover:bg-accent/50 transition-colors">
-                    <div class="bg-purple-600/10 p-3 rounded-lg">
-                        <i class="fas fa-home text-purple-600"></i>
-                    </div>
-                    <span class="font-medium text-foreground">Main Dashboard</span>
+                <a href="{% url 'doctor_consultation_dashboard' %}" class="px-6 py-3 bg-muted hover:bg-muted/80 text-foreground font-semibold rounded-lg transition-all inline-flex items-center justify-center gap-2">
+                    <i class="fas fa-sync-alt"></i>
+                    Clear Filters
                 </a>
             </div>
         </div>
+        {% endif %}
     </div>
 </div>
 

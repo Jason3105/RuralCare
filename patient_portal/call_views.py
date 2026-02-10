@@ -78,38 +78,25 @@ def get_agora_token(request, consultation_id):
 
 @login_required
 def initiate_call(request, consultation_id):
-    """Patient initiates a call to doctor"""
+    """Patient or Doctor initiates a call"""
     from datetime import timedelta
+    from django.contrib import messages
     
+    # Allow both patient and doctor to access this view
     consultation = get_object_or_404(
         Consultation, 
-        id=consultation_id,
-        patient=request.user
+        Q(patient=request.user) | Q(doctor=request.user),
+        id=consultation_id
     )
     
-    now = timezone.now()
-    scheduled_time = consultation.scheduled_datetime
-    call_window_end = scheduled_time + timedelta(minutes=30)
-    
-    # Check if we're within the valid call window (from scheduled time to 30 min after)
-    if now < scheduled_time:
-        # Too early - calculate time until call is available
-        minutes_until = int((scheduled_time - now).total_seconds() / 60)
-        from django.contrib import messages
-        messages.error(request, f'Call is not available yet. Please wait {minutes_until} minutes until the scheduled time.')
-        return redirect('patient_portal:my_consultations')
-    
-    if now > call_window_end:
-        # Too late - window has expired
-        from django.contrib import messages
-        messages.error(request, 'The call window has expired. Video calls are only available up to 30 minutes after the scheduled consultation time.')
-        return redirect('patient_portal:my_consultations')
-    
     # Update consultation status to indicate call started
-    consultation.call_status = 'calling'
-    consultation.call_initiated_by = request.user
-    consultation.call_initiated_at = timezone.now()
-    consultation.save()
+    if consultation.call_status != 'active':
+        consultation.call_status = 'calling' if request.user == consultation.patient else 'active'
+        consultation.call_initiated_by = request.user
+        consultation.call_initiated_at = timezone.now()
+        if request.user == consultation.doctor:
+            consultation.started_at = timezone.now()
+        consultation.save()
     
     context = {
         'consultation': consultation,
@@ -118,6 +105,9 @@ def initiate_call(request, consultation_id):
         'room_id': str(consultation.id),
     }
     
+    # Render different templates based on user type
+    if request.user.user_type == 'doctor':
+        return render(request, 'authentication/doctor/call_interface.html', context)
     return render(request, 'patient_portal/call/call_interface.html', context)
 
 
