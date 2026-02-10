@@ -18,6 +18,9 @@ urlpatterns = [
     # Treatment Center - Combined Plans + Confidence + Explained
     path('treatment-center/', views.treatment_center, name='treatment_center'),
     
+    # Medicine & AI Hub - Combined Identify + History + AI Assistant
+    path('medicine-hub/', views.medicine_hub, name='medicine_hub'),
+    
     # Confidence View (Simplified)
     path('confidence/', views.patient_confidence_view, name='confidence_view'),
     

@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+
+{% block title %}Pathology Hub{% endblock %}
+
+{% block content %}
+<div class="fade-in max-w-7xl mx-auto">
+    <div class="mb-8 sm:mb-10">
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-3">Pathology Hub</h1>
+        <p class="text-base sm:text-lg text-muted-foreground">Upload pathology reports and view your analysis history</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex space-x-1 bg-muted/50 p-1 rounded-xl mb-8 w-fit">
+        <button onclick="switchPathTab('upload')" id="pathTab-upload"
+            class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-card text-foreground shadow-sm">
+            <i class="fas fa-file-upload mr-2"></i>Upload Report
+        </button>
+        <button onclick="switchPathTab('reports')" id="pathTab-reports"
+            class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 text-muted-foreground hover:text-foreground">
+            <i class="fas fa-file-medical mr-2"></i>Reports
+        </button>
+    </div>
+
+    <!-- Upload Tab -->
+    <div id="pathPanel-upload">
+        <div class="max-w-5xl">
+            <div class="bg-card border border-border/50 rounded-2xl p-6 sm:p-10 transition-all">
+                <form method="post" action="{% url 'cancer_detection:upload_histopathology' %}" enctype="multipart/form-data" class="space-y-8">
+                    {% csrf_token %}
+                    
+                    <!-- Report Text Input -->
+                    <div>
+                        <label for="report_text" class="block text-sm sm:text-base font-semibold text-foreground mb-3">
+                            <i class="fas fa-file-alt mr-2 text-primary"></i>Report Text
+                        </label>
+                        <textarea name="report_text" id="report_text" rows="15" 
+                            class="w-full px-4 py-3 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-foreground transition-all font-mono text-sm"
+                            placeholder="Paste the pathology report text here...&#10;&#10;Example:&#10;DIAGNOSIS: Invasive ductal carcinoma, Grade 2&#10;TNM STAGING: T2N1M0 (Stage II)&#10;MARGINS: Negative&#10;LYMPH NODES: 2 of 15 positive&#10;BIOMARKERS: ER positive, PR positive, HER2 negative, Ki-67: 25%"></textarea>
+                        <p class="mt-2 text-xs sm:text-sm text-muted-foreground">Paste the full text of your pathology report for analysis</p>
+                    </div>
+
+                    <!-- OR Divider -->
+                    <div class="relative">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-border"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-4 bg-card text-muted-foreground">OR</span>
+                        </div>
+                    </div>
+
+                    <!-- File Upload -->
+                    <div>
+                        <label for="report_file" class="block text-sm sm:text-base font-semibold text-foreground mb-3">
+                            <i class="fas fa-file-upload mr-2 text-primary"></i>Upload Report File
+                        </label>
+                        <div class="mt-2 flex justify-center px-4 sm:px-6 pt-6 sm:pt-8 pb-6 sm:pb-8 border-2 border-dashed border-border rounded-xl hover:border-primary hover:bg-accent/20 transition-all duration-300 bg-accent/5 cursor-pointer group">
+                            <div class="space-y-2 sm:space-y-3 text-center w-full">
+                                <i class="fas fa-file-pdf text-5xl sm:text-6xl text-primary/40 group-hover:text-primary/60 mx-auto block mb-3 transition-colors"></i>
+                                <div class="flex flex-col text-sm sm:text-base text-muted-foreground justify-center items-center">
+                                    <label for="report_file" class="relative cursor-pointer bg-primary/10 rounded-lg font-semibold text-primary hover:bg-primary/20 hover:text-primary/80 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary px-3 py-2 transition-all">
+                                        <span>Upload a file</span>
+                                        <input id="report_file" name="report_file" type="file" accept=".pdf,.txt,.doc,.docx,image/*" class="sr-only">
+                                    </label>
+                                    <p class="mt-2">or drag and drop</p>
+                                </div>
+                                <p class="text-xs text-muted-foreground/80">PDF, DOC, DOCX, TXT, or images up to 10MB</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                        <button type="submit" class="flex-1 bg-gradient-to-r from-primary to-primary/90 hover:shadow-xl text-primary-foreground font-bold py-3 sm:py-4 px-6 rounded-lg transition-all duration-300 flex items-center justify-center hover:scale-105">
+                            <i class="fas fa-microscope mr-2"></i>
+                            Analyze Report
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Information Box -->
+            <div class="mt-8 bg-gradient-to-br from-blue-50 to-blue-50/50 dark:from-blue-900/20 dark:to-blue-900/10 border border-blue-200 dark:border-blue-800/50 rounded-xl p-6 sm:p-8">
+                <h3 class="text-lg sm:text-xl font-bold text-blue-900 dark:text-blue-300 mb-4 flex items-center">
+                    <i class="fas fa-info-circle mr-2"></i>What We Extract
+                </h3>
+                <ul class="space-y-3 text-blue-800 dark:text-blue-200 text-sm sm:text-base">
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-blue-600 dark:text-blue-400 mr-3 mt-1 flex-shrink-0"></i>
+                        <span><strong>Cancer Type & Subtype:</strong> Identifies specific cancer type and histological subtype</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-blue-600 dark:text-blue-400 mr-3 mt-1 flex-shrink-0"></i>
+                        <span><strong>Grade & Stage:</strong> Extracts tumor grade (1-4) and TNM staging information</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-blue-600 dark:text-blue-400 mr-3 mt-1 flex-shrink-0"></i>
+                        <span><strong>Biomarkers:</strong> ER, PR, HER2, Ki-67, PD-L1, MSI status, and more</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-blue-600 dark:text-blue-400 mr-3 mt-1 flex-shrink-0"></i>
+                        <span><strong>Margin & Lymph Node Status:</strong> Surgical margins and lymph node involvement</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-blue-600 dark:text-blue-400 mr-3 mt-1 flex-shrink-0"></i>
+                        <span><strong>Additional Findings:</strong> LVI, PNI, necrosis, and other pathological features</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports Tab -->
+    <div id="pathPanel-reports" class="hidden">
+        {% if page_obj %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for report in page_obj %}
+            <div class="bg-card border border-border/50 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 card-hover">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="h-12 w-12 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
+                            <i class="fas fa-microscope text-primary-foreground text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-foreground">Report #{{ report.id|slice:":8" }}</h3>
+                            <p class="text-xs text-muted-foreground">{{ report.created_at|date:"M d, Y" }}</p>
+                        </div>
+                    </div>
+                    {% if report.status == 'analyzed' %}
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                        Analyzed
+                    </span>
+                    {% elif report.status == 'analyzing' %}
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                        Analyzing
+                    </span>
+                    {% else %}
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400">
+                        {{ report.status|title }}
+                    </span>
+                    {% endif %}
+                </div>
+
+                {% if report.cancer_type %}
+                <div class="space-y-2 mb-4">
+                    <div class="flex items-center text-sm">
+                        <i class="fas fa-tag text-primary mr-2 w-4"></i>
+                        <span class="text-muted-foreground">Type:</span>
+                        <span class="ml-2 font-semibold text-foreground">{{ report.cancer_type|title }}</span>
+                    </div>
+                    {% if report.stage %}
+                    <div class="flex items-center text-sm">
+                        <i class="fas fa-layer-group text-primary mr-2 w-4"></i>
+                        <span class="text-muted-foreground">Stage:</span>
+                        <span class="ml-2 font-semibold text-foreground">Stage {{ report.stage }}</span>
+                    </div>
+                    {% endif %}
+                    {% if report.grade %}
+                    <div class="flex items-center text-sm">
+                        <i class="fas fa-chart-line text-primary mr-2 w-4"></i>
+                        <span class="text-muted-foreground">Grade:</span>
+                        <span class="ml-2 font-semibold text-foreground">{{ report.grade }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <div class="flex items-center justify-between pt-4 border-t border-border/50">
+                    <a href="{% url 'cancer_detection:histopathology_detail' report_id=report.id %}" 
+                       class="text-primary hover:text-primary/80 font-semibold text-sm flex items-center">
+                        View Details
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                    {% if report.analysis_confidence %}
+                    <span class="text-xs text-muted-foreground">
+                        Confidence: {{ report.analysis_confidence|floatformat:0 }}%
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="mt-8 flex justify-center">
+            <nav class="flex space-x-2">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}#reports" 
+                   class="px-4 py-2 bg-card border border-border rounded-lg hover:bg-accent transition-all">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                {% endif %}
+                
+                <span class="px-4 py-2 bg-card border border-border rounded-lg">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}#reports" 
+                   class="px-4 py-2 bg-card border border-border rounded-lg hover:bg-accent transition-all">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="bg-card border border-border/50 rounded-2xl p-12 text-center">
+            <i class="fas fa-microscope text-6xl text-muted-foreground/30 mb-4"></i>
+            <h3 class="text-xl font-bold text-foreground mb-2">No Reports Yet</h3>
+            <p class="text-muted-foreground mb-6">Upload your first histopathology report to get started</p>
+            <button onclick="switchPathTab('upload')" 
+               class="inline-flex items-center bg-gradient-to-r from-primary to-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg hover:shadow-lg transition-all">
+                <i class="fas fa-plus mr-2"></i>
+                Upload Report
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    function switchPathTab(tab) {
+        // Update tab buttons
+        document.querySelectorAll('[id^="pathTab-"]').forEach(btn => {
+            btn.classList.remove('bg-card', 'text-foreground', 'shadow-sm');
+            btn.classList.add('text-muted-foreground', 'hover:text-foreground');
+        });
+        const activeBtn = document.getElementById('pathTab-' + tab);
+        activeBtn.classList.add('bg-card', 'text-foreground', 'shadow-sm');
+        activeBtn.classList.remove('text-muted-foreground', 'hover:text-foreground');
+
+        // Update panels
+        document.querySelectorAll('[id^="pathPanel-"]').forEach(panel => {
+            panel.classList.add('hidden');
+        });
+        document.getElementById('pathPanel-' + tab).classList.remove('hidden');
+
+        // Update URL hash
+        window.location.hash = tab;
+    }
+
+    // Handle hash on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const hash = window.location.hash.substring(1);
+        if (hash === 'reports' || hash === 'upload') {
+            switchPathTab(hash);
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

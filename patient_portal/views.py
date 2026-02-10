@@ -1078,6 +1078,63 @@ def treatment_center(request):
 
 
 # ============================================================================
+# Medicine & AI Hub (combined: Identify + History + AI Assistant)
+# ============================================================================
+
+@login_required
+@patient_required
+def medicine_hub(request):
+    """Combined medicine page: identify + history + AI chatbot"""
+    from medicine_identifier.models import MedicineIdentification
+    from medical_chatbot.models import ChatSession, ChatMessage
+
+    # --- Identify tab: recent identifications ---
+    recent_identifications = MedicineIdentification.objects.filter(
+        user=request.user
+    ).order_by('-created_at')[:5]
+
+    # --- History tab: paginated identifications ---
+    all_identifications = MedicineIdentification.objects.filter(
+        user=request.user
+    ).order_by('-created_at')
+    paginator = Paginator(all_identifications, 10)
+    page_number = request.GET.get('page', 1)
+    history_page = paginator.get_page(page_number)
+
+    # --- AI Assistant tab: chat session + messages ---
+    active_chat_session = ChatSession.objects.filter(
+        patient=request.user,
+        is_active=True
+    ).first()
+    if not active_chat_session:
+        active_chat_session = ChatSession.objects.create(
+            patient=request.user,
+            title="New Conversation"
+        )
+
+    chat_sessions = ChatSession.objects.filter(
+        patient=request.user
+    ).order_by('-updated_at')[:20]
+
+    chat_messages = ChatMessage.objects.filter(
+        session=active_chat_session
+    ).order_by('created_at')
+
+    context = {
+        # identify tab
+        'recent_identifications': recent_identifications,
+        # history tab
+        'history_identifications': history_page,
+        'history_page': history_page,
+        # assistant tab
+        'active_chat_session': active_chat_session,
+        'chat_sessions': chat_sessions,
+        'chat_messages': chat_messages,
+    }
+    return render(request, 'patient_portal/medicine_hub.html', context)
+
+
+# ============================================================================
 # Patient Dashboard Widget Data
 # ============================================================================
 

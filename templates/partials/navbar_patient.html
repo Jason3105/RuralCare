@@ -34,11 +34,6 @@
                     Records
                 </a>
 
-                <a href="{% url 'patient_portal:treatment_center' %}"
-                    class="text-sm font-medium text-muted-foreground hover:text-foreground transition-all px-3 py-2 rounded-lg hover:bg-accent/50">
-                    Treatment
-                </a>
-
                 <a href="{% url 'nearby_clinics' %}"
                     class="text-sm font-medium text-muted-foreground hover:text-foreground transition-all px-3 py-2 rounded-lg hover:bg-accent/50">
                     Clinics
@@ -54,76 +49,29 @@
                     Insurance
                 </a>
 
-                <!-- Medicine Identifier - AI Powered -->
-                <a href="{% url 'medicine_identifier:upload' %}"
-                    class="text-sm font-medium text-muted-foreground hover:text-foreground transition-all px-3 py-2 rounded-lg hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 group">
-                    Medicine ID
-                    <span
-                        class="ml-1 px-1.5 py-0.5 text-[10px] font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full">AI</span>
-                </a>
-
-                <!-- Medical AI Assistant - NEW -->
-                <a href="{% url 'medical_chatbot:chat_interface' %}"
-                    class="text-sm font-medium text-muted-foreground hover:text-foreground transition-all px-3 py-2 rounded-lg hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 group">
-                    AI Assistant
-                    <span
-                        class="ml-1 px-1.5 py-0.5 text-[10px] font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full">NEW</span>
-                </a>
-
-                <!-- Quick Access Dropdown -->
+                <!-- Scans & Reports Dropdown -->
                 <div class="relative">
-                    <button onclick="toggleNewDropdown()"
+                    <button onclick="toggleScansDropdown()"
                         class="text-sm font-medium text-muted-foreground hover:text-foreground flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-accent/50 transition-all">
-                        <span>New</span>
+                        <span>Scans &amp; Reports</span>
                         <i class="fas fa-chevron-down text-xs opacity-60"></i>
                     </button>
 
-                    <div id="newDropdown"
-                        class="hidden absolute left-0 mt-2 w-48 bg-card border border-border/50 rounded-xl shadow-xl py-2 z-50 backdrop-blur-sm">
-                        <a href="/cancer-detection/upload"
+                    <div id="scansDropdown"
+                        class="hidden absolute left-0 mt-2 w-52 bg-card border border-border/50 rounded-xl shadow-xl py-2 z-50 backdrop-blur-sm">
+                        <a href="{% url 'cancer_detection:image_hub' %}"
                             class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
                             <i class="fas fa-cloud-upload-alt text-primary text-xs"></i>
-                            <span>Upload Image</span>
+                            <span>Image Analysis</span>
                         </a>
-                        <a href="{% url 'cancer_detection:upload_histopathology' %}"
+                        <a href="{% url 'cancer_detection:pathology_hub' %}"
                             class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
                             <i class="fas fa-microscope text-primary text-xs"></i>
-                            <span>Pathology Report</span>
-                        </a>
-                        <a href="{% url 'cancer_detection:upload_genomic' %}"
-                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
-                            <i class="fas fa-dna text-primary text-xs"></i>
-                            <span>Genomic Data</span>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- View Data Dropdown -->
-                <div class="relative">
-                    <button onclick="toggleDataDropdown()"
-                        class="text-sm font-medium text-muted-foreground hover:text-foreground flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-accent/50 transition-all">
-                        <span>Data</span>
-                        <i class="fas fa-chevron-down text-xs opacity-60"></i>
-                    </button>
-
-                    <div id="dataDropdown"
-                        class="hidden absolute left-0 mt-2 w-56 bg-card border border-border/50 rounded-xl shadow-xl py-2 z-50 backdrop-blur-sm">
-                        <div
-                            class="px-4 py-2 text-xs text-muted-foreground font-semibold uppercase tracking-wide border-b border-border/50">
-                            Analyses</div>
-                        <a href="/cancer-detection/analyses"
-                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
-                            <i class="fas fa-chart-bar text-primary text-xs"></i>
-                            <span>Image Analyses</span>
-                        </a>
-                        <a href="{% url 'cancer_detection:histopathology_list' %}"
-                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
-                            <i class="fas fa-file-medical text-primary text-xs"></i>
                             <span>Pathology</span>
                         </a>
-                        <a href="{% url 'cancer_detection:genomic_list' %}"
+                        <a href="{% url 'cancer_detection:genomics_hub' %}"
                             class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
-                            <i class="fas fa-flask text-primary text-xs"></i>
+                            <i class="fas fa-dna text-primary text-xs"></i>
                             <span>Genomics</span>
                         </a>
                     </div>
@@ -159,24 +107,12 @@
                         <div class="border-t border-border/30 my-1"></div>
                         <div class="px-4 py-2 text-xs text-muted-foreground font-semibold uppercase tracking-wide">AI
                             Tools</div>
-                        <a href="{% url 'medicine_identifier:upload' %}"
+                        <a href="{% url 'patient_portal:medicine_hub' %}"
                             class="block px-4 py-2.5 text-sm text-foreground hover:bg-amber-500/10 transition-all flex items-center space-x-2">
                             <i class="fas fa-capsules text-amber-500 text-xs"></i>
-                            <span>Identify Medicine</span>
+                            <span>Medicine &amp; AI Hub</span>
                             <span
-                                class="ml-auto px-1.5 py-0.5 text-[9px] font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full">NEW</span>
-                        </a>
-                        <a href="{% url 'medicine_identifier:history' %}"
-                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
-                            <i class="fas fa-history text-primary text-xs"></i>
-                            <span>Medicine History</span>
-                        </a>
-                        <a href="{% url 'medical_chatbot:chat_interface' %}"
-                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-emerald-500/10 transition-all flex items-center space-x-2">
-                            <i class="fas fa-robot text-emerald-500 text-xs"></i>
-                            <span>Medical AI Assistant</span>
-                            <span
-                                class="ml-auto px-1.5 py-0.5 text-[9px] font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full">NEW</span>
+                                class="ml-auto px-1.5 py-0.5 text-[9px] font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full">AI</span>
                         </a>
                         <div class="border-t border-border/30 my-1"></div>
                         <a href="{% url 'patient_portal:alerts_list' %}"
@@ -431,37 +367,27 @@
                     <i class="fas fa-shield-alt mr-2"></i>Insurance
                 </a>
                 <div class="border-t border-border/50 pt-2 mt-2">
-                    <p class="px-4 py-1 text-xs font-semibold text-muted-foreground uppercase">Quick Actions</p>
-                    <a href="/cancer-detection/upload"
+                    <p class="px-4 py-1 text-xs font-semibold text-muted-foreground uppercase">Scans &amp; Reports</p>
+                    <a href="{% url 'cancer_detection:image_hub' %}"
                         class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 rounded-lg transition-all">
-                        <i class="fas fa-cloud-upload-alt mr-2 text-primary"></i>Upload Image
+                        <i class="fas fa-cloud-upload-alt mr-2 text-primary"></i>Image Analysis
                     </a>
-                    <a href="{% url 'cancer_detection:upload_histopathology' %}"
+                    <a href="{% url 'cancer_detection:pathology_hub' %}"
                         class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 rounded-lg transition-all">
-                        <i class="fas fa-microscope mr-2 text-primary"></i>Pathology Report
+                        <i class="fas fa-microscope mr-2 text-primary"></i>Pathology
                     </a>
-                    <a href="{% url 'cancer_detection:upload_genomic' %}"
+                    <a href="{% url 'cancer_detection:genomics_hub' %}"
                         class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 rounded-lg transition-all">
-                        <i class="fas fa-dna mr-2 text-primary"></i>Genomic Data
+                        <i class="fas fa-dna mr-2 text-primary"></i>Genomics
                     </a>
                 </div>
                 <div class="border-t border-border/50 pt-2 mt-2">
                     <p class="px-4 py-1 text-xs font-semibold text-muted-foreground uppercase">AI Tools</p>
-                    <a href="{% url 'medicine_identifier:upload' %}"
+                    <a href="{% url 'patient_portal:medicine_hub' %}"
                         class="block px-4 py-2.5 text-sm text-foreground hover:bg-amber-500/10 rounded-lg transition-all flex items-center">
-                        <i class="fas fa-pills mr-2 text-amber-500"></i>Identify Medicine
+                        <i class="fas fa-capsules mr-2 text-amber-500"></i>Medicine &amp; AI Hub
                         <span
                             class="ml-auto px-1.5 py-0.5 text-[9px] font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full">AI</span>
-                    </a>
-                    <a href="{% url 'medicine_identifier:history' %}"
-                        class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 rounded-lg transition-all">
-                        <i class="fas fa-history mr-2 text-primary"></i>Medicine History
-                    </a>
-                    <a href="{% url 'medical_chatbot:chat_interface' %}"
-                        class="block px-4 py-2.5 text-sm text-foreground hover:bg-emerald-500/10 rounded-lg transition-all flex items-center">
-                        <i class="fas fa-robot mr-2 text-emerald-500"></i>Medical AI Assistant
-                        <span
-                            class="ml-auto px-1.5 py-0.5 text-[9px] font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full">NEW</span>
                     </a>
                 </div>
             </div>
@@ -478,13 +404,13 @@
         icon.classList.toggle('fa-times');
     }
 
-    function toggleNewDropdown() {
-        const dropdown = document.getElementById('newDropdown');
+    function toggleScansDropdown() {
+        const dropdown = document.getElementById('scansDropdown');
         dropdown.classList.toggle('hidden');
     }
 
-    function toggleDataDropdown() {
-        const dropdown = document.getElementById('dataDropdown');
+    function togglePortalDropdown() {
+        const dropdown = document.getElementById('portalDropdown');
         dropdown.classList.toggle('hidden');
     }
 
@@ -495,22 +421,22 @@
 
     // Close all dropdowns when clicking outside
     document.addEventListener('click', function (event) {
-        const newDropdown = document.getElementById('newDropdown');
-        const dataDropdown = document.getElementById('dataDropdown');
+        const scansDropdown = document.getElementById('scansDropdown');
+        const portalDropdown = document.getElementById('portalDropdown');
         const patientDropdown = document.getElementById('patientDropdown');
 
-        const isNewBtn = event.target.closest('button[onclick*="toggleNewDropdown"]') ||
-            event.target.closest('#newDropdown');
-        const isDataBtn = event.target.closest('button[onclick*="toggleDataDropdown"]') ||
-            event.target.closest('#dataDropdown');
+        const isScansBtn = event.target.closest('button[onclick*="toggleScansDropdown"]') ||
+            event.target.closest('#scansDropdown');
+        const isPortalBtn = event.target.closest('button[onclick*="togglePortalDropdown"]') ||
+            event.target.closest('#portalDropdown');
         const isPatientBtn = event.target.closest('button[onclick*="togglePatientDropdown"]') ||
             event.target.closest('#patientDropdown');
 
-        if (!isNewBtn && newDropdown && !newDropdown.classList.contains('hidden')) {
-            newDropdown.classList.add('hidden');
+        if (!isScansBtn && scansDropdown && !scansDropdown.classList.contains('hidden')) {
+            scansDropdown.classList.add('hidden');
         }
-        if (!isDataBtn && dataDropdown && !dataDropdown.classList.contains('hidden')) {
-            dataDropdown.classList.add('hidden');
+        if (!isPortalBtn && portalDropdown && !portalDropdown.classList.contains('hidden')) {
+            portalDropdown.classList.add('hidden');
         }
         if (!isPatientBtn && patientDropdown && !patientDropdown.classList.contains('hidden')) {
             patientDropdown.classList.add('hidden');

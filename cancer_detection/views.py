@@ -1233,3 +1233,69 @@ def decision_support(request, plan_id):
     }
     
     return render(request, 'cancer_detection/decision_support.html', context)
+
+
+@login_required
+def image_hub(request):
+    """Combined view for image upload and analysis history"""
+    # Upload form context
+    image_types = CancerImageAnalysis.IMAGE_TYPE_CHOICES
+    
+    # Analysis list with pagination
+    analyses = CancerImageAnalysis.objects.filter(user=request.user).order_by('-created_at')
+    paginator = Paginator(analyses, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'image_types': image_types,
+        'page_obj': page_obj,
+    }
+    return render(request, 'cancer_detection/image_hub.html', context)
+
+
+@login_required
+def pathology_hub(request):
+    """Combined view for histopathology upload and reports list"""
+    # Upload form context
+    report_types = HistopathologyReport.REPORT_STATUS_CHOICES
+    
+    # Reports list with pagination
+    reports = HistopathologyReport.objects.filter(patient=request.user).order_by('-created_at')
+    paginator = Paginator(reports, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'report_types': report_types,
+        'page_obj': page_obj,
+    }
+    return render(request, 'cancer_detection/pathology_hub.html', context)
+
+
+@login_required
+def genomics_hub(request):
+    """Combined view for genomic profile upload and profiles list"""
+    # Upload form context
+    profile_types = [
+        ('ngs', 'Next-Generation Sequencing (NGS)'),
+        ('pcr', 'Polymerase Chain Reaction (PCR)'),
+        ('fish', 'Fluorescence In Situ Hybridization (FISH)'),
+        ('ihc', 'Immunohistochemistry (IHC)'),
+        ('microarray', 'Microarray'),
+        ('whole_genome', 'Whole Genome Sequencing'),
+        ('whole_exome', 'Whole Exome Sequencing'),
+        ('other', 'Other'),
+    ]
+    
+    # Profiles list with pagination
+    profiles = GenomicProfile.objects.filter(patient=request.user).order_by('-created_at')
+    paginator = Paginator(profiles, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'profile_types': profile_types,
+        'page_obj': page_obj,
+    }
+    return render(request, 'cancer_detection/genomics_hub.html', context)

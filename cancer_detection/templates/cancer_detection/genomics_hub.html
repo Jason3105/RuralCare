@@ -1,0 +1,389 @@
+{% extends 'base.html' %}
+
+{% block title %}Genomics Hub{% endblock %}
+
+{% block content %}
+<div class="fade-in max-w-7xl mx-auto">
+    <div class="mb-8 sm:mb-10">
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-3">Genomics Hub</h1>
+        <p class="text-base sm:text-lg text-muted-foreground">Upload genomic test results and view your profile history</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex space-x-1 bg-muted/50 p-1 rounded-xl mb-8 w-fit">
+        <button onclick="switchGenomicTab('upload')" id="genomicTab-upload"
+            class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-card text-foreground shadow-sm">
+            <i class="fas fa-dna mr-2"></i>Upload Profile
+        </button>
+        <button onclick="switchGenomicTab('profiles')" id="genomicTab-profiles"
+            class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 text-muted-foreground hover:text-foreground">
+            <i class="fas fa-flask mr-2"></i>Profiles
+        </button>
+    </div>
+
+    <!-- Upload Tab -->
+    <div id="genomicPanel-upload">
+        <div class="max-w-5xl">
+            <div class="bg-card border border-border/50 rounded-2xl p-6 sm:p-10 transition-all">
+                <form method="post" action="{% url 'cancer_detection:upload_genomic' %}" class="space-y-8">
+                    {% csrf_token %}
+                    
+                    <!-- Mutations Section -->
+                    <div>
+                        <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
+                            <i class="fas fa-dna text-primary mr-2"></i>Genetic Mutations
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="mutation_egfr" class="block text-sm font-semibold text-foreground mb-2">EGFR</label>
+                                <input type="text" name="mutation_egfr" id="mutation_egfr" 
+                                    class="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary"
+                                    placeholder="e.g., L858R, exon19del">
+                            </div>
+                            <div>
+                                <label for="mutation_alk" class="block text-sm font-semibold text-foreground mb-2">ALK</label>
+                                <input type="text" name="mutation_alk" id="mutation_alk" 
+                                    class="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary"
+                                    placeholder="e.g., fusion, rearrangement">
+                            </div>
+                            <div>
+                                <label for="mutation_her2" class="block text-sm font-semibold text-foreground mb-2">HER2</label>
+                                <input type="text" name="mutation_her2" id="mutation_her2" 
+                                    class="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary"
+                                    placeholder="e.g., amplification, 3+">
+                            </div>
+                            <div>
+                                <label for="mutation_braf" class="block text-sm font-semibold text-foreground mb-2">BRAF</label>
+                                <input type="text" name="mutation_braf" id="mutation_braf" 
+                                    class="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary"
+                                    placeholder="e.g., V600E, V600K">
+                            </div>
+                            <div>
+                                <label for="mutation_kras" class="block text-sm font-semibold text-foreground mb-2">KRAS</label>
+                                <input type="text" name="mutation_kras" id="mutation_kras" 
+                                    class="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary"
+                                    placeholder="e.g., G12C, G12D">
+                            </div>
+                            <div>
+                                <label for="mutation_brca1" class="block text-sm font-semibold text-foreground mb-2">BRCA1</label>
+                                <input type="text" name="mutation_brca1" id="mutation_brca1" 
+                                    class="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary"
+                                    placeholder="e.g., pathogenic, wild-type">
+                            </div>
+                            <div>
+                                <label for="mutation_brca2" class="block text-sm font-semibold text-foreground mb-2">BRCA2</label>
+                                <input type="text" name="mutation_brca2" id="mutation_brca2" 
+                                    class="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary"
+                                    placeholder="e.g., pathogenic, wild-type">
+                            </div>
+                            <div>
+                                <label for="mutation_tp53" class="block text-sm font-semibold text-foreground mb-2">TP53</label>
+                                <input type="text" name="mutation_tp53" id="mutation_tp53" 
+                                    class="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary"
+                                    placeholder="e.g., mutation, wild-type">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Biomarkers Section -->
+                    <div>
+                        <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
+                            <i class="fas fa-flask text-primary mr-2"></i>Biomarkers
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="biomarker_er" class="block text-sm font-semibold text-foreground mb-2">ER (Estrogen Receptor)</label>
+                                <select name="biomarker_er" id="biomarker_er" 
+                                    class="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary">
+                                    <option value="">Select...</option>
+                                    <option value="positive">Positive</option>
+                                    <option value="negative">Negative</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="biomarker_pr" class="block text-sm font-semibold text-foreground mb-2">PR (Progesterone Receptor)</label>
+                                <select name="biomarker_pr" id="biomarker_pr" 
+                                    class="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary">
+                                    <option value="">Select...</option>
+                                    <option value="positive">Positive</option>
+                                    <option value="negative">Negative</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="biomarker_her2" class="block text-sm font-semibold text-foreground mb-2">HER2</label>
+                                <select name="biomarker_her2" id="biomarker_her2" 
+                                    class="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary">
+                                    <option value="">Select...</option>
+                                    <option value="0">0 (Negative)</option>
+                                    <option value="1+">1+</option>
+                                    <option value="2+">2+</option>
+                                    <option value="3+">3+ (Positive)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="biomarker_ki67" class="block text-sm font-semibold text-foreground mb-2">Ki-67 (%)</label>
+                                <input type="number" name="biomarker_ki67" id="biomarker_ki67" step="0.1" min="0" max="100"
+                                    class="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary"
+                                    placeholder="e.g., 25.5">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Immunoprofile Section -->
+                    <div>
+                        <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
+                            <i class="fas fa-shield-alt text-primary mr-2"></i>Immunoprofile
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="pd_l1_status" class="block text-sm font-semibold text-foreground mb-2">PD-L1 Status</label>
+                                <select name="pd_l1_status" id="pd_l1_status" 
+                                    class="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary">
+                                    <option value="">Select...</option>
+                                    <option value="positive">Positive</option>
+                                    <option value="negative">Negative</option>
+                                    <option value="high">High (≥50%)</option>
+                                    <option value="low">Low (1-49%)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="pd_l1_percentage" class="block text-sm font-semibold text-foreground mb-2">PD-L1 Percentage</label>
+                                <input type="number" name="pd_l1_percentage" id="pd_l1_percentage" step="0.1" min="0" max="100"
+                                    class="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary"
+                                    placeholder="e.g., 65.0">
+                            </div>
+                            <div>
+                                <label for="msi_status" class="block text-sm font-semibold text-foreground mb-2">MSI Status</label>
+                                <select name="msi_status" id="msi_status" 
+                                    class="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary">
+                                    <option value="">Select...</option>
+                                    <option value="MSI-H">MSI-H (High)</option>
+                                    <option value="MSS">MSS (Stable)</option>
+                                    <option value="MSI-L">MSI-L (Low)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="tmb" class="block text-sm font-semibold text-foreground mb-2">Tumor Mutational Burden (mutations/Mb)</label>
+                                <input type="number" name="tmb" id="tmb" step="0.1" min="0"
+                                    class="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary"
+                                    placeholder="e.g., 15.2">
+                            </div>
+                            <div>
+                                <label for="immune_infiltration" class="block text-sm font-semibold text-foreground mb-2">Immune Infiltration</label>
+                                <select name="immune_infiltration" id="immune_infiltration" 
+                                    class="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary">
+                                    <option value="">Select...</option>
+                                    <option value="high">High</option>
+                                    <option value="moderate">Moderate</option>
+                                    <option value="low">Low</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Test Information -->
+                    <div>
+                        <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
+                            <i class="fas fa-vial text-primary mr-2"></i>Test Information
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label for="test_type" class="block text-sm font-semibold text-foreground mb-2">Test Type</label>
+                                <input type="text" name="test_type" id="test_type" 
+                                    class="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary"
+                                    placeholder="e.g., NGS, PCR, IHC">
+                            </div>
+                            <div>
+                                <label for="test_date" class="block text-sm font-semibold text-foreground mb-2">Test Date</label>
+                                <input type="date" name="test_date" id="test_date" 
+                                    class="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary">
+                            </div>
+                            <div>
+                                <label for="lab_name" class="block text-sm font-semibold text-foreground mb-2">Lab Name</label>
+                                <input type="text" name="lab_name" id="lab_name" 
+                                    class="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary"
+                                    placeholder="Laboratory name">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                        <button type="submit" class="flex-1 bg-gradient-to-r from-primary to-primary/90 hover:shadow-xl text-primary-foreground font-bold py-3 sm:py-4 px-6 rounded-lg transition-all duration-300 flex items-center justify-center hover:scale-105">
+                            <i class="fas fa-dna mr-2"></i>
+                            Analyze Genomic Profile
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Information Box -->
+            <div class="mt-8 bg-gradient-to-br from-purple-50 to-purple-50/50 dark:from-purple-900/20 dark:to-purple-900/10 border border-purple-200 dark:border-purple-800/50 rounded-xl p-6 sm:p-8">
+                <h3 class="text-lg sm:text-xl font-bold text-purple-900 dark:text-purple-300 mb-4 flex items-center">
+                    <i class="fas fa-info-circle mr-2"></i>Genomic Analysis Benefits
+                </h3>
+                <ul class="space-y-3 text-purple-800 dark:text-purple-200 text-sm sm:text-base">
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-purple-600 dark:text-purple-400 mr-3 mt-1 flex-shrink-0"></i>
+                        <span><strong>Targeted Therapy Eligibility:</strong> Identifies actionable mutations for precision medicine</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-purple-600 dark:text-purple-400 mr-3 mt-1 flex-shrink-0"></i>
+                        <span><strong>Immunotherapy Assessment:</strong> Evaluates PD-L1, MSI, and TMB for immunotherapy eligibility</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-purple-600 dark:text-purple-400 mr-3 mt-1 flex-shrink-0"></i>
+                        <span><strong>Prognostic Information:</strong> Provides insights into treatment response and outcomes</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-purple-600 dark:text-purple-400 mr-3 mt-1 flex-shrink-0"></i>
+                        <span><strong>Clinical Trial Matching:</strong> Identifies relevant clinical trials based on genomic profile</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profiles Tab -->
+    <div id="genomicPanel-profiles" class="hidden">
+        {% if page_obj %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for profile in page_obj %}
+            <div class="bg-card border border-border/50 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 card-hover">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="h-12 w-12 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                            <i class="fas fa-dna text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-foreground">Profile #{{ profile.id|slice:":8" }}</h3>
+                            <p class="text-xs text-muted-foreground">{{ profile.created_at|date:"M d, Y" }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actionable Mutations -->
+                {% if profile.actionable_mutations %}
+                <div class="mb-4">
+                    <p class="text-xs text-muted-foreground mb-2">Actionable Mutations:</p>
+                    <div class="flex flex-wrap gap-2">
+                        {% for mutation in profile.actionable_mutations|slice:":3" %}
+                        <span class="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 rounded text-xs font-semibold">
+                            {{ mutation.gene }}
+                        </span>
+                        {% endfor %}
+                        {% if profile.actionable_mutations|length > 3 %}
+                        <span class="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded text-xs">
+                            +{{ profile.actionable_mutations|length|add:"-3" }} more
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Eligibility -->
+                <div class="space-y-2 mb-4">
+                    {% if profile.targeted_therapy_eligibility.eligible %}
+                    <div class="flex items-center text-sm">
+                        <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                        <span class="text-muted-foreground">Targeted Therapy:</span>
+                        <span class="ml-2 font-semibold text-green-600">Eligible</span>
+                    </div>
+                    {% endif %}
+                    {% if profile.immunotherapy_eligibility.eligible %}
+                    <div class="flex items-center text-sm">
+                        <i class="fas fa-check-circle text-blue-600 mr-2"></i>
+                        <span class="text-muted-foreground">Immunotherapy:</span>
+                        <span class="ml-2 font-semibold text-blue-600">Eligible</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="flex items-center justify-between pt-4 border-t border-border/50">
+                    <a href="{% url 'cancer_detection:genomic_detail' profile_id=profile.id %}" 
+                       class="text-primary hover:text-primary/80 font-semibold text-sm flex items-center">
+                        View Details
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                    {% if profile.test_type %}
+                    <span class="text-xs text-muted-foreground">
+                        {{ profile.test_type }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="mt-8 flex justify-center">
+            <nav class="flex space-x-2">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}#profiles" 
+                   class="px-4 py-2 bg-card border border-border rounded-lg hover:bg-accent transition-all">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                {% endif %}
+                
+                <span class="px-4 py-2 bg-card border border-border rounded-lg">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}#profiles" 
+                   class="px-4 py-2 bg-card border border-border rounded-lg hover:bg-accent transition-all">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="bg-card border border-border/50 rounded-2xl p-12 text-center">
+            <i class="fas fa-dna text-6xl text-muted-foreground/30 mb-4"></i>
+            <h3 class="text-xl font-bold text-foreground mb-2">No Genomic Profiles Yet</h3>
+            <p class="text-muted-foreground mb-6">Upload your first genomic test results to get started</p>
+            <button onclick="switchGenomicTab('upload')" 
+               class="inline-flex items-center bg-gradient-to-r from-primary to-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg hover:shadow-lg transition-all">
+                <i class="fas fa-plus mr-2"></i>
+                Upload Profile
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    function switchGenomicTab(tab) {
+        // Update tab buttons
+        document.querySelectorAll('[id^="genomicTab-"]').forEach(btn => {
+            btn.classList.remove('bg-card', 'text-foreground', 'shadow-sm');
+            btn.classList.add('text-muted-foreground', 'hover:text-foreground');
+        });
+        const activeBtn = document.getElementById('genomicTab-' + tab);
+        activeBtn.classList.add('bg-card', 'text-foreground', 'shadow-sm');
+        activeBtn.classList.remove('text-muted-foreground', 'hover:text-foreground');
+
+        // Update panels
+        document.querySelectorAll('[id^="genomicPanel-"]').forEach(panel => {
+            panel.classList.add('hidden');
+        });
+        document.getElementById('genomicPanel-' + tab).classList.remove('hidden');
+
+        // Update URL hash
+        window.location.hash = tab;
+    }
+
+    // Handle hash on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const hash = window.location.hash.substring(1);
+        if (hash === 'profiles' || hash === 'upload') {
+            switchGenomicTab(hash);
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

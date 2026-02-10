@@ -28,6 +28,11 @@ urlpatterns = [
     
     # Combined Data Analysis
     path('data-analysis/', views.combined_data_analysis, name='combined_data_analysis'),
+
+    # Combined Hub Pages
+    path('image-hub/', views.image_hub, name='image_hub'),
+    path('pathology-hub/', views.pathology_hub, name='pathology_hub'),
+    path('genomics-hub/', views.genomics_hub, name='genomics_hub'),
     
     # Comprehensive Treatment Planning
     path('comprehensive-plan/', views.create_comprehensive_plan, name='create_comprehensive_plan'),

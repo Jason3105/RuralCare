@@ -1,0 +1,651 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Medicine &amp; AI Hub{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Chat styles scoped to the hub panel */
+    #mhpanel-assistant .chat-box {
+        display: flex;
+        flex-direction: column;
+        height: 70vh;
+        background: #f7fafc;
+        border-radius: 1rem;
+        overflow: hidden;
+        border: 1px solid var(--border, #e2e8f0);
+    }
+    .dark #mhpanel-assistant .chat-box {
+        background: #1a202c;
+    }
+    #mhpanel-assistant .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1.5rem;
+        scroll-behavior: smooth;
+    }
+    #mhpanel-assistant .chat-msg {
+        display: flex;
+        margin-bottom: 1.25rem;
+        animation: chatFadeIn .3s ease-in;
+    }
+    @keyframes chatFadeIn {
+        from { opacity:0; transform:translateY(8px); }
+        to   { opacity:1; transform:translateY(0); }
+    }
+    #mhpanel-assistant .chat-msg.user { justify-content: flex-end; }
+    #mhpanel-assistant .chat-bubble {
+        max-width: 70%;
+        padding: 14px 18px;
+        border-radius: 1rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+    #mhpanel-assistant .chat-msg.user .chat-bubble {
+        background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+        color: #fff;
+        border-bottom-right-radius: 4px;
+    }
+    #mhpanel-assistant .chat-msg.assistant .chat-bubble {
+        background: white;
+        color: #2d3748;
+        border: 1px solid #e2e8f0;
+        border-bottom-left-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.05);
+    }
+    .dark #mhpanel-assistant .chat-msg.assistant .chat-bubble {
+        background: #2d3748;
+        color: #e2e8f0;
+        border-color: #4a5568;
+    }
+    #mhpanel-assistant .chat-avatar {
+        width: 36px; height: 36px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; margin: 0 10px; flex-shrink: 0; font-size: 13px;
+    }
+    #mhpanel-assistant .chat-msg.user .chat-avatar {
+        background: linear-gradient(135deg,#667eea,#764ba2); color:#fff;
+    }
+    #mhpanel-assistant .chat-msg.assistant .chat-avatar {
+        background: linear-gradient(135deg,#48bb78,#38a169); color:#fff;
+    }
+    #mhpanel-assistant .chat-time { font-size: 11px; opacity: .6; margin-top: 6px; }
+    #mhpanel-assistant .typing-dots { display:flex; gap:5px; padding:12px; }
+    #mhpanel-assistant .typing-dots span {
+        width:8px; height:8px; background:#cbd5e0; border-radius:50%;
+        animation: tdot 1.4s infinite;
+    }
+    #mhpanel-assistant .typing-dots span:nth-child(2){animation-delay:.2s}
+    #mhpanel-assistant .typing-dots span:nth-child(3){animation-delay:.4s}
+    @keyframes tdot { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-8px)} }
+    #mhpanel-assistant .chat-input-bar {
+        display:flex; gap:10px; padding:14px 18px;
+        border-top:2px solid var(--border, #e2e8f0); background:white;
+    }
+    .dark #mhpanel-assistant .chat-input-bar { background:#2d3748; }
+    #mhpanel-assistant .chat-input-bar textarea {
+        flex:1; border:none; background:transparent; font-size:15px;
+        outline:none; resize:none; max-height:100px; font-family:inherit;
+        color: inherit;
+    }
+    #mhpanel-assistant .chat-input-bar button {
+        padding:10px 22px; border:none; border-radius:8px; cursor:pointer;
+        font-weight:600; background:linear-gradient(135deg,#667eea,#764ba2);
+        color:#fff; transition:all .3s;
+    }
+    #mhpanel-assistant .chat-input-bar button:hover:not(:disabled){
+        transform:translateY(-1px); box-shadow:0 4px 12px rgba(102,126,234,.4);
+    }
+    #mhpanel-assistant .chat-input-bar button:disabled{opacity:.5;cursor:not-allowed}
+
+    /* Session sidebar within tab */
+    #mhpanel-assistant .chat-sessions {
+        border-right: 1px solid var(--border, #e2e8f0);
+        overflow-y: auto;
+        background: #2d3748;
+        border-radius: 1rem 0 0 1rem;
+        min-width: 220px;
+    }
+    .dark #mhpanel-assistant .chat-sessions { background: #111827; }
+    #mhpanel-assistant .session-btn {
+        display:block; width:100%; text-align:left; padding:10px 14px;
+        background:transparent; border:none; color:#cbd5e0;
+        cursor:pointer; border-left:3px solid transparent;
+        transition:all .2s; font-size:13px;
+    }
+    #mhpanel-assistant .session-btn:hover { background:rgba(255,255,255,.08); border-left-color:#667eea; }
+    #mhpanel-assistant .session-btn.active { background:rgba(102,126,234,.25); border-left-color:#667eea; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-foreground">Medicine &amp; AI Hub</h1>
+                    <p class="text-muted-foreground mt-1">Identify medicines, review history, and chat with your Medical AI Assistant</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="mb-8 border-b border-border/50">
+            <nav class="flex space-x-1 -mb-px" id="medicineTabs">
+                <button onclick="switchMedTab('identify')" id="mtab-identify"
+                    class="mh-tab px-5 py-3 text-sm font-semibold rounded-t-lg transition-all border-b-2 border-primary text-primary bg-primary/5">
+                    <i class="fas fa-capsules mr-2"></i>Identify
+                </button>
+                <button onclick="switchMedTab('history')" id="mtab-history"
+                    class="mh-tab px-5 py-3 text-sm font-semibold rounded-t-lg transition-all border-b-2 border-transparent text-muted-foreground hover:text-foreground hover:border-border">
+                    <i class="fas fa-history mr-2"></i>History
+                </button>
+                <button onclick="switchMedTab('assistant')" id="mtab-assistant"
+                    class="mh-tab px-5 py-3 text-sm font-semibold rounded-t-lg transition-all border-b-2 border-transparent text-muted-foreground hover:text-foreground hover:border-border">
+                    <i class="fas fa-robot mr-2"></i>AI Assistant
+                </button>
+            </nav>
+        </div>
+
+
+        <!-- ============================================================ -->
+        <!-- TAB 1: IDENTIFY MEDICINE (upload)                            -->
+        <!-- ============================================================ -->
+        <div id="mhpanel-identify" class="mh-panel">
+
+            <div class="max-w-4xl mx-auto">
+                <!-- Upload Card -->
+                <div class="bg-card border border-border/50 rounded-2xl shadow-xl overflow-hidden mb-8">
+                    <div class="p-8">
+                        <form method="POST" action="{% url 'medicine_identifier:upload' %}" enctype="multipart/form-data" id="medUploadForm" class="space-y-6">
+                            {% csrf_token %}
+
+                            <!-- Drop Zone -->
+                            <div id="medDropZone" class="relative border-2 border-dashed border-border rounded-xl p-12 text-center hover:border-primary transition-all cursor-pointer bg-accent/20">
+                                <input type="file" name="image" id="medImageInput" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required>
+
+                                <div id="medUploadPlaceholder">
+                                    <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                                        <i class="fas fa-cloud-upload-alt text-4xl text-primary"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-foreground mb-2">Drop your medicine image here</h3>
+                                    <p class="text-muted-foreground mb-4">or click to browse</p>
+                                    <div class="flex flex-wrap justify-center gap-2 text-sm text-muted-foreground">
+                                        <span class="px-2 py-1 bg-accent rounded">JPG</span>
+                                        <span class="px-2 py-1 bg-accent rounded">PNG</span>
+                                        <span class="px-2 py-1 bg-accent rounded">WEBP</span>
+                                        <span class="px-2 py-1 bg-accent rounded">Max 10MB</span>
+                                    </div>
+                                </div>
+
+                                <div id="medImagePreview" class="hidden">
+                                    <img id="medPreviewImg" src="" alt="Preview" class="max-h-64 mx-auto rounded-lg shadow-lg">
+                                    <p id="medFileName" class="mt-4 text-foreground font-medium"></p>
+                                    <button type="button" id="medRemoveImage" class="mt-2 text-red-500 hover:text-red-600 text-sm">
+                                        <i class="fas fa-times mr-1"></i>Remove image
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Supported Medicines Info -->
+                            <div class="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-4">
+                                <h4 class="font-medium text-blue-800 dark:text-blue-300 mb-2">
+                                    <i class="fas fa-info-circle mr-2"></i>Supported Medicine Types
+                                </h4>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-3 py-1 bg-card rounded-full text-sm text-foreground"><i class="fas fa-tablets mr-1 text-blue-500"></i>Tablets</span>
+                                    <span class="px-3 py-1 bg-card rounded-full text-sm text-foreground"><i class="fas fa-capsules mr-1 text-purple-500"></i>Capsules</span>
+                                    <span class="px-3 py-1 bg-card rounded-full text-sm text-foreground"><i class="fas fa-prescription-bottle mr-1 text-green-500"></i>Syrups</span>
+                                    <span class="px-3 py-1 bg-card rounded-full text-sm text-foreground"><i class="fas fa-pump-soap mr-1 text-pink-500"></i>Creams</span>
+                                    <span class="px-3 py-1 bg-card rounded-full text-sm text-foreground"><i class="fas fa-syringe mr-1 text-red-500"></i>Injections</span>
+                                    <span class="px-3 py-1 bg-card rounded-full text-sm text-foreground"><i class="fas fa-eye-dropper mr-1 text-cyan-500"></i>Drops</span>
+                                </div>
+                            </div>
+
+                            <!-- Tips -->
+                            <div class="bg-amber-50 dark:bg-amber-900/30 rounded-xl p-4">
+                                <h4 class="font-medium text-amber-800 dark:text-amber-300 mb-2">
+                                    <i class="fas fa-lightbulb mr-2"></i>Tips for Better Results
+                                </h4>
+                                <ul class="text-sm text-amber-700 dark:text-amber-400 space-y-1">
+                                    <li><i class="fas fa-check mr-2 text-amber-500"></i>Use good lighting and avoid shadows</li>
+                                    <li><i class="fas fa-check mr-2 text-amber-500"></i>Make sure the medicine name and dosage are clearly visible</li>
+                                    <li><i class="fas fa-check mr-2 text-amber-500"></i>Capture the full medicine packaging or label</li>
+                                    <li><i class="fas fa-check mr-2 text-amber-500"></i>Avoid blurry or tilted images</li>
+                                </ul>
+                            </div>
+
+                            <!-- Submit -->
+                            <button type="submit" id="medSubmitBtn" class="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                                <span id="medSubmitText"><i class="fas fa-search mr-2"></i>Identify Medicine</span>
+                                <span id="medLoadingText" class="hidden"><i class="fas fa-spinner fa-spin mr-2"></i>Analyzing image...</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- How It Works -->
+                <div class="bg-card border border-border/50 rounded-2xl shadow-xl overflow-hidden mb-8">
+                    <div class="p-8">
+                        <h2 class="text-xl font-bold text-foreground mb-6 text-center">How It Works</h2>
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <div class="text-center">
+                                <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                                    <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">1</span>
+                                </div>
+                                <h3 class="font-semibold text-foreground mb-2">Upload Image</h3>
+                                <p class="text-sm text-muted-foreground">Take a clear photo of your medicine package, tablet strip, or bottle label</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
+                                    <span class="text-2xl font-bold text-purple-600 dark:text-purple-400">2</span>
+                                </div>
+                                <h3 class="font-semibold text-foreground mb-2">AI Analysis</h3>
+                                <p class="text-sm text-muted-foreground">Our OpenCV &amp; AI system extracts text and analyzes visual features</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                                    <span class="text-2xl font-bold text-green-600 dark:text-green-400">3</span>
+                                </div>
+                                <h3 class="font-semibold text-foreground mb-2">Get Details</h3>
+                                <p class="text-sm text-muted-foreground">Receive comprehensive info about uses, side effects, warnings &amp; more</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Identifications -->
+                {% if recent_identifications %}
+                <div class="bg-card border border-border/50 rounded-2xl shadow-xl overflow-hidden">
+                    <div class="p-6 border-b border-border/50">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-lg font-bold text-foreground"><i class="fas fa-history mr-2 text-muted-foreground"></i>Recent Identifications</h2>
+                            <button onclick="switchMedTab('history')" class="text-primary hover:underline text-sm">View All <i class="fas fa-arrow-right ml-1"></i></button>
+                        </div>
+                    </div>
+                    <div class="divide-y divide-border/50">
+                        {% for item in recent_identifications %}
+                        <a href="{% url 'medicine_identifier:result' item.id %}" class="block p-4 hover:bg-accent/50 transition-colors">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-lg overflow-hidden bg-accent flex-shrink-0">
+                                    {% if item.image %}
+                                    <img src="{{ item.image.url }}" alt="Medicine" class="w-full h-full object-cover">
+                                    {% else %}
+                                    <div class="w-full h-full flex items-center justify-center"><i class="fas fa-pills text-muted-foreground"></i></div>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="font-medium text-foreground truncate">{{ item.medicine_name|default:"Unknown Medicine" }}</h3>
+                                    <p class="text-sm text-muted-foreground">{{ item.created_at|date:"M d, Y H:i" }}</p>
+                                </div>
+                                <div>
+                                    {% if item.status == 'completed' and item.identification_confidence >= 0.6 %}
+                                    <span class="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300 text-xs rounded-full">Identified</span>
+                                    {% elif item.status == 'completed' %}
+                                    <span class="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300 text-xs rounded-full">Partial</span>
+                                    {% elif item.status == 'invalid_image' %}
+                                    <span class="px-2 py-1 bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-300 text-xs rounded-full">Invalid</span>
+                                    {% elif item.status == 'failed' %}
+                                    <span class="px-2 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-300 text-xs rounded-full">Failed</span>
+                                    {% else %}
+                                    <span class="px-2 py-1 bg-accent text-muted-foreground text-xs rounded-full">{{ item.status|title }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Disclaimer -->
+                <div class="mt-8 p-4 bg-yellow-50 dark:bg-yellow-900/30 rounded-xl">
+                    <p class="text-sm text-yellow-800 dark:text-yellow-300 text-center">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <strong>Important:</strong> This tool is for informational purposes only. Always consult a healthcare professional before taking any medication.
+                    </p>
+                </div>
+            </div>
+
+        </div><!-- end mhpanel-identify -->
+
+
+        <!-- ============================================================ -->
+        <!-- TAB 2: MEDICINE HISTORY                                      -->
+        <!-- ============================================================ -->
+        <div id="mhpanel-history" class="mh-panel hidden">
+
+            {% if history_identifications %}
+            <div class="bg-card border border-border/50 rounded-2xl shadow-xl overflow-hidden">
+                <div class="divide-y divide-border/50">
+                    {% for item in history_identifications %}
+                    <div class="p-4 sm:p-6 hover:bg-accent/30 transition-colors">
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <!-- Image Thumbnail -->
+                            <div class="w-full sm:w-24 h-40 sm:h-24 rounded-xl overflow-hidden bg-accent flex-shrink-0">
+                                {% if item.image %}
+                                <img src="{{ item.image.url }}" alt="Medicine" class="w-full h-full object-cover">
+                                {% else %}
+                                <div class="w-full h-full flex items-center justify-center"><i class="fas fa-pills text-3xl text-muted-foreground"></i></div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Details -->
+                            <div class="flex-1 min-w-0">
+                                <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-foreground">{{ item.medicine_name|default:"Unknown Medicine" }}</h3>
+                                        {% if item.generic_name %}
+                                        <p class="text-sm text-muted-foreground">{{ item.generic_name }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex items-center gap-2 flex-shrink-0">
+                                        {% if item.status == 'completed' and item.identification_confidence >= 0.6 %}
+                                        <span class="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300 text-xs font-medium rounded-full"><i class="fas fa-check mr-1"></i>Identified</span>
+                                        {% elif item.status == 'completed' %}
+                                        <span class="px-3 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300 text-xs font-medium rounded-full"><i class="fas fa-question mr-1"></i>Partial</span>
+                                        {% elif item.status == 'invalid_image' %}
+                                        <span class="px-3 py-1 bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-300 text-xs font-medium rounded-full"><i class="fas fa-image mr-1"></i>Invalid Image</span>
+                                        {% elif item.status == 'failed' %}
+                                        <span class="px-3 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-300 text-xs font-medium rounded-full"><i class="fas fa-times mr-1"></i>Failed</span>
+                                        {% else %}
+                                        <span class="px-3 py-1 bg-accent text-muted-foreground text-xs font-medium rounded-full"><i class="fas fa-spinner fa-spin mr-1"></i>{{ item.status|title }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-wrap gap-4 mt-3 text-sm text-muted-foreground">
+                                    {% if item.medicine_form and item.medicine_form != 'unknown' %}
+                                    <span><i class="fas fa-pills mr-1"></i>{{ item.medicine_form|title }}</span>
+                                    {% endif %}
+                                    {% if item.strength %}
+                                    <span><i class="fas fa-weight mr-1"></i>{{ item.strength }}</span>
+                                    {% endif %}
+                                    {% if item.drug_class %}
+                                    <span><i class="fas fa-tag mr-1"></i>{{ item.drug_class }}</span>
+                                    {% endif %}
+                                    <span><i class="fas fa-clock mr-1"></i>{{ item.created_at|date:"M d, Y H:i" }}</span>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="flex flex-wrap gap-2 mt-4">
+                                    <a href="{% url 'medicine_identifier:result' item.id %}" class="inline-flex items-center px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary text-sm font-medium rounded-lg transition-colors">
+                                        <i class="fas fa-eye mr-2"></i>View Details
+                                    </a>
+                                    <form method="POST" action="{% url 'medicine_identifier:delete' item.id %}" class="inline" onsubmit="return confirm('Delete this identification?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-300 text-sm font-medium rounded-lg transition-colors">
+                                            <i class="fas fa-trash mr-2"></i>Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if history_page.has_other_pages %}
+                <div class="px-6 py-4 border-t border-border/50">
+                    <nav class="flex justify-center items-center gap-2">
+                        {% if history_page.has_previous %}
+                        <a href="?page={{ history_page.previous_page_number }}#history" class="px-4 py-2 bg-accent hover:bg-accent/80 text-foreground rounded-lg transition-colors">
+                            <i class="fas fa-chevron-left mr-1"></i>Previous
+                        </a>
+                        {% endif %}
+                        <span class="px-4 py-2 text-muted-foreground">
+                            Page {{ history_page.number }} of {{ history_page.paginator.num_pages }}
+                        </span>
+                        {% if history_page.has_next %}
+                        <a href="?page={{ history_page.next_page_number }}#history" class="px-4 py-2 bg-accent hover:bg-accent/80 text-foreground rounded-lg transition-colors">
+                            Next<i class="fas fa-chevron-right ml-1"></i>
+                        </a>
+                        {% endif %}
+                    </nav>
+                </div>
+                {% endif %}
+            </div>
+
+            {% else %}
+            <!-- Empty State -->
+            <div class="bg-card border border-border/50 rounded-2xl p-12 text-center">
+                <div class="w-20 h-20 bg-accent rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-pills text-4xl text-muted-foreground"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-foreground mb-4">No Identifications Yet</h2>
+                <p class="text-muted-foreground mb-8 max-w-md mx-auto">Upload an image of a medicine on the Identify tab to get started!</p>
+                <button onclick="switchMedTab('identify')" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all">
+                    <i class="fas fa-camera mr-2"></i>Upload Your First Medicine
+                </button>
+            </div>
+            {% endif %}
+
+        </div><!-- end mhpanel-history -->
+
+
+        <!-- ============================================================ -->
+        <!-- TAB 3: AI ASSISTANT (chat)                                   -->
+        <!-- ============================================================ -->
+        <div id="mhpanel-assistant" class="mh-panel hidden">
+
+            <div class="flex rounded-xl overflow-hidden border border-border/50 shadow-xl" style="height:75vh">
+                <!-- Session Sidebar -->
+                <div class="chat-sessions hidden md:block">
+                    <div class="p-4 border-b border-gray-600">
+                        <h3 class="text-white text-sm font-semibold mb-3 flex items-center gap-2"><span>💬</span> Sessions</h3>
+                        <button onclick="hubCreateNewSession()" class="w-full py-2 px-3 text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 transition-all">
+                            <i class="fas fa-plus mr-1"></i> New Chat
+                        </button>
+                    </div>
+                    <div class="p-2" id="hubSessionsList">
+                        {% for session in chat_sessions %}
+                        <button class="session-btn {% if session.id == active_chat_session.id %}active{% endif %}" onclick="hubSwitchSession('{{ session.id }}')">
+                            <div class="truncate font-medium">{{ session.title }}</div>
+                            <div class="text-[11px] opacity-60 mt-1">{{ session.updated_at|date:"M d, Y" }}</div>
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Chat Area -->
+                <div class="flex-1 flex flex-col bg-accent/10">
+                    <!-- Chat Header -->
+                    <div class="px-6 py-4 bg-card border-b border-border/50">
+                        <h2 class="text-lg font-bold text-foreground flex items-center gap-2">
+                            <span>🏥</span> Medical AI Assistant
+                        </h2>
+                        <p class="text-sm text-muted-foreground">Ask about your medical history, treatments, medications, and health records</p>
+                    </div>
+
+                    <!-- Messages -->
+                    <div class="chat-messages flex-1" id="hubMessagesContainer">
+                        {% if chat_messages %}
+                        {% for msg in chat_messages %}
+                        <div class="chat-msg {{ msg.role }}">
+                            {% if msg.role == 'assistant' %}
+                            <div class="chat-avatar">AI</div>
+                            {% endif %}
+                            <div class="chat-bubble">
+                                <div>{{ msg.content }}</div>
+                                <div class="chat-time">{{ msg.created_at|date:"h:i A" }}</div>
+                            </div>
+                            {% if msg.role == 'user' %}
+                            <div class="chat-avatar">{{ request.user.first_name.0|default:"U" }}</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div class="flex flex-col items-center justify-center h-full text-center px-8" id="hubEmptyState">
+                            <div class="text-5xl mb-4 opacity-50">🤖</div>
+                            <h2 class="text-xl font-bold text-foreground mb-2">Welcome to Your Medical AI Assistant</h2>
+                            <p class="text-muted-foreground mb-6 max-w-lg">I have access to your complete medical records. Ask me anything!</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl">
+                                <button onclick="hubSendSuggestion('What is my current diagnosis?')" class="text-left p-4 bg-card border border-border/50 rounded-xl hover:border-primary hover:shadow-md transition-all">
+                                    <strong class="text-foreground block mb-1">📋 Current Diagnosis</strong>
+                                    <span class="text-sm text-muted-foreground">Learn about your conditions</span>
+                                </button>
+                                <button onclick="hubSendSuggestion('What medications am I taking?')" class="text-left p-4 bg-card border border-border/50 rounded-xl hover:border-primary hover:shadow-md transition-all">
+                                    <strong class="text-foreground block mb-1">💊 Medications</strong>
+                                    <span class="text-sm text-muted-foreground">Review current medications</span>
+                                </button>
+                                <button onclick="hubSendSuggestion('What were my recent symptoms?')" class="text-left p-4 bg-card border border-border/50 rounded-xl hover:border-primary hover:shadow-md transition-all">
+                                    <strong class="text-foreground block mb-1">🩺 Symptoms</strong>
+                                    <span class="text-sm text-muted-foreground">Check symptom history</span>
+                                </button>
+                                <button onclick="hubSendSuggestion('Tell me about my treatment plan')" class="text-left p-4 bg-card border border-border/50 rounded-xl hover:border-primary hover:shadow-md transition-all">
+                                    <strong class="text-foreground block mb-1">🏥 Treatment Plan</strong>
+                                    <span class="text-sm text-muted-foreground">Understand your treatment</span>
+                                </button>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Typing indicator (always present, shown/hidden) -->
+                        <div class="chat-msg assistant" id="hubTypingRow" style="display:none">
+                            <div class="chat-avatar">AI</div>
+                            <div class="chat-bubble">
+                                <div class="typing-dots"><span></span><span></span><span></span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input Bar -->
+                    <div class="chat-input-bar">
+                        <textarea id="hubChatInput" placeholder="Ask about your medical history, symptoms, treatments..." rows="1" onkeypress="hubHandleKey(event)"></textarea>
+                        <button id="hubSendBtn" onclick="hubSendMessage()"><i class="fas fa-paper-plane mr-1"></i> Send</button>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- end mhpanel-assistant -->
+
+    </div>
+</div>
+
+<script>
+/* ========== TAB SWITCHING ========== */
+function switchMedTab(tab) {
+    document.querySelectorAll('.mh-tab').forEach(t => {
+        t.className = 'mh-tab px-5 py-3 text-sm font-semibold rounded-t-lg transition-all border-b-2 border-transparent text-muted-foreground hover:text-foreground hover:border-border';
+    });
+    document.getElementById('mtab-' + tab).className =
+        'mh-tab px-5 py-3 text-sm font-semibold rounded-t-lg transition-all border-b-2 border-primary text-primary bg-primary/5';
+    document.querySelectorAll('.mh-panel').forEach(p => p.classList.add('hidden'));
+    document.getElementById('mhpanel-' + tab).classList.remove('hidden');
+    history.replaceState(null, '', '#' + tab);
+    if (tab === 'assistant') hubScrollBottom();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+document.addEventListener('DOMContentLoaded', function() {
+    const hash = window.location.hash.replace('#', '');
+    if (['identify', 'history', 'assistant'].includes(hash)) switchMedTab(hash);
+});
+
+/* ========== UPLOAD (Identify tab) ========== */
+document.addEventListener('DOMContentLoaded', function() {
+    const dz = document.getElementById('medDropZone');
+    const inp = document.getElementById('medImageInput');
+    const ph = document.getElementById('medUploadPlaceholder');
+    const pv = document.getElementById('medImagePreview');
+    const pi = document.getElementById('medPreviewImg');
+    const fn = document.getElementById('medFileName');
+    const rm = document.getElementById('medRemoveImage');
+    const form = document.getElementById('medUploadForm');
+    const sbtn = document.getElementById('medSubmitBtn');
+    const stxt = document.getElementById('medSubmitText');
+    const ltxt = document.getElementById('medLoadingText');
+
+    ['dragenter','dragover','dragleave','drop'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); ev.stopPropagation(); }, false));
+    ['dragenter','dragover'].forEach(e => dz.addEventListener(e, () => dz.classList.add('border-primary','bg-primary/5'), false));
+    ['dragleave','drop'].forEach(e => dz.addEventListener(e, () => dz.classList.remove('border-primary','bg-primary/5'), false));
+    dz.addEventListener('drop', e => { if(e.dataTransfer.files.length){inp.files=e.dataTransfer.files; showPrev(e.dataTransfer.files[0]);} }, false);
+    inp.addEventListener('change', function(){ if(this.files&&this.files[0]) showPrev(this.files[0]); });
+    function showPrev(f){ const r=new FileReader(); r.onload=e=>{pi.src=e.target.result;fn.textContent=f.name;ph.classList.add('hidden');pv.classList.remove('hidden');}; r.readAsDataURL(f); }
+    rm.addEventListener('click', e => { e.stopPropagation(); inp.value=''; pi.src=''; fn.textContent=''; ph.classList.remove('hidden'); pv.classList.add('hidden'); });
+    form.addEventListener('submit', () => { sbtn.disabled=true; stxt.classList.add('hidden'); ltxt.classList.remove('hidden'); });
+});
+
+/* ========== CHAT (AI Assistant tab) ========== */
+let hubSessionId = '{{ active_chat_session.id }}';
+
+function hubHandleKey(e){ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();hubSendMessage();} }
+function hubSendSuggestion(t){ document.getElementById('hubChatInput').value=t; hubSendMessage(); }
+function hubScrollBottom(){ const c=document.getElementById('hubMessagesContainer'); c.scrollTop=c.scrollHeight; }
+
+async function hubSendMessage(){
+    const inp = document.getElementById('hubChatInput');
+    const msg = inp.value.trim();
+    if(!msg) return;
+    const btn = document.getElementById('hubSendBtn');
+    btn.disabled = true;
+    hubAddMsg('user', msg);
+    inp.value = '';
+    document.getElementById('hubTypingRow').style.display = '';
+    hubScrollBottom();
+    try {
+        const res = await fetch('{% url "medical_chatbot:send_message" %}',{
+            method:'POST',
+            headers:{'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},
+            body:JSON.stringify({ message:msg, session_id:hubSessionId })
+        });
+        const data = await res.json();
+        document.getElementById('hubTypingRow').style.display = 'none';
+        if(data.success){
+            hubAddMsg('assistant', data.assistant_message.content);
+            if(data.session_id) hubSessionId = data.session_id;
+        } else {
+            hubAddMsg('assistant', 'Sorry, an error occurred: ' + (data.error||'Unknown'));
+        }
+    } catch(err){
+        document.getElementById('hubTypingRow').style.display = 'none';
+        hubAddMsg('assistant', 'Failed to send message. Please try again.');
+    }
+    btn.disabled = false;
+}
+
+function hubAddMsg(role, content){
+    const c = document.getElementById('hubMessagesContainer');
+    const es = document.getElementById('hubEmptyState');
+    if(es) es.remove();
+    const d = document.createElement('div');
+    d.className = 'chat-msg ' + role;
+    const now = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    const initial = '{{ request.user.first_name.0|default:"U" }}';
+    if(role==='assistant'){
+        d.innerHTML = `<div class="chat-avatar">AI</div><div class="chat-bubble"><div>${content}</div><div class="chat-time">${now}</div></div>`;
+    } else {
+        d.innerHTML = `<div class="chat-bubble"><div>${content}</div><div class="chat-time">${now}</div></div><div class="chat-avatar">${initial}</div>`;
+    }
+    const tr = document.getElementById('hubTypingRow');
+    c.insertBefore(d, tr);
+    hubScrollBottom();
+}
+
+async function hubCreateNewSession(){
+    try {
+        const res = await fetch('{% url "medical_chatbot:new_session" %}',{method:'POST',headers:{'X-CSRFToken':'{{ csrf_token }}'}});
+        const data = await res.json();
+        if(data.success) window.location.href = window.location.pathname + '#assistant';
+        window.location.reload();
+    } catch(e){ console.error(e); }
+}
+async function hubSwitchSession(sid){
+    try {
+        const res = await fetch('/chatbot/switch-session/'+sid+'/',{method:'POST',headers:{'X-CSRFToken':'{{ csrf_token }}'}});
+        const data = await res.json();
+        if(data.success){ window.location.href = window.location.pathname + '#assistant'; window.location.reload(); }
+    } catch(e){ console.error(e); }
+}
+
+// Auto-resize chat input
+const ta = document.getElementById('hubChatInput');
+if(ta) ta.addEventListener('input', function(){ this.style.height='auto'; this.style.height=Math.min(this.scrollHeight,100)+'px'; });
+
+// Scroll on load if on assistant tab
+window.addEventListener('load', () => { if(window.location.hash==='#assistant') hubScrollBottom(); });
+</script>
+{% endblock %}
