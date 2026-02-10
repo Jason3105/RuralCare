@@ -707,33 +707,49 @@ def tumor_board_contributions(request):
 @login_required
 @doctor_required
 def toxicity_dashboard(request):
-    """Toxicity prediction dashboard"""
-    predictions = ToxicityPrediction.objects.select_related(
+    """Toxicity prediction dashboard with stats and filtering"""
+    all_predictions = ToxicityPrediction.objects.select_related(
         'patient', 'treatment_plan'
-    ).order_by('-created_at')
+    )
     
-    # Filter by patient
-    patient_id = request.GET.get('patient')
-    if patient_id:
-        predictions = predictions.filter(patient_id=patient_id)
+    # Calculate stats
+    stats = {
+        'total': all_predictions.count(),
+        'low': all_predictions.filter(overall_risk_level='low').count(),
+        'moderate': all_predictions.filter(overall_risk_level='moderate').count(),
+        'high': all_predictions.filter(overall_risk_level='high').count(),
+    }
+    
+    # Get unique drugs for filter
+    drugs = list(all_predictions.values_list('drug_name', flat=True).distinct().order_by('drug_name'))
+    
+    # Apply filters
+    predictions = all_predictions.order_by('-created_at')
+    
+    # Filter by patient name search
+    patient_search = request.GET.get('patient', '').strip()
+    if patient_search:
+        predictions = predictions.filter(patient__username__icontains=patient_search)
     
     # Filter by risk level
-    risk_level = request.GET.get('risk')
+    risk_level = request.GET.get('risk_level')
     if risk_level:
         predictions = predictions.filter(overall_risk_level=risk_level)
     
+    # Filter by drug
+    drug_filter = request.GET.get('drug')
+    if drug_filter:
+        predictions = predictions.filter(drug_name=drug_filter)
+    
+    # Paginate
     paginator = Paginator(predictions, 10)
     page = request.GET.get('page')
-    page_obj = paginator.get_page(page)
-    
-    patients = User.objects.filter(user_type='patient').order_by('username')
+    predictions = paginator.get_page(page)
     
     context = {
-        'page_obj': page_obj,
-        'patients': patients,
-        'risk_levels': ToxicityPrediction.RISK_LEVEL_CHOICES,
-        'selected_patient': patient_id,
-        'selected_risk': risk_level,
+        'predictions': predictions,
+        'stats': stats,
+        'drugs': drugs,
     }
     return render(request, 'clinical_decision_support/toxicity_dashboard.html', context)
 
