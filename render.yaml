@@ -2,7 +2,7 @@ services:
   - type: web
     name: ruralcare
     runtime: python
-    buildCommand: "./build.sh"
+    buildCommand: "bash build.sh"
     startCommand: "gunicorn cancer_treatment_system.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120 --log-level info"
     envVars:
       - key: DJANGO_SECRET_KEY
