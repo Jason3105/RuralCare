@@ -55,9 +55,8 @@ urlpatterns = [
     path('evidence/rules/', evidence_web_views.rule_based_references_view, name='rule_based_references_view'),
 ]
 
-# Serve media files - custom handler to serve local files
-# This takes precedence and serves local files directly
-if settings.DEBUG:
-    urlpatterns += [
-        re_path(r'^media/(?P<path>.*)$', serve_media, name='serve_media'),
-    ]
+# Serve media files
+# In production on Render, media comes from Supabase; this serves any local files
+urlpatterns += [
+    re_path(r'^media/(?P<path>.*)$', serve_media, name='serve_media'),
+]
