@@ -149,7 +149,9 @@
                 <a href="{% url 'medicine_identifier:result' item.id %}" class="block p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
-                            {% if item.image %}
+                            {% if item.supabase_image_url %}
+                            <img src="{{ item.supabase_image_url }}" alt="Medicine" class="w-full h-full object-cover">
+                            {% elif item.image %}
                             <img src="{{ item.image.url }}" alt="Medicine" class="w-full h-full object-cover">
                             {% else %}
                             <div class="w-full h-full flex items-center justify-center">

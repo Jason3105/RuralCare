@@ -7,6 +7,18 @@ from django.db import models
 from django.conf import settings
 import uuid
 
+from authentication.supabase_storage import SupabaseStorage
+
+
+def get_medicine_storage():
+    """Return SupabaseStorage instance for medicine images."""
+    try:
+        return SupabaseStorage(bucket_name=getattr(settings, 'SUPABASE_STORAGE_BUCKET', 'media'))
+    except Exception:
+        # Fallback to default storage if Supabase is not configured
+        from django.core.files.storage import default_storage
+        return default_storage
+
 
 class MedicineIdentification(models.Model):
     """Model to store medicine identification requests and results"""
@@ -46,8 +58,9 @@ class MedicineIdentification(models.Model):
     )
     
     # Image fields
-    image = models.ImageField(upload_to='medicine_images/')
+    image = models.ImageField(upload_to='medicine_images/', storage=get_medicine_storage)
     original_filename = models.CharField(max_length=255)
+    supabase_image_url = models.URLField(max_length=1024, blank=True, null=True)
     
     # Processing status
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')

@@ -97,6 +97,13 @@ def upload_medicine_image(request):
             status='processing'
         )
         
+        # Store the Supabase public URL for the uploaded image
+        try:
+            identification.supabase_image_url = identification.image.url
+            identification.save(update_fields=['supabase_image_url'])
+        except Exception as e:
+            print(f"Warning: Could not get Supabase URL for medicine image: {e}")
+        
         # Process the image
         try:
             start_time = time.time()

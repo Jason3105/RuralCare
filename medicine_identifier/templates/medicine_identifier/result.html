@@ -38,7 +38,9 @@
                 <!-- Medicine Image -->
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden fade-in">
                     <div class="aspect-square bg-gray-100 dark:bg-gray-700 relative">
-                        {% if identification.image %}
+                        {% if identification.supabase_image_url %}
+                        <img src="{{ identification.supabase_image_url }}" alt="Medicine Image" class="w-full h-full object-contain">
+                        {% elif identification.image %}
                         <img src="{{ identification.image.url }}" alt="Medicine Image" class="w-full h-full object-contain">
                         {% else %}
                         <div class="w-full h-full flex items-center justify-center">
@@ -373,11 +375,11 @@
                     {% endif %}
                     
                     <!-- Show uploaded image -->
-                    {% if identification.image %}
+                    {% if identification.supabase_image_url or identification.image %}
                     <div class="mb-6">
                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Uploaded image:</p>
                         <div class="inline-block p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                            <img src="{{ identification.image.url }}" alt="Uploaded Image" class="max-w-xs max-h-48 object-contain rounded opacity-60">
+                            <img src="{{ identification.supabase_image_url|default:identification.image.url }}" alt="Uploaded Image" class="max-w-xs max-h-48 object-contain rounded opacity-60">
                         </div>
                     </div>
                     {% endif %}
