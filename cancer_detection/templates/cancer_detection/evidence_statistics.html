@@ -1,0 +1,649 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Evidence Statistics{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4 sm:p-6 lg:p-8">
+    <div class="max-w-5xl mx-auto">
+        <!-- Back Link -->
+        <div class="mb-6">
+            <a href="javascript:history.back()" class="inline-flex items-center text-primary hover:text-primary/80 transition-colors text-sm font-medium">
+                <i class="fas fa-arrow-left mr-2"></i> Back
+            </a>
+        </div>
+        
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-primary to-primary/80 dark:from-primary/80 dark:to-primary/60 rounded-lg p-8 text-primary-foreground mb-8 shadow-lg">
+            <h1 class="text-3xl sm:text-4xl font-bold mb-3 flex items-center gap-3">
+                <i class="fas fa-chart-bar"></i> Evidence Statistics
+            </h1>
+            <p class="text-primary-foreground/90 text-lg">Comprehensive overview of evidence for this treatment plan</p>
+        </div>
+        
+        <!-- Key Metrics Stats Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 rounded-lg p-6 text-white shadow-lg">
+                <div class="text-sm font-medium opacity-90 mb-2">Total Recommendations</div>
+                <div class="text-3xl font-bold">{{ total_recommendations }}</div>
+            </div>
+            
+            <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-700 rounded-lg p-6 text-white shadow-lg">
+                <div class="text-sm font-medium opacity-90 mb-2">High Strength</div>
+                <div class="text-3xl font-bold">{{ high_strength_count }}</div>
+            </div>
+            
+            <div class="bg-gradient-to-br from-amber-500 to-amber-600 dark:from-amber-600 dark:to-amber-700 rounded-lg p-6 text-white shadow-lg">
+                <div class="text-sm font-medium opacity-90 mb-2">Moderate Strength</div>
+                <div class="text-3xl font-bold">{{ moderate_strength_count }}</div>
+            </div>
+            
+            <div class="bg-gradient-to-br from-red-500 to-red-600 dark:from-red-600 dark:to-red-700 rounded-lg p-6 text-white shadow-lg">
+                <div class="text-sm font-medium opacity-90 mb-2">Low Strength</div>
+                <div class="text-3xl font-bold">{{ low_strength_count }}</div>
+            </div>
+        </div>
+        
+        <!-- Evidence Distribution Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Strength Distribution -->
+            <div class="bg-card border border-border rounded-lg p-6 shadow-sm">
+                <h3 class="text-xl font-bold text-foreground mb-6 flex items-center gap-2">
+                    <i class="fas fa-chart-line text-primary"></i> Evidence Strength Distribution
+                </h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-foreground">High</span>
+                            <span class="text-xs font-semibold px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded">
+                                {{ high_strength_percentage|floatformat:0 }}%
+                            </span>
+                        </div>
+                        <div class="w-full bg-background rounded-full h-3 overflow-hidden border border-border/50">
+                            <div class="bg-emerald-500 h-full rounded-full transition-all duration-500"
+                                 style="width: {{ high_strength_percentage|floatformat:0 }}%">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-foreground">Moderate</span>
+                            <span class="text-xs font-semibold px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded">
+                                {{ moderate_strength_percentage|floatformat:0 }}%
+                            </span>
+                        </div>
+                        <div class="w-full bg-background rounded-full h-3 overflow-hidden border border-border/50">
+                            <div class="bg-amber-500 h-full rounded-full transition-all duration-500"
+                                 style="width: {{ moderate_strength_percentage|floatformat:0 }}%">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-foreground">Low</span>
+                            <span class="text-xs font-semibold px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded">
+                                {{ low_strength_percentage|floatformat:0 }}%
+                            </span>
+                        </div>
+                        <div class="w-full bg-background rounded-full h-3 overflow-hidden border border-border/50">
+                            <div class="bg-red-500 h-full rounded-full transition-all duration-500"
+                                 style="width: {{ low_strength_percentage|floatformat:0 }}%">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Evidence Type Breakdown -->
+            <div class="bg-card border border-border rounded-lg p-6 shadow-sm">
+                <h3 class="text-xl font-bold text-foreground mb-6 flex items-center gap-2">
+                    <i class="fas fa-layer-group text-primary"></i> Evidence Type Breakdown
+                </h3>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-900/50 rounded-lg p-4 text-center">
+                        <div class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">{{ guidelines_count }}</div>
+                        <div class="text-sm font-semibold text-blue-900 dark:text-blue-300">Clinical Guidelines</div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20 border border-emerald-200 dark:border-emerald-900/50 rounded-lg p-4 text-center">
+                        <div class="text-3xl font-bold text-emerald-600 dark:text-emerald-400 mb-1">{{ studies_count }}</div>
+                        <div class="text-sm font-semibold text-emerald-900 dark:text-emerald-300">PubMed Studies</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- User Feedback Section -->
+        <div class="bg-card border border-border rounded-lg p-6 shadow-sm mb-8">
+            <h3 class="text-xl font-bold text-foreground mb-6 flex items-center gap-2">
+                <i class="fas fa-thumbs-up text-primary"></i> User Feedback
+            </h3>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <div class="text-center p-4 bg-background/50 dark:bg-background/30 rounded-lg border border-border/50">
+                    <div class="text-3xl font-bold text-primary mb-1">{{ total_views }}</div>
+                    <div class="text-sm font-semibold text-muted-foreground">Total Views</div>
+                </div>
+                
+                <div class="text-center p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-900/50">
+                    <div class="text-3xl font-bold text-emerald-600 dark:text-emerald-400 mb-1">{{ helpful_count }}</div>
+                    <div class="text-sm font-semibold text-emerald-900 dark:text-emerald-300">Marked Helpful</div>
+                </div>
+                
+                <div class="text-center p-4 bg-background/50 dark:bg-background/30 rounded-lg border border-border/50">
+                    <div class="text-3xl font-bold text-primary mb-1">{{ helpful_percentage|floatformat:0 }}%</div>
+                    <div class="text-sm font-semibold text-muted-foreground">Helpful Rate</div>
+                </div>
+            </div>
+            
+            <div class="w-full bg-background rounded-lg h-2 overflow-hidden border border-border/50">
+                <div class="bg-gradient-to-r from-emerald-500 to-primary h-full rounded-lg transition-all duration-500"
+                     style="width: {{ helpful_percentage|floatformat:0 }}%">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Access History -->
+        <div class="bg-card border border-border rounded-lg p-6 shadow-sm mb-8">
+            <h3 class="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                <i class="fas fa-history text-primary"></i> Recent Access
+            </h3>
+            
+            {% if recent_access %}
+            <div class="space-y-3 max-h-64 overflow-y-auto">
+                {% for log_entry in recent_access %}
+                <div class="flex items-start justify-between pb-3 border-b border-border/50 last:border-b-0">
+                    <div>
+                        <div class="text-sm font-semibold text-foreground flex items-center gap-2">
+                            {% if log_entry.was_helpful %}
+                                <i class="fas fa-check-circle text-emerald-500"></i>
+                            {% else %}
+                                <i class="fas fa-times-circle text-red-500"></i>
+                            {% endif %}
+                            {{ log_entry.accessed_at|date:"M d, Y H:i" }}
+                        </div>
+                        {% if log_entry.user_feedback %}
+                        <p class="text-xs text-muted-foreground mt-1 italic">{{ log_entry.user_feedback|truncatewords:15 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted-foreground text-sm">No access history available yet.</p>
+            {% endif %}
+        </div>
+        
+        <!-- Summary Narrative -->
+        <div class="bg-gradient-to-r from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 border border-primary/30 rounded-lg p-6 mb-8">
+            <h3 class="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                <i class="fas fa-book-reader text-primary"></i> Summary
+            </h3>
+            
+            <p class="text-muted-foreground leading-relaxed">
+                This treatment plan includes <strong>{{ total_recommendations }}</strong> recommendations backed by <strong>{{ total_sources }}</strong> clinical sources. 
+                The evidence base consists of <strong>{{ guidelines_count }}</strong> clinical guidelines and <strong>{{ studies_count }}</strong> peer-reviewed studies. 
+                {% if helpful_percentage >= 80 %}
+                    Users have found <strong>{{ helpful_percentage|floatformat:0 }}%</strong> of explanations helpful, indicating strong clinical relevance and clarity.
+                {% elif helpful_percentage >= 60 %}
+                    User feedback shows <strong>{{ helpful_percentage|floatformat:0 }}%</strong> found explanations helpful, with room for improvement in presentation.
+                {% else %}
+                    Continued refinement of evidence presentations may help improve user understanding.
+                {% endif %}
+            </p>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <a href="javascript:history.back()" 
+               class="inline-flex items-center justify-center px-6 py-3 bg-card border border-primary/30 rounded-lg hover:bg-accent/50 transition-colors text-foreground font-medium">
+                <i class="fas fa-arrow-left mr-2"></i> Back
+            </a>
+            <a href="{% url 'cancer_detection:evidence_audit_trail' treatment_plan_id %}" 
+               class="inline-flex items-center justify-center px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors font-medium">
+                <i class="fas fa-history mr-2"></i> Audit Trail
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+    .container {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 0 15px;
+    }
+    
+    .header-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+    }
+    
+    .header-section h1 {
+        margin: 0;
+        font-size: 1.8em;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 25px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        text-align: center;
+        border-top: 4px solid #3498db;
+    }
+    
+    .stat-card.high {
+        border-top-color: #27ae60;
+    }
+    
+    .stat-card.moderate {
+        border-top-color: #f39c12;
+    }
+    
+    .stat-card.low {
+        border-top-color: #e74c3c;
+    }
+    
+    .stat-number {
+        font-size: 2.5em;
+        font-weight: bold;
+        color: #2c3e50;
+        margin: 10px 0;
+    }
+    
+    .stat-label {
+        font-size: 0.95em;
+        color: #7f8c8d;
+        font-weight: 600;
+    }
+    
+    .section-card {
+        background: white;
+        padding: 25px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+    
+    .section-title {
+        font-size: 1.3em;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #ecf0f1;
+    }
+    
+    .chart-container {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 4px;
+        margin: 15px 0;
+    }
+    
+    .bar-chart {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin: 15px 0;
+    }
+    
+    .bar-item {
+        text-align: center;
+    }
+    
+    .bar {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        height: 100px;
+        border-radius: 4px;
+        margin: 10px 0;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 1.1em;
+    }
+    
+    .bar-label {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 0.9em;
+        margin-top: 8px;
+    }
+    
+    .feedback-stat {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 4px;
+        margin: 10px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .feedback-label {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .feedback-value {
+        background: white;
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-size: 1.1em;
+        font-weight: bold;
+        color: #3498db;
+    }
+    
+    .progress-bar {
+        background: #ecf0f1;
+        height: 25px;
+        border-radius: 12px;
+        overflow: hidden;
+        margin: 10px 0;
+    }
+    
+    .progress-fill {
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        height: 100%;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 0.85em;
+    }
+    
+    .evidence-type-breakdown {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin: 15px 0;
+    }
+    
+    .type-item {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 15px;
+        border-radius: 4px;
+        border-left: 4px solid #3498db;
+    }
+    
+    .type-item.guideline {
+        border-left-color: #3498db;
+    }
+    
+    .type-item.study {
+        border-left-color: #27ae60;
+    }
+    
+    .type-item.rule {
+        border-left-color: #e67e22;
+    }
+    
+    .type-icon {
+        font-size: 1.5em;
+        margin-bottom: 8px;
+    }
+    
+    .type-name {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .type-count {
+        font-size: 1.4em;
+        font-weight: bold;
+        color: #3498db;
+        margin: 8px 0;
+    }
+    
+    .audit-log-item {
+        background: #f8f9fa;
+        padding: 12px;
+        border-left: 3px solid #3498db;
+        margin: 8px 0;
+        border-radius: 4px;
+    }
+    
+    .audit-timestamp {
+        font-size: 0.85em;
+        color: #7f8c8d;
+    }
+    
+    .audit-action {
+        color: #2c3e50;
+        font-weight: 500;
+    }
+    
+    .back-button {
+        display: inline-block;
+        margin-bottom: 20px;
+        padding: 10px 20px;
+        background-color: #95a5a6;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: 600;
+        transition: background-color 0.3s;
+    }
+    
+    .back-button:hover {
+        background-color: #7f8c8d;
+    }
+    
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .bar-chart {
+            grid-template-columns: 1fr;
+        }
+        
+        .evidence-type-breakdown {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <a href="{% url 'cancer_detection:treatment_plan_with_evidence' treatment_plan.id %}" class="back-button">
+        ← Back to Treatment Plan
+    </a>
+    
+    <!-- Header -->
+    <div class="header-section">
+        <h1>📊 Evidence Statistics</h1>
+        <p style="margin: 10px 0 0 0; opacity: 0.9;">Comprehensive overview of evidence for this treatment plan</p>
+    </div>
+    
+    <!-- Key Metrics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Total Recommendations</div>
+            <div class="stat-number">{{ total_recommendations }}</div>
+        </div>
+        
+        <div class="stat-card high">
+            <div class="stat-label">High Strength Evidence</div>
+            <div class="stat-number">{{ high_strength }}</div>
+        </div>
+        
+        <div class="stat-card moderate">
+            <div class="stat-label">Moderate Strength Evidence</div>
+            <div class="stat-number">{{ moderate_strength }}</div>
+        </div>
+        
+        <div class="stat-card low">
+            <div class="stat-label">Low Strength Evidence</div>
+            <div class="stat-number">{{ low_strength }}</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-label">Total Evidence Sources</div>
+            <div class="stat-number">{{ all_links }}</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-label">Helpful Feedback</div>
+            <div class="stat-number">{{ feedback_percentage|floatformat:0 }}%</div>
+        </div>
+    </div>
+    
+    <!-- Evidence Strength Distribution -->
+    <div class="section-card">
+        <div class="section-title">📈 Evidence Strength Distribution</div>
+        
+        <div class="chart-container">
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {% widthratio high_strength total_recommendations 100 %}%;">
+                    High: {{ high_strength }}
+                </div>
+            </div>
+            <div style="font-size: 0.9em; color: #7f8c8d; margin: 5px 0;">
+                {% widthratio high_strength total_recommendations 100 %}% - High Strength
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {% widthratio moderate_strength total_recommendations 100 %}%; background: linear-gradient(90deg, #f39c12 0%, #e67e22 100%);">
+                    Moderate: {{ moderate_strength }}
+                </div>
+            </div>
+            <div style="font-size: 0.9em; color: #7f8c8d; margin: 5px 0;">
+                {% widthratio moderate_strength total_recommendations 100 %}% - Moderate Strength
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {% widthratio low_strength total_recommendations 100 %}%; background: linear-gradient(90deg, #e74c3c 0%, #c0392b 100%);">
+                    Low: {{ low_strength }}
+                </div>
+            </div>
+            <div style="font-size: 0.9em; color: #7f8c8d; margin: 5px 0;">
+                {% widthratio low_strength total_recommendations 100 %}% - Low Strength
+            </div>
+        </div>
+    </div>
+    
+    <!-- Evidence Type Breakdown -->
+    <div class="section-card">
+        <div class="section-title">📚 Evidence Type Breakdown</div>
+        
+        <div class="evidence-type-breakdown">
+            <div class="type-item guideline">
+                <div class="type-icon">📋</div>
+                <div class="type-name">Clinical Guidelines</div>
+                <div class="type-count">{{ guideline_refs }}</div>
+            </div>
+            
+            <div class="type-item study">
+                <div class="type-icon">📚</div>
+                <div class="type-name">PubMed Studies</div>
+                <div class="type-count">{{ pubmed_refs }}</div>
+            </div>
+            
+            <div class="type-item">
+                <div class="type-icon">📌</div>
+                <div class="type-name">Total Sources</div>
+                <div class="type-count">{{ all_links }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- User Feedback -->
+    <div class="section-card">
+        <div class="section-title">💬 User Feedback</div>
+        
+        <div class="feedback-stat">
+            <div class="feedback-label">Total Views</div>
+            <div class="feedback-value">{{ total_views }}</div>
+        </div>
+        
+        <div class="feedback-stat">
+            <div class="feedback-label">Marked as Helpful</div>
+            <div class="feedback-value" style="color: #27ae60;">
+                {{ helpful_percentage|floatformat:0 }}%
+            </div>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: {{ feedback_percentage }}%; background: linear-gradient(90deg, #27ae60 0%, #229954 100%);">
+                {{ feedback_percentage|floatformat:0 }}% Helpful
+            </div>
+        </div>
+    </div>
+    
+    <!-- Explanation History -->
+    <div class="section-card">
+        <div class="section-title">📝 Recent Access History</div>
+        
+        {% if explanation_logs %}
+            <div style="max-height: 500px; overflow-y: auto;">
+                {% for log in explanation_logs %}
+                <div class="audit-log-item">
+                    <div class="audit-timestamp">
+                        {{ log.created_at|date:"M d, Y H:i" }}
+                    </div>
+                    <div class="audit-action">
+                        {% if log.was_helpful %}
+                            ✓ Marked as helpful
+                        {% elif log.was_helpful == False %}
+                            ✗ Not helpful
+                        {% else %}
+                            Viewed
+                        {% endif %}
+                        {% if log.user %}
+                            by {{ log.user.first_name }} {{ log.user.last_name }}
+                        {% endif %}
+                    </div>
+                    {% if log.user_feedback %}
+                    <div style="font-size: 0.85em; color: #7f8c8d; margin-top: 5px; font-style: italic;">
+                        "{{ log.user_feedback }}"
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p style="color: #7f8c8d;">No access history available.</p>
+        {% endif %}
+    </div>
+    
+    <!-- Summary -->
+    <div class="section-card" style="background: linear-gradient(135deg, #e8f4f8 0%, #c3e2f0 100%); border-left: 4px solid #3498db;">
+        <div class="section-title" style="border-bottom-color: rgba(0,0,0,0.1);">ℹ️ Summary</div>
+        
+        <div style="color: #34495e; line-height: 1.8;">
+            <p>
+                This treatment plan includes <strong>{{ total_recommendations }}</strong> recommendations,
+                with <strong>{{ high_strength }}</strong> backed by high-strength evidence
+                and <strong>{{ moderate_strength }}</strong> by moderate-strength evidence.
+                In total, <strong>{{ all_links }}</strong> clinical evidence sources
+                ({{ guideline_refs }} guidelines and {{ pubmed_refs }} PubMed studies)
+                support these recommendations.
+            </p>
+            <p>
+                User feedback indicates that {{ feedback_percentage|floatformat:0 }}% of explanation views
+                were found helpful, showing high satisfaction with the evidence documentation.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

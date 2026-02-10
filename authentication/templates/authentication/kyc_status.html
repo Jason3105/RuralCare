@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+
+{% block title %}KYC Status{% endblock %}
+
+{% block content %}
+<div class="fade-in min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="mb-10">
+            <h1 class="text-4xl sm:text-5xl font-bold text-foreground mb-3">KYC Verification Status</h1>
+            <p class="text-lg text-muted-foreground">Track your KYC verification progress</p>
+        </div>
+
+        {% if kyc %}
+            <!-- Status Card -->
+            <div class="mb-8">
+                {% if kyc.status == 'approved' %}
+                    <div class="bg-green-500/10 border border-green-500/30 rounded-2xl p-8 sm:p-10">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-check-circle text-2xl text-green-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-green-900 dark:text-green-200">KYC Approved ✓</h3>
+                                <p class="text-green-800 dark:text-green-300 mt-2">Your KYC verification has been approved. You can now access all features of your doctor account.</p>
+                                {% if kyc.verified_at %}
+                                <p class="text-sm text-green-700 dark:text-green-400 mt-3 flex items-center"><i class="fas fa-calendar mr-2"></i>Verified on: {{ kyc.verified_at|date:"M d, Y" }}</p>
+                                {% endif %}
+                                {% if kyc.verified_by %}
+                                <p class="text-sm text-green-700 dark:text-green-400 flex items-center"><i class="fas fa-user-check mr-2"></i>Verified by: {{ kyc.verified_by }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                
+                {% elif kyc.status == 'pending' %}
+                    <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-2xl p-8 sm:p-10">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 bg-yellow-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-hourglass-half text-2xl text-yellow-600 animate-pulse"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-yellow-900 dark:text-yellow-200">KYC Under Review</h3>
+                                <p class="text-yellow-800 dark:text-yellow-300 mt-2">Your KYC application is currently under review by our team. This typically takes 3-5 business days.</p>
+                                {% if kyc.submitted_at %}
+                                <p class="text-sm text-yellow-700 dark:text-yellow-400 mt-3 flex items-center"><i class="fas fa-calendar mr-2"></i>Submitted on: {{ kyc.submitted_at|date:"M d, Y" }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                
+                {% elif kyc.status == 'rejected' %}
+                    <div class="bg-red-500/10 border border-red-500/30 rounded-2xl p-8 sm:p-10">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-times-circle text-2xl text-red-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-red-900 dark:text-red-200">KYC Rejected</h3>
+                                <p class="text-red-800 dark:text-red-300 mt-2">Your KYC application has been rejected. Please review the reason below and resubmit:</p>
+                                {% if kyc.rejection_reason %}
+                                <div class="mt-4 p-4 bg-red-500/20 border border-red-500/30 rounded-xl">
+                                    <p class="text-red-900 dark:text-red-200"><strong>Reason:</strong><br>{{ kyc.rejection_reason }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                
+                {% else %}
+                    <div class="bg-primary/10 border border-primary/30 rounded-2xl p-8 sm:p-10">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-exclamation-circle text-2xl text-primary"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-foreground">KYC Incomplete</h3>
+                                <p class="text-muted-foreground mt-2">Your KYC application is incomplete. Please complete and submit to proceed.</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- KYC Details -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">Submitted Information</h2>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Personal Information -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-gray-900 mb-3">Personal Information</h3>
+                        <div class="space-y-2 text-sm">
+                            <p><span class="font-semibold text-gray-700">Name:</span> {{ kyc.full_name }}</p>
+                            <p><span class="font-semibold text-gray-700">DOB:</span> {{ kyc.date_of_birth|date:"M d, Y" }}</p>
+                            <p><span class="font-semibold text-gray-700">Gender:</span> {{ kyc.get_gender_display }}</p>
+                            <p><span class="font-semibold text-gray-700">Nationality:</span> {{ kyc.nationality }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-gray-900 mb-3">Contact Information</h3>
+                        <div class="space-y-2 text-sm">
+                            <p><span class="font-semibold text-gray-700">Email:</span> {{ kyc.personal_email }}</p>
+                            <p><span class="font-semibold text-gray-700">Phone:</span> {{ kyc.mobile_number }}</p>
+                            <p><span class="font-semibold text-gray-700">City:</span> {{ kyc.city }}</p>
+                            <p><span class="font-semibold text-gray-700">Country:</span> {{ kyc.country }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Medical License -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-gray-900 mb-3">Medical License</h3>
+                        <div class="space-y-2 text-sm">
+                            <p><span class="font-semibold text-gray-700">License No:</span> {{ kyc.license_number_verified }}</p>
+                            <p><span class="font-semibold text-gray-700">Authority:</span> {{ kyc.license_issuing_authority }}</p>
+                            <p><span class="font-semibold text-gray-700">Issue Date:</span> {{ kyc.license_issue_date|date:"M d, Y" }}</p>
+                            <p><span class="font-semibold text-gray-700">Expiry Date:</span> {{ kyc.license_expiry_date|date:"M d, Y" }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Education -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-gray-900 mb-3">Education</h3>
+                        <div class="space-y-2 text-sm">
+                            <p><span class="font-semibold text-gray-700">Degree:</span> {{ kyc.medical_degree }}</p>
+                            <p><span class="font-semibold text-gray-700">University:</span> {{ kyc.medical_university }}</p>
+                            <p><span class="font-semibold text-gray-700">Graduation Year:</span> {{ kyc.graduation_year }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Professional Info -->
+                    <div class="bg-gray-50 p-4 rounded-lg md:col-span-2">
+                        <h3 class="font-semibold text-gray-900 mb-3">Professional Information</h3>
+                        <div class="space-y-2 text-sm">
+                            <p><span class="font-semibold text-gray-700">Designation:</span> {{ kyc.designation }}</p>
+                            <p><span class="font-semibold text-gray-700">Specialty:</span> {{ kyc.department_specialty }}</p>
+                            <p><span class="font-semibold text-gray-700">Years of Practice:</span> {{ kyc.years_of_practice }}</p>
+                            {% if kyc.current_hospital %}
+                            <p><span class="font-semibold text-gray-700">Current Hospital:</span> {{ kyc.current_hospital }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documents Uploaded -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">Documents Submitted</h2>
+                
+                <div class="grid md:grid-cols-2 gap-4">
+                    {% if kyc.license_document %}
+                    <div class="p-4 border rounded-lg flex items-center justify-between bg-green-50">
+                        <div class="flex items-center">
+                            <svg class="h-6 w-6 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <div>
+                                <p class="font-semibold text-gray-900">License Certificate</p>
+                                <p class="text-xs text-gray-600">Uploaded</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if kyc.degree_certificate %}
+                    <div class="p-4 border rounded-lg flex items-center justify-between bg-green-50">
+                        <div class="flex items-center">
+                            <svg class="h-6 w-6 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <div>
+                                <p class="font-semibold text-gray-900">Degree Certificate</p>
+                                <p class="text-xs text-gray-600">Uploaded</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if kyc.employment_document %}
+                    <div class="p-4 border rounded-lg flex items-center justify-between bg-green-50">
+                        <div class="flex items-center">
+                            <svg class="h-6 w-6 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <div>
+                                <p class="font-semibold text-gray-900">Employment Document</p>
+                                <p class="text-xs text-gray-600">Uploaded</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if kyc.identity_document_file %}
+                    <div class="p-4 border rounded-lg flex items-center justify-between bg-green-50">
+                        <div class="flex items-center">
+                            <svg class="h-6 w-6 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <div>
+                                <p class="font-semibold text-gray-900">Identity Document</p>
+                                <p class="text-xs text-gray-600">Uploaded</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if kyc.address_proof_file %}
+                    <div class="p-4 border rounded-lg flex items-center justify-between bg-green-50">
+                        <div class="flex items-center">
+                            <svg class="h-6 w-6 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <div>
+                                <p class="font-semibold text-gray-900">Address Proof</p>
+                                <p class="text-xs text-gray-600">Uploaded</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-4 pt-8 border-t">
+                {% if kyc.status != 'approved' %}
+                <a href="{% url 'kyc_form' %}" class="px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition duration-200">
+                    {% if kyc.status == 'rejected' %}Edit & Resubmit{% else %}Edit Application{% endif %}
+                </a>
+                {% endif %}
+                <a href="{% url 'doctor_dashboard' %}" class="px-8 py-3 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg transition duration-200">
+                    Back to Dashboard
+                </a>
+            </div>
+
+        {% else %}
+            <!-- No KYC Found -->
+            <div class="text-center py-12">
+                <svg class="h-16 w-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m7 7a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">No KYC Application Found</h3>
+                <p class="text-gray-600 mb-6">You haven't submitted a KYC application yet. Please complete your KYC to activate your doctor account.</p>
+                <a href="{% url 'kyc_form' %}" class="px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition duration-200 inline-block">
+                    Start KYC Verification
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

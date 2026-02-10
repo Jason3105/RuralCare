@@ -1,0 +1,422 @@
+{% extends 'base.html' %}
+
+{% block title %}Patient QR Code - {{ user.first_name }} {{ user.last_name }}{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Header -->
+    <div class="mb-8">
+        <a href="{% url 'patient_dashboard' %}" class="text-primary hover:text-primary/80 text-sm font-semibold inline-flex items-center mb-4">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+        </a>
+        <h1 class="text-3xl md:text-4xl font-bold text-foreground">Your QR Code</h1>
+        <p class="text-muted-foreground mt-2">Share securely with doctors for instant access to your medical profile</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Left Column - QR Code Display -->
+        <div class="lg:col-span-2">
+            <!-- QR Code Card -->
+            <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+                <div class="flex flex-col items-center">
+                    <!-- QR Code Image -->
+                    {% if qr_code %}
+                        {% if qr_code.qr_code_image or qr_code.encrypted_token %}
+                            <div class="bg-white p-6 rounded-xl border-2 border-primary/20 mb-6 shadow-lg">
+                                <img src="{% url 'serve_qr_image' %}" alt="Patient QR Code" class="w-64 h-64 object-contain" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'text-center p-12\'><i class=\'fas fa-exclamation-triangle text-4xl text-yellow-600 mb-4\'></i><p class=\'text-muted-foreground\'>QR code image not found. Please regenerate.</p></div>'">
+                            </div>
+                            <p class="text-sm text-muted-foreground text-center mb-6">Scan this code with a doctor's device to share your medical profile instantly</p>
+                        {% else %}
+                            <div class="bg-muted/50 rounded-xl border-2 border-dashed border-border p-12 mb-6 text-center">
+                                <i class="fas fa-qrcode text-5xl text-muted-foreground/50 mb-4 inline-block"></i>
+                                <p class="text-muted-foreground mb-4">QR code image not available</p>
+                                <form method="POST" action="{% url 'regenerate_qr_code' %}" class="inline-block">
+                                    {% csrf_token %}
+                                    <button type="submit" class="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg transition-all">
+                                        <i class="fas fa-sync-alt mr-2"></i>Generate QR Code
+                                    </button>
+                                </form>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="bg-muted/50 rounded-xl border-2 border-dashed border-border p-12 mb-6 text-center">
+                            <i class="fas fa-qrcode text-5xl text-muted-foreground/50 mb-4 inline-block"></i>
+                            <p class="text-muted-foreground mb-4">No QR code generated yet</p>
+                            <button onclick="location.reload()" class="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg transition-all">
+                                <i class="fas fa-plus mr-2"></i>Create QR Code
+                            </button>
+                        </div>
+                    {% endif %}
+
+                    <!-- Status Badge -->
+                    <div class="flex items-center gap-3 mb-8">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold
+                            {% if qr_code.is_active and qr_code.status == 'active' %}
+                                bg-green-500/20 text-green-700 dark:text-green-400
+                            {% elif qr_code.status == 'inactive' %}
+                                bg-red-500/20 text-red-700 dark:text-red-400
+                            {% else %}
+                                bg-yellow-500/20 text-yellow-700 dark:text-yellow-400
+                            {% endif %}
+                        ">
+                            <i class="fas fa-circle text-xs mr-2"></i>
+                            {% if qr_code.is_active and qr_code.status == 'active' %}
+                                Active & Scannable
+                            {% elif qr_code.status == 'inactive' %}
+                                Disabled
+                            {% else %}
+                                {{ qr_code.get_status_display }}
+                            {% endif %}
+                        </span>
+                        
+                        {% if qr_code.expires_at %}
+                        <span class="text-xs text-muted-foreground">
+                            Expires: {{ qr_code.expires_at|date:"M d, Y" }}
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Details -->
+                    {% if qr_code %}
+                    <div class="w-full grid grid-cols-2 gap-4 mb-8 p-4 bg-muted/30 rounded-lg">
+                        <div>
+                            <p class="text-xs text-muted-foreground uppercase tracking-wide">
+                                {% if qr_code.regenerated_at %}Regenerated{% else %}Created{% endif %}
+                            </p>
+                            <p class="font-semibold text-foreground">
+                                {% if qr_code.regenerated_at %}
+                                    {{ qr_code.regenerated_at|date:"M d, Y" }}
+                                {% else %}
+                                    {{ qr_code.created_at|date:"M d, Y" }}
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-muted-foreground uppercase tracking-wide">Last Scanned</p>
+                            <p class="font-semibold text-foreground">
+                                {% if qr_code.last_scanned_at %}
+                                    {{ qr_code.last_scanned_at|timesince }} ago
+                                {% else %}
+                                    Never
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-muted-foreground uppercase tracking-wide">Total Scans</p>
+                            <p class="font-semibold text-foreground">{{ total_scans }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-muted-foreground uppercase tracking-wide">Last By</p>
+                            <p class="font-semibold text-foreground text-sm">
+                                {% if qr_code.last_scanned_by %}
+                                    Dr. {{ qr_code.last_scanned_by.first_name|default:qr_code.last_scanned_by.username }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Action Buttons -->
+                    <div class="w-full space-y-3">
+                        <button class="w-full bg-gradient-to-r from-primary to-primary/90 hover:shadow-lg text-primary-foreground px-6 py-3 rounded-lg transition-all duration-300 font-semibold flex items-center justify-center group hover:scale-105" onclick="downloadQRCode()">
+                            <i class="fas fa-download mr-2 group-hover:translate-y-1 transition-transform"></i>
+                            Download QR Code
+                        </button>
+
+                        <button class="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-all duration-300 font-semibold flex items-center justify-center group hover:scale-105" onclick="copyToClipboard()">
+                            <i class="fas fa-copy mr-2"></i>
+                            Copy to Share
+                        </button>
+
+                        {% if qr_code and qr_code.is_active %}
+                        <form method="POST" action="{% url 'disable_qr_code' %}" class="w-full">
+                            {% csrf_token %}
+                            <button type="submit" class="w-full bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg transition-all duration-300 font-semibold flex items-center justify-center group hover:scale-105" onclick="return confirm('Disable this QR code? Doctors won\'t be able to scan it until re-enabled.')">
+                                <i class="fas fa-ban mr-2"></i>
+                                Disable QR Code
+                            </button>
+                        </form>
+                        {% elif qr_code and not qr_code.is_active %}
+                        <form method="POST" action="{% url 'enable_qr_code' %}" class="w-full">
+                            {% csrf_token %}
+                            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-all duration-300 font-semibold flex items-center justify-center group hover:scale-105">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                Re-enable QR Code
+                            </button>
+                        </form>
+                        {% endif %}
+
+                        <form method="POST" action="{% url 'regenerate_qr_code' %}" class="w-full">
+                            {% csrf_token %}
+                            <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg transition-all duration-300 font-semibold flex items-center justify-center group hover:scale-105" onclick="return confirm('Regenerate QR code? This will invalidate the previous code and create a new one.')">
+                                <i class="fas fa-sync-alt mr-2"></i>
+                                Regenerate Code
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Info -->
+            <div class="bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/30 rounded-2xl p-6 mt-8">
+                <h3 class="text-lg font-bold text-foreground mb-3 flex items-center">
+                    <i class="fas fa-shield-alt mr-2 text-blue-600 dark:text-blue-400"></i>
+                    Security Features
+                </h3>
+                <ul class="space-y-2 text-sm text-muted-foreground">
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-600 dark:text-green-400 mr-3 mt-0.5 flex-shrink-0"></i>
+                        <span>Encrypted token - doesn't contain your patient ID</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-600 dark:text-green-400 mr-3 mt-0.5 flex-shrink-0"></i>
+                        <span>Only authenticated doctors can view your profile</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-600 dark:text-green-400 mr-3 mt-0.5 flex-shrink-0"></i>
+                        <span>Every scan is logged and audited</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-600 dark:text-green-400 mr-3 mt-0.5 flex-shrink-0"></i>
+                        <span>You can disable or regenerate your code anytime</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Right Column - Scan History -->
+        <div>
+            <!-- Scan Analytics Card -->
+            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm mb-6">
+                <h3 class="text-lg font-bold text-foreground mb-4 flex items-center">
+                    <i class="fas fa-history mr-2 text-primary"></i>
+                    Recent Scans
+                </h3>
+
+                {% if scan_logs %}
+                <div class="space-y-4">
+                    {% for log in scan_logs %}
+                    <div class="border border-border/20 rounded-lg p-4 hover:border-primary/50 transition-all">
+                        <div class="flex items-start justify-between mb-2">
+                            <div class="flex-1">
+                                <p class="font-semibold text-foreground text-sm">
+                                    {% if log.scanned_by %}
+                                        Dr. {{ log.scanned_by.first_name|default:log.scanned_by.username }}
+                                    {% else %}
+                                        Unknown Doctor
+                                    {% endif %}
+                                </p>
+                                <p class="text-xs text-muted-foreground">{{ log.scan_timestamp|timesince }} ago</p>
+                            </div>
+                            {% if log.access_granted %}
+                            <span class="bg-green-500/20 text-green-700 dark:text-green-400 text-xs px-2.5 py-1 rounded-full font-semibold">
+                                <i class="fas fa-check-circle mr-1"></i> Accessed
+                            </span>
+                            {% else %}
+                            <span class="bg-red-500/20 text-red-700 dark:text-red-400 text-xs px-2.5 py-1 rounded-full font-semibold">
+                                <i class="fas fa-times-circle mr-1"></i> Denied
+                            </span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Blockchain Status (show if tx_hash exists, even if pending) -->
+                        {% if log.blockchain_tx_hash %}
+                        <div class="mt-3 pt-3 border-t border-border/10" id="blockchain-status-{{ log.id }}" {% if not log.blockchain_block_number %}data-pending-tx="{{ log.blockchain_tx_hash }}" data-log-id="{{ log.id }}"{% endif %}>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <i class="fab fa-ethereum text-primary text-sm"></i>
+                                    {% if log.blockchain_block_number %}
+                                        <span class="text-xs font-semibold text-green-700 dark:text-green-400 blockchain-status-text">
+                                            <i class="fas fa-check-circle mr-1"></i>Blockchain Confirmed
+                                        </span>
+                                    {% else %}
+                                        <span class="text-xs font-semibold text-blue-600 dark:text-blue-400 blockchain-status-text">
+                                            <i class="fas fa-clock mr-1"></i>Transaction Pending
+                                        </span>
+                                        <span class="text-xs text-muted-foreground checking-indicator ml-2"></span>
+                                    {% endif %}
+                                </div>
+                                <a href="https://sepolia.etherscan.io/tx/{% if log.blockchain_tx_hash|slice:':2' == '0x' %}{{ log.blockchain_tx_hash }}{% else %}0x{{ log.blockchain_tx_hash }}{% endif %}" 
+                                   target="_blank"
+                                   class="text-xs text-primary hover:text-primary/80 font-semibold">
+                                    <i class="fas fa-external-link-alt mr-1"></i>View on Etherscan
+                                </a>
+                            </div>
+                            {% if log.blockchain_block_number %}
+                            <div class="mt-2 text-xs text-muted-foreground block-info">
+                                Block #{{ log.blockchain_block_number }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        {% if log.denial_reason %}
+                        <p class="text-xs text-red-600 dark:text-red-400 mt-2">{{ log.denial_reason }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% if scan_logs.count > 10 %}
+                <div class="mt-4 pt-4 border-t border-border/20">
+                    <a href="{% url 'qr_scan_analytics' user.id %}" class="text-primary hover:text-primary/80 font-semibold text-sm inline-flex items-center group">
+                        View all {{ total_scans }} scans <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                </div>
+                {% endif %}
+                {% else %}
+                <div class="text-center py-8">
+                    <i class="fas fa-check-circle text-4xl text-muted-foreground/50 mb-3 inline-block"></i>
+                    <p class="text-muted-foreground text-sm">No scans yet. Share your code with doctors!</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Info Card -->
+            <div class="bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 border border-primary/20 rounded-2xl p-6">
+                <h3 class="font-bold text-foreground mb-3 flex items-center">
+                    <i class="fas fa-lightbulb mr-2 text-primary"></i>
+                    How It Works
+                </h3>
+                <ol class="text-sm text-muted-foreground space-y-2">
+                    <li><span class="font-semibold text-foreground">1.</span> Share your QR code with doctors</li>
+                    <li><span class="font-semibold text-foreground">2.</span> They scan with their device</li>
+                    <li><span class="font-semibold text-foreground">3.</span> Your profile loads instantly</li>
+                    <li><span class="font-semibold text-foreground">4.</span> Scan is logged for security</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function downloadQRCode() {
+    const img = document.querySelector('img[alt="Patient QR Code"]');
+    if (img) {
+        const link = document.createElement('a');
+        link.href = img.src;
+        link.download = 'patient_qr_code.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } else {
+        alert('QR code not available');
+    }
+}
+
+function copyToClipboard() {
+    const img = document.querySelector('img[alt="Patient QR Code"]');
+    if (img) {
+        // In a real app, you might copy a sharing URL instead
+        const text = window.location.href;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('QR Code page URL copied to clipboard!');
+        });
+    }
+}
+
+// Auto-refresh pending transactions
+const pendingTransactions = new Set();
+
+function startBlockchainPolling(txHash, logId) {
+    // Ensure tx_hash has 0x prefix
+    if (!txHash.startsWith('0x')) {
+        txHash = '0x' + txHash;
+    }
+    
+    const key = `${txHash}-${logId}`;
+    if (pendingTransactions.has(key)) {
+        return; // Already polling this transaction
+    }
+    
+    pendingTransactions.add(key);
+    checkBlockchainStatus(txHash, logId);
+}
+
+function checkBlockchainStatus(txHash, logId) {
+    const statusElement = document.getElementById(`blockchain-status-${logId}`);
+    if (!statusElement) {
+        pendingTransactions.delete(`${txHash}-${logId}`);
+        return;
+    }
+    
+    const statusText = statusElement.querySelector('.blockchain-status-text');
+    const checkingIndicator = statusElement.querySelector('.checking-indicator');
+    
+    // Show checking indicator
+    if (checkingIndicator) {
+        checkingIndicator.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    }
+    
+    // Call refresh API
+    fetch('{% url "refresh_blockchain_status" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ tx_hash: txHash })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (data.confirmed || data.already_confirmed) {
+                // Transaction confirmed! Update UI
+                statusText.innerHTML = '<i class="fas fa-check-circle mr-1"></i>Blockchain Confirmed';
+                statusText.className = 'text-xs font-semibold text-green-700 dark:text-green-400 blockchain-status-text';
+                
+                // Add block info
+                if (data.block_number && !statusElement.querySelector('.block-info')) {
+                    const blockInfo = document.createElement('div');
+                    blockInfo.className = 'mt-2 text-xs text-muted-foreground block-info';
+                    blockInfo.textContent = `Block #${data.block_number}`;
+                    statusElement.appendChild(blockInfo);
+                }
+                
+                // Remove checking indicator
+                if (checkingIndicator) {
+                    checkingIndicator.remove();
+                }
+                
+                // Stop polling
+                pendingTransactions.delete(`${txHash}-${logId}`);
+                console.log(`✓ Transaction ${txHash} confirmed in block ${data.block_number}`);
+            } else if (data.pending) {
+                // Still pending, hide indicator and schedule next check
+                if (checkingIndicator) {
+                    checkingIndicator.innerHTML = '';
+                }
+                setTimeout(() => checkBlockchainStatus(txHash, logId), 10000); // Check again in 10 seconds
+            }
+        } else {
+            // Error occurred, hide indicator and retry
+            if (checkingIndicator) {
+                checkingIndicator.innerHTML = '';
+            }
+            console.error('Error checking blockchain status:', data.error || data.message);
+            setTimeout(() => checkBlockchainStatus(txHash, logId), 15000); // Retry in 15 seconds
+        }
+    })
+    .catch(error => {
+        if (checkingIndicator) {
+            checkingIndicator.innerHTML = '';
+        }
+        console.error('Error refreshing status:', error);
+        setTimeout(() => checkBlockchainStatus(txHash, logId), 15000); // Retry in 15 seconds
+    });
+}
+
+// Start polling for all pending transactions on page load
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('[data-pending-tx]').forEach(element => {
+        const txHash = element.getAttribute('data-pending-tx');
+        const logId = element.getAttribute('data-log-id');
+        if (txHash && logId) {
+            startBlockchainPolling(txHash, logId);
+        }
+    });
+});
+</script>
+{% endblock %}

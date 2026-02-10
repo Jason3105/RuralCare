@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if prescription %}Edit{% else %}Create{% endif %} Prescription{% endblock %}
+
+{% block content %}
+<div class="fade-in max-w-6xl mx-auto">
+    <div class="bg-card border border-border/50 rounded-2xl p-6 sm:p-8 mb-6 shadow-sm">
+        <div class="flex items-center justify-between mb-6">
+            <h1 class="text-3xl font-bold text-foreground">
+                {% if prescription %}Edit{% else %}Create{% endif %} Prescription
+            </h1>
+            <a href="{% url 'doctor_consultation_detail' consultation.id %}" class="text-primary hover:underline">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Consultation
+            </a>
+        </div>
+
+        <!-- Patient Info -->
+        <div class="bg-accent/30 rounded-xl p-4 mb-6">
+            <h3 class="font-semibold text-lg mb-2">Patient Information</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <p class="text-sm text-muted-foreground">Name</p>
+                    <p class="font-medium">{{ consultation.patient.first_name }} {{ consultation.patient.last_name }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-muted-foreground">Email</p>
+                    <p class="font-medium">{{ consultation.patient.email }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-muted-foreground">Consultation Date</p>
+                    <p class="font-medium">{{ consultation.scheduled_datetime|date:"F d, Y" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <form id="prescriptionForm" method="post">
+            {% csrf_token %}
+            
+            <!-- Diagnosis -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-foreground mb-2">
+                    Diagnosis <span class="text-red-500">*</span>
+                </label>
+                <textarea name="diagnosis" required rows="3" 
+                    class="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Primary diagnosis...">{% if prescription %}{{ prescription.diagnosis }}{% endif %}</textarea>
+            </div>
+
+            <!-- Symptoms -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-foreground mb-2">Symptoms</label>
+                <textarea name="symptoms" rows="2" 
+                    class="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Observed symptoms...">{% if prescription %}{{ prescription.symptoms }}{% endif %}</textarea>
+            </div>
+
+            <!-- Medicines Section -->
+            <div class="mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-semibold text-foreground">Medicines</h3>
+                    <button type="button" onclick="addMedicine()" class="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg font-semibold">
+                        <i class="fas fa-plus mr-2"></i>Add Medicine
+                    </button>
+                </div>
+
+                <div id="medicinesContainer" class="space-y-4">
+                    <!-- Medicines will be added here dynamically -->
+                </div>
+            </div>
+
+            <!-- Additional Notes -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-foreground mb-2">Additional Notes</label>
+                <textarea name="doctor_notes" rows="3" 
+                    class="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Additional medical notes or instructions...">{% if prescription %}{{ prescription.doctor_notes }}{% endif %}</textarea>
+            </div>
+
+            <!-- Follow-up Instructions -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-foreground mb-2">Follow-up Instructions</label>
+                <textarea name="follow_up_instructions" rows="3" 
+                    class="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Follow-up care instructions...">{% if prescription %}{{ prescription.follow_up_instructions }}{% endif %}</textarea>
+            </div>
+
+            <!-- Hidden field for medicines JSON -->
+            <input type="hidden" name="medicines_json" id="medicinesJson">
+
+            <!-- Submit Buttons -->
+            <div class="flex gap-4">
+                <button type="submit" class="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition-all">
+                    <i class="fas fa-file-pdf mr-2"></i>Generate Prescription PDF
+                </button>
+                <a href="{% url 'doctor_consultation_detail' consultation.id %}" class="px-6 py-3 bg-muted hover:bg-muted/80 text-foreground font-semibold rounded-lg text-center">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+let medicineCount = 0;
+let medicines = [];
+
+{% if prescription and medicines %}
+medicines = {{ medicines|safe }};
+{% endif %}
+
+function addMedicine(med = null) {
+    const container = document.getElementById('medicinesContainer');
+    const index = medicineCount++;
+    
+    const medicine = med || {
+        name: '',
+        dosage: '',
+        frequency: 'twice_daily',
+        timing: 'after_food',
+        duration: '7',
+        instructions: ''
+    };
+    
+    const medicineHTML = `
+        <div class="bg-accent/30 rounded-xl p-4 border border-border" id="medicine-${index}">
+            <div class="flex items-center justify-between mb-4">
+                <h4 class="font-semibold">Medicine #${index + 1}</h4>
+                <button type="button" onclick="removeMedicine(${index})" class="text-red-600 hover:text-red-700">
+                    <i class="fas fa-trash"></i> Remove
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium mb-2">Medicine Name *</label>
+                    <input type="text" class="medicine-name w-full px-4 py-2 rounded-lg border border-border bg-background" 
+                        placeholder="e.g., Paracetamol" value="${medicine.medicine_name || medicine.name}" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Dosage *</label>
+                    <input type="text" class="medicine-dosage w-full px-4 py-2 rounded-lg border border-border bg-background" 
+                        placeholder="e.g., 500mg, 1 tablet" value="${medicine.dosage}" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Frequency *</label>
+                    <select class="medicine-frequency w-full px-4 py-2 rounded-lg border border-border bg-background">
+                        <option value="once_daily" ${medicine.frequency === 'once_daily' ? 'selected' : ''}>Once Daily</option>
+                        <option value="twice_daily" ${medicine.frequency === 'twice_daily' ? 'selected' : ''}>Twice Daily</option>
+                        <option value="thrice_daily" ${medicine.frequency === 'thrice_daily' ? 'selected' : ''}>Thrice Daily</option>
+                        <option value="four_times" ${medicine.frequency === 'four_times' ? 'selected' : ''}>Four Times Daily</option>
+                        <option value="as_needed" ${medicine.frequency === 'as_needed' ? 'selected' : ''}>As Needed</option>
+                        <option value="before_meals" ${medicine.frequency === 'before_meals' ? 'selected' : ''}>Before Meals</option>
+                        <option value="after_meals" ${medicine.frequency === 'after_meals' ? 'selected' : ''}>After Meals</option>
+                        <option value="at_bedtime" ${medicine.frequency === 'at_bedtime' ? 'selected' : ''}>At Bedtime</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Timing *</label>
+                    <select class="medicine-timing w-full px-4 py-2 rounded-lg border border-border bg-background">
+                        <option value="before_food" ${medicine.timing === 'before_food' ? 'selected' : ''}>Before Food</option>
+                        <option value="after_food" ${medicine.timing === 'after_food' ? 'selected' : ''}>After Food</option>
+                        <option value="with_food" ${medicine.timing === 'with_food' ? 'selected' : ''}>With Food</option>
+                        <option value="empty_stomach" ${medicine.timing === 'empty_stomach' ? 'selected' : ''}>Empty Stomach</option>
+                        <option value="anytime" ${medicine.timing === 'anytime' ? 'selected' : ''}>Anytime</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Duration (days) *</label>
+                    <input type="number" class="medicine-duration w-full px-4 py-2 rounded-lg border border-border bg-background" 
+                        placeholder="7" value="${medicine.duration_days || medicine.duration}" min="1" required>
+                </div>
+                
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium mb-2">Special Instructions</label>
+                    <textarea class="medicine-instructions w-full px-4 py-2 rounded-lg border border-border bg-background" 
+                        rows="2" placeholder="e.g., Take with plenty of water">${medicine.instructions}</textarea>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.insertAdjacentHTML('beforeend', medicineHTML);
+}
+
+function removeMedicine(index) {
+    const element = document.getElementById(`medicine-${index}`);
+    if (element) {
+        element.remove();
+    }
+}
+
+function collectMedicines() {
+    const medicines = [];
+    const medicineElements = document.querySelectorAll('#medicinesContainer > div');
+    
+    medicineElements.forEach((el, index) => {
+        medicines.push({
+            name: el.querySelector('.medicine-name').value,
+            dosage: el.querySelector('.medicine-dosage').value,
+            frequency: el.querySelector('.medicine-frequency').value,
+            timing: el.querySelector('.medicine-timing').value,
+            duration: el.querySelector('.medicine-duration').value,
+            instructions: el.querySelector('.medicine-instructions').value
+        });
+    });
+    
+    return medicines;
+}
+
+document.getElementById('prescriptionForm').addEventListener('submit', function(e) {
+    const medicines = collectMedicines();
+    
+    if (medicines.length === 0) {
+        e.preventDefault();
+        alert('Please add at least one medicine to the prescription.');
+        return;
+    }
+    
+    document.getElementById('medicinesJson').value = JSON.stringify(medicines);
+});
+
+// Load existing medicines if editing
+if (medicines.length > 0) {
+    medicines.forEach(med => addMedicine(med));
+} else {
+    // Add first medicine by default
+    addMedicine();
+}
+</script>
+{% endblock %}

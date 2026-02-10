@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Request Consultation{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-8">
+            <nav class="mb-4">
+                <a href="{% url 'patient_portal:available_doctors' %}" class="text-primary hover:underline text-sm">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Doctors
+                </a>
+            </nav>
+            <h1 class="text-3xl font-bold text-foreground">Request Consultation</h1>
+            <p class="text-muted-foreground mt-2">Dr. {{ doctor.first_name }} {{ doctor.last_name }}</p>
+        </div>
+
+        <form method="post" class="bg-card border border-border/50 rounded-xl p-6 space-y-6">
+            {% csrf_token %}
+            
+            <div>
+                <label class="block text-sm font-medium text-foreground mb-2">Consultation Type *</label>
+                <select name="consultation_type" required 
+                        class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground">
+                    <option value="initial">Initial Consultation</option>
+                    <option value="follow_up">Follow-up</option>
+                    <option value="second_opinion">Second Opinion</option>
+                    <option value="treatment_review">Treatment Review</option>
+                    <option value="general">General Consultation</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-foreground mb-2">Reason for Consultation *</label>
+                <textarea name="reason" rows="4" required placeholder="Briefly describe why you need this consultation..."
+                          class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground"></textarea>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-foreground mb-2">Preferred Dates/Times (Optional)</label>
+                <p class="text-xs text-muted-foreground mb-3">You can mention your preferred times, and the doctor will suggest available slots.</p>
+                <textarea name="preferred_dates" rows="3" placeholder="Example: Weekday afternoons, Monday 3-5 PM, etc."
+                          class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground"></textarea>
+            </div>
+
+            <div class="flex space-x-4">
+                <button type="submit" class="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                    <i class="fas fa-paper-plane mr-2"></i>Send Request
+                </button>
+                <a href="{% url 'patient_portal:available_doctors' %}" 
+                   class="px-4 py-2 border border-border rounded-lg hover:bg-accent transition-colors text-foreground">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% block title %}Patient Alerts Dashboard{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-foreground">Patient Alerts</h1>
+                <p class="text-muted-foreground mt-1">Send notifications and reminders to your patients</p>
+            </div>
+            <div class="mt-4 md:mt-0 flex space-x-3">
+                <a href="{% url 'clinical_decision_support:send_patient_alert' %}" 
+                   class="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                    <i class="fas fa-paper-plane mr-2"></i>Send Alert
+                </a>
+                <a href="{% url 'clinical_decision_support:send_bulk_alerts' %}" 
+                   class="inline-flex items-center px-4 py-2 border border-border rounded-lg hover:bg-accent transition-colors">
+                    <i class="fas fa-users mr-2"></i>Bulk Send
+                </a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Patient Selector -->
+            <div class="lg:col-span-1">
+                <div class="bg-card border border-border/50 rounded-xl p-6">
+                    <h2 class="text-lg font-semibold text-foreground mb-4">Select Patient</h2>
+                    <form method="get" class="space-y-4">
+                        <select name="patient" onchange="this.form.submit()" 
+                                class="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
+                            <option value="">Choose a patient...</option>
+                            {% for patient in patients %}
+                            <option value="{{ patient.id }}" {% if selected_patient and selected_patient.id == patient.id %}selected{% endif %}>
+                                {{ patient.get_full_name|default:patient.username }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </form>
+
+                    {% if selected_patient %}
+                    <div class="mt-4 p-4 bg-accent/30 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-primary text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-foreground">{{ selected_patient.get_full_name|default:selected_patient.username }}</p>
+                                <p class="text-sm text-muted-foreground">{{ selected_patient.email }}</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex space-x-2">
+                            <a href="{% url 'clinical_decision_support:send_patient_alert' %}?patient={{ selected_patient.id }}" 
+                               class="flex-1 text-center px-3 py-2 bg-primary text-primary-foreground text-sm rounded-lg hover:bg-primary/90">
+                                <i class="fas fa-paper-plane mr-1"></i>Send Alert
+                            </a>
+                            <a href="{% url 'clinical_decision_support:symptom_monitoring_patient' selected_patient.id %}" 
+                               class="flex-1 text-center px-3 py-2 border border-border text-sm rounded-lg hover:bg-accent">
+                                <i class="fas fa-heartbeat mr-1"></i>Symptoms
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Recent Sent Alerts -->
+                <div class="bg-card border border-border/50 rounded-xl p-6 mt-6">
+                    <h2 class="text-lg font-semibold text-foreground mb-4">Recently Sent by You</h2>
+                    <div class="space-y-3">
+                        {% for alert in recent_sent %}
+                        <div class="p-3 border border-border rounded-lg">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <p class="font-medium text-foreground text-sm">{{ alert.title }}</p>
+                                    <p class="text-xs text-muted-foreground mt-1">
+                                        To: {{ alert.patient.get_full_name|default:alert.patient.username }}
+                                    </p>
+                                </div>
+                                {% if alert.is_urgent %}
+                                <span class="px-2 py-0.5 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 text-xs rounded-full">
+                                    Urgent
+                                </span>
+                                {% endif %}
+                            </div>
+                            <p class="text-xs text-muted-foreground mt-2">{{ alert.created_at|timesince }} ago</p>
+                        </div>
+                        {% empty %}
+                        <p class="text-sm text-muted-foreground text-center py-4">No alerts sent yet</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Patient Alerts -->
+            <div class="lg:col-span-2">
+                {% if selected_patient %}
+                <div class="bg-card border border-border/50 rounded-xl p-6">
+                    <h2 class="text-lg font-semibold text-foreground mb-4">
+                        Alerts for {{ selected_patient.get_full_name|default:selected_patient.username }}
+                    </h2>
+                    <div class="space-y-3">
+                        {% for alert in alerts %}
+                        <div class="p-4 border border-border rounded-lg {% if alert.is_urgent %}border-l-4 border-l-red-500{% endif %}">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="px-2 py-0.5 text-xs rounded-full
+                                            {% if alert.alert_type == 'symptom_reminder' %}bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400
+                                            {% elif alert.alert_type == 'medication' %}bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400
+                                            {% elif alert.alert_type == 'appointment' %}bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400
+                                            {% elif alert.alert_type == 'doctor_review' %}bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400
+                                            {% else %}bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400{% endif %}">
+                                            {{ alert.get_alert_type_display }}
+                                        </span>
+                                        <span class="px-2 py-0.5 text-xs rounded-full
+                                            {% if alert.status == 'read' %}bg-green-100 text-green-700
+                                            {% elif alert.status == 'sent' %}bg-blue-100 text-blue-700
+                                            {% else %}bg-gray-100 text-gray-700{% endif %}">
+                                            {{ alert.get_status_display }}
+                                        </span>
+                                    </div>
+                                    <h3 class="font-medium text-foreground mt-2">{{ alert.title }}</h3>
+                                    <p class="text-sm text-muted-foreground mt-1">{{ alert.message|truncatechars:150 }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between mt-3 text-xs text-muted-foreground">
+                                <span>{{ alert.created_at|date:"M d, Y H:i" }}</span>
+                                {% if alert.metadata.sent_by_name %}
+                                <span>Sent by: {{ alert.metadata.sent_by_name }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-8">
+                            <i class="fas fa-bell-slash text-4xl text-muted-foreground mb-3"></i>
+                            <p class="text-muted-foreground">No alerts for this patient</p>
+                            <a href="{% url 'clinical_decision_support:send_patient_alert' %}?patient={{ selected_patient.id }}" 
+                               class="inline-flex items-center mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
+                                <i class="fas fa-paper-plane mr-2"></i>Send First Alert
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="bg-card border border-border/50 rounded-xl p-12 text-center">
+                    <i class="fas fa-users text-5xl text-muted-foreground mb-4"></i>
+                    <h2 class="text-xl font-semibold text-foreground mb-2">Select a Patient</h2>
+                    <p class="text-muted-foreground mb-6">Choose a patient from the list to view their alerts or send a new notification.</p>
+                    <a href="{% url 'clinical_decision_support:send_patient_alert' %}" 
+                       class="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
+                        <i class="fas fa-paper-plane mr-2"></i>Send Alert
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

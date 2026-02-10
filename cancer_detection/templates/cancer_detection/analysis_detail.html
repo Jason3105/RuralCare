@@ -1,0 +1,315 @@
+{% extends 'base.html' %}
+{% load media_tags %}
+
+{% block title %}Analysis Details{% endblock %}
+
+{% block content %}
+<div class="fade-in max-w-7xl mx-auto">
+    <div class="mb-8 flex justify-between items-start sm:items-center flex-col sm:flex-row gap-4">
+        <div>
+            <h1 class="text-5xl font-bold text-foreground mb-2">Analysis Details</h1>
+            <p class="text-lg text-muted-foreground">Comprehensive AI-powered cancer detection results</p>
+        </div>
+        <div class="flex gap-3 flex-shrink-0">
+            <a href="{% url 'cancer_detection:analysis_list' %}" class="px-6 py-3 bg-muted hover:bg-muted/80 text-foreground font-bold rounded-xl transition-all duration-200 inline-flex items-center gap-2">
+                <i class="fas fa-arrow-left"></i>
+                Back to List
+            </a>
+            {% if analysis.tumor_detected %}
+            <a href="{% url 'cancer_detection:generate_treatment_plan' analysis.id %}" class="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:shadow-xl text-white font-bold rounded-xl transition-all duration-200 hover:scale-105 inline-flex items-center gap-2">
+                <i class="fas fa-flask"></i>
+                Generate Plan
+            </a>
+            <a href="{% url 'cancer_detection:create_comprehensive_plan' %}" class="px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:shadow-xl text-white font-bold rounded-xl transition-all duration-200 hover:scale-105 inline-flex items-center gap-2">
+                <i class="fas fa-project-diagram"></i>
+                Comprehensive Plan
+            </a>
+            {% endif %}
+            <a href="{% url 'cancer_detection:dashboard' %}" class="px-6 py-3 bg-gradient-to-r from-primary to-primary/90 hover:shadow-xl text-primary-foreground font-bold rounded-xl transition-all duration-200 hover:scale-105 inline-flex items-center gap-2">
+                <i class="fas fa-chart-bar"></i>
+                Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Image and Detection Status -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-200">
+            <h2 class="text-2xl sm:text-3xl font-bold text-foreground mb-6 flex items-center gap-3">
+                <div class="bg-primary/10 p-3 rounded-xl">
+                    <i class="fas fa-image text-primary text-xl"></i>
+                </div>
+                Original Image
+            </h2>
+            <img src="{{ analysis.image|local_media_url }}" alt="Analysis Image" class="w-full h-auto rounded-2xl shadow-lg ring-4 ring-primary/20 mb-6">
+            <div class="space-y-3 bg-muted/50 rounded-xl p-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-muted-foreground font-medium">Image Type:</span>
+                    <span class="font-bold text-foreground">{{ analysis.get_image_type_display }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-muted-foreground font-medium">Uploaded:</span>
+                    <span class="font-bold text-foreground">{{ analysis.created_at|date:"M d, Y g:i A" }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-muted-foreground font-medium">Filename:</span>
+                    <span class="font-bold text-foreground truncate">{{ analysis.original_filename }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Annotated Image with Detected Regions -->
+        {% if detailed_analysis.primary_detection or analysis.tumor_detected %}
+        <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-200">
+            <h2 class="text-2xl sm:text-3xl font-bold text-foreground mb-6 flex items-center gap-3">
+                <div class="bg-red-500/10 p-3 rounded-xl">
+                    <i class="fas fa-search-plus text-red-500 text-xl"></i>
+                </div>
+                Detected Regions
+            </h2>
+            {% if detailed_analysis.annotated_image %}
+            <img src="{{ detailed_analysis.annotated_image }}" alt="Annotated Analysis" class="w-full h-auto rounded-2xl shadow-lg ring-4 ring-red-500/20 mb-6">
+            {% else %}
+            <div class="relative">
+                <img src="{{ analysis.image|local_media_url }}" alt="Analysis Image" class="w-full h-auto rounded-2xl shadow-lg ring-4 ring-red-500/20 mb-6">
+                {% if detailed_analysis.primary_detection.bbox %}
+                <div class="absolute border-4 border-red-500 rounded-lg animate-pulse" 
+                     style="left: {{ detailed_analysis.primary_detection.bbox.0|divisibleby:1 }}%; top: {{ detailed_analysis.primary_detection.bbox.1|divisibleby:1 }}%; width: {{ detailed_analysis.primary_detection.bbox.2|divisibleby:1 }}px; height: {{ detailed_analysis.primary_detection.bbox.3|divisibleby:1 }}px;">
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+            <div class="space-y-3 bg-red-500/10 rounded-xl p-4 border border-red-500/30">
+                <div class="flex items-center gap-2 mb-3">
+                    <i class="fas fa-info-circle text-red-500"></i>
+                    <span class="font-bold text-foreground">Detection Details</span>
+                </div>
+                {% if detailed_analysis.all_detections %}
+                <div class="text-sm text-muted-foreground mb-2">
+                    <strong class="text-foreground">{{ detailed_analysis.all_detections|length }}</strong> region(s) detected
+                </div>
+                {% endif %}
+                {% if detailed_analysis.primary_detection.model_sources %}
+                <div class="flex flex-wrap gap-2">
+                    {% for source in detailed_analysis.primary_detection.model_sources %}
+                    <span class="px-3 py-1 bg-primary/20 text-primary rounded-full text-xs font-semibold">{{ source }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <div class="grid grid-cols-2 gap-2 mt-3 text-sm">
+                    {% if detailed_analysis.primary_detection.circularity %}
+                    <div class="bg-background rounded-lg p-2">
+                        <span class="text-muted-foreground">Circularity:</span>
+                        <span class="font-bold text-foreground ml-1">{{ detailed_analysis.primary_detection.circularity }}</span>
+                    </div>
+                    {% endif %}
+                    {% if detailed_analysis.primary_detection.area %}
+                    <div class="bg-background rounded-lg p-2">
+                        <span class="text-muted-foreground">Area:</span>
+                        <span class="font-bold text-foreground ml-1">{{ detailed_analysis.primary_detection.area|floatformat:0 }} px²</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-200">
+            <h2 class="text-2xl sm:text-3xl font-bold text-foreground mb-6 flex items-center gap-3">
+                <div class="bg-primary/10 p-3 rounded-xl">
+                    <i class="fas fa-stethoscope text-primary text-xl"></i>
+                </div>
+                Detection Status
+            </h2>
+            <div class="space-y-6">
+                <div class="flex items-center justify-between p-6 rounded-2xl {% if analysis.tumor_detected %}bg-red-500/10 border-2 border-red-500/50{% else %}bg-green-500/10 border-2 border-green-500/50{% endif %}">
+                    <span class="text-xl font-bold text-foreground">Tumor Detected:</span>
+                    <span class="px-6 py-2 rounded-full font-bold text-lg {% if analysis.tumor_detected %}bg-red-500/20 text-red-600 dark:text-red-400{% else %}bg-green-500/20 text-green-600 dark:text-green-400{% endif %}">
+                        {% if analysis.tumor_detected %}<i class="fas fa-check mr-2"></i>YES{% else %}<i class="fas fa-times mr-2"></i>NO{% endif %}
+                    </span>
+                </div>
+
+                {% if analysis.detection_confidence %}
+                <div>
+                    <div class="flex justify-between mb-3">
+                        <span class="text-sm font-bold text-muted-foreground uppercase tracking-wider">Detection Confidence</span>
+                        <span class="text-xl font-bold text-foreground">{{ analysis.detection_confidence|floatformat:1 }}%</span>
+                    </div>
+                    <div class="w-full bg-muted rounded-full h-3 overflow-hidden">
+                        <div class="bg-gradient-to-r from-primary to-primary/80 h-3 rounded-full transition-all duration-500" style="width: {{ analysis.detection_confidence }}%"></div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if analysis.tumor_detected %}
+                <div class="mt-6 space-y-3 bg-muted/50 rounded-xl p-4">
+                    <div class="flex justify-between items-center py-2 border-b border-border/50">
+                        <span class="text-muted-foreground font-medium">Tumor Type:</span>
+                        <span class="font-bold text-foreground">{{ analysis.tumor_type|default:"N/A" }}</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2 border-b border-border/50">
+                        <span class="text-muted-foreground font-medium">Tumor Stage:</span>
+                        <span class="font-bold text-foreground">{{ analysis.tumor_stage|default:"N/A" }}</span>
+                    </div>
+                    {% if analysis.tumor_size_mm %}
+                    <div class="flex justify-between items-center py-2 border-b border-border/50">
+                        <span class="text-muted-foreground font-medium">Estimated Size:</span>
+                        <span class="font-bold text-foreground">{{ analysis.tumor_size_mm|floatformat:2 }} mm</span>
+                    </div>
+                    {% endif %}
+                    {% if analysis.tumor_location %}
+                    <div class="flex justify-between items-center py-2 border-b border-border/50">
+                        <span class="text-muted-foreground font-medium">Location:</span>
+                        <span class="font-bold text-foreground">{{ analysis.tumor_location }}</span>
+                    </div>
+                    {% endif %}
+                    {% if analysis.stage_confidence %}
+                    <div class="flex justify-between items-center py-2">
+                        <span class="text-muted-foreground font-medium">Stage Confidence:</span>
+                        <span class="font-bold text-foreground">{{ analysis.stage_confidence|floatformat:1 }}%</span>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if analysis.tumor_detected %}
+    <!-- Genetic Profile -->
+    <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-200 mb-8">
+        <h2 class="text-2xl sm:text-3xl font-bold text-foreground mb-6 flex items-center gap-3">
+            <div class="bg-primary/10 p-3 rounded-xl">
+                <i class="fas fa-dna text-primary text-xl"></i>
+            </div>
+            Genetic Profile Indicators
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {% if genetic_profile.high_heterogeneity %}
+            <div class="p-6 bg-yellow-500/10 border-2 border-yellow-500/50 rounded-2xl">
+                <div class="flex items-start justify-between mb-3">
+                    <span class="font-bold text-yellow-700 dark:text-yellow-300">High Heterogeneity</span>
+                    <span class="px-3 py-1 bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 rounded-lg text-xs font-bold">DETECTED</span>
+                </div>
+                <p class="text-sm text-yellow-700 dark:text-yellow-300 mb-2">Score: <span class="font-bold">{{ genetic_profile.heterogeneity_score|floatformat:2 }}</span></p>
+                <p class="text-xs text-yellow-600 dark:text-yellow-400">Genetic diversity in tumor cells detected</p>
+            </div>
+            {% endif %}
+
+            {% if genetic_profile.irregular_borders %}
+            <div class="p-6 bg-orange-500/10 border-2 border-orange-500/50 rounded-2xl">
+                <div class="flex items-start justify-between mb-3">
+                    <span class="font-bold text-orange-700 dark:text-orange-300">Irregular Borders</span>
+                    <span class="px-3 py-1 bg-orange-500/20 text-orange-600 dark:text-orange-400 rounded-lg text-xs font-bold">DETECTED</span>
+                </div>
+                <p class="text-sm text-orange-700 dark:text-orange-300 mb-2">Risk: <span class="font-bold">{{ genetic_profile.aggression_risk|floatformat:2 }}</span></p>
+                <p class="text-xs text-orange-600 dark:text-orange-400">Aggressive tumor behavior indicated</p>
+            </div>
+            {% endif %}
+
+            <div class="p-6 bg-blue-500/10 border-2 border-blue-500/50 rounded-2xl">
+                <div class="mb-3">
+                    <span class="font-bold text-blue-700 dark:text-blue-300">Texture Complexity</span>
+                </div>
+                <p class="text-sm text-blue-700 dark:text-blue-300 mb-2 capitalize font-semibold">{{ genetic_profile.texture_complexity|default:"N/A" }}</p>
+                <p class="text-xs text-blue-600 dark:text-blue-400">Texture analysis of detected region</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comorbidities -->
+    {% if comorbidities %}
+    <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-200 mb-8">
+        <h2 class="text-2xl sm:text-3xl font-bold text-foreground mb-6 flex items-center gap-3">
+            <div class="bg-red-500/10 p-3 rounded-xl">
+                <i class="fas fa-triangle-exclamation text-red-600 dark:text-red-400 text-xl"></i>
+            </div>
+            Detected Comorbidities & Complications
+        </h2>
+        <div class="space-y-3">
+            {% for comorbidity in comorbidities %}
+            <div class="p-4 bg-red-500/10 border-l-4 border-red-500 rounded-xl flex items-center gap-3">
+                <div class="bg-red-500/20 p-2 rounded-lg flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-600 dark:text-red-400"></i>
+                </div>
+                <span class="text-red-700 dark:text-red-300 font-semibold">{{ comorbidity }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Detailed Analysis -->
+    {% if detailed_analysis %}
+    <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-200 mb-8">
+        <h2 class="text-2xl sm:text-3xl font-bold text-foreground mb-6 flex items-center gap-3">
+            <div class="bg-primary/10 p-3 rounded-xl">
+                <i class="fas fa-microscope text-primary text-xl"></i>
+            </div>
+            Detailed Analysis Metrics
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="p-6 bg-muted/50 rounded-xl border border-border/50">
+                <p class="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-2">Area</p>
+                <p class="text-3xl font-bold text-foreground">{{ detailed_analysis.area|floatformat:0 }}<span class="text-sm text-muted-foreground ml-1">px²</span></p>
+            </div>
+            <div class="p-6 bg-muted/50 rounded-xl border border-border/50">
+                <p class="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-2">Perimeter</p>
+                <p class="text-3xl font-bold text-foreground">{{ detailed_analysis.perimeter|floatformat:2 }}<span class="text-sm text-muted-foreground ml-1">px</span></p>
+            </div>
+            <div class="p-6 bg-muted/50 rounded-xl border border-border/50">
+                <p class="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-2">Circularity</p>
+                <p class="text-3xl font-bold text-foreground">{{ detailed_analysis.circularity|floatformat:3 }}</p>
+            </div>
+            <div class="p-6 bg-muted/50 rounded-xl border border-border/50">
+                <p class="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-2">Aspect Ratio</p>
+                <p class="text-3xl font-bold text-foreground">{{ detailed_analysis.aspect_ratio|floatformat:2 }}</p>
+            </div>
+            <div class="p-6 bg-muted/50 rounded-xl border border-border/50">
+                <p class="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-2">Solidity</p>
+                <p class="text-3xl font-bold text-foreground">{{ detailed_analysis.solidity|floatformat:3 }}</p>
+            </div>
+            <div class="p-6 bg-muted/50 rounded-xl border border-border/50">
+                <p class="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-2">Extent</p>
+                <p class="text-3xl font-bold text-foreground">{{ detailed_analysis.extent|floatformat:3 }}</p>
+            </div>
+        </div>
+
+        {% if detailed_analysis.texture_features %}
+        <div>
+            <h3 class="text-xl font-bold text-foreground mb-6">Texture Analysis</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="p-6 bg-blue-500/10 border-2 border-blue-500/50 rounded-xl">
+                    <p class="text-xs text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider mb-2">Std. Deviation</p>
+                    <p class="text-2xl font-bold text-blue-700 dark:text-blue-300">{{ detailed_analysis.texture_features.std_dev|floatformat:2 }}</p>
+                </div>
+                <div class="p-6 bg-blue-500/10 border-2 border-blue-500/50 rounded-xl">
+                    <p class="text-xs text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider mb-2">Mean Gradient</p>
+                    <p class="text-2xl font-bold text-blue-700 dark:text-blue-300">{{ detailed_analysis.texture_features.mean_gradient|floatformat:2 }}</p>
+                </div>
+                <div class="p-6 bg-blue-500/10 border-2 border-blue-500/50 rounded-xl">
+                    <p class="text-xs text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider mb-2">Entropy</p>
+                    <p class="text-2xl font-bold text-blue-700 dark:text-blue-300">{{ detailed_analysis.texture_features.entropy|floatformat:2 }}</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% endif %}
+
+    <!-- Important Notice -->
+    <div class="bg-yellow-500/10 border-2 border-yellow-500/50 rounded-2xl p-8 flex gap-4">
+        <div class="bg-yellow-500/20 p-4 rounded-xl flex-shrink-0">
+            <i class="fas fa-triangle-exclamation text-yellow-600 dark:text-yellow-400 text-2xl"></i>
+        </div>
+        <div>
+            <h3 class="text-lg font-bold text-yellow-700 dark:text-yellow-300 mb-2">Important Medical Disclaimer</h3>
+            <p class="text-yellow-700 dark:text-yellow-300 leading-relaxed">
+                This analysis is for demonstration purposes only. The AI-based detection system uses advanced computer vision techniques and should not be used as a substitute for professional medical diagnosis. Always consult with qualified healthcare professionals for accurate diagnosis and treatment decisions. Do not rely solely on this automated analysis for medical decisions.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

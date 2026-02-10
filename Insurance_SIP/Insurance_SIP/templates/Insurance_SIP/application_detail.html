@@ -1,0 +1,355 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Application Details | Premium Dashboard{% endblock %}
+
+{% block extra_head %}
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        midnight: { 800: '#1e293b', 900: '#0f172a', 950: '#020617' },
+                        accent: { 500: '#3b82f6', 600: '#2563eb', vibrant: '#0061ff' }
+                    },
+                    animation: {
+                        'slide-up': 'slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                    },
+                    keyframes: {
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    },
+                    boxShadow: {
+                        'glow-blue': '0 0 20px rgba(59, 130, 246, 0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Glass Effect */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-panel:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        /* Status Badges */
+        .badge { position: relative; overflow: hidden; }
+        .status-approved { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); box-shadow: 0 0 15px rgba(16, 185, 129, 0.1); }
+        .status-rejected { background: rgba(244, 63, 94, 0.1); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.2); box-shadow: 0 0 15px rgba(244, 63, 94, 0.1); }
+        .status-pending, .status-under_review { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); box-shadow: 0 0 15px rgba(245, 158, 11, 0.1); }
+        .status-draft { background: rgba(148, 163, 184, 0.1); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.2); }
+
+        /* Delays */
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        .delay-400 { animation-delay: 400ms; }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="min-h-screen w-full bg-[#020617] text-slate-200 pt-24 pb-12 px-4 md:px-8 selection:bg-accent-500/30 selection:text-white"
+         style="background-image: radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(15, 23, 42, 1) 0px, transparent 50%); background-attachment: fixed;">
+
+        <div class="max-w-5xl mx-auto space-y-8">
+            
+            <div class="flex items-center justify-between animate-slide-up">
+                <a href="{% url 'insurance:landing' %}" class="group flex items-center gap-3 text-slate-400 hover:text-white transition-all duration-300 px-4 py-2 rounded-full hover:bg-white/5 border border-transparent hover:border-white/10">
+                    <div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center group-hover:bg-accent-600 transition-colors">
+                        <i class="fa-solid fa-arrow-left text-xs text-white transform group-hover:-translate-x-0.5 transition-transform"></i>
+                    </div>
+                    <span class="text-sm font-semibold tracking-wide">Back to Dashboard</span>
+                </a>
+                
+                {% if application.status == 'approved' %}
+                <button class="flex items-center gap-2 text-xs font-bold text-emerald-400 bg-emerald-500/10 px-4 py-2 rounded-full border border-emerald-500/20 hover:bg-emerald-500/20 transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-lg shadow-emerald-500/10">
+                    <i class="fa-solid fa-print"></i> Download Policy
+                </button>
+                {% endif %}
+            </div>
+
+            <div class="glass-panel rounded-3xl p-8 relative overflow-hidden animate-slide-up delay-100">
+                <div class="absolute top-0 right-0 w-96 h-96 bg-accent-600/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-3">
+                            <span class="text-[10px] font-bold tracking-[0.2em] text-accent-500 uppercase bg-accent-500/10 px-2 py-1 rounded">Application ID</span>
+                            <div class="h-px bg-slate-700 w-16 opacity-50"></div>
+                        </div>
+                        <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight font-sans drop-shadow-lg">
+                            {{ application.application_id }}
+                        </h1>
+                        <div class="flex items-center gap-3 text-slate-300 pt-1">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center border border-white/10">
+                                <i class="fa-regular fa-user text-xs"></i>
+                            </div>
+                            <span class="font-medium text-lg">{{ application.applicant_name }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col items-end gap-3">
+                        <span class="badge px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest status-{{ application.status }}">
+                            <i class="fa-solid fa-circle text-[6px] mr-2 align-middle opacity-80"></i>
+                            {{ application.get_status_display }}
+                        </span>
+                        <span class="text-xs font-mono text-slate-500 bg-black/20 px-3 py-1 rounded-md border border-white/5">
+                            Applied: {{ application.created_at|date:"M d, Y" }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <div class="lg:col-span-2 space-y-8">
+                    
+                    <div class="glass-panel rounded-3xl p-8 animate-slide-up delay-200">
+                        <div class="flex items-center gap-3 mb-8">
+                            <div class="p-2.5 rounded-xl bg-accent-600/20 text-accent-500">
+                                <i class="fa-solid fa-shield-halved text-xl"></i>
+                            </div>
+                            <h2 class="text-xl font-bold text-white">Coverage Details</h2>
+                        </div>
+                        
+                        {% if application.policy %}
+                            <div class="mb-6">
+                                <h3 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300">
+                                    {{ application.policy.name }}
+                                </h3>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="p-5 rounded-2xl bg-midnight-800/50 border border-white/5 hover:border-accent-500/30 transition-colors group">
+                                    <span class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2 block">Monthly Premium</span>
+                                    <div class="flex items-baseline gap-1">
+                                        <span class="text-slate-400 text-sm">₹</span>
+                                        <span class="text-2xl font-bold text-white group-hover:text-accent-400 transition-colors">{{ application.policy.premium_amount }}</span>
+                                    </div>
+                                </div>
+                                <div class="p-5 rounded-2xl bg-midnight-800/50 border border-white/5 hover:border-emerald-500/30 transition-colors group">
+                                    <span class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2 block">Total Coverage</span>
+                                    <div class="flex items-baseline gap-1">
+                                        <span class="text-slate-400 text-sm">₹</span>
+                                        <span class="text-2xl font-bold text-emerald-400 group-hover:text-emerald-300 transition-colors">{{ application.policy.coverage_amount }}</span>
+                                    </div>
+                                </div>
+                                <div class="md:col-span-2 p-5 rounded-2xl bg-midnight-800/50 border border-white/5 flex items-center justify-between">
+                                    <div>
+                                        <span class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1 block">Policy Type</span>
+                                        <span class="text-base font-semibold text-white">{{ application.policy.get_policy_type_display }}</span>
+                                    </div>
+                                    <i class="fa-solid fa-file-contract text-slate-700 text-3xl opacity-50"></i>
+                                </div>
+                            </div>
+                        {% elif application.scheme %}
+                            <div class="mb-6">
+                                <h3 class="text-2xl font-bold text-white">{{ application.scheme.name }}</h3>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="p-5 rounded-2xl bg-midnight-800/50 border border-white/5">
+                                    <span class="text-slate-500 text-xs uppercase font-bold tracking-wider block mb-1">Scheme Type</span>
+                                    <span class="text-lg font-bold text-white">{{ application.scheme.get_scheme_type_display }}</span>
+                                </div>
+                                <div class="p-5 rounded-2xl bg-midnight-800/50 border border-white/5">
+                                    <span class="text-slate-500 text-xs uppercase font-bold tracking-wider block mb-1">Applicable Region</span>
+                                    <span class="text-lg font-bold text-white">{{ application.scheme.state|default:"All India" }}</span>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="glass-panel rounded-3xl p-8 animate-slide-up delay-300">
+                        <div class="flex items-center gap-3 mb-8">
+                            <div class="p-2.5 rounded-xl bg-purple-600/20 text-purple-400">
+                                <i class="fa-solid fa-folder-tree text-xl"></i>
+                            </div>
+                            <h2 class="text-xl font-bold text-white">Attached Documents</h2>
+                        </div>
+
+                        {% if application.aadhaar_card or application.pan_card or application.income_proof or application.medical_records %}
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                
+                                {% if application.aadhaar_card %}
+                                <a href="{{ application.aadhaar_card.url }}" target="_blank" class="group relative overflow-hidden rounded-2xl bg-midnight-800/50 border border-white/5 p-4 hover:bg-midnight-800 transition-all duration-300 hover:shadow-glow-blue hover:-translate-y-1">
+                                    <div class="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <i class="fa-solid fa-arrow-up-right-from-square text-white text-xs"></i>
+                                    </div>
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-12 h-12 rounded-xl bg-red-500 bg-opacity-10 flex items-center justify-center text-xl shrink-0">
+                                            <i class="fa-solid fa-fingerprint text-red-500"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-sm font-bold text-slate-200 group-hover:text-white">Aadhaar Card</h4>
+                                            <p class="text-[10px] text-slate-500 mt-1 uppercase tracking-wide font-semibold group-hover:text-accent-400 transition-colors">Click to View</p>
+                                        </div>
+                                    </div>
+                                </a>
+                                {% endif %}
+                                
+                                {% if application.pan_card %}
+                                <a href="{{ application.pan_card.url }}" target="_blank" class="group relative overflow-hidden rounded-2xl bg-midnight-800/50 border border-white/5 p-4 hover:bg-midnight-800 transition-all duration-300 hover:shadow-glow-blue hover:-translate-y-1">
+                                    <div class="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <i class="fa-solid fa-arrow-up-right-from-square text-white text-xs"></i>
+                                    </div>
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-12 h-12 rounded-xl bg-blue-500 bg-opacity-10 flex items-center justify-center text-xl shrink-0">
+                                            <i class="fa-solid fa-id-card text-blue-500"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-sm font-bold text-slate-200 group-hover:text-white">PAN Card</h4>
+                                            <p class="text-[10px] text-slate-500 mt-1 uppercase tracking-wide font-semibold group-hover:text-accent-400 transition-colors">Click to View</p>
+                                        </div>
+                                    </div>
+                                </a>
+                                {% endif %}
+
+                                {% if application.income_proof %}
+                                <a href="{{ application.income_proof.url }}" target="_blank" class="group relative overflow-hidden rounded-2xl bg-midnight-800/50 border border-white/5 p-4 hover:bg-midnight-800 transition-all duration-300 hover:shadow-glow-blue hover:-translate-y-1">
+                                    <div class="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <i class="fa-solid fa-arrow-up-right-from-square text-white text-xs"></i>
+                                    </div>
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-12 h-12 rounded-xl bg-green-500 bg-opacity-10 flex items-center justify-center text-xl shrink-0">
+                                            <i class="fa-solid fa-file-invoice-dollar text-green-500"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-sm font-bold text-slate-200 group-hover:text-white">Income Proof</h4>
+                                            <p class="text-[10px] text-slate-500 mt-1 uppercase tracking-wide font-semibold group-hover:text-accent-400 transition-colors">Click to View</p>
+                                        </div>
+                                    </div>
+                                </a>
+                                {% endif %}
+
+                                {% if application.medical_records %}
+                                <a href="{{ application.medical_records.url }}" target="_blank" class="group relative overflow-hidden rounded-2xl bg-midnight-800/50 border border-white/5 p-4 hover:bg-midnight-800 transition-all duration-300 hover:shadow-glow-blue hover:-translate-y-1">
+                                    <div class="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <i class="fa-solid fa-arrow-up-right-from-square text-white text-xs"></i>
+                                    </div>
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-12 h-12 rounded-xl bg-purple-500 bg-opacity-10 flex items-center justify-center text-xl shrink-0">
+                                            <i class="fa-solid fa-heart-pulse text-purple-500"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-sm font-bold text-slate-200 group-hover:text-white">Medical Records</h4>
+                                            <p class="text-[10px] text-slate-500 mt-1 uppercase tracking-wide font-semibold group-hover:text-accent-400 transition-colors">Click to View</p>
+                                        </div>
+                                    </div>
+                                </a>
+                                {% endif %}
+
+                            </div>
+                        {% else %}
+                            <div class="flex flex-col items-center justify-center py-10 border border-dashed border-slate-700 rounded-2xl bg-white/5">
+                                <i class="fa-regular fa-folder-open text-slate-600 text-4xl mb-4"></i>
+                                <p class="text-slate-500 font-medium">No documents uploaded</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="lg:col-span-1 space-y-8">
+                    
+                    <div class="glass-panel rounded-3xl p-8 h-full animate-slide-up delay-400 flex flex-col">
+                        <div class="flex items-center gap-3 mb-8">
+                            <div class="p-2.5 rounded-xl bg-orange-500/20 text-orange-500">
+                                <i class="fa-solid fa-clock-rotate-left text-xl"></i>
+                            </div>
+                            <h2 class="text-xl font-bold text-white">Timeline</h2>
+                        </div>
+
+                        <div class="relative pl-6 border-l border-slate-700/50 space-y-10 flex-grow">
+                            
+                            <div class="relative">
+                                <div class="absolute -left-[29px] top-1.5 w-4 h-4 rounded-full border-[3px] 
+                                    {% if application.status != 'draft' %}bg-accent-500 border-midnight-900 shadow-[0_0_0_2px_rgba(59,130,246,0.5)]{% else %}bg-slate-700 border-midnight-900{% endif %}">
+                                </div>
+                                <h4 class="text-sm font-bold text-white mb-1">Submitted</h4>
+                                <p class="text-xs text-slate-500 font-mono">{{ application.created_at|date:"M d, Y - h:i A" }}</p>
+                            </div>
+
+                            <div class="relative">
+                                <div class="absolute -left-[29px] top-1.5 w-4 h-4 rounded-full border-[3px] 
+                                    {% if application.status == 'under_review' %}bg-amber-500 border-midnight-900 shadow-[0_0_0_2px_rgba(245,158,11,0.5)]{% elif application.status == 'approved' or application.status == 'rejected' %}bg-accent-500 border-midnight-900{% else %}bg-slate-700 border-midnight-900{% endif %}">
+                                </div>
+                                <h4 class="text-sm font-bold 
+                                    {% if application.status == 'under_review' %}text-amber-400{% elif application.status == 'approved' or application.status == 'rejected' %}text-white{% else %}text-slate-600{% endif %}">
+                                    Under Review
+                                </h4>
+                                <p class="text-xs text-slate-500 font-mono">
+                                    {% if application.status != 'submitted' and application.status != 'draft' %}
+                                        {{ application.updated_at|date:"M d, Y" }}
+                                    {% else %}
+                                        Processing...
+                                    {% endif %}
+                                </p>
+                            </div>
+
+                            <div class="relative">
+                                <div class="absolute -left-[29px] top-1.5 w-4 h-4 rounded-full border-[3px] 
+                                    {% if application.status == 'approved' %}bg-emerald-500 border-midnight-900 shadow-[0_0_0_2px_rgba(16,185,129,0.5)]{% elif application.status == 'rejected' %}bg-rose-500 border-midnight-900 shadow-[0_0_0_2px_rgba(244,63,94,0.5)]{% else %}bg-slate-700 border-midnight-900{% endif %}">
+                                </div>
+                                <h4 class="text-sm font-bold 
+                                    {% if application.status == 'approved' %}text-emerald-400{% elif application.status == 'rejected' %}text-rose-400{% else %}text-slate-600{% endif %}">
+                                    {% if application.status == 'approved' %}Approved{% elif application.status == 'rejected' %}Rejected{% else %}Decision{% endif %}
+                                </h4>
+                                <p class="text-xs text-slate-500 font-mono">
+                                    {% if application.approved_at %}{{ application.approved_at|date:"M d, Y" }}
+                                    {% elif application.status == 'rejected' %}{{ application.updated_at|date:"M d, Y" }}
+                                    {% else %}Pending...{% endif %}
+                                </p>
+                            </div>
+                        </div>
+
+                        {% if application.admin_notes %}
+                            <div class="mt-6 p-4 rounded-xl bg-slate-900 border border-slate-700 relative">
+                                <div class="absolute -top-3 left-4 bg-slate-800 text-xs text-slate-300 px-2 py-0.5 rounded border border-slate-600">
+                                    Admin Note
+                                </div>
+                                <p class="text-sm text-slate-300 italic pt-2">"{{ application.admin_notes }}"</p>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {% if application.status == 'draft' %}
+                    <div class="glass-panel rounded-3xl p-6 text-center shadow-2xl shadow-black/50">
+                        <div class="w-12 h-12 rounded-full bg-amber-500/20 text-amber-500 flex items-center justify-center mx-auto mb-4">
+                            <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+                        </div>
+                        <h3 class="text-white font-bold mb-2">Application Incomplete</h3>
+                        <p class="text-slate-400 text-xs mb-6 px-4">Your application is currently saved as a draft. Please complete it to proceed.</p>
+                        
+                        <a href="{% url 'insurance:apply_policy' application.policy.id %}" class="relative w-full block group">
+                            <div class="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl blur opacity-60 group-hover:opacity-100 transition duration-500"></div>
+                            <div class="relative bg-[#0b1120] rounded-xl flex items-center justify-center px-6 py-4 border border-white/10 group-hover:bg-[#0f172a] transition-all duration-200">
+                                <span class="text-sm font-bold text-white mr-2">Complete Application</span>
+                                <i class="fa-solid fa-arrow-right text-accent-500 group-hover:translate-x-1 transition-transform"></i>
+                            </div>
+                        </a>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

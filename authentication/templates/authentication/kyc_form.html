@@ -1,0 +1,424 @@
+{% extends 'base.html' %}
+
+{% block title %}Doctor KYC Form{% endblock %}
+
+{% block content %}
+<div class="fade-in max-w-5xl mx-auto py-8">
+    <div class="bg-card border border-border/50 rounded-2xl p-8 sm:p-12 mb-8 shadow-sm">
+        <div class="mb-8">
+            <h1 class="text-4xl sm:text-5xl font-bold text-foreground mb-3">Doctor KYC Verification</h1>
+            <p class="text-lg text-muted-foreground">Complete your Know Your Customer (KYC) verification to activate your doctor account and unlock all features</p>
+            {% if kyc and kyc.status == 'rejected' %}
+            <div class="mt-6 p-6 bg-red-500/10 border-2 border-red-500/50 rounded-2xl flex gap-4">
+                <div class="bg-red-500/20 p-3 rounded-lg flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-600 dark:text-red-400 text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-red-700 dark:text-red-300 font-semibold"><strong>Application Rejected:</strong></p>
+                    <p class="text-red-700 dark:text-red-300">{{ kyc.rejection_reason }}</p>
+                </div>
+            </div>
+            {% elif kyc and kyc.status == 'pending' %}
+            <div class="mt-6 p-6 bg-yellow-500/10 border-2 border-yellow-500/50 rounded-2xl flex gap-4">
+                <div class="bg-yellow-500/20 p-3 rounded-lg flex-shrink-0">
+                    <i class="fas fa-clock text-yellow-600 dark:text-yellow-400 text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-yellow-700 dark:text-yellow-300 font-semibold"><strong>Pending Review:</strong></p>
+                    <p class="text-yellow-700 dark:text-yellow-300">Your KYC application is under review. You can edit it if needed.</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" class="space-y-10">
+            {% csrf_token %}
+
+            <!-- Personal Information Section -->
+            <div class="border-b border-border/50 pb-10">
+                <h2 class="text-2xl sm:text-3xl font-bold text-foreground mb-8 flex items-center gap-3">
+                    <div class="bg-primary/10 p-3 rounded-xl">
+                        <i class="fas fa-user text-primary text-xl"></i>
+                    </div>
+                    Personal Information
+                </h2>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">Full Name *</label>
+                        <input type="text" name="full_name" required value="{{ kyc.full_name|default:'' }}"
+                            class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-foreground placeholder-muted-foreground"
+                            placeholder="Enter your full name">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">Date of Birth *</label>
+                        <input type="date" name="date_of_birth" required value="{{ kyc.date_of_birth|default:'' }}"
+                            class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-foreground">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">Gender *</label>
+                        <select name="gender" required class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-foreground">
+                            <option value="">Select Gender</option>
+                            {% for value, label in gender_choices %}
+                            <option value="{{ value }}" {% if kyc.gender == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">Nationality *</label>
+                        <input type="text" name="nationality" required value="{{ kyc.nationality|default:'' }}"
+                            class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-foreground placeholder-muted-foreground"
+                            placeholder="e.g., Indian">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information Section -->
+            <div class="border-b border-border/50 pb-10">
+                <h2 class="text-2xl sm:text-3xl font-bold text-foreground mb-8 flex items-center gap-3">
+                    <div class="bg-primary/10 p-3 rounded-xl">
+                        <i class="fas fa-envelope text-primary text-xl"></i>
+                    </div>
+                    Contact Information
+                </h2>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">Personal Email *</label>
+                        <input type="email" name="personal_email" required value="{{ kyc.personal_email|default:'' }}"
+                            class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-foreground placeholder-muted-foreground"
+                            placeholder="your.email@example.com">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">Mobile Number *</label>
+                        <input type="tel" name="mobile_number" required value="{{ kyc.mobile_number|default:'' }}"
+                            class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-foreground placeholder-muted-foreground"
+                            placeholder="+91 98765 43210">
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">Residential Address *</label>
+                        <textarea name="residential_address" required rows="3"
+                            class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-foreground placeholder-muted-foreground"
+                            placeholder="Enter your complete residential address">{{ kyc.residential_address|default:'' }}</textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">City *</label>
+                        <input type="text" name="city" required value="{{ kyc.city|default:'' }}"
+                            class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-foreground placeholder-muted-foreground"
+                            placeholder="City">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">State/Province *</label>
+                        <input type="text" name="state" required value="{{ kyc.state|default:'' }}"
+                            class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-foreground placeholder-muted-foreground"
+                            placeholder="State">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">Postal Code *</label>
+                        <input type="text" name="postal_code" required value="{{ kyc.postal_code|default:'' }}"
+                            class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-foreground placeholder-muted-foreground"
+                            placeholder="123456">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">Country *</label>
+                        <input type="text" name="country" required value="{{ kyc.country|default:'' }}"
+                            class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-foreground placeholder-muted-foreground"
+                            placeholder="Country">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medical License Information -->
+            <div class="border-b border-border/50 pb-10">
+                <h2 class="text-2xl sm:text-3xl font-bold text-foreground mb-8 flex items-center gap-3">
+                    <div class="bg-primary/10 p-3 rounded-xl">
+                        <i class="fas fa-certificate text-primary text-xl"></i>
+                    </div>
+                    Medical License Information
+                </h2>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">License Number *</label>
+                        <input type="text" name="license_number_verified" required value="{{ kyc.license_number_verified|default:'' }}"
+                            class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-foreground placeholder-muted-foreground"
+                            placeholder="Enter your medical license number">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">Issuing Authority *</label>
+                        <input type="text" name="license_issuing_authority" required value="{{ kyc.license_issuing_authority|default:'' }}"
+                            class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-foreground placeholder-muted-foreground"
+                            placeholder="Medical Council Name">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">License Issue Date *</label>
+                        <input type="date" name="license_issue_date" required value="{{ kyc.license_issue_date|default:'' }}"
+                            class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-foreground">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">License Expiry Date *</label>
+                        <input type="date" name="license_expiry_date" required value="{{ kyc.license_expiry_date|default:'' }}"
+                            class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-foreground">
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">Medical License Document (PDF/Image) {% if not kyc.license_document %}*{% endif %}</label>
+                        <div class="border-2 border-dashed border-border/50 rounded-xl p-6 hover:border-primary/50 transition-colors text-center cursor-pointer relative" data-file-input="license_document">
+                            <input type="file" name="license_document" accept=".pdf,.jpg,.jpeg,.png" {% if not kyc.license_document %}required{% endif %}
+                                class="w-full h-full opacity-0 absolute inset-0 cursor-pointer z-10" id="license_document">
+                            <i class="fas fa-file-medical text-3xl text-muted-foreground mb-2"></i>
+                            <p class="text-foreground font-semibold file-status">
+                                {% if kyc.license_document %}
+                                    <span class="text-green-500"><i class="fas fa-check-circle"></i></span> Current: {{ kyc.license_document.name|default:"Uploaded" }}
+                                {% else %}
+                                    Upload your medical license document
+                                {% endif %}
+                            </p>
+                            <p class="text-xs text-muted-foreground">PDF or Image (JPG, PNG) {% if kyc.license_document %}- Upload to replace{% endif %}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Educational Qualification -->
+            <div class="border-b border-border/50 pb-10">
+                <h2 class="text-2xl sm:text-3xl font-bold text-foreground mb-8 flex items-center gap-3">
+                    <div class="bg-primary/10 p-3 rounded-xl">
+                        <i class="fas fa-graduation-cap text-primary text-xl"></i>
+                    </div>
+                    Educational Qualification
+                </h2>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">Medical Degree *</label>
+                        <input type="text" name="medical_degree" required value="{{ kyc.medical_degree|default:'' }}"
+                            class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-foreground placeholder-muted-foreground"
+                            placeholder="e.g., MBBS, MD, BDS">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">Medical University *</label>
+                        <input type="text" name="medical_university" required value="{{ kyc.medical_university|default:'' }}"
+                            class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-foreground placeholder-muted-foreground"
+                            placeholder="University name">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">Graduation Year *</label>
+                        <input type="number" name="graduation_year" required value="{{ kyc.graduation_year|default:'' }}" min="1900" max="2100"
+                            class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-foreground placeholder-muted-foreground"
+                            placeholder="YYYY">
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">Degree Certificate (PDF/Image) {% if not kyc.degree_certificate %}*{% endif %}</label>
+                        <div class="border-2 border-dashed border-border/50 rounded-xl p-6 hover:border-primary/50 transition-colors text-center cursor-pointer relative" data-file-input="degree_certificate">
+                            <input type="file" name="degree_certificate" accept=".pdf,.jpg,.jpeg,.png" {% if not kyc.degree_certificate %}required{% endif %}
+                                class="w-full h-full opacity-0 absolute inset-0 cursor-pointer z-10" id="degree_certificate">
+                            <i class="fas fa-certificate text-3xl text-muted-foreground mb-2"></i>
+                            <p class="text-foreground font-semibold file-status">
+                                {% if kyc.degree_certificate %}
+                                    <span class="text-green-500"><i class="fas fa-check-circle"></i></span> Current: {{ kyc.degree_certificate.name|default:"Uploaded" }}
+                                {% else %}
+                                    Upload your medical degree certificate
+                                {% endif %}
+                            </p>
+                            <p class="text-xs text-muted-foreground">PDF or Image (JPG, PNG) {% if kyc.degree_certificate %}- Upload to replace{% endif %}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Professional Information -->
+            <div class="border-b border-border/50 pb-10">
+                <h2 class="text-2xl sm:text-3xl font-bold text-foreground mb-8 flex items-center gap-3">
+                    <div class="bg-primary/10 p-3 rounded-xl">
+                        <i class="fas fa-briefcase text-primary text-xl"></i>
+                    </div>
+                    Professional Information
+                </h2>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">Current Hospital/Clinic</label>
+                        <input type="text" name="current_hospital" value="{{ kyc.current_hospital|default:'' }}"
+                            class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-foreground placeholder-muted-foreground"
+                            placeholder="Hospital/Clinic name">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">Designation *</label>
+                        <input type="text" name="designation" required value="{{ kyc.designation|default:'' }}"
+                            class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-foreground placeholder-muted-foreground"
+                            placeholder="e.g., Senior Consultant, Associate Professor">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">Department/Specialty *</label>
+                        <input type="text" name="department_specialty" required value="{{ kyc.department_specialty|default:'' }}"
+                            class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-foreground placeholder-muted-foreground"
+                            placeholder="e.g., Oncology, Cardiology">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">Years of Practice *</label>
+                        <input type="number" name="years_of_practice" required value="{{ kyc.years_of_practice|default:'' }}" min="0" max="70"
+                            class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-foreground placeholder-muted-foreground"
+                            placeholder="Years">
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">Employment Document (PDF/Image)</label>
+                        <div class="border-2 border-dashed border-border/50 rounded-xl p-6 hover:border-primary/50 transition-colors text-center cursor-pointer relative" data-file-input="employment_document">
+                            <input type="file" name="employment_document" accept=".pdf,.jpg,.jpeg,.png"
+                                class="w-full h-full opacity-0 absolute inset-0 cursor-pointer z-10" id="employment_document">
+                            <i class="fas fa-file-contract text-3xl text-muted-foreground mb-2"></i>
+                            <p class="text-foreground font-semibold file-status">
+                                {% if kyc.employment_document %}
+                                    <span class="text-green-500"><i class="fas fa-check-circle"></i></span> Current: {{ kyc.employment_document.name|default:"Uploaded" }}
+                                {% else %}
+                                    Upload employment letter or certificate
+                                {% endif %}
+                            </p>
+                            <p class="text-xs text-muted-foreground">PDF or Image (JPG, PNG) {% if kyc.employment_document %}- Upload to replace{% endif %}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Identity Documents -->
+            <div class="border-b border-border/50 pb-10">
+                <h2 class="text-2xl sm:text-3xl font-bold text-foreground mb-8 flex items-center gap-3">
+                    <div class="bg-primary/10 p-3 rounded-xl">
+                        <i class="fas fa-id-card text-primary text-xl"></i>
+                    </div>
+                    Identity Verification
+                </h2>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">Identity Document Type *</label>
+                        <select name="identity_document_type" required class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-foreground">
+                            <option value="">Select Document Type</option>
+                            {% for value, label in identity_doc_types %}
+                            <option value="{{ value }}" {% if kyc.identity_document_type == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">Document Number *</label>
+                        <input type="text" name="identity_document_number" required value="{{ kyc.identity_document_number|default:'' }}"
+                            class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-foreground placeholder-muted-foreground"
+                            placeholder="Document number">
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">Identity Document (PDF/Image) {% if not kyc.identity_document_file %}*{% endif %}</label>
+                        <div class="border-2 border-dashed border-border/50 rounded-xl p-6 hover:border-primary/50 transition-colors text-center cursor-pointer relative" data-file-input="identity_document_file">
+                            <input type="file" name="identity_document_file" accept=".pdf,.jpg,.jpeg,.png" {% if not kyc.identity_document_file %}required{% endif %}
+                                class="w-full h-full opacity-0 absolute inset-0 cursor-pointer z-10" id="identity_document_file">
+                            <i class="fas fa-passport text-3xl text-muted-foreground mb-2"></i>
+                            <p class="text-foreground font-semibold file-status">
+                                {% if kyc.identity_document_file %}
+                                    <span class="text-green-500"><i class="fas fa-check-circle"></i></span> Current: {{ kyc.identity_document_file.name|default:"Uploaded" }}
+                                {% else %}
+                                    Upload clear copy of your identity document
+                                {% endif %}
+                            </p>
+                            <p class="text-xs text-muted-foreground">PDF or Image (JPG, PNG) {% if kyc.identity_document_file %}- Upload to replace{% endif %}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address Proof -->
+            <div class="pb-8">
+                <h2 class="text-2xl sm:text-3xl font-bold text-foreground mb-8 flex items-center gap-3">
+                    <div class="bg-primary/10 p-3 rounded-xl">
+                        <i class="fas fa-map-location-dot text-primary text-xl"></i>
+                    </div>
+                    Address Proof
+                </h2>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">Address Proof Type *</label>
+                        <select name="address_proof_type" required class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200 text-foreground">
+                            <option value="">Select Proof Type</option>
+                            {% for value, label in address_proof_types %}
+                            <option value="{{ value }}" {% if kyc.address_proof_type == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-bold text-foreground mb-2 uppercase tracking-wider">Address Proof Document (PDF/Image) {% if not kyc.address_proof_file %}*{% endif %}</label>
+                        <div class="border-2 border-dashed border-border/50 rounded-xl p-6 hover:border-primary/50 transition-colors text-center cursor-pointer relative" data-file-input="address_proof_file">
+                            <input type="file" name="address_proof_file" accept=".pdf,.jpg,.jpeg,.png" {% if not kyc.address_proof_file %}required{% endif %}
+                                class="w-full h-full opacity-0 absolute inset-0 cursor-pointer z-10" id="address_proof_file">
+                            <i class="fas fa-file-invoice text-3xl text-muted-foreground mb-2"></i>
+                            <p class="text-foreground font-semibold file-status">
+                                {% if kyc.address_proof_file %}
+                                    <span class="text-green-500"><i class="fas fa-check-circle"></i></span> Current: {{ kyc.address_proof_file.name|default:"Uploaded" }}
+                                {% else %}
+                                    Upload utility bill, rental agreement, or property deed
+                                {% endif %}
+                            </p>
+                            <p class="text-xs text-muted-foreground">PDF or Image (JPG, PNG) {% if kyc.address_proof_file %}- Upload to replace{% endif %}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-4 pt-8 border-t border-border/50">
+                <button type="submit" class="px-8 sm:px-10 py-3 bg-gradient-to-r from-green-600 to-green-500 hover:shadow-xl text-white font-bold rounded-xl transition-all duration-200 hover:scale-105 inline-flex items-center gap-2">
+                    <i class="fas fa-check"></i>
+                    Submit KYC Application
+                </button>
+                <a href="{% url 'doctor_dashboard' %}" class="px-8 sm:px-10 py-3 bg-muted hover:bg-muted/80 text-foreground font-bold rounded-xl transition-all duration-200 text-center inline-flex items-center gap-2">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Dashboard
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Make file inputs clickable when the div is clicked
+document.querySelectorAll('.border-dashed').forEach(div => {
+    div.addEventListener('click', function(e) {
+        // Prevent double-triggering when clicking directly on input
+        if (e.target.tagName === 'INPUT') return;
+        const input = this.querySelector('input[type="file"]');
+        if (input) input.click();
+    });
+    
+    // Update text when file is selected
+    const input = div.querySelector('input[type="file"]');
+    if (input) {
+        input.addEventListener('change', function() {
+            const statusEl = div.querySelector('.file-status');
+            if (this.files && this.files[0] && statusEl) {
+                statusEl.innerHTML = '<span class="text-blue-500"><i class="fas fa-file"></i></span> Selected: ' + this.files[0].name;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

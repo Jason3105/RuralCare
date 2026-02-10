@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+{% block title %}Notification Preferences{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <nav class="mb-4">
+                <a href="{% url 'patient_portal:alerts_list' %}" class="text-primary hover:underline text-sm">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Alerts
+                </a>
+            </nav>
+            <h1 class="text-3xl font-bold text-foreground">Notification Preferences</h1>
+            <p class="text-muted-foreground mt-1">Customize how you receive alerts and reminders</p>
+        </div>
+
+        <!-- Form -->
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Notification Channels -->
+            <div class="bg-card border border-border/50 rounded-xl p-6">
+                <h2 class="text-lg font-semibold text-foreground mb-4">How would you like to be notified?</h2>
+                
+                <div class="space-y-4">
+                    <label class="flex items-center justify-between p-4 border border-border rounded-lg cursor-pointer hover:bg-accent/30 transition-colors">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                                <i class="fas fa-envelope text-blue-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-foreground">Email Notifications</p>
+                                <p class="text-sm text-muted-foreground">Receive alerts via email</p>
+                            </div>
+                        </div>
+                        <input type="checkbox" name="email_notifications" 
+                               {% if preferences.email_notifications %}checked{% endif %}
+                               class="w-5 h-5 rounded border-border text-primary focus:ring-primary">
+                    </label>
+
+                    <label class="flex items-center justify-between p-4 border border-border rounded-lg cursor-pointer hover:bg-accent/30 transition-colors">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                                <i class="fas fa-sms text-green-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-foreground">SMS Notifications</p>
+                                <p class="text-sm text-muted-foreground">Receive text message alerts</p>
+                            </div>
+                        </div>
+                        <input type="checkbox" name="sms_notifications" 
+                               {% if preferences.sms_notifications %}checked{% endif %}
+                               class="w-5 h-5 rounded border-border text-primary focus:ring-primary">
+                    </label>
+
+                    <label class="flex items-center justify-between p-4 border border-border rounded-lg cursor-pointer hover:bg-accent/30 transition-colors">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
+                                <i class="fas fa-bell text-purple-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-foreground">In-App Notifications</p>
+                                <p class="text-sm text-muted-foreground">See alerts when you log in</p>
+                            </div>
+                        </div>
+                        <input type="checkbox" name="in_app_notifications" 
+                               {% if preferences.in_app_notifications %}checked{% endif %}
+                               class="w-5 h-5 rounded border-border text-primary focus:ring-primary">
+                    </label>
+
+                    <!-- Telegram Integration -->
+                    {% if telegram_linked %}
+                    <label class="flex items-center justify-between p-4 border border-border rounded-lg cursor-pointer hover:bg-accent/30 transition-colors">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                                <i class="fab fa-telegram text-blue-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-foreground">Telegram Notifications</p>
+                                <p class="text-sm text-muted-foreground">Connected: @{{ patient_profile.telegram_username }}</p>
+                            </div>
+                        </div>
+                        <input type="checkbox" name="enable_telegram" 
+                               {% if patient_profile.telegram_notifications_enabled %}checked{% endif %}
+                               class="w-5 h-5 rounded border-border text-primary focus:ring-primary">
+                    </label>
+                    {% else %}
+                    <div class="p-4 border border-dashed border-border rounded-lg">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                                    <i class="fab fa-telegram text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-foreground">Telegram Notifications</p>
+                                    <p class="text-sm text-muted-foreground">Get instant alerts on your phone</p>
+                                </div>
+                            </div>
+                            <a href="{% url 'patient_portal:link_telegram' %}" 
+                               class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fab fa-telegram mr-2"></i>Link Account
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Notification Types -->
+            <div class="bg-card border border-border/50 rounded-xl p-6">
+                <h2 class="text-lg font-semibold text-foreground mb-4">What would you like to be notified about?</h2>
+                
+                <div class="space-y-4">
+                    <label class="flex items-center justify-between p-4 border border-border rounded-lg cursor-pointer hover:bg-accent/30 transition-colors">
+                        <div>
+                            <p class="font-medium text-foreground">Appointment Reminders</p>
+                            <p class="text-sm text-muted-foreground">Upcoming appointments and visits</p>
+                        </div>
+                        <input type="checkbox" name="appointment_reminders" 
+                               {% if preferences.appointment_reminders %}checked{% endif %}
+                               class="w-5 h-5 rounded border-border text-primary focus:ring-primary">
+                    </label>
+
+                    <label class="flex items-center justify-between p-4 border border-border rounded-lg cursor-pointer hover:bg-accent/30 transition-colors">
+                        <div>
+                            <p class="font-medium text-foreground">Medication Reminders</p>
+                            <p class="text-sm text-muted-foreground">Reminders to take your medications</p>
+                        </div>
+                        <input type="checkbox" name="medication_reminders" 
+                               {% if preferences.medication_reminders %}checked{% endif %}
+                               class="w-5 h-5 rounded border-border text-primary focus:ring-primary">
+                    </label>
+
+                    <label class="flex items-center justify-between p-4 border border-border rounded-lg cursor-pointer hover:bg-accent/30 transition-colors">
+                        <div>
+                            <p class="font-medium text-foreground">Symptom Log Reminders</p>
+                            <p class="text-sm text-muted-foreground">Daily reminders to log your symptoms</p>
+                        </div>
+                        <input type="checkbox" name="symptom_log_reminders" 
+                               {% if preferences.symptom_log_reminders %}checked{% endif %}
+                               class="w-5 h-5 rounded border-border text-primary focus:ring-primary">
+                    </label>
+
+                    <label class="flex items-center justify-between p-4 border border-border rounded-lg cursor-pointer hover:bg-accent/30 transition-colors">
+                        <div>
+                            <p class="font-medium text-foreground">Treatment Updates</p>
+                            <p class="text-sm text-muted-foreground">Updates about your treatment plan</p>
+                        </div>
+                        <input type="checkbox" name="treatment_updates" 
+                               {% if preferences.treatment_updates %}checked{% endif %}
+                               class="w-5 h-5 rounded border-border text-primary focus:ring-primary">
+                    </label>
+
+                    <label class="flex items-center justify-between p-4 border border-border rounded-lg cursor-pointer hover:bg-accent/30 transition-colors">
+                        <div>
+                            <p class="font-medium text-foreground">Lab Results</p>
+                            <p class="text-sm text-muted-foreground">Notifications when lab results are ready</p>
+                        </div>
+                        <input type="checkbox" name="lab_results" 
+                               {% if preferences.lab_results %}checked{% endif %}
+                               class="w-5 h-5 rounded border-border text-primary focus:ring-primary">
+                    </label>
+                </div>
+            </div>
+
+            <!-- Reminder Time -->
+            <div class="bg-card border border-border/50 rounded-xl p-6">
+                <h2 class="text-lg font-semibold text-foreground mb-4">Reminder Timing</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label for="reminder_time" class="block text-sm font-medium text-foreground mb-2">
+                            Daily symptom log reminder time
+                        </label>
+                        <input type="time" id="reminder_time" name="reminder_time" 
+                               value="{{ preferences.reminder_time|default:'09:00' }}"
+                               class="px-4 py-2 bg-background border border-border rounded-lg text-foreground">
+                    </div>
+
+                    <div>
+                        <label for="appointment_reminder_hours" class="block text-sm font-medium text-foreground mb-2">
+                            Remind me before appointments
+                        </label>
+                        <select id="appointment_reminder_hours" name="appointment_reminder_hours"
+                                class="px-4 py-2 bg-background border border-border rounded-lg text-foreground">
+                            <option value="1" {% if preferences.appointment_reminder_hours == 1 %}selected{% endif %}>1 hour before</option>
+                            <option value="2" {% if preferences.appointment_reminder_hours == 2 %}selected{% endif %}>2 hours before</option>
+                            <option value="24" {% if preferences.appointment_reminder_hours == 24 %}selected{% endif %}>1 day before</option>
+                            <option value="48" {% if preferences.appointment_reminder_hours == 48 %}selected{% endif %}>2 days before</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiet Hours -->
+            <div class="bg-card border border-border/50 rounded-xl p-6">
+                <h2 class="text-lg font-semibold text-foreground mb-4">Quiet Hours</h2>
+                <p class="text-muted-foreground mb-4">Don't send notifications during these hours (except high priority)</p>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="quiet_start" class="block text-sm font-medium text-foreground mb-2">Start</label>
+                        <input type="time" id="quiet_start" name="quiet_start" 
+                               value="{{ preferences.quiet_start|default:'22:00' }}"
+                               class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground">
+                    </div>
+                    <div>
+                        <label for="quiet_end" class="block text-sm font-medium text-foreground mb-2">End</label>
+                        <input type="time" id="quiet_end" name="quiet_end" 
+                               value="{{ preferences.quiet_end|default:'08:00' }}"
+                               class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="flex justify-end space-x-4">
+                <a href="{% url 'patient_portal:alerts_list' %}" 
+                   class="px-6 py-2 border border-border rounded-lg hover:bg-accent transition-colors">
+                    Cancel
+                </a>
+                <button type="submit" class="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                    <i class="fas fa-save mr-2"></i>Save Preferences
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

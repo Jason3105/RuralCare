@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+
+{% block title %}Genomic Profile Details{% endblock %}
+
+{% block content %}
+<div class="fade-in max-w-6xl mx-auto">
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-3xl sm:text-4xl font-bold text-foreground mb-2">Genomic Profile</h1>
+            <p class="text-muted-foreground">Uploaded on {{ profile.created_at|date:"F d, Y" }}</p>
+        </div>
+        <div class="mt-4 sm:mt-0 flex gap-3">
+            <a href="{% url 'cancer_detection:genomic_list' %}" 
+               class="bg-card border-2 border-border hover:border-primary text-foreground font-semibold py-2 px-4 rounded-lg transition-all">
+                <i class="fas fa-arrow-left mr-2"></i>Back to List
+            </a>
+            <a href="{% url 'cancer_detection:create_comprehensive_plan' %}" 
+               class="bg-gradient-to-r from-green-500 to-green-600 hover:shadow-xl text-white font-semibold py-2 px-4 rounded-lg transition-all">
+                <i class="fas fa-project-diagram mr-2"></i>Use in Plan
+            </a>
+        </div>
+    </div>
+
+    {% if profile %}
+    <!-- Actionable Mutations -->
+    {% if profile.actionable_mutations %}
+    <div class="bg-card border border-border/50 rounded-2xl p-6 mb-8">
+        <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
+            <i class="fas fa-star text-yellow-500 mr-2"></i>Actionable Mutations
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for mutation in profile.actionable_mutations %}
+            <div class="bg-background rounded-lg p-4 border border-border/50">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="font-bold text-lg text-foreground">{{ mutation.gene }}</span>
+                    <span class="px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 rounded text-xs font-semibold">
+                        {{ mutation.priority|title }} Priority
+                    </span>
+                </div>
+                <p class="text-sm text-muted-foreground mb-3">{{ mutation.mutation }}</p>
+                <div>
+                    <p class="text-xs text-muted-foreground mb-1">Recommended Therapies:</p>
+                    <div class="flex flex-wrap gap-2">
+                        {% for therapy in mutation.therapies|slice:":3" %}
+                        <span class="px-2 py-1 bg-primary/10 text-primary rounded text-xs font-semibold">
+                            {{ therapy }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Eligibility Assessment -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <!-- Targeted Therapy -->
+        <div class="bg-card border border-border/50 rounded-2xl p-6">
+            <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
+                <i class="fas fa-bullseye text-primary mr-2"></i>Targeted Therapy Eligibility
+            </h2>
+            {% if profile.targeted_therapy_eligibility.eligible %}
+            <div class="mb-4">
+                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                    <i class="fas fa-check-circle mr-2"></i>Eligible
+                </span>
+                <span class="ml-3 text-sm text-muted-foreground">
+                    Score: {{ profile.targeted_therapy_eligibility.eligibility_score }}%
+                </span>
+            </div>
+            {% if profile.targeted_therapy_eligibility.therapies %}
+            <div class="space-y-2">
+                {% for therapy in profile.targeted_therapy_eligibility.therapies %}
+                <div class="bg-background rounded-lg p-3">
+                    <p class="font-semibold text-foreground">{{ therapy.therapy_class }}</p>
+                    <p class="text-sm text-muted-foreground">{{ therapy.indication }}</p>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        {% for drug in therapy.drugs|slice:":3" %}
+                        <span class="px-2 py-1 bg-primary/10 text-primary rounded text-xs">{{ drug }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% else %}
+            <p class="text-muted-foreground">No actionable mutations identified for targeted therapy.</p>
+            {% endif %}
+        </div>
+
+        <!-- Immunotherapy -->
+        <div class="bg-card border border-border/50 rounded-2xl p-6">
+            <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
+                <i class="fas fa-shield-alt text-primary mr-2"></i>Immunotherapy Eligibility
+            </h2>
+            {% if profile.immunotherapy_eligibility.eligible %}
+            <div class="mb-4">
+                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                    <i class="fas fa-check-circle mr-2"></i>Eligible
+                </span>
+                <span class="ml-3 text-sm text-muted-foreground">
+                    Score: {{ profile.immunotherapy_eligibility.eligibility_score }}%
+                </span>
+            </div>
+            <p class="text-sm text-foreground mb-3">{{ profile.immunotherapy_eligibility.recommendation }}</p>
+            {% if profile.immunotherapy_eligibility.factors %}
+            <div class="space-y-1 mb-3">
+                {% for factor in profile.immunotherapy_eligibility.factors %}
+                <div class="flex items-center text-sm text-muted-foreground">
+                    <i class="fas fa-check text-primary mr-2"></i>{{ factor }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% if profile.immunotherapy_eligibility.preferred_agents %}
+            <div>
+                <p class="text-xs text-muted-foreground mb-2">Preferred Agents:</p>
+                <div class="flex flex-wrap gap-2">
+                    {% for agent in profile.immunotherapy_eligibility.preferred_agents %}
+                    <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 rounded text-xs font-semibold">
+                        {{ agent }}
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            {% else %}
+            <p class="text-muted-foreground">Limited immunotherapy benefit expected based on current biomarkers.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Mutations & Biomarkers -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="bg-card border border-border/50 rounded-2xl p-6">
+            <h2 class="text-xl font-bold text-foreground mb-4">Mutations</h2>
+            {% if profile.mutations %}
+            <div class="space-y-2">
+                {% for gene, value in profile.mutations.items %}
+                <div class="flex justify-between items-center bg-background rounded-lg p-3">
+                    <span class="font-semibold text-foreground">{{ gene }}</span>
+                    <span class="text-sm text-muted-foreground">{{ value }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted-foreground">No mutations recorded</p>
+            {% endif %}
+        </div>
+
+        <div class="bg-card border border-border/50 rounded-2xl p-6">
+            <h2 class="text-xl font-bold text-foreground mb-4">Biomarkers</h2>
+            <div class="space-y-2">
+                {% if profile.pd_l1_status %}
+                <div class="flex justify-between items-center bg-background rounded-lg p-3">
+                    <span class="font-semibold text-foreground">PD-L1</span>
+                    <span class="text-sm text-muted-foreground">{{ profile.pd_l1_status|title }}{% if profile.pd_l1_percentage %} ({{ profile.pd_l1_percentage }}%){% endif %}</span>
+                </div>
+                {% endif %}
+                {% if profile.msi_status %}
+                <div class="flex justify-between items-center bg-background rounded-lg p-3">
+                    <span class="font-semibold text-foreground">MSI</span>
+                    <span class="text-sm text-muted-foreground">{{ profile.msi_status }}</span>
+                </div>
+                {% endif %}
+                {% if profile.tumor_mutational_burden %}
+                <div class="flex justify-between items-center bg-background rounded-lg p-3">
+                    <span class="font-semibold text-foreground">TMB</span>
+                    <span class="text-sm text-muted-foreground">{{ profile.tumor_mutational_burden }} mutations/Mb</span>
+                </div>
+                {% endif %}
+                {% if profile.biomarkers %}
+                {% for biomarker, value in profile.biomarkers.items %}
+                <div class="flex justify-between items-center bg-background rounded-lg p-3">
+                    <span class="font-semibold text-foreground">{{ biomarker|upper }}</span>
+                    <span class="text-sm text-muted-foreground">{{ value|title }}</span>
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Prognostic Profile -->
+    {% if profile.prognostic_profile %}
+    <div class="bg-card border border-border/50 rounded-2xl p-6 mb-8">
+        <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
+            <i class="fas fa-chart-line text-primary mr-2"></i>Prognostic Profile
+        </h2>
+        <div class="mb-4">
+            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold 
+                {% if profile.prognostic_profile.prognosis_category == 'Favorable' %}bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400
+                {% elif profile.prognostic_profile.prognosis_category == 'Unfavorable' %}bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400
+                {% else %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400{% endif %}">
+                {{ profile.prognostic_profile.prognosis_category }}
+            </span>
+        </div>
+        <p class="text-sm text-foreground mb-4">{{ profile.prognostic_profile.overall_assessment }}</p>
+        {% if profile.prognostic_profile.favorable_markers %}
+        <div class="mb-3">
+            <p class="text-xs text-muted-foreground mb-2">Favorable Markers:</p>
+            <div class="flex flex-wrap gap-2">
+                {% for marker in profile.prognostic_profile.favorable_markers %}
+                <span class="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 rounded text-xs">{{ marker }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        {% if profile.prognostic_profile.unfavorable_markers %}
+        <div>
+            <p class="text-xs text-muted-foreground mb-2">Unfavorable Markers:</p>
+            <div class="flex flex-wrap gap-2">
+                {% for marker in profile.prognostic_profile.unfavorable_markers %}
+                <span class="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 rounded text-xs">{{ marker }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Test Information -->
+    <div class="bg-card border border-border/50 rounded-2xl p-6">
+        <h2 class="text-xl font-bold text-foreground mb-4">Test Information</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {% if profile.test_type %}
+            <div>
+                <p class="text-sm text-muted-foreground">Test Type</p>
+                <p class="font-semibold text-foreground">{{ profile.test_type }}</p>
+            </div>
+            {% endif %}
+            {% if profile.test_date %}
+            <div>
+                <p class="text-sm text-muted-foreground">Test Date</p>
+                <p class="font-semibold text-foreground">{{ profile.test_date|date:"M d, Y" }}</p>
+            </div>
+            {% endif %}
+            {% if profile.lab_name %}
+            <div>
+                <p class="text-sm text-muted-foreground">Laboratory</p>
+                <p class="font-semibold text-foreground">{{ profile.lab_name }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

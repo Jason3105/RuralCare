@@ -1,0 +1,909 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Evidence Explanation - Treatment Plan{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4 sm:p-6 lg:p-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Back Link -->
+        <div class="mb-6">
+            <a href="javascript:history.back()" class="inline-flex items-center text-primary hover:text-primary/80 transition-colors text-sm font-medium">
+                <i class="fas fa-arrow-left mr-2"></i> Back
+            </a>
+        </div>
+        
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-primary to-primary/80 dark:from-primary/80 dark:to-primary/60 rounded-lg p-8 text-primary-foreground mb-8 shadow-lg">
+            <h1 class="text-3xl sm:text-4xl font-bold mb-3">{{ rec_evidence.recommendation_type }}</h1>
+            <p class="text-primary-foreground/90 text-lg mb-4">{{ rec_evidence.recommendation_text|truncatewords:30 }}</p>
+            
+            <div class="inline-block px-4 py-2 bg-primary-foreground/20 rounded-full text-primary-foreground font-semibold text-sm mb-4">
+                Evidence Strength: 
+                {% if rec_evidence.total_evidence_score >= 0.7 %}
+                    HIGH ({{ rec_evidence.total_evidence_score|floatformat:0 }}%)
+                {% elif rec_evidence.total_evidence_score >= 0.4 %}
+                    MODERATE ({{ rec_evidence.total_evidence_score|floatformat:0 }}%)
+                {% else %}
+                    LOW ({{ rec_evidence.total_evidence_score|floatformat:0 }}%)
+                {% endif %}
+            </div>
+            
+            <div class="w-full bg-primary-foreground/20 rounded-full h-2 overflow-hidden">
+                <div class="bg-primary-foreground/80 h-full rounded-full transition-all duration-500"
+                     style="width: {{ rec_evidence.total_evidence_score|floatformat:0 }}%">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recommendation Details -->
+        <div class="bg-card border border-border rounded-lg p-6 mb-6 shadow-sm">
+            <h3 class="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                <i class="fas fa-clipboard-list text-primary"></i> Recommendation
+            </h3>
+            <p class="text-muted-foreground leading-relaxed mb-4">{{ rec_evidence.recommendation_text }}</p>
+            
+            <div class="pt-4 border-t border-border/50 flex flex-col sm:flex-row gap-4 text-sm">
+                <div>
+                    <span class="font-semibold text-foreground">Type:</span>
+                    <span class="text-muted-foreground ml-2">{{ rec_evidence.recommendation_type }}</span>
+                </div>
+                <div>
+                    <span class="font-semibold text-foreground">Priority:</span>
+                    <span class="text-muted-foreground ml-2">{{ rec_evidence.recommendation_priority|default:"Standard" }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Clinical Rationale -->
+        {% if explanation.rationale %}
+        <div class="bg-card border border-border rounded-lg p-6 mb-6 shadow-sm">
+            <h3 class="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                <i class="fas fa-lightbulb text-primary"></i> Clinical Rationale
+            </h3>
+            <p class="text-muted-foreground leading-relaxed">{{ explanation.rationale }}</p>
+        </div>
+        {% endif %}
+        
+        <!-- Evidence Sources -->
+        <div class="bg-card border border-border rounded-lg p-6 mb-6 shadow-sm">
+            <h3 class="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                <i class="fas fa-book text-primary"></i> Evidence Sources ({{ evidence_sources|length }})
+            </h3>
+            
+            {% if evidence_sources %}
+                <div class="space-y-4">
+                    {% for item in evidence_sources %}
+                    <div class="bg-background/50 dark:bg-background/30 border-l-4 {% if 'guideline' in item.source.source_type %}border-blue-500{% elif item.source.pmid %}border-emerald-500{% else %}border-amber-500{% endif %} p-4 rounded-lg">
+                        <h4 class="font-semibold text-foreground mb-2">{{ item.source.title }}</h4>
+                        
+                        <div class="space-y-2 text-sm text-muted-foreground mb-3">
+                            {% if item.source.pmid %}
+                                <div><strong>PMID:</strong> <a href="https://pubmed.ncbi.nlm.nih.gov/{{ item.source.pmid }}" target="_blank" class="text-primary hover:underline">{{ item.source.pmid }}</a></div>
+                            {% endif %}
+                            
+                            {% if item.source.authors %}
+                                <div><strong>Authors:</strong> {{ item.source.authors }}</div>
+                            {% endif %}
+                            
+                            {% if item.source.journal %}
+                                <div><strong>Journal:</strong> {{ item.source.journal }} ({{ item.source.publication_year }})</div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if item.source.abstract %}
+                        <p class="text-sm text-muted-foreground italic mb-3">
+                            {{ item.source.abstract|truncatewords:60 }}
+                        </p>
+                        {% endif %}
+                        
+                        <div class="flex flex-wrap gap-2 mb-3">
+                            {% if item.source.evidence_strength == 'High' %}
+                                <span class="inline-block px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded text-xs font-semibold">
+                                    <i class="fas fa-star mr-1"></i>High Strength
+                                </span>
+                            {% elif item.source.evidence_strength == 'Moderate' %}
+                                <span class="inline-block px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded text-xs font-semibold">
+                                    <i class="fas fa-star-half-alt mr-1"></i>Moderate Strength
+                                </span>
+                            {% else %}
+                                <span class="inline-block px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded text-xs font-semibold">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>Low Strength
+                                </span>
+                            {% endif %}
+                            
+                            <span class="inline-block px-2 py-1 bg-background border border-border rounded text-xs font-semibold text-foreground">
+                                Relevance: {{ item.relevance_score|floatformat:0 }}%
+                            </span>
+                            <span class="inline-block px-2 py-1 bg-background border border-border rounded text-xs font-semibold text-foreground">
+                                Impact: {{ item.impact_percentage|floatformat:1 }}%
+                            </span>
+                        </div>
+                        
+                        {% if item.source.pmid %}
+                        <a href="https://pubmed.ncbi.nlm.nih.gov/{{ item.source.pmid }}" 
+                           target="_blank" class="inline-flex items-center px-3 py-1 bg-primary hover:bg-primary/90 text-primary-foreground rounded text-xs font-semibold transition-colors">
+                            <i class="fas fa-external-link-alt mr-1"></i> View on PubMed
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted-foreground">No evidence sources available for this recommendation.</p>
+            {% endif %}
+        </div>
+        
+        <!-- Decision Factors -->
+        <div class="bg-card border border-border rounded-lg p-6 mb-6 shadow-sm">
+            <h3 class="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                <i class="fas fa-chart-bar text-primary"></i> Decision Factors
+            </h3>
+            <p class="text-muted-foreground text-sm mb-4">
+                The following patient factors influenced this treatment recommendation:
+            </p>
+            
+            {% if decision_factors %}
+                <div class="space-y-3 mb-4">
+                    {% for factor in decision_factors %}
+                    <div class="bg-background/50 dark:bg-background/30 p-3 rounded-lg border border-border/50">
+                        <div class="font-semibold text-foreground">{{ factor }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted-foreground text-sm">Decision factor analysis not available.</p>
+            {% endif %}
+            
+            <a href="{% url 'cancer_detection:decision_factors_breakdown' treatment_plan.id rec_evidence.id %}" 
+               class="inline-flex items-center px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors font-medium text-sm">
+                <i class="fas fa-chart-bar mr-2"></i> View Detailed Analysis
+            </a>
+        </div>
+        
+        <!-- Feedback Section -->
+        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900/50 rounded-lg p-6 mb-6">
+            <h3 class="text-xl font-bold text-blue-900 dark:text-blue-400 mb-4 flex items-center gap-2">
+                <i class="fas fa-comment-dots"></i> Was this explanation helpful?
+            </h3>
+            
+            <form id="feedback-form" method="post" action="{% url 'cancer_detection:submit_explanation_feedback' treatment_plan.id rec_evidence.id %}" class="space-y-4">
+                {% csrf_token %}
+                
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button type="button" class="feedback-btn px-6 py-2 border-2 border-blue-500 text-blue-500 rounded-lg font-semibold transition-colors" data-helpful="true">
+                        <i class="fas fa-thumbs-up mr-2"></i> Yes, Helpful
+                    </button>
+                    <button type="button" class="feedback-btn px-6 py-2 border-2 border-red-500 text-red-500 rounded-lg font-semibold transition-colors" data-helpful="false">
+                        <i class="fas fa-thumbs-down mr-2"></i> Not Helpful
+                    </button>
+                </div>
+                
+                <div>
+                    <label for="feedback" class="block text-sm font-semibold text-foreground mb-2">
+                        Additional Comments (Optional):
+                    </label>
+                    <textarea id="feedback" name="feedback" class="w-full px-4 py-2 bg-background border border-input rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none" placeholder="Share your thoughts..." rows="4"></textarea>
+                </div>
+                
+                <button type="submit" class="px-6 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg font-semibold transition-colors">
+                    <i class="fas fa-send mr-2"></i> Submit Feedback
+                </button>
+            </form>
+        </div>
+        
+        <!-- Explanation History -->
+        <div class="bg-card border border-border rounded-lg p-6 mb-6 shadow-sm">
+            <h3 class="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                <i class="fas fa-history text-primary"></i> Explanation History
+            </h3>
+            
+            {% if history %}
+                <div class="space-y-3 max-h-96 overflow-y-auto">
+                    {% for log in history %}
+                    <div class="bg-background/50 dark:bg-background/30 border-l-4 {% if log.was_helpful %}border-emerald-500{% elif log.was_helpful == False %}border-red-500{% else %}border-primary{% endif %} p-3 rounded-lg">
+                        <div class="font-semibold text-foreground text-sm flex items-center gap-2">
+                            {% if log.was_helpful %}
+                                <i class="fas fa-check-circle text-emerald-500"></i> Marked as helpful
+                            {% elif log.was_helpful == False %}
+                                <i class="fas fa-times-circle text-red-500"></i> Marked as not helpful
+                            {% else %}
+                                <i class="fas fa-eye text-primary"></i> Viewed
+                            {% endif %}
+                        </div>
+                        <div class="text-xs text-muted-foreground mt-1">
+                            {{ log.created_at|date:"M d, Y H:i" }} 
+                            {% if log.user %}
+                                by {{ log.user.first_name }} {{ log.user.last_name }}
+                            {% endif %}
+                        </div>
+                        {% if log.user_feedback %}
+                        <p class="text-sm text-muted-foreground mt-2 italic">
+                            "{{ log.user_feedback }}"
+                        </p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted-foreground text-sm">No explanation history available.</p>
+            {% endif %}
+        </div>
+        
+        <!-- Statistics -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <div class="bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 rounded-lg p-6 text-white shadow-lg">
+                <div class="text-sm font-medium opacity-90 mb-2">Total Views</div>
+                <div class="text-3xl font-bold">{{ total_views }}</div>
+            </div>
+            
+            <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-700 rounded-lg p-6 text-white shadow-lg">
+                <div class="text-sm font-medium opacity-90 mb-2">Found Helpful</div>
+                <div class="text-3xl font-bold">{{ helpful_percentage|floatformat:0 }}%</div>
+            </div>
+            
+            <div class="bg-gradient-to-br from-amber-500 to-amber-600 dark:from-amber-600 dark:to-amber-700 rounded-lg p-6 text-white shadow-lg">
+                <div class="text-sm font-medium opacity-90 mb-2">Evidence Sources</div>
+                <div class="text-3xl font-bold">{{ evidence_sources|length }}</div>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <a href="{% url 'cancer_detection:treatment_plan_with_evidence' treatment_plan.id %}" 
+               class="inline-flex items-center justify-center px-6 py-3 bg-card border border-primary/30 rounded-lg hover:bg-accent/50 transition-colors text-foreground font-medium">
+                <i class="fas fa-arrow-left mr-2"></i> Back to Plan
+            </a>
+            <a href="{% url 'cancer_detection:decision_factors_breakdown' treatment_plan.id rec_evidence.id %}" 
+               class="inline-flex items-center justify-center px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors font-medium">
+                <i class="fas fa-chart-bar mr-2"></i> Decision Factors
+            </a>
+            <a href="{% url 'cancer_detection:evidence_audit_trail' treatment_plan.id %}" 
+               class="inline-flex items-center justify-center px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors font-medium">
+                <i class="fas fa-history mr-2"></i> Audit Trail
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+document.querySelectorAll('.feedback-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        document.querySelectorAll('.feedback-btn').forEach(b => {
+            b.classList.remove('bg-blue-500', 'bg-red-500', 'text-white');
+            b.classList.add('text-blue-500', 'text-red-500', 'border-blue-500', 'border-red-500');
+        });
+        this.classList.add('bg-blue-500', 'text-white') if this.dataset.helpful === 'true' else this.classList.add('bg-red-500', 'text-white');
+        this.classList.remove('text-blue-500', 'text-red-500');
+        document.querySelector('#feedback-form').dataset.helpful = this.dataset.helpful;
+    });
+});
+
+document.getElementById('feedback-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const helpful = this.dataset.helpful;
+    if (!helpful) {
+        alert('Please select whether the explanation was helpful.');
+        return;
+    }
+    
+    const formData = new FormData(this);
+    formData.set('was_helpful', helpful);
+    
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    });
+});
+</script>
+{% endblock %}
+    .explanation-container {
+        max-width: 1100px;
+        margin: 30px auto;
+    }
+    
+    .header-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+    }
+    
+    .header-section h1 {
+        margin: 0 0 10px 0;
+        font-size: 1.8em;
+    }
+    
+    .confidence-score {
+        display: inline-block;
+        background: rgba(255,255,255,0.2);
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 1.1em;
+        font-weight: bold;
+        margin-top: 10px;
+    }
+    
+    .score-bar {
+        margin-top: 10px;
+        background: rgba(255,255,255,0.2);
+        height: 8px;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+    .score-fill {
+        background: rgba(255,255,255,0.8);
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+    
+    .content-section {
+        background: white;
+        padding: 25px;
+        margin-bottom: 25px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .section-title {
+        font-size: 1.3em;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #ecf0f1;
+    }
+    
+    .rationale-text {
+        color: #34495e;
+        line-height: 1.8;
+        font-size: 1em;
+    }
+    
+    .evidence-item {
+        background: #f8f9fa;
+        padding: 15px;
+        margin: 10px 0;
+        border-left: 4px solid #3498db;
+        border-radius: 4px;
+    }
+    
+    .evidence-item.guideline {
+        border-left-color: #3498db;
+    }
+    
+    .evidence-item.study {
+        border-left-color: #27ae60;
+    }
+    
+    .evidence-item.rule {
+        border-left-color: #e67e22;
+    }
+    
+    .evidence-title {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+    }
+    
+    .evidence-details {
+        font-size: 0.9em;
+        color: #7f8c8d;
+        line-height: 1.6;
+    }
+    
+    .evidence-meta {
+        display: flex;
+        gap: 15px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.85em;
+    }
+    
+    .badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        font-weight: 600;
+    }
+    
+    .badge-high {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .badge-moderate {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    
+    .badge-low {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    .citation-format {
+        background: #ecf0f1;
+        padding: 10px;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 0.85em;
+        margin: 5px 0;
+        color: #2c3e50;
+    }
+    
+    .factor-card {
+        background: #f8f9fa;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 4px;
+        border: 1px solid #e9ecef;
+    }
+    
+    .factor-name {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+    }
+    
+    .factor-influence {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .influence-bar {
+        flex-grow: 1;
+        background: #e9ecef;
+        height: 20px;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .influence-fill {
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        height: 100%;
+        border-radius: 10px;
+        transition: width 0.3s ease;
+    }
+    
+    .influence-percentage {
+        font-weight: 600;
+        color: #2c3e50;
+        min-width: 40px;
+        text-align: right;
+    }
+    
+    .feedback-section {
+        background: #e8f4f8;
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 4px solid #3498db;
+    }
+    
+    .feedback-question {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 15px;
+    }
+    
+    .feedback-buttons {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .btn-feedback {
+        padding: 10px 20px;
+        border: 2px solid #3498db;
+        background: white;
+        color: #3498db;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    
+    .btn-feedback.active {
+        background: #3498db;
+        color: white;
+    }
+    
+    .btn-feedback:hover {
+        background: #3498db;
+        color: white;
+    }
+    
+    .feedback-textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #bdc3c7;
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 0.95em;
+        resize: vertical;
+        min-height: 80px;
+    }
+    
+    .back-link {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: #3498db;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    
+    .back-link:hover {
+        color: #2980b9;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .btn-action {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #3498db;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: 600;
+        transition: background-color 0.3s;
+    }
+    
+    .btn-action:hover {
+        background-color: #2980b9;
+        color: white;
+    }
+    
+    .tab-navigation {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #ecf0f1;
+    }
+    
+    .tab-link {
+        padding: 12px 20px;
+        background: none;
+        border: none;
+        color: #7f8c8d;
+        cursor: pointer;
+        font-weight: 600;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s;
+    }
+    
+    .tab-link.active {
+        color: #3498db;
+        border-bottom-color: #3498db;
+    }
+    
+    .tab-link:hover {
+        color: #2c3e50;
+    }
+    
+    @media (max-width: 768px) {
+        .explanation-container {
+            padding: 0 15px;
+        }
+        
+        .header-section {
+            padding: 20px;
+        }
+        
+        .content-section {
+            padding: 15px;
+        }
+        
+        .feedback-buttons {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="explanation-container">
+    <a href="{% url 'cancer_detection:treatment_plan_with_evidence' treatment_plan.id %}" class="back-link">← Back to Treatment Plan</a>
+    
+    <!-- Header -->
+    <div class="header-section">
+        <h1>{{ rec_evidence.recommendation_type }}</h1>
+        <p style="margin: 10px 0 0 0; opacity: 0.9;">{{ rec_evidence.recommendation_text|truncatewords:30 }}</p>
+        
+        <div class="confidence-score">
+            Evidence Strength: 
+            {% if rec_evidence.total_evidence_score >= 0.7 %}
+                HIGH ({{ rec_evidence.total_evidence_score|floatformat:0 }}%)
+            {% elif rec_evidence.total_evidence_score >= 0.4 %}
+                MODERATE ({{ rec_evidence.total_evidence_score|floatformat:0 }}%)
+            {% else %}
+                LOW ({{ rec_evidence.total_evidence_score|floatformat:0 }}%)
+            {% endif %}
+        </div>
+        
+        <div class="score-bar">
+            <div class="score-fill" style="width: {{ rec_evidence.total_evidence_score|floatformat:0 }}%;"></div>
+        </div>
+    </div>
+    
+    <!-- Recommendation Details -->
+    <div class="content-section">
+        <div class="section-title">📋 Recommendation</div>
+        <p class="rationale-text">{{ rec_evidence.recommendation_text }}</p>
+        
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ecf0f1;">
+            <strong>Type:</strong> {{ rec_evidence.recommendation_type }} | 
+            <strong>Priority:</strong> {{ rec_evidence.recommendation_priority|default:"Standard" }}
+        </div>
+    </div>
+    
+    <!-- Rationale -->
+    {% if explanation.rationale %}
+    <div class="content-section">
+        <div class="section-title">🎯 Clinical Rationale</div>
+        <p class="rationale-text">{{ explanation.rationale }}</p>
+    </div>
+    {% endif %}
+    
+    <!-- Evidence Sources -->
+    <div class="content-section">
+        <div class="section-title">📚 Evidence Sources ({{ evidence_sources|length }})</div>
+        
+        {% if evidence_sources %}
+            {% for item in evidence_sources %}
+            <div class="evidence-item {% if 'guideline' in item.source.source_type %}guideline{% elif item.source.pmid %}study{% else %}rule{% endif %}">
+                <div class="evidence-title">{{ item.source.title }}</div>
+                
+                <div class="evidence-details">
+                    {% if item.source.pmid %}
+                        <div><strong>PMID:</strong> <a href="https://pubmed.ncbi.nlm.nih.gov/{{ item.source.pmid }}" target="_blank">{{ item.source.pmid }}</a></div>
+                    {% endif %}
+                    
+                    {% if item.source.authors %}
+                        <div><strong>Authors:</strong> {{ item.source.authors }}</div>
+                    {% endif %}
+                    
+                    {% if item.source.journal %}
+                        <div><strong>Journal:</strong> {{ item.source.journal }} ({{ item.source.publication_year }})</div>
+                    {% endif %}
+                    
+                    {% if item.source.abstract %}
+                        <div style="margin-top: 8px; font-style: italic; color: #34495e;">
+                            {{ item.source.abstract|truncatewords:60 }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="evidence-meta">
+                    <div class="meta-item">
+                        {% if item.source.evidence_strength == 'High' %}
+                            <span class="badge badge-high">High Strength</span>
+                        {% elif item.source.evidence_strength == 'Moderate' %}
+                            <span class="badge badge-moderate">Moderate Strength</span>
+                        {% else %}
+                            <span class="badge badge-low">Low Strength</span>
+                        {% endif %}
+                    </div>
+                    <div class="meta-item">
+                        <strong>Relevance:</strong> {{ item.relevance_score|floatformat:0 }}%
+                    </div>
+                    <div class="meta-item">
+                        <strong>Impact:</strong> {{ item.impact_percentage|floatformat:1 }}%
+                    </div>
+                </div>
+                
+                {% if item.source.pmid %}
+                <div style="margin-top: 10px;">
+                    <a href="https://pubmed.ncbi.nlm.nih.gov/{{ item.source.pmid }}" 
+                       target="_blank" class="btn-action" style="background-color: #27ae60; padding: 6px 12px; font-size: 0.85em;">
+                        View on PubMed
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: #7f8c8d;">No evidence sources available for this recommendation.</p>
+        {% endif %}
+    </div>
+    
+    <!-- Decision Factors -->
+    <div class="content-section">
+        <div class="section-title">🎯 Decision Factors</div>
+        <p style="color: #7f8c8d; margin-bottom: 15px;">
+            The following patient factors influenced this treatment recommendation:
+        </p>
+        
+        {% if decision_factors %}
+            {% for factor in decision_factors %}
+            <div class="factor-card">
+                <div class="factor-name">{{ factor }}</div>
+                <!-- Factor influence will be displayed here -->
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: #7f8c8d;">Decision factor analysis not available.</p>
+        {% endif %}
+        
+        <div style="margin-top: 15px;">
+            <a href="{% url 'cancer_detection:decision_factors_breakdown' treatment_plan.id rec_evidence.id %}" 
+               class="btn-action" style="background-color: #e67e22;">
+                📊 View Detailed Analysis
+            </a>
+        </div>
+    </div>
+    
+    <!-- Feedback Section -->
+    <div class="content-section feedback-section">
+        <div class="feedback-question">Was this explanation helpful?</div>
+        
+        <form id="feedback-form" method="post" action="{% url 'cancer_detection:submit_explanation_feedback' treatment_plan.id rec_evidence.id %}">
+            {% csrf_token %}
+            
+            <div class="feedback-buttons">
+                <button type="button" class="btn-feedback" data-helpful="true">👍 Yes, Helpful</button>
+                <button type="button" class="btn-feedback" data-helpful="false">👎 Not Helpful</button>
+            </div>
+            
+            <div>
+                <label for="feedback" style="display: block; margin-bottom: 8px; font-weight: 600; color: #2c3e50;">
+                    Additional Comments (Optional):
+                </label>
+                <textarea id="feedback" name="feedback" class="feedback-textarea" placeholder="Share your thoughts..."></textarea>
+            </div>
+            
+            <button type="submit" class="btn-action" style="margin-top: 10px;">Submit Feedback</button>
+        </form>
+    </div>
+    
+    <!-- Explanation History -->
+    <div class="content-section">
+        <div class="section-title">📝 Explanation History</div>
+        
+        {% if history %}
+            <div style="max-height: 400px; overflow-y: auto;">
+                {% for log in history %}
+                <div style="background: #f8f9fa; padding: 12px; margin: 8px 0; border-radius: 4px; border-left: 3px solid #3498db;">
+                    <div style="font-weight: 600; color: #2c3e50;">
+                        {% if log.was_helpful %}
+                            ✓ Marked as helpful
+                        {% elif log.was_helpful == False %}
+                            ✗ Marked as not helpful
+                        {% else %}
+                            Viewed
+                        {% endif %}
+                    </div>
+                    <div style="font-size: 0.85em; color: #7f8c8d; margin-top: 4px;">
+                        {{ log.created_at|date:"M d, Y H:i" }} 
+                        {% if log.user %}
+                            by {{ log.user.first_name }} {{ log.user.last_name }}
+                        {% endif %}
+                    </div>
+                    {% if log.user_feedback %}
+                    <div style="font-size: 0.9em; color: #34495e; margin-top: 6px; font-style: italic;">
+                        "{{ log.user_feedback }}"
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p style="color: #7f8c8d;">No explanation history available.</p>
+        {% endif %}
+    </div>
+    
+    <!-- Statistics -->
+    <div class="content-section" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+        <div class="section-title" style="border-bottom-color: rgba(0,0,0,0.1);">📊 Explanation Statistics</div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+            <div style="background: white; padding: 15px; border-radius: 4px; text-align: center;">
+                <div style="font-size: 1.8em; font-weight: bold; color: #3498db;">{{ total_views }}</div>
+                <div style="font-size: 0.9em; color: #7f8c8d;">Total Views</div>
+            </div>
+            
+            <div style="background: white; padding: 15px; border-radius: 4px; text-align: center;">
+                <div style="font-size: 1.8em; font-weight: bold; color: #27ae60;">{{ helpful_percentage|floatformat:0 }}%</div>
+                <div style="font-size: 0.9em; color: #7f8c8d;">Found Helpful</div>
+            </div>
+            
+            <div style="background: white; padding: 15px; border-radius: 4px; text-align: center;">
+                <div style="font-size: 1.8em; font-weight: bold; color: #e67e22;">{{ evidence_sources|length }}</div>
+                <div style="font-size: 0.9em; color: #7f8c8d;">Evidence Sources</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div style="margin-top: 30px; margin-bottom: 30px;">
+        <div class="action-buttons">
+            <a href="{% url 'cancer_detection:treatment_plan_with_evidence' treatment_plan.id %}" 
+               class="btn-action" style="background-color: #95a5a6;">
+                ← Back to Treatment Plan
+            </a>
+            <a href="{% url 'cancer_detection:decision_factors_breakdown' treatment_plan.id rec_evidence.id %}" 
+               class="btn-action" style="background-color: #e67e22;">
+                📊 Decision Factors
+            </a>
+            <a href="{% url 'cancer_detection:evidence_audit_trail' treatment_plan.id %}" 
+               class="btn-action" style="background-color: #9b59b6;">
+                🔍 Audit Trail
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+document.querySelectorAll('[data-helpful]').forEach(button => {
+    button.addEventListener('click', function() {
+        document.querySelectorAll('[data-helpful]').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        document.querySelector('#feedback-form').dataset.helpful = this.dataset.helpful;
+    });
+});
+
+document.getElementById('feedback-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const helpful = this.dataset.helpful;
+    if (!helpful) {
+        alert('Please select whether the explanation was helpful.');
+        return;
+    }
+    
+    const formData = new FormData(this);
+    formData.set('was_helpful', helpful);
+    
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
+</script>
+{% endblock %}

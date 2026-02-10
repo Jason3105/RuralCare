@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% block title %}Dr. {{ doctor.first_name }} {{ doctor.last_name }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav class="mb-4">
+            <a href="{% url 'patient_portal:available_doctors' %}" class="text-primary hover:underline text-sm">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Doctors
+            </a>
+        </nav>
+
+        <div class="bg-card border border-border/50 rounded-xl p-8">
+            <!-- Doctor Header -->
+            <div class="flex items-start space-x-6 mb-8 pb-8 border-b border-border/50">
+                {% if doctor.profile_picture %}
+                <img src="{{ doctor.profile_picture }}" alt="{{ doctor.first_name }}" 
+                     class="w-32 h-32 rounded-full object-cover border-4 border-primary/20">
+                {% else %}
+                <div class="w-32 h-32 rounded-full bg-primary/20 flex items-center justify-center border-4 border-primary/40">
+                    <span class="text-4xl font-bold text-primary">
+                        {{ doctor.first_name.0 }}{{ doctor.last_name.0 }}
+                    </span>
+                </div>
+                {% endif %}
+                
+                <div class="flex-1">
+                    <h1 class="text-3xl font-bold text-foreground">
+                        Dr. {{ doctor.first_name }} {{ doctor.last_name }}
+                    </h1>
+                    {% if doctor_profile and doctor_profile.specialization %}
+                    <p class="text-lg text-primary font-medium mt-1">{{ doctor_profile.get_specialization_display }}</p>
+                    {% else %}
+                    <p class="text-lg text-muted-foreground mt-1">Medical Specialist</p>
+                    {% endif %}
+                    <div class="flex flex-wrap gap-4 mt-3 text-sm text-muted-foreground">
+                        {% if doctor_profile.years_of_experience %}
+                        <span><i class="fas fa-certificate mr-1"></i>{{ doctor_profile.years_of_experience }} years experience</span>
+                        {% endif %}
+                        {% if doctor_profile.license_number %}
+                        <span><i class="fas fa-id-card mr-1"></i>License: {{ doctor_profile.license_number }}</span>
+                        {% endif %}
+                        {% if doctor_profile.is_verified %}
+                        <span class="text-green-600 dark:text-green-400"><i class="fas fa-check-circle mr-1"></i>Verified</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Professional Details -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold text-foreground mb-4">Professional Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% if doctor_profile.medical_degree %}
+                    <div>
+                        <h3 class="text-sm font-medium text-muted-foreground mb-1">Education</h3>
+                        <p class="text-foreground">{{ doctor_profile.medical_degree }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if doctor_profile.hospital_affiliation %}
+                    <div>
+                        <h3 class="text-sm font-medium text-muted-foreground mb-1">Hospital Affiliation</h3>
+                        <p class="text-foreground"><i class="fas fa-hospital mr-2 text-primary"></i>{{ doctor_profile.hospital_affiliation }}</p>
+                        {% if doctor_profile.hospital_phone %}
+                        <p class="text-sm text-muted-foreground mt-1">
+                            <i class="fas fa-phone mr-2 text-primary"></i>
+                            <a href="tel:{{ doctor_profile.hospital_phone }}" class="hover:text-primary">{{ doctor_profile.hospital_phone }}</a>
+                        </p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    {% if doctor_profile.department %}
+                    <div>
+                        <h3 class="text-sm font-medium text-muted-foreground mb-1">Department</h3>
+                        <p class="text-foreground">{{ doctor_profile.department }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if doctor_profile.consultation_fee %}
+                    <div>
+                        <h3 class="text-sm font-medium text-muted-foreground mb-1">Consultation Fee</h3>
+                        <p class="text-foreground text-lg font-semibold text-primary">₹{{ doctor_profile.consultation_fee }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if doctor_profile.languages_spoken %}
+                    <div>
+                        <h3 class="text-sm font-medium text-muted-foreground mb-1">Languages Spoken</h3>
+                        <p class="text-foreground">{{ doctor_profile.languages_spoken }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if doctor_profile.city or doctor_profile.state %}
+                    <div>
+                        <h3 class="text-sm font-medium text-muted-foreground mb-1">Location</h3>
+                        <p class="text-foreground"><i class="fas fa-map-marker-alt mr-2 text-primary"></i>{{ doctor_profile.city }}{% if doctor_profile.state %}, {{ doctor_profile.state }}{% endif %}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                {% if doctor_profile.additional_qualifications %}
+                <div class="mt-6">
+                    <h3 class="text-sm font-medium text-muted-foreground mb-2">Additional Qualifications</h3>
+                    <p class="text-foreground">{{ doctor_profile.additional_qualifications }}</p>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if doctor_profile.bio %}
+            <!-- About Doctor -->
+            <div class="mb-8 pb-8 border-b border-border/50">
+                <h2 class="text-xl font-semibold text-foreground mb-4">About</h2>
+                <p class="text-muted-foreground leading-relaxed">{{ doctor_profile.bio }}</p>
+            </div>
+            {% endif %}
+
+            {% if doctor_profile.clinic_address %}
+            <!-- Clinic Location -->
+            <div class="mb-8 pb-8 border-b border-border/50">
+                <h2 class="text-xl font-semibold text-foreground mb-4">Clinic Address</h2>
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-clinic-medical text-primary mt-1"></i>
+                    <div>
+                        <p class="text-foreground">{{ doctor_profile.clinic_address }}</p>
+                        {% if doctor_profile.city %}
+                        <p class="text-sm text-muted-foreground mt-1">{{ doctor_profile.city }}{% if doctor_profile.pincode %} - {{ doctor_profile.pincode }}{% endif %}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Availability Schedule -->
+            {% if availability_by_day %}
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold text-foreground mb-4">Available Hours</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for day, slots in availability_by_day.items %}
+                    <div class="p-4 bg-accent/30 rounded-lg">
+                        <h3 class="font-medium text-foreground mb-2">{{ day }}</h3>
+                        {% for slot in slots %}
+                        <p class="text-sm text-muted-foreground">
+                            {{ slot.start_time|time:"g:i A" }} - {{ slot.end_time|time:"g:i A" }}
+                        </p>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="mb-8 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                <p class="text-sm text-yellow-800 dark:text-yellow-400">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    This doctor hasn't set their availability yet. You can still request a consultation.
+                </p>
+            </div>
+            {% endif %}
+
+            <!-- Action Buttons -->
+            <div class="flex space-x-4">
+                {% if existing_requests %}
+                <a href="{% url 'patient_portal:consultation_requests' %}" 
+                   class="flex-1 text-center px-6 py-3 bg-muted text-muted-foreground rounded-lg cursor-not-allowed">
+                    <i class="fas fa-clock mr-2"></i>Request Pending
+                </a>
+                {% else %}
+                <a href="{% url 'patient_portal:request_consultation' doctor.id %}" 
+                   class="flex-1 text-center px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                    <i class="fas fa-calendar-plus mr-2"></i>Request Consultation
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

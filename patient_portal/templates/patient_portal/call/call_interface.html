@@ -1,0 +1,111 @@
+{% extends 'base_call.html' %}
+{% load static %}
+{% block title %}{{ consultation.mode|title }} Call{% endblock %}
+
+{% block content %}
+<div class="fixed inset-0 bg-black flex items-center justify-center overflow-hidden">
+    <div class="w-full h-full flex flex-col relative">
+        <!-- Call Header -->
+        <div class="bg-gradient-to-b from-black/90 via-black/50 to-transparent absolute top-0 left-0 right-0 z-20 p-4 md:p-6">
+            <div class="max-w-7xl mx-auto flex items-center justify-between">
+                <div class="text-white">
+                    <h1 class="text-lg md:text-2xl font-bold">Dr. {{ consultation.doctor.first_name }} {{ consultation.doctor.last_name }}</h1>
+                    <p class="text-xs md:text-sm text-gray-300" id="call-status">Connecting...</p>
+                </div>
+                <div class="text-white text-right">
+                    <p class="text-xs md:text-sm text-gray-300">{{ consultation.mode|title }} Call</p>
+                    <p class="text-base md:text-lg font-mono" id="call-timer">00:00</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Video/Phone Container -->
+        <div class="flex-1 relative w-full h-full">
+            {% if is_video %}
+            <!-- Video Call Interface -->
+            <div id="video-container" class="w-full h-full absolute inset-0">
+                <!-- Remote video (doctor) -->
+                <video id="remote-video" autoplay playsinline class="w-full h-full object-cover bg-gray-900"></video>
+                
+                <!-- Local video (patient) - small preview -->
+                <div class="absolute bottom-24 md:bottom-28 right-4 md:right-6 w-32 h-24 md:w-48 md:h-36 bg-gray-800 rounded-lg overflow-hidden shadow-2xl border-2 border-white/20 z-10">
+                    <video id="local-video" autoplay playsinline muted class="w-full h-full object-cover"></video>
+                </div>
+            </div>
+            {% elif is_phone %}
+            <!-- Phone Call Interface -->
+            <div id="phone-container" class="w-full h-full flex items-center justify-center absolute inset-0">
+                <div class="text-center">
+                    <div class="mb-8">
+                        <div class="w-24 h-24 md:w-32 md:h-32 mx-auto rounded-full bg-primary/20 flex items-center justify-center mb-4 animate-pulse">
+                            <span class="text-4xl md:text-6xl font-bold text-white">
+                                {{ consultation.doctor.first_name.0 }}{{ consultation.doctor.last_name.0 }}
+                            </span>
+                        </div>
+                        <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">Dr. {{ consultation.doctor.first_name }} {{ consultation.doctor.last_name }}</h2>
+                        <p class="text-lg md:text-xl text-gray-400" id="phone-status">Calling...</p>
+                    </div>
+                    
+                    <!-- Audio visualizer -->
+                    <div id="audio-visualizer" class="hidden flex justify-center space-x-2 mb-8">
+                        <div class="w-2 h-8 bg-primary rounded-full animate-pulse"></div>
+                        <div class="w-2 h-12 bg-primary rounded-full animate-pulse" style="animation-delay: 0.1s;"></div>
+                        <div class="w-2 h-10 bg-primary rounded-full animate-pulse" style="animation-delay: 0.2s;"></div>
+                        <div class="w-2 h-14 bg-primary rounded-full animate-pulse" style="animation-delay: 0.3s;"></div>
+                        <div class="w-2 h-8 bg-primary rounded-full animate-pulse" style="animation-delay: 0.4s;"></div>
+                    </div>
+                </div>
+                
+                <!-- Hidden audio element for phone call -->
+                <audio id="remote-audio" autoplay></audio>
+                <audio id="local-audio" muted></audio>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Call Controls -->
+        <div class="bg-gradient-to-t from-black/90 via-black/50 to-transparent absolute bottom-0 left-0 right-0 z-20 p-4 md:p-6">
+            <div class="max-w-md mx-auto flex items-center justify-center space-x-4 md:space-x-6">
+                {% if is_video %}
+                <!-- Video controls -->
+                <button id="mute-btn" class="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gray-700/90 hover:bg-gray-600 flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg">
+                    <i class="fas fa-microphone text-white text-lg md:text-xl"></i>
+                </button>
+                <button id="video-btn" class="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gray-700/90 hover:bg-gray-600 flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg">
+                    <i class="fas fa-video text-white text-lg md:text-xl"></i>
+                </button>
+                {% else %}
+                <!-- Phone controls -->
+                <button id="mute-btn" class="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gray-700/90 hover:bg-gray-600 flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg">
+                    <i class="fas fa-microphone text-white text-lg md:text-xl"></i>
+                </button>
+                <button id="speaker-btn" class="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gray-700/90 hover:bg-gray-600 flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg">
+                    <i class="fas fa-volume-up text-white text-lg md:text-xl"></i>
+                </button>
+                {% endif %}
+                
+                <!-- End call button -->
+                <button id="end-call-btn" class="w-14 h-14 md:w-16 md:h-16 rounded-full bg-red-600 hover:bg-red-700 flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-xl">
+                    <i class="fas fa-phone-slash text-white text-lg md:text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ringing audio -->
+<audio id="ringing-audio" loop>
+    <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjGH0fPTgjMGHm7A7+OZRQ4PWq/o75pTEQdIouX1unMoBC6Ezvbehz8KFl+a6umnWBMJQ5rh8L1tJAU0jdP00n0vBiJ1y+vblUMPDly26OybURIJSJrk9LdnHgU6k9b1zXQrByt+zO7dmUgPDlux6+udVBQJP5Pg8cF0JwU+k9X1y3QrBylzx+vfm0UODV2z6eqaVBINRZvl9LlqIwU6j9X0z3AsBSJ3yu7gm0UOC1qv6OqbVBQLRZbg8bpuJAU8ktj2zHEqBydyxuvfm0UODV2z6eqbVBQLRJfh87tuJQU6j9X1z3AsBSJ4y+3gnEUOClqs6OqaUxQLRJbg8bptJQU7ktj1zHEqBydyxuvfmkUODV+06eqbVRQLQ5bh87tuJAU6ktj1zHEqByd0x+3gm0UOClu05+ubVBULQpbg8bttJQU6kdj1zHEqBydyx+vgm0UOCly06eqbVBULQpbg8rtuJAU6k9j1y3AqBydyx+vfm0UOCly06OqcVRQLQpbh8bttJAU7k9j1y3AqBydyx+vgm0YOC1u06OqcVBQMQ5fg8rttJAU8k9j1y3AqBidyx+vfm0YOCluz6OubVBQMQ5fg8bttJAU8ktj1y3AqBidyx+vgm0YOC1uz6OqbVBQMQ5fh8rttJAU7k9j1y3AqBidyx+vgm0UOC1uz6OqbVBQMRJfh8bttJAU8ktj1y3AqBidyx+vgm0UOC1uz6OqbVBQMRJfh8bttJAU8ktj1y3AqBidyx+vgm0UOC1uz6OqbVBQMRJfh8bttJAU8ktj1y3AqBidyx+vgm0UOC1uz6OqbVBQMRJfh8bttJAU7ktj1y3AqBidyx+vfm0UOC1u06OqbVBQMQ5fh8bttJAU7ktj1y3AqBidyx+vgm0UOC1uz6OqbVBQMRJfh8bttJAU7ktj1y3AqBidyx+vgm0UOC1u06OqbVBQMQ5fh8rttJAU7ktj1y3AqBidyx+vgm0UOC1uz6OqbVBQMQ5fh8rptJAU8ktj1y3AqBidyx+vgm0UOC1uz6OqbVBQMQ5fh8rttJAU8ktj1y3AqBSdyx+vgm0UOC1uz6OqbVBQMQ5fh8rttJAU8ktj1y3AqBSdyx+vgm0UOC1uz6OqbVBQMQ5fh8rttJAU8ktj1y3AqBSdyx+vgm0UOC1uz6OqbVBQMQ5fh8rttJAU8ktj1y3AqBSdyx+vgm0UOC1uz6OqbVBQMQ5fh8rttJAU8ktj1y3AqBSdyx+vgm0UOC1uz6OqbVBQMQ5fh8rttJAU8ktj1y3AqBSdyx+vgm0UOC1uz6OqbVBQMQ5fh8rttJAU8ktj1y3AqBSdyx+vgm0UOC1uz6OqbVBQMQ5fh8rttJAU8ktj1y3AqBSdyx+vgm0UOC1uz6OqbVBQMQ5fh8rttJAU8ktj1y3AqBSdyx+vgm0UOC1uz6OqbVBQMQ5fh8rttJAU8ktj1y3AqBSdyx+vgm0UOC1uz6OqbVBQMQ5fh8rttJAU8ktj1y3AqBSdyx+vgm0UOC1uz6OqbVBQMQ5fh8rttJAU8ktj1y3AqBSdyx+vgm0UOC1uz6OqbVBQMQ5fh8rttJAU8ktj1y3AqBSdyx+vgm0UOC1uz6OqbVBQMQ5fh8rttJAU8ktj1y3AqBSdyx+vgm0UOC1uz6OqbVBQMQ5fh8rttJAU8ktj1y3AqBSdyx+vgm0UOC1uz6OqbVBQMQ5fh8rttJAU8ktj1y3AqBSdyx+vgm0UOC1uz6OqbVBQMQ5fh8rttJAU8ktj1y3AqBSdyx+vgm0UOC1uz6OqbVBQMQ5fh8rttJAU8ktj1y3AqBSdyx+vgm0UOC1uz6OqbVBQMQ5fh8rttJAU8ktj1y3AqBSdyx+vgm0UOC1uz6OqbVBQMQ5fh8rttJAU8ktj1y3AqBSdyx+vgm0UOC1uz6OqbVBQMQ5fh8rttJAU8ktj1y3AqBSdyx+vgm0UOC1uz6OqbVBQMQ5fh8rttJAU8ktj1y3AqBSdyx+vgm0UOC1uz6OqbVBQMQ5fh8rttJAU8ktj1y3AqBSdyx+vgm0UOC1uz6OqbVBQMQ5fh8g==" type="audio/wav">
+</audio>
+
+<script>
+const CONSULTATION_ID = '{{ consultation.id }}';
+const IS_VIDEO = {{ is_video|yesno:"true,false" }};
+const CSRF_TOKEN = '{{ csrf_token }}';
+</script>
+<!-- Agora SDK -->
+<script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.20.0.js"></script>
+<script src="{% static 'patient_portal/agora_patient.js' %}"></script>
+<!-- WebRTC implementation commented out - using Agora now -->
+<!-- <script src="{% static 'patient_portal/webrtc_patient.js' %}"></script> -->
+{% endblock %}

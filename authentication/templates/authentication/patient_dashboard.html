@@ -1,0 +1,506 @@
+{% extends 'base.html' %}
+
+{% block title %}Patient Dashboard{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Welcome Header -->
+    <div class="bg-gradient-to-r from-card to-card/50 border border-primary/20 rounded-2xl p-6 sm:p-8 mb-8 transition-all">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+            <div class="flex items-center w-full sm:w-auto">
+                {% if user.profile_picture %}
+                    <img src="{{ user.profile_picture }}" alt="Profile" class="h-16 w-16 sm:h-20 sm:w-20 rounded-full mr-4 ring-4 ring-primary/30 hover:ring-primary transition-all object-cover">
+                {% else %}
+                    <div class="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center mr-4 ring-4 ring-primary/30 flex-shrink-0">
+                        <span class="text-2xl sm:text-3xl text-primary-foreground font-bold">{{ user.first_name.0|default:'P' }}</span>
+                    </div>
+                {% endif %}
+                <div class="flex-1 min-w-0">
+                    <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">Welcome, {{ user.first_name|default:user.username }}! 👋</h1>
+                    <p class="text-sm sm:text-base text-muted-foreground truncate mt-1">Patient ID: <span class="font-semibold text-foreground">{{ user.id|truncatechars:15 }}</span></p>
+                </div>
+            </div>
+            <div class="text-left sm:text-right w-full sm:w-auto bg-accent/30 rounded-lg p-3 sm:p-4">
+                <p class="text-xs sm:text-sm text-muted-foreground">Last Login</p>
+                <p class="text-base sm:text-lg font-bold text-foreground">{{ user.last_login|date:"M d, Y" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+        <!-- Cancer Analyses Card -->
+        <div class="bg-card border border-border/50 rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all duration-300 hover:border-primary/50 card-hover group">
+            <div class="flex items-center justify-between">
+                <div class="flex-1">
+                    <p class="text-xs sm:text-sm text-muted-foreground mb-2">Cancer Analyses</p>
+                    <p class="text-2xl sm:text-3xl font-bold text-foreground">{{ total_analyses }}</p>
+                    <p class="text-xs text-orange-600 dark:text-orange-400 mt-1">{{ analyses_with_tumors }} detected</p>
+                </div>
+                <div class="bg-orange-500/10 dark:bg-orange-500/20 p-3 rounded-xl group-hover:scale-110 transition-transform flex-shrink-0">
+                    <i class="fas fa-scan text-2xl text-orange-600 dark:text-orange-400"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Treatment Plans Card -->
+        <div class="bg-card border border-border/50 rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all duration-300 hover:border-primary/50 card-hover group">
+            <div class="flex items-center justify-between">
+                <div class="flex-1">
+                    <p class="text-xs sm:text-sm text-muted-foreground mb-2">Treatment Plans</p>
+                    <p class="text-2xl sm:text-3xl font-bold text-foreground">{{ total_treatment_plans }}</p>
+                    <p class="text-xs text-blue-600 dark:text-blue-400 mt-1">{{ active_treatment_plans }} active</p>
+                </div>
+                <div class="bg-blue-500/10 dark:bg-blue-500/20 p-3 rounded-xl group-hover:scale-110 transition-transform flex-shrink-0">
+                    <i class="fas fa-file-medical text-2xl text-blue-600 dark:text-blue-400"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Medical Records Card -->
+        <div class="bg-card border border-border/50 rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all duration-300 hover:border-primary/50 card-hover group">
+            <div class="flex items-center justify-between">
+                <div class="flex-1">
+                    <p class="text-xs sm:text-sm text-muted-foreground mb-2">Medical Records</p>
+                    <p class="text-2xl sm:text-3xl font-bold text-foreground">{{ total_medical_records }}</p>
+                    <p class="text-xs text-green-600 dark:text-green-400 mt-1">OCR Enabled</p>
+                </div>
+                <div class="bg-green-500/10 dark:bg-green-500/20 p-3 rounded-xl group-hover:scale-110 transition-transform flex-shrink-0">
+                    <i class="fas fa-file-pdf text-2xl text-green-600 dark:text-green-400"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Completion Card -->
+        <a href="{% url 'patient_profile_edit' %}" class="bg-card border border-border/50 rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all duration-300 hover:border-primary/50 card-hover group block">
+            <div class="flex items-center justify-between">
+                <div class="flex-1">
+                    <p class="text-xs sm:text-sm text-muted-foreground mb-2">Profile Complete</p>
+                    <p class="text-2xl sm:text-3xl font-bold text-foreground">{{ profile_completion }}%</p>
+                    <p class="text-xs text-purple-600 dark:text-purple-400 mt-1 group-hover:underline">Click to edit profile</p>
+                </div>
+                <div class="bg-purple-500/10 dark:bg-purple-500/20 p-3 rounded-xl group-hover:scale-110 transition-transform flex-shrink-0">
+                    <i class="fas fa-user-edit text-2xl text-purple-600 dark:text-purple-400"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+        <!-- Left Column - 2/3 width -->
+        <div class="lg:col-span-2 space-y-6 sm:space-y-8">
+            <!-- Cancer Detection Analyses -->
+            <div class="bg-card border border-border/50 rounded-xl p-6 sm:p-8 transition-all">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl sm:text-2xl font-bold text-foreground flex items-center">
+                        <i class="fas fa-scan mr-3 text-orange-600 dark:text-orange-400 text-2xl"></i>
+                        Cancer Detection Analysis
+                    </h2>
+                    <div class="flex gap-2">
+                        <a href="{% url 'cancer_detection:upload_image' %}" class="text-sm bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg transition-all">
+                            <i class="fas fa-plus mr-1"></i>Upload
+                        </a>
+                        <a href="{% url 'cancer_detection:create_comprehensive_plan' %}" class="text-sm bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-all">
+                            <i class="fas fa-brain mr-1"></i>Create Plan
+                        </a>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl sm:text-2xl font-bold text-foreground flex items-center">
+                        <i class="fas fa-database mr-3 text-purple-600 dark:text-purple-400 text-2xl"></i>
+                        Data Analysis
+                    </h2>
+                    <div class="flex gap-2">
+                        <a href="{% url 'cancer_detection:upload_histopathology' %}" class="text-sm bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-all">
+                            <i class="fas fa-microscope mr-1"></i>Pathology
+                        </a>
+                        <a href="{% url 'cancer_detection:upload_genomic' %}" class="text-sm bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-all">
+                            <i class="fas fa-dna mr-1"></i>Genomics
+                        </a>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <a href="{% url 'cancer_detection:histopathology_list' %}" class="bg-card border border-border/50 rounded-lg p-4 hover:shadow-lg transition-all">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-semibold text-foreground mb-1">Pathology Reports</h3>
+                                <p class="text-xs text-muted-foreground">View histopathology analyses</p>
+                            </div>
+                            <i class="fas fa-microscope text-2xl text-purple-600"></i>
+                        </div>
+                    </a>
+                    <a href="{% url 'cancer_detection:genomic_list' %}" class="bg-card border border-border/50 rounded-lg p-4 hover:shadow-lg transition-all">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-semibold text-foreground mb-1">Genomic Profiles</h3>
+                                <p class="text-xs text-muted-foreground">View genetic analyses</p>
+                            </div>
+                            <i class="fas fa-dna text-2xl text-indigo-600"></i>
+                        </div>
+                    </a>
+                </div>
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl sm:text-2xl font-bold text-foreground flex items-center">
+                        <i class="fas fa-scan mr-3 text-orange-600 dark:text-orange-400 text-2xl"></i>
+                        Cancer Detection Analysis
+                    </h2>
+                    <a href="{% url 'cancer_detection:upload_image' %}" class="text-sm bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg transition-all">
+                        <i class="fas fa-plus mr-1"></i> New Scan
+                    </a>
+                </div>
+
+                {% if recent_analyses %}
+                    <div class="space-y-4">
+                        {% for analysis in recent_analyses %}
+                        <div class="border border-border/30 rounded-lg p-4 hover:border-orange-500/50 hover:shadow-md transition-all group">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="text-sm font-semibold text-foreground">{{ analysis.image_type|title }}</span>
+                                        {% if analysis.tumor_detected %}
+                                            <span class="bg-red-500/20 text-red-700 dark:text-red-400 text-xs px-2.5 py-0.5 rounded-full font-semibold">
+                                                <i class="fas fa-exclamation-circle mr-1"></i> Tumor Detected
+                                            </span>
+                                        {% else %}
+                                            <span class="bg-green-500/20 text-green-700 dark:text-green-400 text-xs px-2.5 py-0.5 rounded-full font-semibold">
+                                                <i class="fas fa-check-circle mr-1"></i> Clear
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 font-medium"><i class="far fa-clock mr-1.5"></i>{{ analysis.created_at|date:"M d, Y at g:i A" }}</p>
+                                </div>
+                                <a href="{% url 'cancer_detection:analysis_detail' analysis.id %}" class="text-orange-600 hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300 font-semibold text-sm group-hover:translate-x-1 transition-transform">
+                                    View Details <i class="fas fa-arrow-right ml-1"></i>
+                                </a>
+                            </div>
+
+                            {% if analysis.tumor_detected %}
+                            <div class="space-y-2 pt-3 border-t border-border/20">
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                    {% if analysis.tumor_type %}
+                                    <div class="col-span-2">
+                                        <p class="text-xs text-muted-foreground uppercase tracking-wide">Type</p>
+                                        <p class="text-sm font-semibold text-foreground">{{ analysis.tumor_type }}</p>
+                                    </div>
+                                    {% endif %}
+                                    {% if analysis.tumor_stage %}
+                                    <div>
+                                        <p class="text-xs text-muted-foreground uppercase tracking-wide">Stage</p>
+                                        <p class="text-sm font-semibold text-foreground">{{ analysis.tumor_stage }}</p>
+                                    </div>
+                                    {% endif %}
+                                    {% if analysis.tumor_size_mm %}
+                                    <div>
+                                        <p class="text-xs text-muted-foreground uppercase tracking-wide">Size</p>
+                                        <p class="text-sm font-semibold text-foreground">{{ analysis.tumor_size_mm|floatformat:1 }}mm</p>
+                                    </div>
+                                    {% endif %}
+                                    {% if analysis.tumor_location %}
+                                    <div>
+                                        <p class="text-xs text-muted-foreground uppercase tracking-wide">Location</p>
+                                        <p class="text-sm font-semibold text-foreground">{{ analysis.tumor_location }}</p>
+                                    </div>
+                                    {% endif %}
+                                    {% if analysis.detection_confidence %}
+                                    <div>
+                                        <p class="text-xs text-muted-foreground uppercase tracking-wide">Confidence</p>
+                                        <p class="text-sm font-semibold text-foreground">{{ analysis.detection_confidence|floatformat:1 }}%</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    {% if all_analyses.count > 3 %}
+                    <div class="mt-4 pt-4 border-t border-border/20">
+                        <a href="{% url 'cancer_detection:analysis_list' %}" class="text-orange-600 hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300 font-semibold text-sm inline-flex items-center group">
+                            View all {{ all_analyses.count }} analyses <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-10 sm:py-12">
+                        <div class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-muted/50 mb-4">
+                            <i class="fas fa-scan text-4xl sm:text-5xl text-muted-foreground/50"></i>
+                        </div>
+                        <p class="text-base sm:text-lg text-muted-foreground mb-6">No cancer detection analyses yet.</p>
+                        <a href="{% url 'cancer_detection:upload_image' %}" class="bg-gradient-to-r from-orange-600 to-orange-600/90 hover:shadow-lg text-white px-6 sm:px-8 py-3 rounded-lg transition-all duration-300 font-semibold hover:scale-105 inline-flex items-center">
+                            <i class="fas fa-upload mr-2"></i>
+                            Upload Medical Image
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Treatment Plans -->
+            <div class="bg-card border border-border/50 rounded-xl p-6 sm:p-8 transition-all">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl sm:text-2xl font-bold text-foreground flex items-center">
+                        <i class="fas fa-file-medical mr-3 text-blue-600 dark:text-blue-400 text-2xl"></i>
+                        Treatment Plans
+                    </h2>
+                    {% if recent_analyses %}
+                    <a href="{% url 'cancer_detection:generate_treatment_plan' recent_analyses.0.id %}" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-all">
+                        <i class="fas fa-plus mr-1"></i> Generate Plan
+                    </a>
+                    {% endif %}
+                </div>
+
+                {% if recent_treatment_plans %}
+                    <div class="space-y-4">
+                        {% for plan in recent_treatment_plans %}
+                        <div class="border border-border/30 rounded-lg p-4 hover:border-blue-500/50 hover:shadow-md transition-all group">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <h3 class="text-sm font-semibold text-foreground">{{ plan.plan_name }}</h3>
+                                        <span class="
+                                            {% if plan.status == 'draft' %}bg-slate-500/20 text-slate-700 dark:text-slate-300
+                                            {% elif plan.status == 'pending_review' %}bg-yellow-500/20 text-yellow-700 dark:text-yellow-300
+                                            {% elif plan.status == 'approved' %}bg-green-500/20 text-green-700 dark:text-green-300
+                                            {% elif plan.status == 'active' %}bg-blue-500/20 text-blue-700 dark:text-blue-300
+                                            {% else %}bg-gray-500/20 text-gray-700 dark:text-gray-300
+                                            {% endif %}
+                                            text-xs px-2.5 py-0.5 rounded-full font-semibold">
+                                            {{ plan.get_status_display }}
+                                        </span>
+                                    </div>
+                                    <p class="text-xs text-muted-foreground">{{ plan.cancer_type|title }} - Stage {{ plan.cancer_stage }} • Created {{ plan.created_at|date:"M d, Y" }}</p>
+                                </div>
+                                <a href="{% url 'cancer_detection:treatment_plan_detail' plan.id %}" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold text-sm group-hover:translate-x-1 transition-transform">
+                                    Review <i class="fas fa-arrow-right ml-1"></i>
+                                </a>
+                            </div>
+
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-border/20">
+                                {% if plan.predicted_5yr_survival %}
+                                <div>
+                                    <p class="text-xs text-muted-foreground uppercase tracking-wide">5-Yr Survival</p>
+                                    <p class="text-sm font-semibold text-foreground">{{ plan.predicted_5yr_survival|floatformat:1 }}%</p>
+                                </div>
+                                {% endif %}
+                                {% if plan.remission_probability %}
+                                <div>
+                                    <p class="text-xs text-muted-foreground uppercase tracking-wide">Remission</p>
+                                    <p class="text-sm font-semibold text-foreground">{{ plan.remission_probability|floatformat:1 }}%</p>
+                                </div>
+                                {% endif %}
+                                {% if plan.quality_of_life_score %}
+                                <div>
+                                    <p class="text-xs text-muted-foreground uppercase tracking-wide">QOL Score</p>
+                                    <p class="text-sm font-semibold text-foreground">{{ plan.quality_of_life_score }}/10</p>
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <p class="text-xs text-muted-foreground uppercase tracking-wide">Treatments</p>
+                                    <p class="text-sm font-semibold text-foreground">
+                                        {% if plan.primary_treatments %}{{ plan.primary_treatments|length }}{% else %}0{% endif %} Total
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    {% if all_treatment_plans.count > 3 %}
+                    <div class="mt-4 pt-4 border-t border-border/20">
+                        <a href="{% url 'cancer_detection:treatment_plans_list' %}" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold text-sm inline-flex items-center group">
+                            View all {{ all_treatment_plans.count }} plans <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-10 sm:py-12">
+                        <div class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-muted/50 mb-4">
+                            <i class="fas fa-file-medical text-4xl sm:text-5xl text-muted-foreground/50"></i>
+                        </div>
+                        <p class="text-base sm:text-lg text-muted-foreground mb-6">No treatment plans generated yet.</p>
+                        {% if recent_analyses %}
+                        <a href="{% url 'cancer_detection:generate_treatment_plan' recent_analyses.0.id %}" class="bg-gradient-to-r from-blue-600 to-blue-600/90 hover:shadow-lg text-white px-6 sm:px-8 py-3 rounded-lg transition-all duration-300 font-semibold hover:scale-105 inline-flex items-center">
+                            <i class="fas fa-flask mr-2"></i>
+                            Generate AI Treatment Plan
+                        </a>
+                        {% else %}
+                        <p class="text-sm text-muted-foreground">Complete a cancer detection analysis first to generate a treatment plan.</p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Medical Records with OCR -->
+            <div class="bg-card border border-border/50 rounded-xl p-6 sm:p-8 transition-all">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl sm:text-2xl font-bold text-foreground flex items-center">
+                        <i class="fas fa-file-pdf mr-3 text-green-600 dark:text-green-400 text-2xl"></i>
+                        Medical Records (OCR)
+                    </h2>
+                    <a href="{% url 'upload_medical_record' %}" class="text-sm bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-all">
+                        <i class="fas fa-plus mr-1"></i> Upload
+                    </a>
+                </div>
+
+                {% if recent_medical_records %}
+                    <div class="space-y-4">
+                        {% for record in recent_medical_records %}
+                        <div class="border border-border/30 rounded-lg p-4 hover:border-green-500/50 hover:shadow-md transition-all group">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <i class="fas fa-file-pdf text-green-600 dark:text-green-400 text-lg"></i>
+                                        <h3 class="text-sm font-semibold text-foreground">{{ record.document_type|title }}</h3>
+                                        {% if record.extracted_text %}
+                                            <span class="bg-green-500/20 text-green-700 dark:text-green-400 text-xs px-2 py-1 rounded text-xs font-semibold">
+                                                <i class="fas fa-check-circle mr-1"></i>OCR Done
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    <p class="text-xs text-muted-foreground">{{ record.created_at|date:"M d, Y at g:i A" }}</p>
+                                </div>
+                                <a href="{% url 'medical_record_detail' record.id %}" class="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 font-semibold text-sm group-hover:translate-x-1 transition-transform">
+                                    View <i class="fas fa-arrow-right ml-1"></i>
+                                </a>
+                            </div>
+
+                            {% if record.extracted_text %}
+                            <div class="pt-3 border-t border-border/20">
+                                <p class="text-xs text-muted-foreground mb-2 uppercase tracking-wide">Extracted Text (Preview)</p>
+                                <p class="text-sm text-foreground line-clamp-2 bg-muted/30 p-3 rounded">{{ record.extracted_text|truncatewords:30 }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    {% if all_analyses.count > 3 %}
+                    <div class="mt-4 pt-4 border-t border-border/20">
+                        <a href="{% url 'medical_records_list' %}" class="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 font-semibold text-sm inline-flex items-center group">
+                            View all {{ total_medical_records }} records <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-10 sm:py-12">
+                        <div class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-muted/50 mb-4">
+                            <i class="fas fa-file-pdf text-4xl sm:text-5xl text-muted-foreground/50"></i>
+                        </div>
+                        <p class="text-base sm:text-lg text-muted-foreground mb-6">No medical records uploaded yet.</p>
+                        <a href="{% url 'upload_medical_record' %}" class="bg-gradient-to-r from-green-600 to-green-600/90 hover:shadow-lg text-white px-6 sm:px-8 py-3 rounded-lg transition-all duration-300 font-semibold hover:scale-105 inline-flex items-center">
+                            <i class="fas fa-cloud-upload-alt mr-2"></i>
+                            Upload Medical Records
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Right Column - 1/3 width -->
+        <div class="space-y-6 sm:space-y-8">
+            <!-- My QR Code -->
+            <div class="bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 rounded-xl p-6 sm:p-8 border border-primary/20 transition-all">
+                <h2 class="text-lg sm:text-xl font-bold text-foreground mb-4 flex items-center">
+                    <i class="fas fa-qrcode mr-2 text-primary text-xl"></i>
+                    My QR Code
+                </h2>
+                <div class="text-center">
+                    <div class="bg-white dark:bg-gray-900 p-4 rounded-xl inline-block mb-4 shadow-sm">
+                        <i class="fas fa-qrcode text-6xl text-primary"></i>
+                    </div>
+                    <p class="text-sm text-muted-foreground mb-4">Share your QR code with doctors for instant access to your medical profile</p>
+                    <a href="{% url 'patient_qr_dashboard' %}" class="w-full bg-gradient-to-r from-primary to-primary/90 hover:shadow-lg text-primary-foreground px-6 py-3 rounded-lg transition-all duration-300 font-semibold inline-flex items-center justify-center group hover:scale-105">
+                        <i class="fas fa-qrcode mr-2"></i>
+                        View My QR Code
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="bg-card border border-border/50 rounded-xl p-6 sm:p-8 transition-all">
+                <h2 class="text-lg sm:text-xl font-bold text-foreground mb-4 flex items-center">
+                    <i class="fas fa-bolt mr-2 text-primary"></i>
+                    Quick Actions
+                </h2>
+                <div class="space-y-3">
+                    <a href="{% url 'patient_profile_edit' %}" class="w-full bg-accent/50 hover:bg-accent transition-all duration-300 text-foreground px-4 py-3 rounded-lg text-left flex items-center group border border-transparent hover:border-primary/50">
+                        <i class="fas fa-user-edit mr-3 text-primary text-lg group-hover:scale-110 transition-transform flex-shrink-0"></i>
+                        <span class="font-semibold text-sm">Edit My Profile</span>
+                    </a>
+                    <a href="{% url 'cancer_detection:upload_image' %}" class="w-full bg-accent/50 hover:bg-accent transition-all duration-300 text-foreground px-4 py-3 rounded-lg text-left flex items-center group border border-transparent hover:border-orange-500/30">
+                        <i class="fas fa-scan mr-3 text-orange-600 dark:text-orange-400 text-lg group-hover:scale-110 transition-transform flex-shrink-0"></i>
+                        <span class="font-semibold text-sm">Upload Medical Image</span>
+                    </a>
+                    <a href="{% url 'upload_medical_record' %}" class="w-full bg-accent/50 hover:bg-accent transition-all duration-300 text-foreground px-4 py-3 rounded-lg text-left flex items-center group border border-transparent hover:border-green-500/30">
+                        <i class="fas fa-file-pdf mr-3 text-green-600 dark:text-green-400 text-lg group-hover:scale-110 transition-transform flex-shrink-0"></i>
+                        <span class="font-semibold text-sm">Upload Medical Record</span>
+                    </a>
+                    <a href="{% url 'medical_records_list' %}" class="w-full bg-accent/50 hover:bg-accent transition-all duration-300 text-foreground px-4 py-3 rounded-lg text-left flex items-center group border border-transparent hover:border-blue-500/30">
+                        <i class="fas fa-folder-open mr-3 text-blue-600 dark:text-blue-400 text-lg group-hover:scale-110 transition-transform flex-shrink-0"></i>
+                        <span class="font-semibold text-sm">View All Records</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Health Summary -->
+            <div class="bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 rounded-xl p-6 sm:p-8 border border-primary/20">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-bold text-foreground flex items-center">
+                        <i class="fas fa-heart-pulse mr-2 text-primary text-xl"></i>
+                        Health Summary
+                    </h2>
+                    <a href="{% url 'patient_profile_edit' %}" class="text-primary hover:text-primary/80 transition-colors" title="Edit Profile">
+                        <i class="fas fa-edit text-lg"></i>
+                    </a>
+                </div>
+                {% if patient_profile %}
+                <div class="space-y-3 text-sm">
+                    {% if patient_profile.date_of_birth %}
+                    <div class="flex items-center justify-between">
+                        <span class="text-muted-foreground">Date of Birth:</span>
+                        <span class="font-semibold text-foreground">{{ patient_profile.date_of_birth|date:"M d, Y" }}</span>
+                    </div>
+                    {% endif %}
+                    {% if patient_profile.gender %}
+                    <div class="flex items-center justify-between">
+                        <span class="text-muted-foreground">Gender:</span>
+                        <span class="font-semibold text-foreground">{{ patient_profile.gender|title }}</span>
+                    </div>
+                    {% endif %}
+                    {% if patient_profile.blood_group %}
+                    <div class="flex items-center justify-between">
+                        <span class="text-muted-foreground">Blood Group:</span>
+                        <span class="font-semibold text-foreground">{{ patient_profile.blood_group }}</span>
+                    </div>
+                    {% endif %}
+                    {% if patient_profile.medical_history %}
+                    <div class="pt-3 border-t border-primary/20">
+                        <p class="text-muted-foreground mb-2">Medical History:</p>
+                        <p class="text-foreground text-xs line-clamp-2">{{ patient_profile.medical_history }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <p class="text-muted-foreground text-sm mb-4">Complete your profile to view health summary.</p>
+                <a href="{% url 'patient_profile_edit' %}" class="w-full bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2.5 rounded-lg transition-all font-semibold text-sm inline-flex items-center justify-center">
+                    <i class="fas fa-plus-circle mr-2"></i>
+                    Complete Profile
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- Health Tip -->
+            <div class="bg-gradient-to-br from-blue-500/10 to-blue-500/5 dark:from-blue-500/20 dark:to-blue-500/10 rounded-xl p-6 sm:p-8 border border-blue-500/20">
+                <h2 class="text-lg font-bold text-foreground mb-3 flex items-center">
+                    <i class="fas fa-lightbulb mr-2 text-blue-600 dark:text-blue-400 text-xl"></i>
+                    Health Tip
+                </h2>
+                <p class="text-sm text-muted-foreground leading-relaxed">
+                    Regular monitoring and early detection are key to better cancer treatment outcomes. Keep all your medical records up to date and attend scheduled follow-up appointments.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

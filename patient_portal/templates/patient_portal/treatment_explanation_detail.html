@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% block title %}Treatment Explanation{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <nav class="mb-4">
+                <a href="{% url 'patient_portal:treatment_explanation_list' %}" class="text-primary hover:underline text-sm">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Explanations
+                </a>
+            </nav>
+            <h1 class="text-3xl font-bold text-foreground">{{ plan.cancer_type }} Treatment</h1>
+            <p class="text-muted-foreground mt-1">Stage {{ plan.cancer_stage }} | Status: {{ plan.get_status_display }}</p>
+        </div>
+
+        <!-- AI Generated Explanation -->
+        {% if ai_explanation %}
+        <div class="bg-primary/5 border border-primary/20 rounded-xl p-6 mb-6">
+            <h2 class="text-lg font-semibold text-foreground mb-3">
+                <i class="fas fa-lightbulb text-primary mr-2"></i>Your Treatment in Simple Terms
+            </h2>
+            <div class="prose prose-sm dark:prose-invert max-w-none">
+                <p class="text-foreground text-lg leading-relaxed whitespace-pre-line">{{ ai_explanation }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Outcome Predictions -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            {% if survival_rate %}
+            <div class="bg-card border border-border/50 rounded-xl p-4 text-center">
+                <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                    <span class="text-2xl font-bold text-green-600">{{ survival_rate|floatformat:0 }}%</span>
+                </div>
+                <p class="text-sm font-medium text-foreground">5-Year Survival Estimate</p>
+                <p class="text-xs text-muted-foreground">Based on your specific profile</p>
+            </div>
+            {% endif %}
+            {% if remission_rate %}
+            <div class="bg-card border border-border/50 rounded-xl p-4 text-center">
+                <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                    <span class="text-2xl font-bold text-blue-600">{{ remission_rate|floatformat:0 }}%</span>
+                </div>
+                <p class="text-sm font-medium text-foreground">Remission Probability</p>
+                <p class="text-xs text-muted-foreground">Chance of cancer-free status</p>
+            </div>
+            {% endif %}
+            {% if qol_score %}
+            <div class="bg-card border border-border/50 rounded-xl p-4 text-center">
+                <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                    <span class="text-2xl font-bold text-purple-600">{{ qol_score }}</span>
+                </div>
+                <p class="text-sm font-medium text-foreground">Quality of Life Score</p>
+                <p class="text-xs text-muted-foreground">Expected during treatment</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Content Sections -->
+        <div class="space-y-6">
+            <!-- Primary Treatments -->
+            {% if treatments %}
+            <div class="bg-card border border-border/50 rounded-xl p-6">
+                <h2 class="text-xl font-semibold text-foreground mb-4 flex items-center">
+                    <span class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-pills text-green-600"></i>
+                    </span>
+                    Your Primary Treatments
+                </h2>
+                <div class="space-y-4">
+                    {% for treatment in treatments %}
+                    <div class="p-4 bg-accent/30 rounded-lg">
+                        {% if treatment.name %}
+                        <h3 class="font-medium text-foreground mb-2">{{ treatment.name }}</h3>
+                        {% if treatment.description %}
+                        <p class="text-sm text-muted-foreground">{{ treatment.description }}</p>
+                        {% endif %}
+                        {% if treatment.duration %}
+                        <p class="text-xs text-primary mt-2"><i class="fas fa-clock mr-1"></i>{{ treatment.duration }}</p>
+                        {% endif %}
+                        {% else %}
+                        <p class="text-foreground">{{ treatment }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Targeted Therapies -->
+            {% if targeted_therapies %}
+            <div class="bg-card border border-border/50 rounded-xl p-6">
+                <h2 class="text-xl font-semibold text-foreground mb-4 flex items-center">
+                    <span class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-crosshairs text-blue-600"></i>
+                    </span>
+                    Targeted Therapies
+                </h2>
+                <p class="text-sm text-muted-foreground mb-4">These treatments specifically target cancer cells while minimizing damage to healthy tissue.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for therapy in targeted_therapies %}
+                    <div class="p-4 border border-border rounded-lg">
+                        {% if therapy.drug %}
+                        <h3 class="font-medium text-foreground">{{ therapy.drug }}</h3>
+                        {% if therapy.target %}
+                        <p class="text-xs text-primary">Targets: {{ therapy.target }}</p>
+                        {% endif %}
+                        {% if therapy.expected_response %}
+                        <p class="text-sm text-muted-foreground mt-2">{{ therapy.expected_response }}</p>
+                        {% endif %}
+                        {% else %}
+                        <p class="text-foreground">{{ therapy }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Adjuvant Treatments -->
+            {% if adjuvant_treatments %}
+            <div class="bg-card border border-border/50 rounded-xl p-6">
+                <h2 class="text-xl font-semibold text-foreground mb-4 flex items-center">
+                    <span class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-hand-holding-medical text-amber-600"></i>
+                    </span>
+                    Supporting Treatments
+                </h2>
+                <p class="text-sm text-muted-foreground mb-4">Additional treatments to support your main therapy and improve outcomes.</p>
+                <div class="space-y-3">
+                    {% for treatment in adjuvant_treatments %}
+                    <div class="flex items-start space-x-3 p-3 bg-accent/30 rounded-lg">
+                        <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                        {% if treatment.name %}
+                        <div>
+                            <p class="text-foreground font-medium">{{ treatment.name }}</p>
+                            {% if treatment.purpose %}
+                            <p class="text-sm text-muted-foreground">{{ treatment.purpose }}</p>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <p class="text-foreground">{{ treatment }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Treatment Milestones -->
+            {% if milestones %}
+            <div class="bg-card border border-border/50 rounded-xl p-6">
+                <h2 class="text-xl font-semibold text-foreground mb-4 flex items-center">
+                    <span class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-flag-checkered text-purple-600"></i>
+                    </span>
+                    Treatment Milestones
+                </h2>
+                <div class="space-y-4">
+                    {% for milestone in milestones %}
+                    <div class="flex items-start space-x-4">
+                        <div class="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-primary font-bold text-sm">{{ forloop.counter }}</span>
+                        </div>
+                        <div class="flex-1">
+                            {% if milestone.name %}
+                            <p class="font-medium text-foreground">{{ milestone.name }}</p>
+                            {% if milestone.timeframe %}
+                            <p class="text-sm text-muted-foreground">{{ milestone.timeframe }}</p>
+                            {% endif %}
+                            {% else %}
+                            <p class="text-foreground">{{ milestone }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Monitoring Plan -->
+            {% if monitoring_plan %}
+            <div class="bg-card border border-border/50 rounded-xl p-6">
+                <h2 class="text-xl font-semibold text-foreground mb-4 flex items-center">
+                    <span class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-stethoscope text-indigo-600"></i>
+                    </span>
+                    Monitoring & Follow-Up
+                </h2>
+                <div class="space-y-3">
+                    {% for key, value in monitoring_plan.items %}
+                    <div class="flex justify-between items-center p-3 bg-accent/30 rounded-lg">
+                        <span class="text-foreground font-medium">{{ key|title }}</span>
+                        <span class="text-muted-foreground">{{ value }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Related Actions -->
+        <div class="mt-8 bg-accent/30 rounded-xl p-6">
+            <h3 class="font-semibold text-foreground mb-4">Related Resources</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <a href="{% url 'patient_portal:side_effects_detail' plan.id %}" 
+                   class="flex items-center space-x-3 p-3 bg-card rounded-lg hover:shadow-md transition-shadow">
+                    <i class="fas fa-pills text-amber-500"></i>
+                    <span class="text-foreground text-sm">View Side Effects</span>
+                </a>
+                <a href="{% url 'patient_portal:symptom_log_create' %}" 
+                   class="flex items-center space-x-3 p-3 bg-card rounded-lg hover:shadow-md transition-shadow">
+                    <i class="fas fa-clipboard-list text-green-500"></i>
+                    <span class="text-foreground text-sm">Log Symptoms</span>
+                </a>
+                <a href="{% url 'patient_portal:confidence_view' %}" 
+                   class="flex items-center space-x-3 p-3 bg-card rounded-lg hover:shadow-md transition-shadow">
+                    <i class="fas fa-chart-pie text-blue-500"></i>
+                    <span class="text-foreground text-sm">Confidence Details</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

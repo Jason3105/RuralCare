@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% block title %}Send Bulk Alerts{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <a href="{% url 'clinical_decision_support:patient_alerts_dashboard' %}" class="text-primary hover:underline text-sm mb-2 inline-block">
+                <i class="fas fa-arrow-left mr-1"></i>Back to Alerts Dashboard
+            </a>
+            <h1 class="text-3xl font-bold text-foreground">Send Bulk Alerts</h1>
+            <p class="text-muted-foreground mt-1">Send the same notification to multiple patients at once</p>
+        </div>
+
+        <div class="bg-card border border-border/50 rounded-xl p-6">
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Patient Selection -->
+                <div>
+                    <label class="block text-sm font-medium text-foreground mb-2">
+                        Select Patients <span class="text-red-500">*</span>
+                    </label>
+                    <div class="border border-border rounded-lg p-4 max-h-64 overflow-y-auto">
+                        <div class="flex items-center justify-between mb-3 pb-3 border-b border-border">
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="checkbox" id="select_all" onchange="toggleAll(this)"
+                                       class="w-4 h-4 rounded border-border text-primary focus:ring-primary">
+                                <span class="font-medium text-foreground">Select All</span>
+                            </label>
+                            <span id="selected_count" class="text-sm text-muted-foreground">0 selected</span>
+                        </div>
+                        <div class="space-y-2">
+                            {% for patient in patients %}
+                            <label class="flex items-center space-x-3 p-2 rounded-lg hover:bg-accent/30 cursor-pointer">
+                                <input type="checkbox" name="patient_ids" value="{{ patient.id }}"
+                                       onchange="updateCount()"
+                                       class="patient-checkbox w-4 h-4 rounded border-border text-primary focus:ring-primary">
+                                <div class="flex-1">
+                                    <span class="font-medium text-foreground">{{ patient.get_full_name|default:patient.username }}</span>
+                                    <span class="text-sm text-muted-foreground ml-2">{{ patient.email }}</span>
+                                </div>
+                            </label>
+                            {% empty %}
+                            <p class="text-muted-foreground text-center py-4">No patients with treatment plans found.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alert Type -->
+                <div>
+                    <label for="alert_type" class="block text-sm font-medium text-foreground mb-2">
+                        Alert Type
+                    </label>
+                    <select name="alert_type" id="alert_type"
+                            class="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
+                        {% for value, label in alert_types %}
+                        <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Title -->
+                <div>
+                    <label for="title" class="block text-sm font-medium text-foreground mb-2">
+                        Title <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="title" id="title" required maxlength="200"
+                           placeholder="e.g., Important Health Update"
+                           class="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
+                </div>
+
+                <!-- Message -->
+                <div>
+                    <label for="message" class="block text-sm font-medium text-foreground mb-2">
+                        Message <span class="text-red-500">*</span>
+                    </label>
+                    <textarea name="message" id="message" rows="5" required
+                              placeholder="Write your message here. This will be sent to all selected patients..."
+                              class="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"></textarea>
+                </div>
+
+                <!-- Urgent Checkbox -->
+                <div class="flex items-center space-x-3">
+                    <input type="checkbox" name="is_urgent" id="is_urgent"
+                           class="w-5 h-5 rounded border-border text-primary focus:ring-primary">
+                    <label for="is_urgent" class="text-sm text-foreground">
+                        <span class="font-medium">Mark as Urgent</span>
+                        <span class="text-muted-foreground ml-1">(All patients will see this highlighted)</span>
+                    </label>
+                </div>
+
+                <!-- Common Templates -->
+                <div class="border-t border-border pt-6">
+                    <p class="text-sm font-medium text-foreground mb-3">Common Bulk Templates:</p>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" onclick="useBulkTemplate('reminder')"
+                                class="px-3 py-1.5 text-xs border border-border rounded-full hover:bg-accent transition-colors">
+                            <i class="fas fa-bell mr-1"></i>General Reminder
+                        </button>
+                        <button type="button" onclick="useBulkTemplate('holiday')"
+                                class="px-3 py-1.5 text-xs border border-border rounded-full hover:bg-accent transition-colors">
+                            <i class="fas fa-calendar-alt mr-1"></i>Holiday Notice
+                        </button>
+                        <button type="button" onclick="useBulkTemplate('update')"
+                                class="px-3 py-1.5 text-xs border border-border rounded-full hover:bg-accent transition-colors">
+                            <i class="fas fa-info-circle mr-1"></i>System Update
+                        </button>
+                        <button type="button" onclick="useBulkTemplate('wellness')"
+                                class="px-3 py-1.5 text-xs border border-border rounded-full hover:bg-accent transition-colors">
+                            <i class="fas fa-heart mr-1"></i>Wellness Check
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex items-center justify-end space-x-4 pt-4">
+                    <a href="{% url 'clinical_decision_support:patient_alerts_dashboard' %}" 
+                       class="px-6 py-3 border border-border rounded-lg hover:bg-accent transition-colors">
+                        Cancel
+                    </a>
+                    <button type="submit" 
+                            class="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                        <i class="fas fa-paper-plane mr-2"></i>Send to Selected Patients
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleAll(checkbox) {
+    const checkboxes = document.querySelectorAll('.patient-checkbox');
+    checkboxes.forEach(cb => cb.checked = checkbox.checked);
+    updateCount();
+}
+
+function updateCount() {
+    const checkboxes = document.querySelectorAll('.patient-checkbox:checked');
+    document.getElementById('selected_count').textContent = checkboxes.length + ' selected';
+}
+
+function useBulkTemplate(type) {
+    const title = document.getElementById('title');
+    const message = document.getElementById('message');
+    const alertType = document.getElementById('alert_type');
+    
+    const templates = {
+        reminder: {
+            type: 'symptom_reminder',
+            title: 'Daily Health Reminder',
+            message: 'Hello! This is a friendly reminder to:\n\n• Log your daily symptoms\n• Take your medications as prescribed\n• Stay hydrated and get adequate rest\n• Reach out if you have any concerns\n\nYour health matters to us. Thank you for being proactive!'
+        },
+        holiday: {
+            type: 'general',
+            title: 'Holiday Office Hours Notice',
+            message: 'Please note that our office will have modified hours during the upcoming holiday period.\n\nFor emergencies, please contact our emergency line or visit the nearest emergency room.\n\nWe wish you and your family a safe and healthy holiday season!'
+        },
+        update: {
+            type: 'general',
+            title: 'Important Update from Your Healthcare Team',
+            message: 'We wanted to share some important information with you.\n\n[Add your update details here]\n\nIf you have any questions about this update, please don\'t hesitate to reach out to us.\n\nThank you for your continued trust in our care.'
+        },
+        wellness: {
+            type: 'reassurance',
+            title: 'Wellness Check-In',
+            message: 'We hope this message finds you well! We wanted to check in and remind you that your healthcare team is here to support you.\n\nIf you\'re experiencing any new symptoms, side effects, or have any concerns, please log them in your patient portal or contact us directly.\n\nTake care of yourself, and remember - we\'re in this together!'
+        }
+    };
+    
+    if (templates[type]) {
+        alertType.value = templates[type].type;
+        title.value = templates[type].title;
+        message.value = templates[type].message;
+    }
+}
+</script>
+{% endblock %}

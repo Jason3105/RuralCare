@@ -1,0 +1,329 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Apply for {{ policy.name }} - RuralCare{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-12">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Back Button -->
+        <div class="mb-6">
+            <a href="{% url 'insurance:policy_detail' policy.id %}" class="inline-flex items-center text-blue-600 hover:text-blue-800">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Back to Policy Details
+            </a>
+        </div>
+
+        <!-- Header -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <div class="flex items-center mb-4">
+                <div class="bg-blue-100 rounded-full p-4 mr-4">
+                    <i class="fas fa-file-alt text-blue-600 text-3xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Apply for Insurance Policy</h1>
+                    <p class="text-gray-600">{{ policy.name }}</p>
+                </div>
+            </div>
+            
+            <div class="bg-blue-50 rounded-lg p-4 flex items-start">
+                <i class="fas fa-info-circle text-blue-600 mt-1 mr-3"></i>
+                <div class="text-sm text-gray-700">
+                    <strong>Please note:</strong> All documents will be securely stored and validated using OCR technology. 
+                    Make sure to provide clear, readable images. Your application will be reviewed within 24-48 hours.
+                </div>
+            </div>
+            
+            <!-- Validation Messages -->
+            {% if messages %}
+            <div class="mt-4 space-y-2">
+                {% for message in messages %}
+                <div class="rounded-lg p-4 flex items-start {% if message.tags == 'error' %}bg-red-50 text-red-800{% else %}bg-green-50 text-green-800{% endif %}">
+                    <i class="fas {% if message.tags == 'error' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %} mt-1 mr-3"></i>
+                    <div class="text-sm">{{ message }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Application Form -->
+        <form method="post" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Personal Information -->
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-user text-blue-600 mr-3"></i>
+                    Personal Information
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Full Name <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="applicant_name" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="Enter your full name">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Age <span class="text-red-500">*</span>
+                        </label>
+                        <input type="number" name="applicant_age" required min="{{ policy.min_age }}" max="{{ policy.max_age }}"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="Enter your age">
+                        <p class="text-xs text-gray-500 mt-1">Age must be between {{ policy.min_age }}-{{ policy.max_age }} years</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            State <span class="text-red-500">*</span>
+                        </label>
+                        <select name="applicant_state" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Select State</option>
+                            <option value="Andhra Pradesh">Andhra Pradesh</option>
+                            <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                            <option value="Assam">Assam</option>
+                            <option value="Bihar">Bihar</option>
+                            <option value="Chhattisgarh">Chhattisgarh</option>
+                            <option value="Goa">Goa</option>
+                            <option value="Gujarat">Gujarat</option>
+                            <option value="Haryana">Haryana</option>
+                            <option value="Himachal Pradesh">Himachal Pradesh</option>
+                            <option value="Jharkhand">Jharkhand</option>
+                            <option value="Karnataka">Karnataka</option>
+                            <option value="Kerala">Kerala</option>
+                            <option value="Madhya Pradesh">Madhya Pradesh</option>
+                            <option value="Maharashtra">Maharashtra</option>
+                            <option value="Manipur">Manipur</option>
+                            <option value="Meghalaya">Meghalaya</option>
+                            <option value="Mizoram">Mizoram</option>
+                            <option value="Nagaland">Nagaland</option>
+                            <option value="Odisha">Odisha</option>
+                            <option value="Punjab">Punjab</option>
+                            <option value="Rajasthan">Rajasthan</option>
+                            <option value="Sikkim">Sikkim</option>
+                            <option value="Tamil Nadu">Tamil Nadu</option>
+                            <option value="Telangana">Telangana</option>
+                            <option value="Tripura">Tripura</option>
+                            <option value="Uttar Pradesh">Uttar Pradesh</option>
+                            <option value="Uttarakhand">Uttarakhand</option>
+                            <option value="West Bengal">West Bengal</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Annual Income <span class="text-red-500">*</span>
+                        </label>
+                        <input type="number" name="applicant_income" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="Enter annual income">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Document Upload -->
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-upload text-green-600 mr-3"></i>
+                    Required Documents
+                    <span class="ml-3 text-sm font-normal text-gray-500">
+                        <i class="fas fa-robot mr-1"></i>OCR Validation Enabled
+                    </span>
+                </h2>
+                
+                <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-6">
+                    <div class="flex items-start">
+                        <i class="fas fa-lightbulb text-yellow-600 mt-1 mr-3"></i>
+                        <div class="text-sm text-yellow-800">
+                            <strong>Tips for better validation:</strong>
+                            <ul class="list-disc ml-5 mt-2 space-y-1">
+                                <li>Upload clear, high-quality images</li>
+                                <li>Ensure all text is readable</li>
+                                <li>Avoid shadows or glare</li>
+                                <li>Documents should be properly oriented</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-6">
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-500 transition-colors document-upload-box" data-doc-type="aadhaar">
+                        <label class="block">
+                            <span class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                <i class="fas fa-id-card text-blue-500 mr-2"></i>
+                                Aadhaar Card <span class="text-red-500 ml-1">*</span>
+                                <span class="ml-auto text-xs font-normal validation-status"></span>
+                            </span>
+                            <input type="file" name="aadhaar" required accept=".pdf,.jpg,.jpeg,.png"
+                                   class="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 document-input">
+                            <p class="text-xs text-gray-500 mt-2">PDF, JPG, or PNG (Max 5MB) - Will be validated for Aadhaar authenticity</p>
+                        </label>
+                    </div>
+                    
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-500 transition-colors document-upload-box" data-doc-type="pan">
+                        <label class="block">
+                            <span class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                <i class="fas fa-credit-card text-blue-500 mr-2"></i>
+                                PAN Card <span class="text-red-500 ml-1">*</span>
+                                <span class="ml-auto text-xs font-normal validation-status"></span>
+                            </span>
+                            <input type="file" name="pan" required accept=".pdf,.jpg,.jpeg,.png"
+                                   class="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 document-input">
+                            <p class="text-xs text-gray-500 mt-2">PDF, JPG, or PNG (Max 5MB) - Will be validated for PAN authenticity</p>
+                        </label>
+                    </div>
+                    
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-500 transition-colors document-upload-box" data-doc-type="income">
+                        <label class="block">
+                            <span class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                <i class="fas fa-file-invoice text-blue-500 mr-2"></i>
+                                Income Proof <span class="text-red-500 ml-1">*</span>
+                                <span class="ml-auto text-xs font-normal validation-status"></span>
+                            </span>
+                            <input type="file" name="income_proof" required accept=".pdf,.jpg,.jpeg,.png"
+                                   class="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 document-input">
+                            <p class="text-xs text-gray-500 mt-2">Salary slip, ITR, or Bank statement (PDF, JPG, or PNG - Max 5MB)</p>
+                        </label>
+                    </div>
+                    
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-500 transition-colors document-upload-box" data-doc-type="medical">
+                        <label class="block">
+                            <span class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                <i class="fas fa-notes-medical text-blue-500 mr-2"></i>
+                                Medical Records (Optional)
+                                <span class="ml-auto text-xs font-normal validation-status"></span>
+                            </span>
+                            <input type="file" name="medical_records" accept=".pdf,.jpg,.jpeg,.png"
+                                   class="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 document-input">
+                            <p class="text-xs text-gray-500 mt-2">Recent medical checkup reports (PDF, JPG, or PNG - Max 5MB)</p>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Notes -->
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-comment-alt text-purple-600 mr-3"></i>
+                    Additional Information
+                </h2>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        Notes (Optional)
+                    </label>
+                    <textarea name="notes" rows="4"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              placeholder="Any additional information you'd like to share..."></textarea>
+                </div>
+            </div>
+
+            <!-- Policy Summary -->
+            <div class="bg-gradient-to-r from-blue-600 to-green-600 rounded-xl shadow-lg p-8 text-white">
+                <h2 class="text-2xl font-bold mb-6">Policy Summary</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <div class="text-blue-100 text-sm mb-1">Policy Name</div>
+                        <div class="text-xl font-bold">{{ policy.name }}</div>
+                    </div>
+                    <div>
+                        <div class="text-blue-100 text-sm mb-1">Monthly Premium</div>
+                        <div class="text-xl font-bold">₹{{ policy.premium_per_month }}</div>
+                    </div>
+                    <div>
+                        <div class="text-blue-100 text-sm mb-1">Coverage</div>
+                        <div class="text-xl font-bold">₹{{ policy.coverage_amount|floatformat:0 }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <div class="flex items-start mb-6">
+                    <input type="checkbox" required id="terms" class="mt-1 mr-3 h-5 w-5 text-blue-600">
+                    <label for="terms" class="text-sm text-gray-700">
+                        I agree to the <a href="#" class="text-blue-600 hover:underline">Terms and Conditions</a> and 
+                        <a href="#" class="text-blue-600 hover:underline">Privacy Policy</a>. I confirm that all information provided is accurate and complete.
+                    </label>
+                </div>
+                
+                <button type="submit" id="submitBtn"
+                        class="w-full bg-gradient-to-r from-blue-600 to-green-600 text-white py-4 rounded-xl font-bold text-lg hover:shadow-2xl transform hover:scale-105 transition-all">
+                    <i class="fas fa-paper-plane mr-2"></i>
+                    <span id="submitText">Submit Application</span>
+                    <span id="loadingText" class="hidden">
+                        <i class="fas fa-spinner fa-spin mr-2"></i>Validating Documents...
+                    </span>
+                </button>
+                
+                <p class="text-center text-sm text-gray-500 mt-4">
+                    <i class="fas fa-lock mr-1"></i>
+                    Your data is encrypted and securely stored | 
+                    <i class="fas fa-robot mr-1"></i>
+                    OCR validation protects against fraudulent documents
+                </p>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// File size and type validation with visual feedback
+document.querySelectorAll('.document-input').forEach(input => {
+    input.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        const box = e.target.closest('.document-upload-box');
+        const statusSpan = box.querySelector('.validation-status');
+        
+        if (file) {
+            // Check file size
+            if (file.size > 5 * 1024 * 1024) { // 5MB
+                alert('File size must be less than 5MB');
+                e.target.value = '';
+                box.classList.remove('border-green-500');
+                box.classList.add('border-red-500');
+                statusSpan.innerHTML = '<span class="text-red-600"><i class="fas fa-times-circle"></i> Too large</span>';
+                return;
+            }
+            
+            // Check file type
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('Please upload only JPG, PNG, or PDF files');
+                e.target.value = '';
+                box.classList.remove('border-green-500');
+                box.classList.add('border-red-500');
+                statusSpan.innerHTML = '<span class="text-red-600"><i class="fas fa-times-circle"></i> Invalid type</span>';
+                return;
+            }
+            
+            // Visual feedback for successful upload
+            box.classList.remove('border-red-500', 'border-gray-300');
+            box.classList.add('border-green-500');
+            statusSpan.innerHTML = '<span class="text-green-600"><i class="fas fa-check-circle"></i> Ready for validation</span>';
+        } else {
+            box.classList.remove('border-green-500', 'border-red-500');
+            box.classList.add('border-gray-300');
+            statusSpan.innerHTML = '';
+        }
+    });
+});
+
+// Show loading state on form submit
+document.querySelector('form').addEventListener('submit', function(e) {
+    const submitBtn = document.getElementById('submitBtn');
+    const submitText = document.getElementById('submitText');
+    const loadingText = document.getElementById('loadingText');
+    
+    submitBtn.disabled = true;
+    submitText.classList.add('hidden');
+    loadingText.classList.remove('hidden');
+});
+</script>
+{% endblock %}

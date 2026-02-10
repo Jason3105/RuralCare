@@ -1,0 +1,396 @@
+{% extends 'base.html' %}
+{% block title %}Consultation Dashboard{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <nav class="mb-4">
+                <a href="{% url 'doctor_dashboard' %}" class="text-primary hover:underline text-sm">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+                </a>
+            </nav>
+            <h1 class="text-3xl font-bold text-foreground">Consultation Management</h1>
+            <p class="text-muted-foreground mt-1">Manage your consultation requests and appointments</p>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+            <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-muted-foreground mb-1">Pending Requests</p>
+                        <p class="text-3xl font-bold text-foreground">{{ pending_count }}</p>
+                    </div>
+                    <div class="bg-yellow-600/10 p-3 rounded-xl">
+                        <i class="fas fa-clock text-yellow-600 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-muted-foreground mb-1">Today's Schedule</p>
+                        <p class="text-3xl font-bold text-foreground">{{ today_consultations|length }}</p>
+                    </div>
+                    <div class="bg-green-600/10 p-3 rounded-xl">
+                        <i class="fas fa-calendar-day text-green-600 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-muted-foreground mb-1">Upcoming</p>
+                        <p class="text-3xl font-bold text-foreground">{{ upcoming_consultations|length }}</p>
+                    </div>
+                    <div class="bg-blue-600/10 p-3 rounded-xl">
+                        <i class="fas fa-calendar-alt text-blue-600 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Pending Requests -->
+            <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-semibold text-foreground flex items-center">
+                        <i class="fas fa-bell text-yellow-600 mr-2"></i>
+                        Pending Requests
+                    </h2>
+                    <a href="{% url 'doctor_consultation_requests' %}" class="text-primary hover:underline text-sm">
+                        View All <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                </div>
+
+                {% if pending_requests %}
+                <div class="space-y-4">
+                    {% for request in pending_requests %}
+                    <div class="bg-accent/30 border border-border/50 rounded-lg p-4 hover:shadow-md transition-all">
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-start space-x-3 flex-1">
+                                {% if request.patient.profile_picture %}
+                                <img src="{{ request.patient.profile_picture }}" alt="{{ request.patient.first_name }}" 
+                                     class="w-10 h-10 rounded-full object-cover">
+                                {% else %}
+                                <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                                    <span class="text-sm font-bold text-primary">
+                                        {{ request.patient.first_name.0 }}{{ request.patient.last_name.0 }}
+                                    </span>
+                                </div>
+                                {% endif %}
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-foreground">{{ request.patient.first_name }} {{ request.patient.last_name }}</h3>
+                                    <p class="text-sm text-muted-foreground">{{ request.get_consultation_type_display }}</p>
+                                    <p class="text-xs text-muted-foreground mt-1">{{ request.requested_at|timesince }} ago</p>
+                                </div>
+                            </div>
+                            <a href="{% url 'doctor_respond_to_request' request.id %}" 
+                               class="px-3 py-1 bg-primary text-primary-foreground rounded hover:bg-primary/90 text-sm">
+                                Respond
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-8">
+                    <i class="fas fa-inbox text-4xl text-muted-foreground mb-2"></i>
+                    <p class="text-muted-foreground">No pending requests</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Today's Schedule -->
+            <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-semibold text-foreground flex items-center">
+                        <i class="fas fa-calendar-check text-green-600 mr-2"></i>
+                        Today's Schedule
+                    </h2>
+                    <a href="{% url 'doctor_consultations' %}" class="text-primary hover:underline text-sm">
+                        View All <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                </div>
+
+                {% if today_consultations %}
+                <div class="space-y-4">
+                    {% for consultation in today_consultations %}
+                    <div class="bg-accent/30 border border-border/50 rounded-lg p-4">
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-start space-x-3 flex-1">
+                                {% if consultation.patient.profile_picture %}
+                                <img src="{{ consultation.patient.profile_picture }}" alt="{{ consultation.patient.first_name }}" 
+                                     class="w-10 h-10 rounded-full object-cover">
+                                {% else %}
+                                <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                                    <span class="text-sm font-bold text-primary">
+                                        {{ consultation.patient.first_name.0 }}{{ consultation.patient.last_name.0 }}
+                                    </span>
+                                </div>
+                                {% endif %}
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-foreground">{{ consultation.patient.first_name }} {{ consultation.patient.last_name }}</h3>
+                                    <p class="text-sm text-primary font-medium">
+                                        <i class="fas fa-clock mr-1"></i>{{ consultation.scheduled_datetime|time:"g:i A" }}
+                                    </p>
+                                    <p class="text-xs text-muted-foreground">{{ consultation.mode|title }} • {{ consultation.duration_minutes }} min</p>
+                                </div>
+                            </div>
+                            {% if consultation.meeting_link %}
+                            <a href="{{ consultation.meeting_link }}" target="_blank"
+                               class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm">
+                                <i class="fas fa-video mr-1"></i>Join
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-8">
+                    <i class="fas fa-calendar-day text-4xl text-muted-foreground mb-2"></i>
+                    <p class="text-muted-foreground">No consultations scheduled for today</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Upcoming Consultations -->
+        {% if upcoming_consultations %}
+        <div class="mt-8 bg-card border border-border/50 rounded-xl p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold text-foreground flex items-center">
+                    <i class="fas fa-calendar-alt text-blue-600 mr-2"></i>
+                    Upcoming Consultations
+                </h2>
+                <a href="{% url 'doctor_consultations' %}" class="text-primary hover:underline text-sm">
+                    View All <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for consultation in upcoming_consultations %}
+                <div class="bg-accent/30 border border-border/50 rounded-lg p-4">
+                    <div class="flex items-start space-x-3">
+                        {% if consultation.patient.profile_picture %}
+                        <img src="{{ consultation.patient.profile_picture }}" alt="{{ consultation.patient.first_name }}" 
+                             class="w-10 h-10 rounded-full object-cover">
+                        {% else %}
+                        <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                            <span class="text-sm font-bold text-primary">
+                                {{ consultation.patient.first_name.0 }}{{ consultation.patient.last_name.0 }}
+                            </span>
+                        </div>
+                        {% endif %}
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-foreground">{{ consultation.patient.first_name }} {{ consultation.patient.last_name }}</h3>
+                            <p class="text-sm text-muted-foreground">{{ consultation.scheduled_datetime|date:"M d, Y" }}</p>
+                            <p class="text-sm text-primary">{{ consultation.scheduled_datetime|time:"g:i A" }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Quick Actions -->
+        <div class="mt-8 bg-card border border-border/50 rounded-xl p-6">
+            <h2 class="text-xl font-semibold text-foreground mb-4">Quick Actions</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <a href="{% url 'doctor_consultation_requests' %}" 
+                   class="flex items-center space-x-3 p-4 bg-accent/30 rounded-lg hover:bg-accent/50 transition-colors">
+                    <div class="bg-yellow-600/10 p-3 rounded-lg">
+                        <i class="fas fa-inbox text-yellow-600"></i>
+                    </div>
+                    <span class="font-medium text-foreground">View Requests</span>
+                </a>
+                
+                <a href="{% url 'doctor_manage_availability' %}" 
+                   class="flex items-center space-x-3 p-4 bg-accent/30 rounded-lg hover:bg-accent/50 transition-colors">
+                    <div class="bg-blue-600/10 p-3 rounded-lg">
+                        <i class="fas fa-clock text-blue-600"></i>
+                    </div>
+                    <span class="font-medium text-foreground">Manage Availability</span>
+                </a>
+                
+                <a href="{% url 'doctor_consultations' %}" 
+                   class="flex items-center space-x-3 p-4 bg-accent/30 rounded-lg hover:bg-accent/50 transition-colors">
+                    <div class="bg-green-600/10 p-3 rounded-lg">
+                        <i class="fas fa-calendar-alt text-green-600"></i>
+                    </div>
+                    <span class="font-medium text-foreground">All Consultations</span>
+                </a>
+                
+                <a href="{% url 'doctor_dashboard' %}" 
+                   class="flex items-center space-x-3 p-4 bg-accent/30 rounded-lg hover:bg-accent/50 transition-colors">
+                    <div class="bg-purple-600/10 p-3 rounded-lg">
+                        <i class="fas fa-home text-purple-600"></i>
+                    </div>
+                    <span class="font-medium text-foreground">Main Dashboard</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Incoming Call Corner Notification -->
+<div id="incomingCallNotification" class="fixed bottom-6 right-6 z-50 hidden transform transition-all duration-300 ease-out">
+    <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-2xl max-w-sm animate-bounce-subtle">
+        <div class="p-6 text-white">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-white/20 rounded-full p-3 animate-pulse">
+                        <i class="fas fa-phone-alt text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 id="callerName" class="text-lg font-bold text-white">Incoming Call</h3>
+                        <p id="callType" class="text-sm text-white/90">Video Call</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex space-x-3">
+                <button onclick="answerCall()" 
+                        class="flex-1 bg-white text-green-600 px-4 py-3 rounded-xl font-bold hover:bg-green-50 transition-all hover:scale-105 flex items-center justify-center gap-2">
+                    <i class="fas fa-check"></i>
+                    <span>Answer</span>
+                </button>
+                <button onclick="dismissCallNotification()" 
+                        class="flex-1 bg-red-500 text-white px-4 py-3 rounded-xl font-bold hover:bg-red-600 transition-all hover:scale-105 flex items-center justify-center gap-2">
+                    <i class="fas fa-times"></i>
+                    <span>Dismiss</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Audio element for ringtone -->
+<audio id="ringtone" loop>
+    <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
+</audio>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentCallId = null;
+const ringtone = document.getElementById('ringtone');
+const callNotification = document.getElementById('incomingCallNotification');
+let autoHideTimeout = null;
+
+// Check for incoming calls every 1 second
+setInterval(checkIncomingCalls, 1000);
+
+// Also check immediately on page load
+checkIncomingCalls();
+
+function checkIncomingCalls() {
+    fetch('/portal/api/incoming-calls/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.calls && data.calls.length > 0) {
+                const call = data.calls[0];
+                showIncomingCallNotification(call);
+            } else {
+                // No incoming calls - dismiss notification if showing
+                if (currentCallId && !callNotification.classList.contains('hidden')) {
+                    dismissCallNotification();
+                }
+            }
+        })
+        .catch(error => console.error('Error checking calls:', error));
+}
+
+function showIncomingCallNotification(call) {
+    // If already showing this call, don't show again
+    if (currentCallId === call.id) return;
+    
+    currentCallId = call.id;
+    document.getElementById('callerName').textContent = call.patient_name;
+    document.getElementById('callType').textContent = call.mode === 'video' ? '📹 Video Call' : '📞 Phone Call';
+    
+    // Show notification with animation
+    callNotification.classList.remove('hidden');
+    callNotification.querySelector('div').classList.remove('animate-slide-out-right');
+    callNotification.querySelector('div').classList.add('animate-slide-in-right');
+    
+    // Play ringtone
+    ringtone.play().catch(e => console.log('Could not play ringtone:', e));
+    
+    // Clear any existing auto-hide timeout
+    if (autoHideTimeout) {
+        clearTimeout(autoHideTimeout);
+    }
+}
+
+function answerCall() {
+    if (currentCallId) {
+        ringtone.pause();
+        ringtone.currentTime = 0;
+        window.location.href = `/portal/call/${currentCallId}/join/`;
+    }
+}
+
+function dismissCallNotification() {
+    callNotification.querySelector('div').classList.add('animate-slide-out-right');
+    ringtone.pause();
+    ringtone.currentTime = 0;
+    
+    setTimeout(() => {
+        callNotification.classList.add('hidden');
+        currentCallId = null;
+    }, 300);
+}
+</script>
+
+<style>
+@keyframes slide-in-right {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slide-out-right {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+@keyframes bounce-subtle {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.animate-slide-in-right {
+    animation: slide-in-right 0.3s ease-out forwards;
+}
+
+.animate-slide-out-right {
+    animation: slide-out-right 0.3s ease-out forwards;
+}
+
+.animate-bounce-subtle {
+    animation: bounce-subtle 2s ease-in-out infinite;
+}
+</style>
+{% endblock %}

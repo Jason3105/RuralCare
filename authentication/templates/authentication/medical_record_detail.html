@@ -1,0 +1,335 @@
+{% extends 'base.html' %}
+{% load media_tags %}
+
+{% block title %}{{ record.title }}{% endblock %}
+
+{% block content %}
+<div class="fade-in max-w-7xl mx-auto py-8">
+    <!-- Header -->
+    <div class="mb-6 sm:mb-8">
+        <div class="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
+            <div class="flex-1">
+                <div class="flex items-center space-x-3 mb-3">
+                    <a href="{% url 'medical_records_list' %}" class="text-muted-foreground hover:text-foreground transition-colors">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-foreground">{{ record.title }}</h1>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 dark:bg-primary/20 text-primary">
+                        <i class="fas fa-folder mr-1.5"></i>
+                        {{ record.get_record_type_display }}
+                    </span>
+                    {% if record.ocr_status == 'completed' %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-500/10 dark:bg-green-500/20 text-green-700 dark:text-green-400">
+                            <i class="fas fa-check-circle mr-1.5"></i>
+                            Processed
+                        </span>
+                    {% elif record.ocr_status == 'processing' %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-500/10 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400">
+                            <i class="fas fa-spinner fa-spin mr-1.5"></i>
+                            Processing...
+                        </span>
+                    {% elif record.ocr_status == 'failed' %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-500/10 dark:bg-red-500/20 text-red-700 dark:text-red-400">
+                            <i class="fas fa-exclamation-circle mr-1.5"></i>
+                            Processing Failed
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+            <a href="{{ record.document_file|local_media_url }}" target="_blank" download class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-primary to-primary/90 hover:shadow-xl text-primary-foreground font-bold rounded-xl transition-all duration-200 hover:scale-105 text-sm">
+                <i class="fas fa-download mr-2"></i>
+                Download
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Content Area -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Record Information -->
+            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+                <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
+                    <i class="fas fa-info-circle text-primary mr-2"></i>
+                    Record Information
+                </h2>
+                <div class="space-y-4">
+                    {% if record.description %}
+                    <div>
+                        <label class="text-sm font-medium text-muted-foreground">Description</label>
+                        <p class="text-foreground mt-1">{{ record.description }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {% if record.report_date %}
+                        <div>
+                            <label class="text-sm font-medium text-muted-foreground">Report Date</label>
+                            <p class="text-foreground mt-1">
+                                <i class="fas fa-calendar text-primary mr-2"></i>
+                                {{ record.report_date|date:"F d, Y" }}
+                            </p>
+                        </div>
+                        {% endif %}
+                        
+                        <div>
+                            <label class="text-sm font-medium text-muted-foreground">Uploaded</label>
+                            <p class="text-foreground mt-1">
+                                <i class="fas fa-clock text-primary mr-2"></i>
+                                {{ record.created_at|date:"F d, Y H:i" }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Extracted Patient Information -->
+            {% if record.ocr_status == 'completed' and record.extracted_data %}
+            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+                <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
+                    <i class="fas fa-user-md text-primary mr-2"></i>
+                    Extracted Patient Information
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {% if record.extracted_data.patient_name %}
+                    <div class="bg-accent/50 rounded-xl p-4 border border-border/50">
+                        <label class="text-sm font-medium text-muted-foreground">Patient Name</label>
+                        <p class="text-foreground font-semibold mt-1">{{ record.extracted_data.patient_name }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if record.extracted_data.age %}
+                    <div class="bg-accent/50 rounded-xl p-4 border border-border/50">
+                        <label class="text-sm font-medium text-muted-foreground">Age</label>
+                        <p class="text-foreground font-semibold mt-1">{{ record.extracted_data.age }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if record.extracted_data.gender %}
+                    <div class="bg-accent/50 rounded-xl p-4 border border-border/50">
+                        <label class="text-sm font-medium text-muted-foreground">Gender</label>
+                        <p class="text-foreground font-semibold mt-1">{{ record.extracted_data.gender }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if record.extracted_data.date %}
+                    <div class="bg-accent/50 rounded-xl p-4 border border-border/50">
+                        <label class="text-sm font-medium text-muted-foreground">Report Date</label>
+                        <p class="text-foreground font-semibold mt-1">{{ record.extracted_data.date }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if record.extracted_data.hospital_name %}
+                    <div class="bg-accent/50 rounded-xl p-4 border border-border/50">
+                        <label class="text-sm font-medium text-muted-foreground">Hospital</label>
+                        <p class="text-foreground font-semibold mt-1">{{ record.extracted_data.hospital_name }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if record.extracted_data.doctor_name %}
+                    <div class="bg-accent/50 rounded-xl p-4 border border-border/50">
+                        <label class="text-sm font-medium text-muted-foreground">Doctor</label>
+                        <p class="text-foreground font-semibold mt-1">{{ record.extracted_data.doctor_name }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Test Results -->
+            {% if record.extracted_data.test_results %}
+            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+                <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
+                    <i class="fas fa-flask text-primary mr-2"></i>
+                    Laboratory Test Results
+                    <span class="ml-auto text-xs font-normal text-muted-foreground">{{ record.extracted_data.test_results|length }} parameters</span>
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b-2 border-border/50 bg-accent/30">
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-foreground">Test Parameter</th>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-foreground">Result & Reference Range</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for key, value in record.extracted_data.test_results.items %}
+                            <tr class="border-b border-border/50 hover:bg-accent/30 transition-colors group">
+                                <td class="py-3 px-4 align-top">
+                                    <div class="flex items-start">
+                                        <i class="fas fa-vial text-primary mr-2 mt-1 text-xs opacity-70 group-hover:opacity-100"></i>
+                                        <span class="text-sm text-foreground font-medium">{{ key }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <div class="text-sm text-foreground font-mono">
+                                        {% if 'high' in value|lower or 'elevated' in value|lower or 'increased' in value|lower %}
+                                            <span class="inline-flex items-center px-2 py-1 bg-red-500/10 dark:bg-red-500/20 text-red-700 dark:text-red-400 rounded">
+                                                <i class="fas fa-arrow-up mr-1 text-xs"></i>
+                                                {{ value }}
+                                            </span>
+                                        {% elif 'low' in value|lower or 'decreased' in value|lower %}
+                                            <span class="inline-flex items-center px-2 py-1 bg-blue-500/10 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 rounded">
+                                                <i class="fas fa-arrow-down mr-1 text-xs"></i>
+                                                {{ value }}
+                                            </span>
+                                        {% elif 'normal' in value|lower or 'within' in value|lower %}
+                                            <span class="inline-flex items-center px-2 py-1 bg-green-500/10 dark:bg-green-500/20 text-green-700 dark:text-green-400 rounded">
+                                                <i class="fas fa-check mr-1 text-xs"></i>
+                                                {{ value }}
+                                            </span>
+                                        {% else %}
+                                            {{ value }}
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Legend -->
+                <div class="mt-4 pt-4 border-t border-border/50 flex flex-wrap gap-4 text-xs">
+                    <div class="flex items-center">
+                        <i class="fas fa-arrow-up text-red-600 dark:text-red-400 mr-1"></i>
+                        <span class="text-muted-foreground">High/Elevated</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-arrow-down text-blue-600 dark:text-blue-400 mr-1"></i>
+                        <span class="text-muted-foreground">Low/Decreased</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-check text-green-600 dark:text-green-400 mr-1"></i>
+                        <span class="text-muted-foreground">Normal/Within Range</span>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endif %}
+
+            <!-- Full Extracted Text -->
+            {% if record.ocr_status == 'completed' and record.extracted_text %}
+            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+                <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
+                    <i class="fas fa-file-alt text-primary mr-2"></i>
+                    Full Extracted Text
+                </h2>
+                <div class="bg-accent/50 rounded-xl p-4 max-h-96 overflow-y-auto border border-border/50">
+                    <pre class="text-sm text-foreground whitespace-pre-wrap font-mono">{{ record.extracted_text }}</pre>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Processing Message -->
+            {% if record.ocr_status == 'processing' %}
+            <div class="bg-card border border-border/50 rounded-2xl p-8 text-center shadow-sm">
+                <div class="bg-yellow-500/10 dark:bg-yellow-500/20 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-yellow-500/20">
+                    <i class="fas fa-spinner fa-spin text-4xl text-yellow-600 dark:text-yellow-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-foreground mb-2">Processing Your Document</h3>
+                <p class="text-muted-foreground">
+                    Our AI is extracting text and medical information from your document. This may take a few moments.
+                </p>
+                <p class="text-sm text-muted-foreground mt-2">This page will auto-refresh when processing is complete.</p>
+            </div>
+            {% endif %}
+
+            <!-- Failed Message -->
+            {% if record.ocr_status == 'failed' %}
+            <div class="bg-card border border-border/50 rounded-2xl p-8 text-center shadow-sm">
+                <div class="bg-red-500/10 dark:bg-red-500/20 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-500/20">
+                    <i class="fas fa-exclamation-triangle text-4xl text-red-600 dark:text-red-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-foreground mb-2">Processing Failed</h3>
+                <p class="text-muted-foreground">
+                    We encountered an error while processing your document. Please try uploading again or contact support if the issue persists.
+                </p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- OCR Confidence -->
+            {% if record.ocr_status == 'completed' and record.ocr_confidence %}
+            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+                <h3 class="text-lg font-bold text-foreground mb-4 flex items-center">
+                    <i class="fas fa-chart-bar text-primary mr-2"></i>
+                    OCR Confidence
+                </h3>
+                <div class="text-center">
+                    <div class="relative inline-flex items-center justify-center mb-4">
+                        <div class="text-6xl font-bold text-primary">
+                            {{ record.ocr_confidence|floatformat:0 }}<span class="text-3xl">%</span>
+                        </div>
+                    </div>
+                    <p class="text-sm text-muted-foreground">Extraction Accuracy</p>
+                    <div class="mt-4 bg-accent rounded-full h-2 overflow-hidden border border-border/50">
+                        <div class="bg-primary h-full transition-all duration-500" style="width: {{ record.ocr_confidence|floatformat:0 }}%"></div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- File Details -->
+            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+                <h3 class="text-lg font-bold text-foreground mb-4 flex items-center">
+                    <i class="fas fa-file text-primary mr-2"></i>
+                    File Details
+                </h3>
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-sm font-medium text-muted-foreground">File Name</label>
+                        <p class="text-foreground mt-1 text-sm break-all">{{ record.file.name|slice:"16:" }}</p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-muted-foreground">File Type</label>
+                        <p class="text-foreground mt-1 text-sm">{{ record.file.name|slice:"-4:"|upper }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+                <h3 class="text-lg font-bold text-foreground mb-4 flex items-center">
+                    <i class="fas fa-bolt text-primary mr-2"></i>
+                    Quick Actions
+                </h3>
+                <div class="space-y-2">
+                    <a href="{{ record.document_file|local_media_url }}" target="_blank" class="block w-full bg-accent hover:bg-accent/70 text-foreground py-2 px-4 rounded-xl transition-colors text-center text-sm font-medium">
+                        <i class="fas fa-eye mr-2"></i>View File
+                    </a>
+                    <a href="{{ record.document_file|local_media_url }}" download class="block w-full bg-accent hover:bg-accent/70 text-foreground py-2 px-4 rounded-xl transition-colors text-center text-sm font-medium">
+                        <i class="fas fa-download mr-2"></i>Download
+                    </a>
+                    <form method="post" action="{% url 'delete_medical_record' record.id %}" onsubmit="return confirm('Are you sure you want to permanently delete this medical record? This action cannot be undone.');" class="w-full">
+                        {% csrf_token %}
+                        <button type="submit" class="block w-full bg-red-500/10 dark:bg-red-500/20 hover:bg-red-500/20 dark:hover:bg-red-500/30 text-red-700 dark:text-red-400 py-2 px-4 rounded-xl transition-colors text-center text-sm font-medium border border-red-500/20">
+                            <i class="fas fa-trash mr-2"></i>Delete
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if record.ocr_status == 'processing' %}
+<script>
+// Auto-refresh while processing
+setTimeout(() => {
+    location.reload();
+}, 5000); // Refresh every 5 seconds
+</script>
+{% endif %}
+
+<style>
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+</style>
+{% endblock %}

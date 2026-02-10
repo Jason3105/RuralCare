@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% block title %}Send Alert to Patient{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <a href="{% url 'clinical_decision_support:patient_alerts_dashboard' %}" class="text-primary hover:underline text-sm mb-2 inline-block">
+                <i class="fas fa-arrow-left mr-1"></i>Back to Alerts Dashboard
+            </a>
+            <h1 class="text-3xl font-bold text-foreground">Send Alert to Patient</h1>
+            <p class="text-muted-foreground mt-1">Send a notification, reminder, or important message to a patient</p>
+        </div>
+
+        <div class="bg-card border border-border/50 rounded-xl p-6">
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Patient Selection -->
+                <div>
+                    <label for="patient_id" class="block text-sm font-medium text-foreground mb-2">
+                        Select Patient <span class="text-red-500">*</span>
+                    </label>
+                    <select name="patient_id" id="patient_id" required
+                            class="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
+                        <option value="">Choose a patient...</option>
+                        {% for patient in patients %}
+                        <option value="{{ patient.id }}" {% if selected_patient and selected_patient.id == patient.id %}selected{% endif %}>
+                            {{ patient.get_full_name|default:patient.username }} ({{ patient.email }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Alert Type -->
+                <div>
+                    <label for="alert_type" class="block text-sm font-medium text-foreground mb-2">
+                        Alert Type
+                    </label>
+                    <select name="alert_type" id="alert_type"
+                            class="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
+                        {% for value, label in alert_types %}
+                        <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Title -->
+                <div>
+                    <label for="title" class="block text-sm font-medium text-foreground mb-2">
+                        Title <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="title" id="title" required maxlength="200"
+                           placeholder="e.g., Reminder: Log Your Symptoms Today"
+                           class="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
+                </div>
+
+                <!-- Message -->
+                <div>
+                    <label for="message" class="block text-sm font-medium text-foreground mb-2">
+                        Message <span class="text-red-500">*</span>
+                    </label>
+                    <textarea name="message" id="message" rows="5" required
+                              placeholder="Write your message to the patient here..."
+                              class="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"></textarea>
+                    <p class="text-xs text-muted-foreground mt-1">Use simple, clear language that patients can easily understand.</p>
+                </div>
+
+                <!-- Urgent Checkbox -->
+                <div class="flex items-center space-x-3">
+                    <input type="checkbox" name="is_urgent" id="is_urgent"
+                           class="w-5 h-5 rounded border-border text-primary focus:ring-primary">
+                    <label for="is_urgent" class="text-sm text-foreground">
+                        <span class="font-medium">Mark as Urgent</span>
+                        <span class="text-muted-foreground ml-1">(Patient will see this highlighted)</span>
+                    </label>
+                </div>
+
+                <!-- Quick Templates -->
+                <div class="border-t border-border pt-6">
+                    <p class="text-sm font-medium text-foreground mb-3">Quick Templates:</p>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" onclick="useTemplate('symptom')"
+                                class="px-3 py-1.5 text-xs border border-border rounded-full hover:bg-accent transition-colors">
+                            <i class="fas fa-clipboard-list mr-1"></i>Symptom Reminder
+                        </button>
+                        <button type="button" onclick="useTemplate('appointment')"
+                                class="px-3 py-1.5 text-xs border border-border rounded-full hover:bg-accent transition-colors">
+                            <i class="fas fa-calendar mr-1"></i>Appointment Reminder
+                        </button>
+                        <button type="button" onclick="useTemplate('medication')"
+                                class="px-3 py-1.5 text-xs border border-border rounded-full hover:bg-accent transition-colors">
+                            <i class="fas fa-pills mr-1"></i>Medication Reminder
+                        </button>
+                        <button type="button" onclick="useTemplate('checkup')"
+                                class="px-3 py-1.5 text-xs border border-border rounded-full hover:bg-accent transition-colors">
+                            <i class="fas fa-stethoscope mr-1"></i>Check-up
+                        </button>
+                        <button type="button" onclick="useTemplate('reassurance')"
+                                class="px-3 py-1.5 text-xs border border-border rounded-full hover:bg-accent transition-colors">
+                            <i class="fas fa-heart mr-1"></i>Reassurance
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex items-center justify-end space-x-4 pt-4">
+                    <a href="{% url 'clinical_decision_support:patient_alerts_dashboard' %}" 
+                       class="px-6 py-3 border border-border rounded-lg hover:bg-accent transition-colors">
+                        Cancel
+                    </a>
+                    <button type="submit" 
+                            class="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                        <i class="fas fa-paper-plane mr-2"></i>Send Alert
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function useTemplate(type) {
+    const title = document.getElementById('title');
+    const message = document.getElementById('message');
+    const alertType = document.getElementById('alert_type');
+    
+    const templates = {
+        symptom: {
+            type: 'symptom_reminder',
+            title: 'Please Log Your Symptoms Today',
+            message: 'Hi! This is a friendly reminder to log your symptoms today. Regular symptom tracking helps us monitor your progress and adjust your treatment plan if needed.\n\nPlease take a few minutes to record how you\'re feeling. Thank you for being proactive about your health!'
+        },
+        appointment: {
+            type: 'appointment',
+            title: 'Upcoming Appointment Reminder',
+            message: 'This is a reminder about your upcoming appointment. Please make sure to:\n\n• Bring your ID and insurance card\n• Arrive 15 minutes early\n• Bring a list of any questions you have\n• Note any new symptoms since your last visit\n\nIf you need to reschedule, please contact us as soon as possible.'
+        },
+        medication: {
+            type: 'medication',
+            title: 'Medication Reminder',
+            message: 'This is a reminder to take your medication as prescribed. Remember:\n\n• Take your medication at the same time each day\n• Don\'t skip doses without consulting your doctor\n• If you experience any side effects, please report them\n\nYour adherence to the treatment plan is important for your recovery.'
+        },
+        checkup: {
+            type: 'general',
+            title: 'How Are You Feeling Today?',
+            message: 'Hi! I wanted to check in and see how you\'re doing. If you have any concerns, questions, or are experiencing any new symptoms, please don\'t hesitate to reach out.\n\nYour health and well-being are our top priority. We\'re here to support you every step of the way.'
+        },
+        reassurance: {
+            type: 'reassurance',
+            title: 'You\'re Doing Great!',
+            message: 'I just wanted to reach out and let you know that you\'re doing a great job with your treatment. Your commitment to your health is truly inspiring.\n\nRemember, it\'s okay to have difficult days. We\'re here to support you through this journey. Please don\'t hesitate to reach out if you need anything at all.\n\nTake care of yourself!'
+        }
+    };
+    
+    if (templates[type]) {
+        alertType.value = templates[type].type;
+        title.value = templates[type].title;
+        message.value = templates[type].message;
+    }
+}
+</script>
+{% endblock %}

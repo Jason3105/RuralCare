@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Treatment Plan with Evidence - Cancer Treatment System{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4 sm:p-6 lg:p-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8 fade-in">
+            <h1 class="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent mb-2">
+                {{ treatment_plan.created_for_analysis.cancer_type }} Treatment Plan
+            </h1>
+            <p class="text-muted-foreground text-sm sm:text-base">
+                <span class="font-semibold">Patient:</span> {{ patient.first_name }} {{ patient.last_name }} | 
+                <span class="font-semibold">Plan ID:</span> <code class="bg-card border border-border px-2 py-1 rounded text-xs font-mono">{{ treatment_plan.id }}</code>
+            </p>
+        </div>
+        
+        <!-- Statistics Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 rounded-lg p-6 text-white shadow-lg hover:shadow-xl transition-shadow">
+                <h3 class="text-sm font-medium opacity-90 mb-2">Total Recommendations</h3>
+                <div class="text-3xl font-bold">{{ recommendations|length }}</div>
+            </div>
+            
+            <div class="bg-gradient-to-br from-purple-500 to-purple-600 dark:from-purple-600 dark:to-purple-700 rounded-lg p-6 text-white shadow-lg hover:shadow-xl transition-shadow">
+                <h3 class="text-sm font-medium opacity-90 mb-2">Backed by Evidence</h3>
+                <div class="text-3xl font-bold">
+                    {% if recommendations %}{{ recommendations|length }}{% else %}0{% endif %}
+                </div>
+            </div>
+            
+            <div class="bg-gradient-to-br from-cyan-500 to-cyan-600 dark:from-cyan-600 dark:to-cyan-700 rounded-lg p-6 text-white shadow-lg hover:shadow-xl transition-shadow">
+                <h3 class="text-sm font-medium opacity-90 mb-2">Clinical Guidelines</h3>
+                <div class="text-3xl font-bold">15+</div>
+            </div>
+            
+            <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-700 rounded-lg p-6 text-white shadow-lg hover:shadow-xl transition-shadow">
+                <h3 class="text-sm font-medium opacity-90 mb-2">PubMed Studies</h3>
+                <div class="text-3xl font-bold">{% if recommendations|length > 0 %}{{ recommendations|length }}+{% else %}0{% endif %}</div>
+            </div>
+        </div>
+        
+        <!-- View Options -->
+        <div class="mb-8 flex flex-col sm:flex-row gap-3 justify-end">
+            <a href="{% url 'cancer_detection:evidence_statistics' treatment_plan.id %}" 
+               class="inline-flex items-center justify-center px-4 py-2 bg-card border border-primary/30 rounded-lg hover:bg-accent/50 transition-colors text-foreground font-medium text-sm">
+                <i class="fas fa-chart-bar mr-2"></i> Evidence Statistics
+            </a>
+            <a href="{% url 'cancer_detection:evidence_audit_trail' treatment_plan.id %}" 
+               class="inline-flex items-center justify-center px-4 py-2 bg-card border border-primary/30 rounded-lg hover:bg-accent/50 transition-colors text-foreground font-medium text-sm">
+                <i class="fas fa-history mr-2"></i> Audit Trail
+            </a>
+        </div>
+        
+        <!-- Treatment Recommendations Section -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-foreground mb-4 pb-2 border-b-2 border-primary/30">
+                Treatment Recommendations
+            </h2>
+            
+            {% if recommendations %}
+                <div class="space-y-4">
+                    {% for item in recommendations %}
+                    <div class="bg-card border-l-4 {% if item.has_evidence %}border-emerald-500{% else %}border-red-500{% endif %} rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-foreground mb-2">
+                                    {{ item.recommendation.recommendation_text }}
+                                </h3>
+                                <span class="inline-block px-3 py-1 bg-accent/30 text-accent-foreground rounded-full text-xs font-medium">
+                                    {{ item.recommendation.recommendation_type|title }}
+                                </span>
+                            </div>
+                            {% if item.has_evidence %}
+                                <span class="inline-flex items-center px-3 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-full text-xs font-semibold whitespace-nowrap">
+                                    <i class="fas fa-check-circle mr-1"></i> Evidence Backed
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-full text-xs font-semibold whitespace-nowrap">
+                                    <i class="fas fa-exclamation-circle mr-1"></i> No Evidence
+                                </span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Evidence Summary -->
+                        {% if item.has_evidence and item.explanation %}
+                        <div class="bg-background/50 dark:bg-background/30 p-4 rounded-lg mb-4 border border-border/50">
+                            <div class="mb-3">
+                                <strong class="text-foreground text-sm">Evidence Strength:</strong>
+                                {% with confidence=item.evidence.total_evidence_score %}
+                                    {% if confidence >= 0.7 %}
+                                        <span class="ml-2 inline-block px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded text-xs font-semibold">
+                                            HIGH ({{ confidence|floatformat:0 }}%)
+                                        </span>
+                                    {% elif confidence >= 0.4 %}
+                                        <span class="ml-2 inline-block px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded text-xs font-semibold">
+                                            MODERATE ({{ confidence|floatformat:0 }}%)
+                                        </span>
+                                    {% else %}
+                                        <span class="ml-2 inline-block px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded text-xs font-semibold">
+                                            LOW ({{ confidence|floatformat:0 }}%)
+                                        </span>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+                            
+                            {% if item.explanation.rationale %}
+                            <div class="mb-3 text-sm text-muted-foreground">
+                                <strong class="text-foreground">Rationale:</strong><br/>
+                                {{ item.explanation.rationale|truncatewords:50 }}
+                            </div>
+                            {% endif %}
+                            
+                            {% if item.explanation.evidence_summary %}
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                {% if item.explanation.evidence_summary.guidelines %}
+                                <div class="flex items-center text-muted-foreground">
+                                    <i class="fas fa-book mr-1 text-primary"></i>
+                                    <span><strong>Guidelines:</strong> {{ item.explanation.evidence_summary.guidelines|length }}</span>
+                                </div>
+                                {% endif %}
+                                {% if item.explanation.evidence_summary.studies %}
+                                <div class="flex items-center text-muted-foreground">
+                                    <i class="fas fa-flask mr-1 text-primary"></i>
+                                    <span><strong>Studies:</strong> {{ item.explanation.evidence_summary.studies|length }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Action Buttons -->
+                        <div class="flex flex-col sm:flex-row gap-2 pt-4 border-t border-border/50">
+                            {% if item.has_evidence %}
+                                <a href="{% url 'cancer_detection:evidence_explanation_detail' treatment_plan.id item.evidence.id %}" 
+                                   class="inline-flex items-center justify-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors text-sm font-medium">
+                                    <i class="fas fa-book-open mr-2"></i> View Full Evidence
+                                </a>
+                                <a href="{% url 'cancer_detection:decision_factors_breakdown' treatment_plan.id item.evidence.id %}" 
+                                   class="inline-flex items-center justify-center px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors text-sm font-medium">
+                                    <i class="fas fa-chart-bar mr-2"></i> Decision Factors
+                                </a>
+                            {% else %}
+                                <span class="text-red-600 dark:text-red-400 text-sm font-medium flex items-center">
+                                    <i class="fas fa-exclamation-circle mr-2"></i> Evidence data not available
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="bg-card border border-border rounded-lg p-12 text-center">
+                    <i class="fas fa-inbox text-4xl text-muted-foreground mb-4 opacity-50"></i>
+                    <p class="text-muted-foreground text-lg">No recommendations found for this treatment plan.</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Additional Resources -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-foreground mb-4 pb-2 border-b-2 border-primary/30">
+                Explore More
+            </h2>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="bg-card border border-blue-200 dark:border-blue-900/50 rounded-lg p-6 border-l-4 border-l-blue-500">
+                    <h3 class="text-lg font-semibold text-foreground mb-2 flex items-center">
+                        <i class="fas fa-search text-blue-500 mr-2"></i> Search Evidence
+                    </h3>
+                    <p class="text-muted-foreground text-sm mb-4">Browse all available clinical guidelines and research studies.</p>
+                    <a href="{% url 'cancer_detection:evidence_search' %}" class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors text-sm font-medium">
+                        Search <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+                
+                <div class="bg-card border border-emerald-200 dark:border-emerald-900/50 rounded-lg p-6 border-l-4 border-l-emerald-500">
+                    <h3 class="text-lg font-semibold text-foreground mb-2 flex items-center">
+                        <i class="fas fa-clipboard-list text-emerald-500 mr-2"></i> Rule-Based References
+                    </h3>
+                    <p class="text-muted-foreground text-sm mb-4">View pre-configured treatment guidelines for different cancer types.</p>
+                    <a href="{% url 'cancer_detection:rule_based_references_view' %}" class="inline-flex items-center px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors text-sm font-medium">
+                        View <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+                
+                <div class="bg-card border border-amber-200 dark:border-amber-900/50 rounded-lg p-6 border-l-4 border-l-amber-500">
+                    <h3 class="text-lg font-semibold text-foreground mb-2 flex items-center">
+                        <i class="fas fa-chart-bar text-amber-500 mr-2"></i> Plan Statistics
+                    </h3>
+                    <p class="text-muted-foreground text-sm mb-4">View detailed statistics and evidence quality metrics.</p>
+                    <a href="{% url 'cancer_detection:evidence_statistics' treatment_plan.id %}" class="inline-flex items-center px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors text-sm font-medium">
+                        View <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+</div>
+{% endblock %}

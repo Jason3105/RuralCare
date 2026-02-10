@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% block title %}Symptom Log - {{ log.logged_at|date:"M d, Y" }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <nav class="mb-4">
+                <a href="{% url 'patient_portal:symptom_log_list' %}" class="text-primary hover:underline text-sm">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Logs
+                </a>
+            </nav>
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-foreground">{{ log.logged_at|date:"l, F d, Y" }}</h1>
+                    <p class="text-muted-foreground mt-1">Logged at {{ log.logged_at|time:"g:i A" }}</p>
+                </div>
+                <div class="mt-4 md:mt-0 flex items-center space-x-4">
+                    <div class="text-center">
+                        <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto
+                            {% if log.overall_wellness >= 4 %}bg-green-100 dark:bg-green-900/30
+                            {% elif log.overall_wellness >= 3 %}bg-amber-100 dark:bg-amber-900/30
+                            {% else %}bg-red-100 dark:bg-red-900/30{% endif %}">
+                            <span class="text-2xl font-bold
+                                {% if log.overall_wellness >= 4 %}text-green-600
+                                {% elif log.overall_wellness >= 3 %}text-amber-600
+                                {% else %}text-red-600{% endif %}">{{ log.overall_wellness }}</span>
+                        </div>
+                        <p class="text-xs text-muted-foreground mt-1">Overall</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Symptoms -->
+        <div class="bg-card border border-border/50 rounded-xl p-6 mb-6">
+            <h2 class="text-xl font-semibold text-foreground mb-6">Symptom Summary</h2>
+            
+            <!-- Pain -->
+            <div class="mb-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="font-medium text-foreground">Pain Level</span>
+                    <span class="text-2xl font-bold 
+                        {% if log.pain_level >= 7 %}text-red-600
+                        {% elif log.pain_level >= 4 %}text-amber-600
+                        {% else %}text-green-600{% endif %}">{{ log.pain_level }}/10</span>
+                </div>
+                <div class="h-3 bg-accent/30 rounded-full overflow-hidden">
+                    <div class="h-full rounded-full transition-all
+                        {% if log.pain_level >= 7 %}bg-red-500
+                        {% elif log.pain_level >= 4 %}bg-amber-500
+                        {% else %}bg-green-500{% endif %}"
+                         style="width: {{ log.pain_level }}0%"></div>
+                </div>
+                {% if log.pain_location %}
+                <p class="text-sm text-muted-foreground mt-2">Location: {{ log.pain_location }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Symptom Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="text-center p-4 bg-accent/30 rounded-xl">
+                    <i class="fas fa-battery-quarter text-xl mb-2
+                        {% if log.fatigue >= 4 %}text-red-500{% elif log.fatigue >= 3 %}text-amber-500{% else %}text-green-500{% endif %}"></i>
+                    <p class="text-2xl font-bold text-foreground">{{ log.fatigue }}/5</p>
+                    <p class="text-sm text-muted-foreground">Fatigue</p>
+                </div>
+                <div class="text-center p-4 bg-accent/30 rounded-xl">
+                    <i class="fas fa-dizzy text-xl mb-2
+                        {% if log.nausea >= 4 %}text-red-500{% elif log.nausea >= 3 %}text-amber-500{% else %}text-green-500{% endif %}"></i>
+                    <p class="text-2xl font-bold text-foreground">{{ log.nausea }}/5</p>
+                    <p class="text-sm text-muted-foreground">Nausea</p>
+                </div>
+                <div class="text-center p-4 bg-accent/30 rounded-xl">
+                    <i class="fas fa-head-side-cough text-xl mb-2
+                        {% if log.vomiting >= 4 %}text-red-500{% elif log.vomiting >= 3 %}text-amber-500{% else %}text-green-500{% endif %}"></i>
+                    <p class="text-2xl font-bold text-foreground">{{ log.vomiting }}/5</p>
+                    <p class="text-sm text-muted-foreground">Vomiting</p>
+                </div>
+                <div class="text-center p-4 bg-accent/30 rounded-xl">
+                    <i class="fas fa-utensils text-xl mb-2
+                        {% if log.appetite_loss >= 4 %}text-red-500{% elif log.appetite_loss >= 3 %}text-amber-500{% else %}text-green-500{% endif %}"></i>
+                    <p class="text-2xl font-bold text-foreground">{{ log.appetite_loss }}/5</p>
+                    <p class="text-sm text-muted-foreground">Appetite Loss</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Symptoms -->
+        <div class="bg-card border border-border/50 rounded-xl p-6 mb-6">
+            <h2 class="text-xl font-semibold text-foreground mb-4">Other Symptoms</h2>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div class="flex items-center justify-between p-3 bg-accent/20 rounded-lg">
+                    <span class="text-muted-foreground">Breathing</span>
+                    <span class="font-bold {% if log.breathing_difficulty >= 4 %}text-red-600{% elif log.breathing_difficulty >= 3 %}text-amber-600{% else %}text-green-600{% endif %}">
+                        {{ log.breathing_difficulty }}/5
+                    </span>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-accent/20 rounded-lg">
+                    <span class="text-muted-foreground">Sleep Quality</span>
+                    <span class="font-bold {% if log.sleep_quality <= 2 %}text-red-600{% elif log.sleep_quality <= 3 %}text-amber-600{% else %}text-green-600{% endif %}">
+                        {{ log.sleep_quality }}/5
+                    </span>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-accent/20 rounded-lg">
+                    <span class="text-muted-foreground">Mood</span>
+                    <span class="font-bold {% if log.mood <= 2 %}text-red-600{% elif log.mood <= 3 %}text-amber-600{% else %}text-green-600{% endif %}">
+                        {{ log.mood }}/5
+                    </span>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-accent/20 rounded-lg">
+                    <span class="text-muted-foreground">Numbness</span>
+                    <span class="font-bold {% if log.numbness_tingling >= 4 %}text-red-600{% elif log.numbness_tingling >= 3 %}text-amber-600{% else %}text-green-600{% endif %}">
+                        {{ log.numbness_tingling }}/5
+                    </span>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-accent/20 rounded-lg">
+                    <span class="text-muted-foreground">Mouth Sores</span>
+                    <span class="font-bold {% if log.mouth_sores >= 4 %}text-red-600{% elif log.mouth_sores >= 3 %}text-amber-600{% else %}text-green-600{% endif %}">
+                        {{ log.mouth_sores }}/5
+                    </span>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-accent/20 rounded-lg">
+                    <span class="text-muted-foreground">Skin Issues</span>
+                    <span class="font-bold {% if log.skin_issues >= 4 %}text-red-600{% elif log.skin_issues >= 3 %}text-amber-600{% else %}text-green-600{% endif %}">
+                        {{ log.skin_issues }}/5
+                    </span>
+                </div>
+            </div>
+
+            <!-- Boolean Symptoms -->
+            <div class="flex flex-wrap gap-3 mt-4">
+                {% if log.has_fever %}
+                <span class="px-3 py-1 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-full text-sm">
+                    <i class="fas fa-thermometer-half mr-1"></i>Fever
+                </span>
+                {% endif %}
+                {% if log.has_diarrhea %}
+                <span class="px-3 py-1 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded-full text-sm">
+                    Diarrhea
+                </span>
+                {% endif %}
+                {% if log.has_constipation %}
+                <span class="px-3 py-1 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded-full text-sm">
+                    Constipation
+                </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Notes -->
+        {% if log.additional_symptoms %}
+        <div class="bg-card border border-border/50 rounded-xl p-6 mb-6">
+            <h2 class="text-xl font-semibold text-foreground mb-4">Additional Notes</h2>
+            <p class="text-foreground">{{ log.additional_symptoms }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Medications -->
+        <div class="bg-card border border-border/50 rounded-xl p-6 mb-6">
+            <h2 class="text-xl font-semibold text-foreground mb-4">Medications</h2>
+            <div class="flex items-center space-x-3">
+                {% if log.medications_taken %}
+                <span class="px-3 py-1 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-full">
+                    <i class="fas fa-check mr-1"></i>All medications taken
+                </span>
+                {% else %}
+                <span class="px-3 py-1 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-full">
+                    <i class="fas fa-times mr-1"></i>Medications missed
+                </span>
+                {% endif %}
+            </div>
+            {% if log.missed_medications %}
+            <p class="text-muted-foreground mt-2">Missed: {{ log.missed_medications }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Actions -->
+        <div class="flex justify-between">
+            <a href="{% url 'patient_portal:symptom_log_list' %}" 
+               class="px-4 py-2 border border-border rounded-lg hover:bg-accent transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Logs
+            </a>
+            <a href="{% url 'patient_portal:symptom_log_create' %}" 
+               class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                <i class="fas fa-plus mr-2"></i>Log New Symptoms
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

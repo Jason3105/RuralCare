@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Check Eligibility - Insurance Portal{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Check Your Eligibility</h4>
+                </div>
+                <div class="card-body">
+                    <p>Enter your details below to find government schemes you're eligible for.</p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="age" class="form-label">Your Age *</label>
+                            <input type="number" class="form-control" id="age" name="age" min="0" max="120" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="income" class="form-label">Annual Income (₹) *</label>
+                            <input type="number" class="form-control" id="income" name="income" step="0.01" min="0" required>
+                            <small class="form-text text-muted">Enter 0 if no income</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="state" class="form-label">State *</label>
+                            <select class="form-select" id="state" name="state" required>
+                                <option value="">Select State</option>
+                                <option value="All India">All India</option>
+                                <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                <option value="Maharashtra">Maharashtra</option>
+                                <option value="Karnataka">Karnataka</option>
+                                <option value="Tamil Nadu">Tamil Nadu</option>
+                                <option value="Gujarat">Gujarat</option>
+                                <option value="Rajasthan">Rajasthan</option>
+                                <option value="West Bengal">West Bengal</option>
+                                <option value="Delhi">Delhi</option>
+                                <!-- Add more states as needed -->
+                            </select>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">Check Eligibility</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

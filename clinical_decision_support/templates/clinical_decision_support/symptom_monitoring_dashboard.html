@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+{% block title %}Symptom Monitoring Dashboard{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-foreground">Patient Symptom Monitoring</h1>
+            <p class="text-muted-foreground mt-1">Overview of patient-reported symptoms requiring attention</p>
+        </div>
+
+        <!-- Alert Summary -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-card border border-border/50 rounded-xl p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-muted-foreground">Patients Monitored</p>
+                        <p class="text-2xl font-bold text-foreground">{{ stats.total_patients }}</p>
+                    </div>
+                    <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                        <i class="fas fa-users text-primary"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-card border border-border/50 rounded-xl p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-muted-foreground">Critical Alerts</p>
+                        <p class="text-2xl font-bold text-red-600">{{ stats.critical }}</p>
+                    </div>
+                    <div class="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                        <i class="fas fa-exclamation-triangle text-red-600"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-card border border-border/50 rounded-xl p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-muted-foreground">Pending Review</p>
+                        <p class="text-2xl font-bold text-amber-600">{{ stats.pending_review }}</p>
+                    </div>
+                    <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center">
+                        <i class="fas fa-clock text-amber-600"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-card border border-border/50 rounded-xl p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-muted-foreground">Resolved Today</p>
+                        <p class="text-2xl font-bold text-green-600">{{ stats.resolved_today }}</p>
+                    </div>
+                    <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                        <i class="fas fa-check text-green-600"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter -->
+        <div class="bg-card border border-border/50 rounded-xl p-4 mb-6">
+            <form method="get" class="flex flex-wrap items-center gap-4">
+                <div class="flex-1 min-w-[200px]">
+                    <input type="text" name="search" value="{{ request.GET.search }}"
+                           class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground"
+                           placeholder="Search by patient name...">
+                </div>
+                <div>
+                    <select name="alert_level" class="px-4 py-2 bg-background border border-border rounded-lg text-foreground">
+                        <option value="">All Alert Levels</option>
+                        <option value="critical" {% if request.GET.alert_level == 'critical' %}selected{% endif %}>Critical</option>
+                        <option value="warning" {% if request.GET.alert_level == 'warning' %}selected{% endif %}>Warning</option>
+                        <option value="monitoring" {% if request.GET.alert_level == 'monitoring' %}selected{% endif %}>Monitoring</option>
+                    </select>
+                </div>
+                <div>
+                    <select name="status" class="px-4 py-2 bg-background border border-border rounded-lg text-foreground">
+                        <option value="">All Status</option>
+                        <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending Review</option>
+                        <option value="reviewed" {% if request.GET.status == 'reviewed' %}selected{% endif %}>Reviewed</option>
+                        <option value="intervention" {% if request.GET.status == 'intervention' %}selected{% endif %}>Intervention Made</option>
+                    </select>
+                </div>
+                <button type="submit" class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                    <i class="fas fa-filter mr-2"></i>Filter
+                </button>
+            </form>
+        </div>
+
+        <!-- Critical Alerts Section -->
+        {% if critical_monitors %}
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-foreground mb-4 flex items-center">
+                <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+                Critical Alerts Requiring Immediate Attention
+            </h2>
+            <div class="space-y-4">
+                {% for monitor in critical_monitors %}
+                <div class="bg-red-50 dark:bg-red-900/10 border-2 border-red-300 dark:border-red-700 rounded-xl p-4">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-start space-x-4">
+                            <div class="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-user-injured text-red-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-foreground">{{ monitor.patient.username }}</h3>
+                                <p class="text-sm text-red-600 dark:text-red-400">{{ monitor.alert_reason }}</p>
+                                <p class="text-xs text-muted-foreground mt-1">
+                                    Last log: {{ monitor.last_symptom_log.logged_at|timesince }} ago
+                                </p>
+                            </div>
+                        </div>
+                        <a href="{% url 'clinical_decision_support:symptom_monitoring_patient' monitor.patient.id %}" 
+                           class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                            Review Now
+                        </a>
+                    </div>
+                    
+                    <!-- Symptom Summary -->
+                    <div class="mt-4 pl-16">
+                        <div class="flex flex-wrap gap-2">
+                            {% if monitor.last_symptom_log.pain_level >= 7 %}
+                            <span class="px-2 py-1 text-xs bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200 rounded-full">
+                                Pain: {{ monitor.last_symptom_log.pain_level }}/10
+                            </span>
+                            {% endif %}
+                            {% if monitor.last_symptom_log.nausea >= 4 %}
+                            <span class="px-2 py-1 text-xs bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200 rounded-full">
+                                Severe Nausea
+                            </span>
+                            {% endif %}
+                            {% if monitor.last_symptom_log.fatigue >= 4 %}
+                            <span class="px-2 py-1 text-xs bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200 rounded-full">
+                                Severe Fatigue
+                            </span>
+                            {% endif %}
+                            {% if monitor.last_symptom_log.breathing_difficulty >= 4 %}
+                            <span class="px-2 py-1 text-xs bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200 rounded-full">
+                                Breathing Difficulty
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- All Monitored Patients -->
+        <h2 class="text-xl font-semibold text-foreground mb-4">All Monitored Patients</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for monitor in monitors %}
+            <div class="bg-card border border-border/50 rounded-xl p-5 hover:shadow-md transition-shadow">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-primary"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-foreground">{{ monitor.patient.username }}</h3>
+                            <p class="text-xs text-muted-foreground">Monitoring since {{ monitor.created_at|date:"M d, Y" }}</p>
+                        </div>
+                    </div>
+                    <span class="px-2 py-1 rounded-full text-xs font-medium
+                        {% if monitor.alert_level == 'critical' %}bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400
+                        {% elif monitor.alert_level == 'warning' %}bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400
+                        {% else %}bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400{% endif %}">
+                        {{ monitor.get_alert_level_display }}
+                    </span>
+                </div>
+
+                <!-- Latest Symptoms -->
+                <div class="mb-4">
+                    <p class="text-xs text-muted-foreground mb-2">Recent Symptoms:</p>
+                    {% if monitor.last_symptom_log %}
+                    <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                        <div class="p-2 bg-accent/30 rounded">
+                            <p class="text-muted-foreground">Pain</p>
+                            <p class="font-bold {% if monitor.last_symptom_log.pain_level >= 7 %}text-red-600{% elif monitor.last_symptom_log.pain_level >= 4 %}text-amber-600{% else %}text-green-600{% endif %}">
+                                {{ monitor.last_symptom_log.pain_level }}/10
+                            </p>
+                        </div>
+                        <div class="p-2 bg-accent/30 rounded">
+                            <p class="text-muted-foreground">Fatigue</p>
+                            <p class="font-bold {% if monitor.last_symptom_log.fatigue >= 4 %}text-red-600{% elif monitor.last_symptom_log.fatigue >= 3 %}text-amber-600{% else %}text-green-600{% endif %}">
+                                {{ monitor.last_symptom_log.fatigue }}/5
+                            </p>
+                        </div>
+                        <div class="p-2 bg-accent/30 rounded">
+                            <p class="text-muted-foreground">Nausea</p>
+                            <p class="font-bold {% if monitor.last_symptom_log.nausea >= 4 %}text-red-600{% elif monitor.last_symptom_log.nausea >= 3 %}text-amber-600{% else %}text-green-600{% endif %}">
+                                {{ monitor.last_symptom_log.nausea }}/5
+                            </p>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="text-sm text-muted-foreground">No symptoms logged yet</p>
+                    {% endif %}
+                </div>
+
+                <!-- Last Log Time -->
+                <div class="flex items-center justify-between text-xs text-muted-foreground mb-4">
+                    <span>
+                        <i class="fas fa-clock mr-1"></i>
+                        {% if monitor.last_symptom_log %}
+                        Last log: {{ monitor.last_symptom_log.logged_at|timesince }} ago
+                        {% else %}
+                        No logs yet
+                        {% endif %}
+                    </span>
+                    <span class="px-2 py-1 rounded
+                        {% if monitor.status == 'pending' %}bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400
+                        {% elif monitor.status == 'reviewed' %}bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400
+                        {% else %}bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400{% endif %}">
+                        {{ monitor.get_status_display }}
+                    </span>
+                </div>
+
+                <!-- Action -->
+                <a href="{% url 'clinical_decision_support:symptom_monitoring_patient' monitor.patient.id %}" 
+                   class="block w-full text-center py-2 border border-primary text-primary rounded-lg hover:bg-primary/10 transition-colors text-sm">
+                    View Details
+                </a>
+            </div>
+            {% empty %}
+            <div class="col-span-3 bg-card border border-border/50 rounded-xl p-12 text-center">
+                <i class="fas fa-heartbeat text-4xl text-muted-foreground mb-4"></i>
+                <h3 class="text-lg font-medium text-foreground mb-2">No Patients Being Monitored</h3>
+                <p class="text-muted-foreground">Patient symptom monitoring will appear here when patients log symptoms</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if monitors.has_other_pages %}
+        <div class="mt-8 flex justify-center">
+            <nav class="flex items-center space-x-2">
+                {% if monitors.has_previous %}
+                <a href="?page={{ monitors.previous_page_number }}" class="px-3 py-1 bg-accent rounded hover:bg-accent/80">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                {% endif %}
+                <span class="px-3 py-1 text-muted-foreground">
+                    Page {{ monitors.number }} of {{ monitors.paginator.num_pages }}
+                </span>
+                {% if monitors.has_next %}
+                <a href="?page={{ monitors.next_page_number }}" class="px-3 py-1 bg-accent rounded hover:bg-accent/80">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

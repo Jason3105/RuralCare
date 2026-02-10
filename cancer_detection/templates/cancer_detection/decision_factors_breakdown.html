@@ -1,0 +1,601 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Decision Factors Breakdown{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4 sm:p-6 lg:p-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Back Link -->
+        <div class="mb-6">
+            <a href="javascript:history.back()" class="inline-flex items-center text-primary hover:text-primary/80 transition-colors text-sm font-medium">
+                <i class="fas fa-arrow-left mr-2"></i> Back
+            </a>
+        </div>
+        
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-primary to-primary/80 dark:from-primary/80 dark:to-primary/60 rounded-lg p-8 text-primary-foreground mb-8 shadow-lg">
+            <h1 class="text-3xl sm:text-4xl font-bold mb-3">Decision Factors Breakdown</h1>
+            <p class="text-primary-foreground/90 text-lg">Understanding why this treatment was recommended</p>
+        </div>
+        
+        <!-- Recommendation Box -->
+        <div class="bg-card border border-border rounded-lg p-6 mb-8 shadow-sm">
+            <div class="mb-4">
+                <h2 class="text-2xl font-semibold text-foreground mb-2">{{ recommendation_text }}</h2>
+                <span class="inline-block px-3 py-1 bg-accent/30 text-accent-foreground rounded-full text-xs font-semibold">
+                    {{ recommendation_type|title }}
+                </span>
+            </div>
+            
+            <div class="bg-background/50 dark:bg-background/30 p-4 rounded-lg border border-border/50">
+                <strong class="text-foreground text-sm">Evidence Strength:</strong>
+                {% if evidence_score >= 0.7 %}
+                    <span class="ml-2 inline-block px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded text-xs font-semibold">
+                        HIGH ({{ evidence_score|floatformat:0 }}%)
+                    </span>
+                {% elif evidence_score >= 0.4 %}
+                    <span class="ml-2 inline-block px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded text-xs font-semibold">
+                        MODERATE ({{ evidence_score|floatformat:0 }}%)
+                    </span>
+                {% else %}
+                    <span class="ml-2 inline-block px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded text-xs font-semibold">
+                        LOW ({{ evidence_score|floatformat:0 }}%)
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Key Influencing Factors -->
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-foreground mb-4 pb-2 border-b-2 border-primary/30">
+                Key Influencing Factors
+            </h3>
+            
+            <div class="grid grid-cols-1 gap-4">
+                {% for factor in decision_factors %}
+                <div class="bg-card border border-border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div class="flex-1">
+                            <h4 class="text-lg font-semibold text-foreground mb-1">
+                                {{ factor.name }}
+                            </h4>
+                            {% if factor.patient_value %}
+                            <p class="text-sm text-muted-foreground">
+                                <span class="font-medium">Patient Value:</span> {{ factor.patient_value }}
+                            </p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="flex items-center gap-4">
+                            <div class="flex-1 min-w-48">
+                                <div class="w-full bg-background rounded-full h-2 overflow-hidden border border-border/50">
+                                    <div class="bg-gradient-to-r from-primary to-primary/70 h-full rounded-full transition-all duration-500"
+                                         style="width: {{ factor.influence_score|floatformat:0 }}%">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-right min-w-14">
+                                <span class="text-2xl font-bold text-primary">{{ factor.influence_score|floatformat:0 }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if factor.details %}
+                    <div class="mt-4 pt-4 border-t border-border/50 text-sm text-muted-foreground">
+                        {{ factor.details }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Summary Section -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <div class="bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 rounded-lg p-6 text-white shadow-lg">
+                <div class="text-sm font-medium opacity-90 mb-2">Total Factors</div>
+                <div class="text-3xl font-bold">{{ decision_factors|length }}</div>
+            </div>
+            
+            <div class="bg-gradient-to-br from-purple-500 to-purple-600 dark:from-purple-600 dark:to-purple-700 rounded-lg p-6 text-white shadow-lg">
+                <div class="text-sm font-medium opacity-90 mb-2">Evidence Strength</div>
+                <div class="text-3xl font-bold">
+                    {% if evidence_score >= 0.7 %}HIGH{% elif evidence_score >= 0.4 %}MODERATE{% else %}LOW{% endif %}
+                </div>
+            </div>
+            
+            <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-700 rounded-lg p-6 text-white shadow-lg">
+                <div class="text-sm font-medium opacity-90 mb-2">Overall Confidence</div>
+                <div class="text-3xl font-bold">{{ evidence_score|floatformat:0 }}%</div>
+            </div>
+        </div>
+        
+        <!-- Interpretation Guide -->
+        <div class="bg-card border border-border rounded-lg p-6 mb-8 shadow-sm">
+            <h4 class="text-xl font-semibold text-foreground mb-4">How to Interpret This Data</h4>
+            <p class="text-muted-foreground leading-relaxed mb-4">
+                Each factor shows how much it influenced the final recommendation. Factors with higher percentages had greater impact on the decision. 
+                This helps understand why this specific treatment was chosen based on your individual profile.
+            </p>
+            <div class="bg-background/50 dark:bg-background/30 p-4 rounded-lg border border-border/50 text-sm text-muted-foreground">
+                <strong class="text-foreground">Example:</strong> If "Cancer Stage" has 80% influence, it means this factor was the primary driver 
+                in recommending this treatment option for your situation.
+            </div>
+        </div>
+        
+        <!-- Educational Information -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900/50 rounded-lg p-6">
+                <h4 class="text-lg font-semibold text-blue-900 dark:text-blue-400 mb-2 flex items-center gap-2">
+                    <i class="fas fa-info-circle"></i> Patient Factors
+                </h4>
+                <p class="text-sm text-blue-800 dark:text-blue-300">
+                    Information about your health profile, age, performance status, and cancer characteristics that influenced this recommendation.
+                </p>
+            </div>
+            
+            <div class="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-900/50 rounded-lg p-6">
+                <h4 class="text-lg font-semibold text-emerald-900 dark:text-emerald-400 mb-2 flex items-center gap-2">
+                    <i class="fas fa-leaf"></i> Evidence Weight
+                </h4>
+                <p class="text-sm text-emerald-800 dark:text-emerald-300">
+                    How much clinical research and guidelines support this recommendation for patients with your specific characteristics.
+                </p>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <a href="javascript:history.back()" 
+               class="inline-flex items-center justify-center px-6 py-3 bg-card border border-primary/30 rounded-lg hover:bg-accent/50 transition-colors text-foreground font-medium">
+                <i class="fas fa-arrow-left mr-2"></i> Back
+            </a>
+            <a href="{% url 'cancer_detection:evidence_explanation_detail' treatment_plan_id rec_evidence_id %}" 
+               class="inline-flex items-center justify-center px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors font-medium">
+                <i class="fas fa-book-open mr-2"></i> Full Explanation
+            </a>
+            <a href="{% url 'cancer_detection:evidence_statistics' treatment_plan_id %}" 
+               class="inline-flex items-center justify-center px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors font-medium">
+                <i class="fas fa-chart-bar mr-2"></i> Statistics
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+    .container-fluid {
+        max-width: 1200px;
+    }
+    
+    .header-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+    }
+    
+    .header-gradient h1 {
+        margin: 0;
+        font-size: 1.8em;
+    }
+    
+    .recommendation-box {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .recommendation-box .text {
+        color: #34495e;
+        line-height: 1.8;
+        font-size: 1.05em;
+    }
+    
+    .factors-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin: 20px 0;
+    }
+    
+    .factor-card {
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .factor-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .factor-name {
+        font-size: 1.1em;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 12px;
+    }
+    
+    .influence-score {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .influence-bar {
+        flex-grow: 1;
+        background: #e9ecef;
+        height: 25px;
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .influence-fill {
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        height: 100%;
+        border-radius: 12px;
+        transition: width 0.5s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.8em;
+        font-weight: bold;
+    }
+    
+    .percentage-text {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #667eea;
+        min-width: 50px;
+        text-align: right;
+    }
+    
+    .patient-value {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 4px;
+        margin-top: 10px;
+        border-left: 3px solid #3498db;
+    }
+    
+    .patient-value-label {
+        font-size: 0.85em;
+        color: #7f8c8d;
+        font-weight: 600;
+    }
+    
+    .patient-value-content {
+        color: #2c3e50;
+        font-weight: 500;
+        margin-top: 5px;
+    }
+    
+    .summary-section {
+        background: white;
+        padding: 25px;
+        border-radius: 8px;
+        margin-top: 30px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .summary-title {
+        font-size: 1.3em;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #ecf0f1;
+    }
+    
+    .impact-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+    
+    .impact-item {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 4px;
+        border-left: 4px solid #3498db;
+    }
+    
+    .impact-label {
+        font-size: 0.85em;
+        color: #7f8c8d;
+        font-weight: 600;
+    }
+    
+    .impact-value {
+        font-size: 1.4em;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-top: 5px;
+    }
+    
+    .strength-indicator {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+    }
+    
+    .strength-high {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .strength-moderate {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    
+    .strength-low {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    .interpretation-box {
+        background: #e8f4f8;
+        border-left: 4px solid #3498db;
+        padding: 15px;
+        border-radius: 4px;
+        margin-top: 15px;
+        line-height: 1.6;
+    }
+    
+    .interpretation-title {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+    }
+    
+    .interpretation-text {
+        color: #34495e;
+    }
+    
+    .back-button {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: #3498db;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    
+    .back-button:hover {
+        color: #2980b9;
+    }
+    
+    .action-buttons {
+        margin-top: 30px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .btn-action {
+        display: inline-block;
+        padding: 12px 24px;
+        background-color: #3498db;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: 600;
+        transition: background-color 0.3s;
+    }
+    
+    .btn-action:hover {
+        background-color: #2980b9;
+        color: white;
+    }
+    
+    .btn-secondary {
+        background-color: #95a5a6;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #7f8c8d;
+    }
+    
+    @media (max-width: 768px) {
+        .factors-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .impact-summary {
+            grid-template-columns: 1fr;
+        }
+        
+        .influence-score {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .percentage-text {
+            text-align: left;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 30px auto; padding: 0 15px;">
+    <a href="{% url 'cancer_detection:evidence_explanation_detail' treatment_plan.id rec_evidence.id %}" class="back-button">← Back to Explanation</a>
+    
+    <!-- Header -->
+    <div class="header-gradient">
+        <h1>🎯 Decision Factors Breakdown</h1>
+        <p style="margin: 10px 0 0 0; opacity: 0.9;">Understanding why this treatment was recommended</p>
+    </div>
+    
+    <!-- Recommendation Details -->
+    <div class="recommendation-box">
+        <h3 style="margin-top: 0; color: #2c3e50;">Recommendation</h3>
+        <p class="text">{{ recommendation_text }}</p>
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ecf0f1;">
+            <strong>Evidence Strength:</strong>
+            {% if evidence_strength >= 0.7 %}
+                <span class="strength-indicator strength-high">HIGH ({{ evidence_strength|floatformat:0 }}%)</span>
+            {% elif evidence_strength >= 0.4 %}
+                <span class="strength-indicator strength-moderate">MODERATE ({{ evidence_strength|floatformat:0 }}%)</span>
+            {% else %}
+                <span class="strength-indicator strength-low">LOW ({{ evidence_strength|floatformat:0 }}%)</span>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Individual Decision Factors -->
+    <div class="summary-section">
+        <div class="summary-title">📊 Key Influencing Factors</div>
+        <p style="color: #7f8c8d; margin-bottom: 20px;">
+            These patient characteristics influenced the treatment decision. The bar length indicates relative influence.
+        </p>
+        
+        {% if decision_factors %}
+            <div class="factors-grid">
+                {% for factor in decision_factors %}
+                <div class="factor-card">
+                    <div class="factor-name">{{ factor.name }}</div>
+                    
+                    <div class="influence-score">
+                        <div class="influence-bar">
+                            <div class="influence-fill" style="width: {{ factor.percentage }}%;">
+                                {% if factor.percentage > 15 %}{{ factor.percentage }}%{% endif %}
+                            </div>
+                        </div>
+                        <div class="percentage-text">{{ factor.percentage }}%</div>
+                    </div>
+                    
+                    {% if factor.patient_value %}
+                    <div class="patient-value">
+                        <div class="patient-value-label">Patient's Value:</div>
+                        <div class="patient-value-content">{{ factor.patient_value }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p style="color: #7f8c8d;">
+                ⚠ Decision factor analysis not available for this recommendation.
+            </p>
+        {% endif %}
+    </div>
+    
+    <!-- Summary Analysis -->
+    <div class="summary-section" style="margin-top: 30px;">
+        <div class="summary-title">📈 Summary Analysis</div>
+        
+        <div class="impact-summary">
+            <div class="impact-item">
+                <div class="impact-label">Total Factors Analyzed</div>
+                <div class="impact-value">{{ total_factors }}</div>
+            </div>
+            
+            <div class="impact-item">
+                <div class="impact-label">Evidence Strength</div>
+                <div class="impact-value">
+                    {% if evidence_strength >= 0.7 %}
+                        High
+                    {% elif evidence_strength >= 0.4 %}
+                        Moderate
+                    {% else %}
+                        Low
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="impact-item">
+                <div class="impact-label">Overall Confidence</div>
+                <div class="impact-value">{{ evidence_strength|floatformat:0 }}%</div>
+            </div>
+        </div>
+        
+        <div class="interpretation-box">
+            <div class="interpretation-title">💡 How to Interpret This:</div>
+            <div class="interpretation-text">
+                Each factor shows how much it influenced the final treatment recommendation. 
+                Factors with higher percentages had greater impact on the decision. 
+                This breakdown helps understand why this specific treatment was chosen 
+                based on your individual medical profile.
+            </div>
+        </div>
+    </div>
+    
+    <!-- Educational Info -->
+    <div class="summary-section" style="margin-top: 30px; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+        <div class="summary-title">ℹ️ Understanding Your Decision Factors</div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+            <div style="background: white; padding: 15px; border-radius: 4px;">
+                <h4 style="margin-top: 0; color: #2c3e50;">Age</h4>
+                <p style="color: #7f8c8d; font-size: 0.9em;">
+                    Age affects treatment tolerance and the risk-benefit profile of different therapies.
+                </p>
+            </div>
+            
+            <div style="background: white; padding: 15px; border-radius: 4px;">
+                <h4 style="margin-top: 0; color: #2c3e50;">Performance Status</h4>
+                <p style="color: #7f8c8d; font-size: 0.9em;">
+                    Your ability to handle the physical demands of treatment is crucial for selecting appropriate therapies.
+                </p>
+            </div>
+            
+            <div style="background: white; padding: 15px; border-radius: 4px;">
+                <h4 style="margin-top: 0; color: #2c3e50;">Cancer Stage</h4>
+                <p style="color: #7f8c8d; font-size: 0.9em;">
+                    Stage determines the aggressiveness and extent of treatment needed.
+                </p>
+            </div>
+            
+            <div style="background: white; padding: 15px; border-radius: 4px;">
+                <h4 style="margin-top: 0; color: #2c3e50;">Molecular Markers</h4>
+                <p style="color: #7f8c8d; font-size: 0.9em;">
+                    Genetic and molecular characteristics guide targeted therapy selection.
+                </p>
+            </div>
+            
+            <div style="background: white; padding: 15px; border-radius: 4px;">
+                <h4 style="margin-top: 0; color: #2c3e50;">Comorbidities</h4>
+                <p style="color: #7f8c8d; font-size: 0.9em;">
+                    Other medical conditions affect which treatments are safe and well-tolerated.
+                </p>
+            </div>
+            
+            <div style="background: white; padding: 15px; border-radius: 4px;">
+                <h4 style="margin-top: 0; color: #2c3e50;">Organ Function</h4>
+                <p style="color: #7f8c8d; font-size: 0.9em;">
+                    Kidney, liver, and cardiac function influence drug metabolism and clearance.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="{% url 'cancer_detection:evidence_explanation_detail' treatment_plan.id rec_evidence.id %}" 
+           class="btn-action">
+            ← Back to Full Explanation
+        </a>
+        <a href="{% url 'cancer_detection:treatment_plan_with_evidence' treatment_plan.id %}" 
+           class="btn-action btn-secondary">
+            ← Treatment Plan
+        </a>
+        <a href="{% url 'cancer_detection:evidence_statistics' treatment_plan.id %}" 
+           class="btn-action btn-secondary">
+            📊 Statistics
+        </a>
+    </div>
+</div>
+{% endblock %}

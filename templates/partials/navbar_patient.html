@@ -1,0 +1,725 @@
+<!-- Patient Navigation -->
+<nav
+    class="border-b border-border/50 bg-card/95 backdrop-blur-xl supports-[backdrop-filter]:bg-card/60 sticky top-0 z-50 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+
+            <!-- Left Section: Logo & Mobile Menu Toggle -->
+            <div class="flex items-center space-x-4">
+                <a href="/" class="flex items-center space-x-3 group">
+                    <div
+                        class="h-9 w-9 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center group-hover:scale-110 group-hover:shadow-lg transition-all duration-300">
+                        <i class="fas fa-heartbeat text-primary-foreground text-lg"></i>
+                    </div>
+                    <span
+                        class="hidden sm:inline text-lg font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">RuralCare</span>
+                </a>
+
+                <!-- Mobile Menu Toggle -->
+                <button onclick="toggleMobileMenu()"
+                    class="md:hidden h-10 w-10 rounded-lg border border-border hover:bg-accent/80 flex items-center justify-center transition-all duration-300">
+                    <i class="fas fa-bars text-foreground" id="menuIcon"></i>
+                </button>
+            </div>
+
+            <!-- Desktop Navigation Links -->
+            <div class="hidden md:flex items-center space-x-2">
+                <a href="{% url 'patient_dashboard' %}"
+                    class="text-sm font-medium text-muted-foreground hover:text-foreground transition-all px-3 py-2 rounded-lg hover:bg-accent/50">
+                    Dashboard
+                </a>
+
+                <a href="{% url 'medical_records_list' %}"
+                    class="text-sm font-medium text-muted-foreground hover:text-foreground transition-all px-3 py-2 rounded-lg hover:bg-accent/50">
+                    Records
+                </a>
+
+                <a href="{% url 'cancer_detection:treatment_plans_list' %}"
+                    class="text-sm font-medium text-muted-foreground hover:text-foreground transition-all px-3 py-2 rounded-lg hover:bg-accent/50">
+                    Plans
+                </a>
+
+                <a href="{% url 'nearby_clinics' %}"
+                    class="text-sm font-medium text-muted-foreground hover:text-foreground transition-all px-3 py-2 rounded-lg hover:bg-accent/50">
+                    Clinics
+                </a>
+
+                <a href="/evidence/search/"
+                    class="text-sm font-medium text-muted-foreground hover:text-foreground transition-all px-3 py-2 rounded-lg hover:bg-accent/50">
+                    Evidence
+                </a>
+
+                <a href="{% url 'insurance:landing' %}"
+                    class="text-sm font-medium text-muted-foreground hover:text-foreground transition-all px-3 py-2 rounded-lg hover:bg-accent/50">
+                    Insurance
+                </a>
+
+                <!-- Medicine Identifier - AI Powered -->
+                <a href="{% url 'medicine_identifier:upload' %}"
+                    class="text-sm font-medium text-muted-foreground hover:text-foreground transition-all px-3 py-2 rounded-lg hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 group">
+                    Medicine ID
+                    <span
+                        class="ml-1 px-1.5 py-0.5 text-[10px] font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full">AI</span>
+                </a>
+
+                <!-- Medical AI Assistant - NEW -->
+                <a href="{% url 'medical_chatbot:chat_interface' %}"
+                    class="text-sm font-medium text-muted-foreground hover:text-foreground transition-all px-3 py-2 rounded-lg hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 group">
+                    AI Assistant
+                    <span
+                        class="ml-1 px-1.5 py-0.5 text-[10px] font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full">NEW</span>
+                </a>
+
+                <!-- Quick Access Dropdown -->
+                <div class="relative">
+                    <button onclick="toggleNewDropdown()"
+                        class="text-sm font-medium text-muted-foreground hover:text-foreground flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-accent/50 transition-all">
+                        <span>New</span>
+                        <i class="fas fa-chevron-down text-xs opacity-60"></i>
+                    </button>
+
+                    <div id="newDropdown"
+                        class="hidden absolute left-0 mt-2 w-48 bg-card border border-border/50 rounded-xl shadow-xl py-2 z-50 backdrop-blur-sm">
+                        <a href="/cancer-detection/upload"
+                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
+                            <i class="fas fa-cloud-upload-alt text-primary text-xs"></i>
+                            <span>Upload Image</span>
+                        </a>
+                        <a href="{% url 'cancer_detection:upload_histopathology' %}"
+                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
+                            <i class="fas fa-microscope text-primary text-xs"></i>
+                            <span>Pathology Report</span>
+                        </a>
+                        <a href="{% url 'cancer_detection:upload_genomic' %}"
+                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
+                            <i class="fas fa-dna text-primary text-xs"></i>
+                            <span>Genomic Data</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- View Data Dropdown -->
+                <div class="relative">
+                    <button onclick="toggleDataDropdown()"
+                        class="text-sm font-medium text-muted-foreground hover:text-foreground flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-accent/50 transition-all">
+                        <span>Data</span>
+                        <i class="fas fa-chevron-down text-xs opacity-60"></i>
+                    </button>
+
+                    <div id="dataDropdown"
+                        class="hidden absolute left-0 mt-2 w-56 bg-card border border-border/50 rounded-xl shadow-xl py-2 z-50 backdrop-blur-sm">
+                        <div
+                            class="px-4 py-2 text-xs text-muted-foreground font-semibold uppercase tracking-wide border-b border-border/50">
+                            Analyses</div>
+                        <a href="/cancer-detection/analyses"
+                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
+                            <i class="fas fa-chart-bar text-primary text-xs"></i>
+                            <span>Image Analyses</span>
+                        </a>
+                        <a href="{% url 'cancer_detection:histopathology_list' %}"
+                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
+                            <i class="fas fa-file-medical text-primary text-xs"></i>
+                            <span>Pathology</span>
+                        </a>
+                        <a href="{% url 'cancer_detection:genomic_list' %}"
+                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
+                            <i class="fas fa-flask text-primary text-xs"></i>
+                            <span>Genomics</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Patient Portal Dropdown -->
+                <div class="relative">
+                    <button onclick="togglePortalDropdown()"
+                        class="text-sm font-medium text-muted-foreground hover:text-foreground flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-accent/50 transition-all">
+                        <span>My Health</span>
+                        <i class="fas fa-chevron-down text-xs opacity-60" id="portalChevron"></i>
+                    </button>
+
+                    <div id="portalDropdown"
+                        class="dropdown-menu absolute left-0 mt-2 w-56 bg-card border border-border/50 rounded-xl shadow-xl py-2 z-50 backdrop-blur-sm">
+                        <a href="{% url 'patient_profile_edit' %}"
+                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
+                            <i class="fas fa-user-edit text-primary text-xs"></i>
+                            <span>Edit My Profile</span>
+                        </a>
+                        <div class="border-t border-border/30 my-1"></div>
+                        <a href="{% url 'patient_portal:overview' %}"
+                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
+                            <i class="fas fa-th-large text-primary text-xs"></i>
+                            <span>Health Portal</span>
+                        </a>
+                        <a href="{% url 'patient_portal:symptom_log_create' %}"
+                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
+                            <i class="fas fa-plus-circle text-primary text-xs"></i>
+                            <span>Log Symptoms</span>
+                        </a>
+                        <div class="border-t border-border/30 my-1"></div>
+                        <a href="{% url 'patient_portal:confidence_view' %}"
+                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
+                            <i class="fas fa-chart-pie text-primary text-xs"></i>
+                            <span>Treatment Confidence</span>
+                        </a>
+                        <a href="{% url 'patient_portal:treatment_explanation_list' %}"
+                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
+                            <i class="fas fa-book-open text-primary text-xs"></i>
+                            <span>Treatment Explained</span>
+                        </a>
+                        <a href="{% url 'patient_portal:side_effects_list' %}"
+                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
+                            <i class="fas fa-pills text-primary text-xs"></i>
+                            <span>Side Effects</span>
+                        </a>
+                        <div class="border-t border-border/30 my-1"></div>
+                        <div class="px-4 py-2 text-xs text-muted-foreground font-semibold uppercase tracking-wide">AI
+                            Tools</div>
+                        <a href="{% url 'medicine_identifier:upload' %}"
+                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-amber-500/10 transition-all flex items-center space-x-2">
+                            <i class="fas fa-capsules text-amber-500 text-xs"></i>
+                            <span>Identify Medicine</span>
+                            <span
+                                class="ml-auto px-1.5 py-0.5 text-[9px] font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full">NEW</span>
+                        </a>
+                        <a href="{% url 'medicine_identifier:history' %}"
+                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
+                            <i class="fas fa-history text-primary text-xs"></i>
+                            <span>Medicine History</span>
+                        </a>
+                        <a href="{% url 'medical_chatbot:chat_interface' %}"
+                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-emerald-500/10 transition-all flex items-center space-x-2">
+                            <i class="fas fa-robot text-emerald-500 text-xs"></i>
+                            <span>Medical AI Assistant</span>
+                            <span
+                                class="ml-auto px-1.5 py-0.5 text-[9px] font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full">NEW</span>
+                        </a>
+                        <div class="border-t border-border/30 my-1"></div>
+                        <a href="{% url 'patient_portal:alerts_list' %}"
+                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
+                            <i class="fas fa-bell text-primary text-xs"></i>
+                            <span>Alerts & Reminders</span>
+                        </a>
+                        <div class="border-t border-border/30 my-1"></div>
+                        <a href="{% url 'patient_portal:available_doctors' %}"
+                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
+                            <i class="fas fa-user-md text-primary text-xs"></i>
+                            <span>Book Consultation</span>
+                        </a>
+                        <a href="{% url 'patient_portal:my_consultations' %}"
+                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
+                            <i class="fas fa-calendar-check text-primary text-xs"></i>
+                            <span>My Consultations</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Section: Theme Toggle & Profile -->
+            <div class="flex items-center space-x-3">
+                <!-- Notification Icon -->
+                <a href="{% url 'patient_portal:alerts_list' %}"
+                    class="relative h-10 w-10 rounded-lg border border-border hover:bg-accent/80 hover:border-primary/50 flex items-center justify-center transition-all duration-300 hover:scale-110 group">
+                    <i class="fas fa-bell text-foreground group-hover:text-primary transition-all"></i>
+                    <!-- Red Dot for Unread Notifications -->
+                    <span id="notificationBadge"
+                        class="hidden absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center ring-2 ring-card animate-pulse">
+                        <span id="notificationCount">0</span>
+                    </span>
+                </a>
+
+                <!-- Language Selector -->
+                <div class="relative">
+                    <button onclick="toggleLanguageDropdown()"
+                        class="hidden sm:flex h-10 px-3 rounded-lg border border-border hover:bg-accent/80 hover:border-primary/50 items-center justify-center space-x-2 transition-all duration-300 hover:scale-105 group">
+                        <i class="fas fa-language text-foreground group-hover:text-primary transition-all"></i>
+                        <span class="text-xs font-medium text-foreground" id="selectedLanguageText">EN</span>
+                    </button>
+
+                    <div id="languageDropdown"
+                        class="hidden absolute right-0 mt-2 w-48 bg-card border border-border/50 rounded-xl shadow-xl py-2 z-50 backdrop-blur-sm">
+                        <div
+                            class="px-4 py-2 text-xs text-muted-foreground font-semibold uppercase tracking-wide border-b border-border/50">
+                            Select Language</div>
+                        <button onclick="changeLanguage('en', 'EN')"
+                            class="w-full text-left px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
+                            <i class="fas fa-check text-primary text-xs" id="check-en"></i>
+                            <span>English</span>
+                        </button>
+                        <button onclick="changeLanguage('hi', 'HI')"
+                            class="w-full text-left px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
+                            <i class="fas fa-check text-primary text-xs opacity-0" id="check-hi"></i>
+                            <span>हिंदी (Hindi)</span>
+                        </button>
+                        <button onclick="changeLanguage('mr', 'MR')"
+                            class="w-full text-left px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
+                            <i class="fas fa-check text-primary text-xs opacity-0" id="check-mr"></i>
+                            <span>मराठी (Marathi)</span>
+                        </button>
+                        <button onclick="changeLanguage('gu', 'GU')"
+                            class="w-full text-left px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
+                            <i class="fas fa-check text-primary text-xs opacity-0" id="check-gu"></i>
+                            <span>ગુજરાતી (Gujarati)</span>
+                        </button>
+                        <button onclick="changeLanguage('te', 'TE')"
+                            class="w-full text-left px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
+                            <i class="fas fa-check text-primary text-xs opacity-0" id="check-te"></i>
+                            <span>తెలుగు (Telugu)</span>
+                        </button>
+                        <button onclick="changeLanguage('kn', 'KN')"
+                            class="w-full text-left px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
+                            <i class="fas fa-check text-primary text-xs opacity-0" id="check-kn"></i>
+                            <span>ಕನ್ನಡ (Kannada)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Theme Toggle -->
+                <button onclick="toggleTheme()"
+                    class="hidden sm:flex h-10 w-10 rounded-lg border border-border hover:bg-accent/80 hover:border-primary/50 items-center justify-center transition-all duration-300 hover:scale-110">
+                    <i class="fas fa-sun text-foreground dark:hidden"></i>
+                    <i class="fas fa-moon text-foreground hidden dark:inline"></i>
+                </button>
+
+                <!-- Patient Profile Dropdown -->
+                <div class="relative">
+                    <button onclick="togglePatientDropdown()"
+                        class="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-accent/50 transition-all duration-300 group">
+                        {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture }}" alt="Profile"
+                            class="h-8 w-8 rounded-full ring-2 ring-primary/50 group-hover:ring-primary transition-all duration-300">
+                        {% else %}
+                        <div
+                            class="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center ring-2 ring-primary/50 group-hover:ring-primary transition-all duration-300">
+                            <span class="text-xs text-primary-foreground font-bold">{{ user.first_name.0|default:'P'
+                                }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="hidden md:block text-left">
+                            <p class="text-sm font-semibold text-foreground">{{ user.first_name|default:user.username }}
+                            </p>
+                        </div>
+                        <i
+                            class="fas fa-chevron-down text-xs text-muted-foreground group-hover:text-foreground transition-all"></i>
+                    </button>
+
+                    <!-- Profile Dropdown Menu -->
+                    <div id="patientDropdown"
+                        class="dropdown-menu absolute right-0 mt-2 w-80 bg-card rounded-xl shadow-2xl border border-border/50 z-50 backdrop-blur-sm hidden">
+                        <div class="px-4 py-4 border-b border-border/50 bg-gradient-to-br from-primary/5 to-primary/0">
+                            <div class="flex items-center space-x-3">
+                                {% if user.profile_picture %}
+                                <img src="{{ user.profile_picture }}" alt="Profile"
+                                    class="h-12 w-12 rounded-full ring-2 ring-primary/50">
+                                {% else %}
+                                <div
+                                    class="h-12 w-12 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center ring-2 ring-primary/50">
+                                    <span class="text-lg text-primary-foreground font-bold">{{
+                                        user.first_name.0|default:'P' }}</span>
+                                </div>
+                                {% endif %}
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-foreground">{{ user.first_name|default:user.username
+                                        }} {{ user.last_name|default:'' }}</h3>
+                                    <p class="text-xs text-muted-foreground">Patient Account</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="px-4 py-3 space-y-2 max-h-56 overflow-y-auto border-b border-border/50">
+                            <!-- Contact Info Section -->
+                            <div class="space-y-2">
+                                {% if user.email %}
+                                <div class="flex items-start space-x-3 text-sm p-2 rounded-lg bg-accent/30">
+                                    <i class="fas fa-envelope w-4 text-primary/80 flex-shrink-0 mt-0.5"></i>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs text-muted-foreground font-semibold">Email</p>
+                                        <p class="text-xs font-medium text-foreground truncate">{{ user.email }}</p>
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                {% if user.phone_number %}
+                                <div class="flex items-start space-x-3 text-sm p-2 rounded-lg bg-accent/30">
+                                    <i class="fas fa-phone w-4 text-primary/80 flex-shrink-0 mt-0.5"></i>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs text-muted-foreground font-semibold">Phone</p>
+                                        <p class="text-xs font-medium text-foreground">{{ user.phone_number }}</p>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Medical Info Section -->
+                            {% if user.patient_profile %}
+                            <div class="space-y-2 pt-2 border-t border-border/30">
+                                {% if user.patient_profile.date_of_birth %}
+                                <div class="flex items-center space-x-3 text-xs p-2 rounded-lg hover:bg-accent/50">
+                                    <i class="fas fa-birthday-cake w-4 text-primary/80 flex-shrink-0"></i>
+                                    <div class="flex-1">
+                                        <p class="text-muted-foreground">DOB</p>
+                                        <p class="font-medium text-foreground">{{
+                                            user.patient_profile.date_of_birth|date:"M d, Y" }}</p>
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                {% if user.patient_profile.blood_group %}
+                                <div class="flex items-center space-x-3 text-xs p-2 rounded-lg hover:bg-accent/50">
+                                    <i class="fas fa-tint w-4 text-red-500 flex-shrink-0"></i>
+                                    <div class="flex-1">
+                                        <p class="text-muted-foreground">Blood Type</p>
+                                        <p class="font-medium text-foreground">{{ user.patient_profile.blood_group }}
+                                        </p>
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                {% if user.patient_profile.emergency_contact_name %}
+                                <div
+                                    class="flex items-start space-x-3 text-xs p-2 rounded-lg hover:bg-accent/50 border border-orange-200/50 bg-orange-50/30 dark:bg-orange-950/20 dark:border-orange-800/30">
+                                    <i
+                                        class="fas fa-alert-circle w-4 text-orange-600 dark:text-orange-400 flex-shrink-0 mt-0.5"></i>
+                                    <div class="flex-1">
+                                        <p class="text-muted-foreground font-semibold">Emergency</p>
+                                        <p class="font-medium text-foreground">{{
+                                            user.patient_profile.emergency_contact_name }}</p>
+                                        {% if user.patient_profile.emergency_contact_phone %}
+                                        <p class="text-xs text-muted-foreground">{{
+                                            user.patient_profile.emergency_contact_phone }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="px-4 py-3 space-y-2 bg-gradient-to-br from-accent/30 to-accent/0">
+                            <a href="{% url 'patient_profile_edit' %}"
+                                class="flex items-center justify-center w-full px-4 py-2.5 bg-primary/10 border border-primary/30 text-primary text-sm font-semibold rounded-lg hover:bg-primary/20 hover:scale-105 transition-all">
+                                <i class="fas fa-user-edit mr-2"></i>Edit Profile
+                            </a>
+                            <a href="{% url 'patient_dashboard' %}"
+                                class="flex items-center justify-center w-full px-4 py-2.5 bg-gradient-to-r from-primary to-primary/90 text-primary-foreground text-sm font-semibold rounded-lg hover:shadow-lg hover:scale-105 transition-all">
+                                <i class="fas fa-dashboard mr-2"></i>Dashboard
+                            </a>
+                            <a href="{% url 'logout' %}"
+                                class="flex items-center justify-center w-full px-4 py-2.5 border border-border/50 text-sm font-semibold rounded-lg hover:bg-accent/80 transition-all">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobileMenu"
+            class="hidden md:hidden pb-4 border-t border-border/50 bg-gradient-to-b from-card to-card/80">
+            <div class="space-y-2 pt-2">
+                <a href="{% url 'patient_dashboard' %}"
+                    class="block px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent/80 rounded-lg transition-all">
+                    <i class="fas fa-home mr-2"></i>Dashboard
+                </a>
+                <a href="{% url 'patient_profile_edit' %}"
+                    class="block px-4 py-2.5 text-sm font-medium text-primary hover:bg-accent/80 rounded-lg transition-all border border-primary/30 bg-primary/5">
+                    <i class="fas fa-user-edit mr-2"></i>Edit My Profile
+                </a>
+                <a href="{% url 'medical_records_list' %}"
+                    class="block px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent/80 rounded-lg transition-all">
+                    <i class="fas fa-file-medical mr-2"></i>Medical Records
+                </a>
+                <a href="{% url 'cancer_detection:treatment_plans_list' %}"
+                    class="block px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent/80 rounded-lg transition-all">
+                    <i class="fas fa-clipboard-list mr-2"></i>Treatment Plans
+                </a>
+                <a href="/evidence/search/"
+                    class="block px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent/80 rounded-lg transition-all">
+                    <i class="fas fa-lightbulb mr-2"></i>Evidence Search
+                </a>
+                <a href="{% url 'insurance:landing' %}"
+                    class="block px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent/80 rounded-lg transition-all">
+                    <i class="fas fa-shield-alt mr-2"></i>Insurance
+                </a>
+                <div class="border-t border-border/50 pt-2 mt-2">
+                    <p class="px-4 py-1 text-xs font-semibold text-muted-foreground uppercase">Quick Actions</p>
+                    <a href="/cancer-detection/upload"
+                        class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 rounded-lg transition-all">
+                        <i class="fas fa-cloud-upload-alt mr-2 text-primary"></i>Upload Image
+                    </a>
+                    <a href="{% url 'cancer_detection:upload_histopathology' %}"
+                        class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 rounded-lg transition-all">
+                        <i class="fas fa-microscope mr-2 text-primary"></i>Pathology Report
+                    </a>
+                    <a href="{% url 'cancer_detection:upload_genomic' %}"
+                        class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 rounded-lg transition-all">
+                        <i class="fas fa-dna mr-2 text-primary"></i>Genomic Data
+                    </a>
+                </div>
+                <div class="border-t border-border/50 pt-2 mt-2">
+                    <p class="px-4 py-1 text-xs font-semibold text-muted-foreground uppercase">AI Tools</p>
+                    <a href="{% url 'medicine_identifier:upload' %}"
+                        class="block px-4 py-2.5 text-sm text-foreground hover:bg-amber-500/10 rounded-lg transition-all flex items-center">
+                        <i class="fas fa-pills mr-2 text-amber-500"></i>Identify Medicine
+                        <span
+                            class="ml-auto px-1.5 py-0.5 text-[9px] font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full">AI</span>
+                    </a>
+                    <a href="{% url 'medicine_identifier:history' %}"
+                        class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 rounded-lg transition-all">
+                        <i class="fas fa-history mr-2 text-primary"></i>Medicine History
+                    </a>
+                    <a href="{% url 'medical_chatbot:chat_interface' %}"
+                        class="block px-4 py-2.5 text-sm text-foreground hover:bg-emerald-500/10 rounded-lg transition-all flex items-center">
+                        <i class="fas fa-robot mr-2 text-emerald-500"></i>Medical AI Assistant
+                        <span
+                            class="ml-auto px-1.5 py-0.5 text-[9px] font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full">NEW</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobileMenu');
+        const icon = document.getElementById('menuIcon');
+        menu.classList.toggle('hidden');
+        icon.classList.toggle('fa-bars');
+        icon.classList.toggle('fa-times');
+    }
+
+    function toggleNewDropdown() {
+        const dropdown = document.getElementById('newDropdown');
+        dropdown.classList.toggle('hidden');
+    }
+
+    function toggleDataDropdown() {
+        const dropdown = document.getElementById('dataDropdown');
+        dropdown.classList.toggle('hidden');
+    }
+
+    function togglePatientDropdown() {
+        const dropdown = document.getElementById('patientDropdown');
+        dropdown.classList.toggle('hidden');
+    }
+
+    // Close all dropdowns when clicking outside
+    document.addEventListener('click', function (event) {
+        const newDropdown = document.getElementById('newDropdown');
+        const dataDropdown = document.getElementById('dataDropdown');
+        const patientDropdown = document.getElementById('patientDropdown');
+
+        const isNewBtn = event.target.closest('button[onclick*="toggleNewDropdown"]') ||
+            event.target.closest('#newDropdown');
+        const isDataBtn = event.target.closest('button[onclick*="toggleDataDropdown"]') ||
+            event.target.closest('#dataDropdown');
+        const isPatientBtn = event.target.closest('button[onclick*="togglePatientDropdown"]') ||
+            event.target.closest('#patientDropdown');
+
+        if (!isNewBtn && newDropdown && !newDropdown.classList.contains('hidden')) {
+            newDropdown.classList.add('hidden');
+        }
+        if (!isDataBtn && dataDropdown && !dataDropdown.classList.contains('hidden')) {
+            dataDropdown.classList.add('hidden');
+        }
+        if (!isPatientBtn && patientDropdown && !patientDropdown.classList.contains('hidden')) {
+            patientDropdown.classList.add('hidden');
+        }
+    });
+
+    // Update notification count
+    function updateNotificationCount() {
+        fetch('{% url "patient_portal:api_alerts_count" %}')
+            .then(response => response.json())
+            .then(data => {
+                const count = data.count || 0;
+                const badge = document.getElementById('notificationBadge');
+                const countEl = document.getElementById('notificationCount');
+
+                if (count > 0) {
+                    badge.classList.remove('hidden');
+                    countEl.textContent = count > 99 ? '99+' : count;
+                } else {
+                    badge.classList.add('hidden');
+                }
+            })
+            .catch(error => console.error('Error fetching notification count:', error));
+    }
+
+    // Update count on page load and every 30 seconds
+    document.addEventListener('DOMContentLoaded', function () {
+        updateNotificationCount();
+        setInterval(updateNotificationCount, 30000);
+    });
+
+    // Language Dropdown Toggle
+    function toggleLanguageDropdown() {
+        const dropdown = document.getElementById('languageDropdown');
+        dropdown.classList.toggle('hidden');
+    }
+
+    // Google Translate Functions - Reliable Implementation using cookies and reload
+    function googleTranslateElementInit() {
+        new google.translate.TranslateElement({
+            pageLanguage: 'en',
+            includedLanguages: 'en,hi,mr,gu,te,kn',
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+            autoDisplay: false
+        }, 'google_translate_element');
+
+        // Update UI to reflect current language on page load
+        setTimeout(() => {
+            const savedLang = localStorage.getItem('preferredLanguage') || 'en';
+            const savedDisplay = localStorage.getItem('preferredLanguageDisplay') || 'EN';
+            updateLanguageUI(savedLang, savedDisplay);
+        }, 100);
+    }
+
+    function updateLanguageUI(langCode, displayCode) {
+        // Update selected language display
+        const langText = document.getElementById('selectedLanguageText');
+        if (langText) langText.textContent = displayCode;
+
+        // Update checkmarks
+        ['en', 'hi', 'mr', 'gu', 'te', 'kn'].forEach(lang => {
+            const check = document.getElementById('check-' + lang);
+            if (check) {
+                if (lang === langCode) {
+                    check.classList.remove('opacity-0');
+                } else {
+                    check.classList.add('opacity-0');
+                }
+            }
+        });
+    }
+
+    function setCookie(name, value, days) {
+        let expires = "";
+        if (days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        // Set cookie for current domain
+        document.cookie = name + "=" + (value || "") + expires + "; path=/";
+        // Also set for domain without 'www' for consistency
+        const domain = window.location.hostname;
+        document.cookie = name + "=" + (value || "") + expires + "; path=/; domain=" + domain;
+    }
+
+    function deleteCookie(name) {
+        document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        const domain = window.location.hostname;
+        document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + domain;
+    }
+
+    function changeLanguage(langCode, displayCode) {
+        // Get current language
+        const currentLang = localStorage.getItem('preferredLanguage') || 'en';
+
+        // If same language, just close dropdown
+        if (currentLang === langCode) {
+            document.getElementById('languageDropdown').classList.add('hidden');
+            return;
+        }
+
+        // Update UI immediately
+        updateLanguageUI(langCode, displayCode);
+
+        // Close dropdown
+        document.getElementById('languageDropdown').classList.add('hidden');
+
+        // Save preference to localStorage
+        localStorage.setItem('preferredLanguage', langCode);
+        localStorage.setItem('preferredLanguageDisplay', displayCode);
+
+        // Set or delete the googtrans cookie
+        if (langCode === 'en') {
+            // Reset to English - delete cookies and reload
+            deleteCookie('googtrans');
+            // Small delay then reload
+            setTimeout(() => {
+                window.location.reload();
+            }, 100);
+        } else {
+            // Set the Google Translate cookie
+            setCookie('googtrans', '/en/' + langCode, 365);
+            // Also set it in the session storage as backup
+            sessionStorage.setItem('googtrans', '/en/' + langCode);
+            // Reload page to apply translation
+            setTimeout(() => {
+                window.location.reload();
+            }, 100);
+        }
+    }
+
+    // Hide Google Translate UI elements but keep functionality
+    document.addEventListener('DOMContentLoaded', function () {
+        const style = document.createElement('style');
+        style.textContent = `
+        /* Hide Google Translate banner and branding */
+        .goog-te-banner-frame { display: none !important; }
+        .goog-te-gadget { 
+            color: transparent !important;
+            font-size: 0 !important;
+        }
+        .goog-te-gadget > span { display: none !important; }
+        .goog-te-gadget img { display: none !important; }
+        body { top: 0 !important; position: static !important; }
+        #google_translate_element { 
+            position: absolute !important;
+            left: -9999px !important;
+            top: -9999px !important;
+            visibility: hidden !important;
+        }
+        .skiptranslate { display: none !important; }
+        .goog-te-spinner-pos { display: none !important; }
+        
+        /* Fix body shifting issue */
+        html.translated-ltr { margin-top: 0 !important; }
+        html.translated-rtl { margin-top: 0 !important; }
+        .goog-te-banner-frame.skiptranslate { display: none !important; }
+        
+        /* Hide the "Translated by Google" tooltip */
+        .goog-tooltip { display: none !important; }
+        .goog-tooltip:hover { display: none !important; }
+        .goog-text-highlight { background-color: transparent !important; box-shadow: none !important; }
+    `;
+        document.head.appendChild(style);
+
+        // Monitor and hide Google Translate elements as they appear
+        const observer = new MutationObserver(function (mutations) {
+            const banner = document.querySelector('.goog-te-banner-frame');
+            if (banner) banner.style.display = 'none';
+            document.body.style.top = '0px';
+
+            // Remove the "Select Language" text from Google Translate gadget
+            const gadget = document.querySelector('.goog-te-gadget');
+            if (gadget) {
+                const textNodes = gadget.childNodes;
+                for (let i = textNodes.length - 1; i >= 0; i--) {
+                    if (textNodes[i].nodeType === 3) { // Text node
+                        textNodes[i].textContent = '';
+                    }
+                }
+            }
+        });
+        observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+    });
+
+    // Close language dropdown when clicking outside
+    document.addEventListener('click', function (event) {
+        const languageDropdown = document.getElementById('languageDropdown');
+        const isLanguageBtn = event.target.closest('button[onclick*="toggleLanguageDropdown"]');
+
+        if (!isLanguageBtn && languageDropdown && !languageDropdown.classList.contains('hidden')) {
+            languageDropdown.classList.add('hidden');
+        }
+    });
+</script>
+
+<!-- Google Translate Element Container (hidden but functional) -->
+<div id="google_translate_element" style="position: absolute; left: -9999px; visibility: hidden;"></div>
+<script type="text/javascript"
+    src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>

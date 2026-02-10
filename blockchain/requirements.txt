@@ -1,0 +1,5 @@
+# Blockchain dependencies - updated for compatibility with Python 3.13
+web3>=7.0.0
+py-solc-x==2.0.2
+eth-account>=0.10.0
+eth-utils>=2.3.1

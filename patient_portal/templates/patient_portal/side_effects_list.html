@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% block title %}Side Effects Information{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <nav class="mb-4">
+                <a href="{% url 'patient_portal:overview' %}" class="text-primary hover:underline text-sm">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Portal
+                </a>
+            </nav>
+            <h1 class="text-3xl font-bold text-foreground">Side Effects Information</h1>
+            <p class="text-muted-foreground mt-1">What to expect and how to manage potential side effects from your treatment</p>
+        </div>
+
+        <!-- Risk Level Legend -->
+        <div class="bg-card border border-border/50 rounded-xl p-4 mb-6">
+            <p class="text-sm text-muted-foreground mb-3">Risk levels are shown as:</p>
+            <div class="flex flex-wrap gap-4">
+                <div class="flex items-center space-x-2">
+                    <span class="w-3 h-3 bg-green-500 rounded-full"></span>
+                    <span class="text-sm text-foreground">Low - Manageable at home</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="w-3 h-3 bg-amber-500 rounded-full"></span>
+                    <span class="text-sm text-foreground">Moderate - May need medication</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="w-3 h-3 bg-red-500 rounded-full"></span>
+                    <span class="text-sm text-foreground">High - Contact your doctor</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Side Effects by Treatment Plan -->
+        <div class="space-y-6">
+            {% for item in side_effects_list %}
+            <div class="bg-card border border-border/50 rounded-xl overflow-hidden">
+                <div class="bg-accent/30 px-6 py-4 border-b border-border/50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-lg font-semibold text-foreground">{{ item.plan.cancer_type }} Treatment</h2>
+                            <p class="text-sm text-muted-foreground">Stage {{ item.plan.cancer_stage }} | {{ item.plan.get_status_display }}</p>
+                        </div>
+                        <a href="{% url 'patient_portal:side_effects_detail' item.plan.id %}" 
+                           class="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm hover:bg-primary/90 transition-colors">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    {% if item.side_effects %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {% for effect in item.side_effects|slice:":6" %}
+                        <div class="flex items-start space-x-3 p-3 bg-accent/30 rounded-lg">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
+                                {% if effect.severity == 'high' or effect.severity == 'severe' %}bg-red-100 dark:bg-red-900/30
+                                {% elif effect.severity == 'moderate' or effect.severity == 'medium' %}bg-amber-100 dark:bg-amber-900/30
+                                {% else %}bg-green-100 dark:bg-green-900/30{% endif %}">
+                                <i class="fas fa-exclamation-circle
+                                    {% if effect.severity == 'high' or effect.severity == 'severe' %}text-red-600
+                                    {% elif effect.severity == 'moderate' or effect.severity == 'medium' %}text-amber-600
+                                    {% else %}text-green-600{% endif %} text-sm"></i>
+                            </div>
+                            <div>
+                                {% if effect.effect %}
+                                <p class="font-medium text-foreground">{{ effect.effect }}</p>
+                                {% if effect.management %}
+                                <p class="text-xs text-muted-foreground mt-1">{{ effect.management|truncatechars:60 }}</p>
+                                {% endif %}
+                                {% else %}
+                                <p class="font-medium text-foreground">{{ effect }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% if item.side_effects|length > 6 %}
+                    <p class="text-sm text-muted-foreground mt-4 text-center">
+                        + {{ item.side_effects|length|add:"-6" }} more side effects. 
+                        <a href="{% url 'patient_portal:side_effects_detail' item.plan.id %}" class="text-primary hover:underline">View all</a>
+                    </p>
+                    {% endif %}
+                    {% else %}
+                    <div class="text-center py-8">
+                        <i class="fas fa-info-circle text-2xl text-muted-foreground mb-2"></i>
+                        <p class="text-muted-foreground">Click "View Details" to generate AI-powered side effect information</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="bg-card border border-border/50 rounded-xl p-12 text-center">
+                <i class="fas fa-shield-alt text-4xl text-green-500 mb-4"></i>
+                <h3 class="text-lg font-medium text-foreground mb-2">No Treatment Plans Yet</h3>
+                <p class="text-muted-foreground mb-4">Side effect information will appear here once you have an active treatment plan</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- General Tips Section -->
+        <div class="mt-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+            <h2 class="text-lg font-semibold text-blue-800 dark:text-blue-400 mb-4">
+                <i class="fas fa-info-circle mr-2"></i>General Tips for Managing Side Effects
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex items-start space-x-3">
+                    <div class="w-8 h-8 bg-blue-100 dark:bg-blue-800/50 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-clock text-blue-600 text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-blue-800 dark:text-blue-400">Track Your Symptoms</p>
+                        <p class="text-sm text-blue-700 dark:text-blue-300">Log symptoms daily to help your doctor adjust treatment</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <div class="w-8 h-8 bg-blue-100 dark:bg-blue-800/50 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-tint text-blue-600 text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-blue-800 dark:text-blue-400">Stay Hydrated</p>
+                        <p class="text-sm text-blue-700 dark:text-blue-300">Drink plenty of fluids unless directed otherwise</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <div class="w-8 h-8 bg-blue-100 dark:bg-blue-800/50 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-bed text-blue-600 text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-blue-800 dark:text-blue-400">Rest When Needed</p>
+                        <p class="text-sm text-blue-700 dark:text-blue-300">Listen to your body and don't push too hard</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <div class="w-8 h-8 bg-blue-100 dark:bg-blue-800/50 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-phone text-blue-600 text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-blue-800 dark:text-blue-400">Don't Wait to Call</p>
+                        <p class="text-sm text-blue-700 dark:text-blue-300">Contact your team if something doesn't feel right</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

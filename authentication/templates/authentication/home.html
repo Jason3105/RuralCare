@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - CancerCare AI{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Hero Section -->
+    <div class="relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-32">
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center p-3 bg-primary/10 dark:bg-primary/20 rounded-full mb-6 scale-in">
+                    <span class="px-4 py-2 text-xs sm:text-sm font-bold text-primary bg-white/50 dark:bg-white/10 rounded-full backdrop-blur-sm">✨ AI-Powered Healthcare</span>
+                </div>
+                <h1 class="text-4xl sm:text-5xl lg:text-7xl font-bold text-foreground mb-6 leading-tight">
+                    Personalized Cancer Treatment
+                    <span class="block text-transparent bg-gradient-to-r from-primary via-primary to-primary/70 bg-clip-text mt-2">Powered by AI</span>
+                </h1>
+                <p class="text-lg sm:text-xl text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed">
+                    Advanced machine learning algorithms analyze clinical, genomic, and historical patient data to design optimal treatment plans with precision and care.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 slide-in-up">
+                    <a href="{% url 'patient_login' %}" class="group bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary hover:shadow-xl text-primary-foreground px-8 py-4 rounded-lg text-lg font-bold transition-all duration-300 transform hover:scale-110 flex items-center justify-center">
+                        <i class="fas fa-user-injured mr-2"></i>
+                        Patient Portal
+                        <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                    <a href="{% url 'doctor_login' %}" class="group bg-card border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground px-8 py-4 rounded-lg text-lg font-bold transition-all duration-300 transform hover:scale-110 flex items-center justify-center hover:shadow-xl">
+                        <i class="fas fa-user-md mr-2"></i>
+                        Doctor Portal
+                        <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Decorative background with animation -->
+        <div class="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+            <div class="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 dark:bg-primary/5 rounded-full blur-3xl animate-pulse"></div>
+            <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-primary/10 dark:bg-primary/5 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="py-16 sm:py-24">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl sm:text-5xl font-bold text-foreground mb-4">Cutting-Edge Features</h2>
+            <p class="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Technology designed to empower healthcare professionals and improve patient outcomes
+            </p>
+        </div>
+        
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            <!-- Feature 1 -->
+            <div class="bg-card border border-border/50 p-6 sm:p-8 rounded-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 group card-hover">
+                <div class="bg-blue-500/10 dark:bg-blue-500/20 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform group-hover:bg-blue-500/20">
+                    <i class="fas fa-brain text-3xl text-blue-600 dark:text-blue-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-foreground mb-3">AI-Powered Analysis</h3>
+                <p class="text-muted-foreground leading-relaxed">
+                    Advanced machine learning algorithms analyze comprehensive patient data to generate evidence-based treatment recommendations.
+                </p>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="bg-card border border-border/50 p-6 sm:p-8 rounded-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 group card-hover">
+                <div class="bg-green-500/10 dark:bg-green-500/20 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform group-hover:bg-green-500/20">
+                    <i class="fas fa-dna text-3xl text-green-600 dark:text-green-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-foreground mb-3">Genomic Integration</h3>
+                <p class="text-muted-foreground leading-relaxed">
+                    Leverage genomic data analysis to identify targeted therapies and predict treatment responses with unprecedented precision.
+                </p>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="bg-card border border-border/50 p-6 sm:p-8 rounded-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 group card-hover">
+                <div class="bg-purple-500/10 dark:bg-purple-500/20 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform group-hover:bg-purple-500/20">
+                    <i class="fas fa-file-medical-alt text-3xl text-purple-600 dark:text-purple-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-foreground mb-3">Comprehensive Reports</h3>
+                <p class="text-muted-foreground leading-relaxed">
+                    Generate detailed treatment plans with outcome predictions, side effect analysis, and evidence-based recommendations.
+                </p>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="bg-card border border-border/50 p-6 sm:p-8 rounded-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 group card-hover">
+                <div class="bg-red-500/10 dark:bg-red-500/20 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform group-hover:bg-red-500/20">
+                    <i class="fas fa-microscope text-3xl text-red-600 dark:text-red-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-foreground mb-3">Image Analysis</h3>
+                <p class="text-muted-foreground leading-relaxed">
+                    Advanced computer vision using OpenCV to detect tumors in medical images with high accuracy and detailed analysis.
+                </p>
+            </div>
+
+            <!-- Feature 5 -->
+            <div class="bg-card border border-border/50 p-6 sm:p-8 rounded-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 group card-hover">
+                <div class="bg-yellow-500/10 dark:bg-yellow-500/20 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform group-hover:bg-yellow-500/20">
+                    <i class="fas fa-users text-3xl text-yellow-600 dark:text-yellow-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-foreground mb-3">Collaborative Care</h3>
+                <p class="text-muted-foreground leading-relaxed">
+                    Enhanced communication platform connecting patients, oncologists, and care teams for coordinated treatment and care.
+                </p>
+            </div>
+
+            <!-- Feature 6 -->
+            <div class="bg-card border border-border/50 p-6 sm:p-8 rounded-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 group card-hover">
+                <div class="bg-indigo-500/10 dark:bg-indigo-500/20 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform group-hover:bg-indigo-500/20">
+                    <i class="fas fa-chart-line text-3xl text-indigo-600 dark:text-indigo-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-foreground mb-3">Outcome Prediction</h3>
+                <p class="text-muted-foreground leading-relaxed">
+                    Machine learning models predict treatment outcomes and survival rates based on historical data and patient profiles.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Section with gradient -->
+    <div class="py-16 sm:py-24 bg-gradient-to-br from-primary/10 via-primary/5 to-primary/10 dark:from-primary/20 dark:via-primary/10 dark:to-primary/20 rounded-3xl my-16 border border-primary/20">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl sm:text-4xl font-bold text-foreground mb-4">Trusted & Proven</h2>
+            <p class="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Making a real difference in cancer care through advanced technology
+            </p>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 px-4 sm:px-8">
+            <div class="text-center">
+                <div class="text-4xl sm:text-5xl font-bold text-primary mb-2 flex items-center justify-center">
+                    <i class="fas fa-percent mr-2"></i>
+                    95%
+                </div>
+                <div class="text-foreground/80 font-semibold">Accuracy Rate</div>
+                <p class="text-sm text-muted-foreground mt-2">In treatment recommendations</p>
+            </div>
+            <div class="text-center">
+                <div class="text-4xl sm:text-5xl font-bold text-primary mb-2 flex items-center justify-center">
+                    <i class="fas fa-users mr-2"></i>
+                    10K+
+                </div>
+                <div class="text-foreground/80 font-semibold">Patients Helped</div>
+                <p class="text-sm text-muted-foreground mt-2">Across multiple cancer types</p>
+            </div>
+            <div class="text-center">
+                <div class="text-4xl sm:text-5xl font-bold text-primary mb-2 flex items-center justify-center">
+                    <i class="fas fa-user-md mr-2"></i>
+                    500+
+                </div>
+                <div class="text-foreground/80 font-semibold">Oncologists</div>
+                <p class="text-sm text-muted-foreground mt-2">Using our platform daily</p>
+            </div>
+            <div class="text-center">
+                <div class="text-4xl sm:text-5xl font-bold text-primary mb-2 flex items-center justify-center">
+                    <i class="fas fa-hospital mr-2"></i>
+                    100+
+                </div>
+                <div class="text-foreground/80 font-semibold">Hospitals</div>
+                <p class="text-sm text-muted-foreground mt-2">Integrated worldwide</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works Section -->
+    <div class="py-16 sm:py-24">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl sm:text-4xl font-bold text-foreground mb-4">How It Works</h2>
+            <p class="text-lg text-muted-foreground max-w-2xl mx-auto">
+                A simple, efficient process powered by cutting-edge technology
+            </p>
+        </div>
+        
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="text-center relative">
+                <div class="bg-gradient-to-br from-primary/10 to-primary/5 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl font-bold text-primary">1</span>
+                </div>
+                <h3 class="text-lg font-bold text-foreground mb-2">Upload Data</h3>
+                <p class="text-muted-foreground text-sm">
+                    Submit patient clinical data, medical images, and genomic information securely
+                </p>
+            </div>
+            
+            <div class="text-center relative">
+                <div class="bg-gradient-to-br from-primary/10 to-primary/5 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl font-bold text-primary">2</span>
+                </div>
+                <h3 class="text-lg font-bold text-foreground mb-2">AI Analysis</h3>
+                <p class="text-muted-foreground text-sm">
+                    Our AI engine analyzes data using advanced machine learning algorithms
+                </p>
+            </div>
+            
+            <div class="text-center relative">
+                <div class="bg-gradient-to-br from-primary/10 to-primary/5 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl font-bold text-primary">3</span>
+                </div>
+                <h3 class="text-lg font-bold text-foreground mb-2">Get Recommendations</h3>
+                <p class="text-muted-foreground text-sm">
+                    Receive personalized treatment plans with evidence-based insights
+                </p>
+            </div>
+            
+            <div class="text-center relative">
+                <div class="bg-gradient-to-br from-primary/10 to-primary/5 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl font-bold text-primary">4</span>
+                </div>
+                <h3 class="text-lg font-bold text-foreground mb-2">Monitor Progress</h3>
+                <p class="text-muted-foreground text-sm">
+                    Track outcomes and adjust treatment plans based on patient response
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="py-16 sm:py-24 text-center">
+        <div class="bg-gradient-to-br from-card to-card/50 border border-primary/20 rounded-2xl p-8 sm:p-16 max-w-4xl mx-auto backdrop-blur-sm shadow-xl">
+            <h2 class="text-3xl sm:text-4xl font-bold text-foreground mb-4">Ready to Transform Cancer Care?</h2>
+            <p class="text-lg text-muted-foreground mb-10 max-w-2xl mx-auto">
+                Join thousands of healthcare professionals and patients using AI to improve outcomes
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6">
+                <a href="{% url 'patient_login' %}" class="bg-gradient-to-r from-primary to-primary/90 hover:shadow-xl text-primary-foreground px-8 py-3 rounded-lg font-bold transition-all duration-300 hover:scale-105 inline-flex items-center justify-center">
+                    <i class="fas fa-user-plus mr-2"></i>
+                    Register as Patient
+                </a>
+                <a href="{% url 'doctor_login' %}" class="bg-card border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground px-8 py-3 rounded-lg font-bold transition-all duration-300 hover:scale-105 inline-flex items-center justify-center">
+                    <i class="fas fa-user-md mr-2"></i>
+                    Join as Oncologist
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

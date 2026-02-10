@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ evidence_source.title }} - Evidence Details{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4 sm:p-6 lg:p-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Back Link -->
+        <div class="mb-6">
+            <a href="{% url 'cancer_detection:evidence_search' %}" 
+               class="inline-flex items-center text-primary hover:text-primary/80 transition-colors text-sm font-medium">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Search
+            </a>
+        </div>
+        
+        <!-- Header Card -->
+        <div class="bg-card border border-border rounded-lg shadow-sm overflow-hidden mb-8">
+            <!-- Type Badge and Title -->
+            <div class="bg-gradient-to-r from-primary to-primary/80 dark:from-primary/80 dark:to-primary/60 p-6 text-primary-foreground">
+                <div class="flex flex-wrap items-center gap-3 mb-4">
+                    <span class="inline-block px-3 py-1 bg-white/20 rounded-full text-xs font-semibold uppercase">
+                        {% if 'pubmed' in evidence_source.source_type %}
+                            <i class="fas fa-flask mr-1"></i>PubMed Study
+                        {% elif 'guideline' in evidence_source.source_type %}
+                            <i class="fas fa-book mr-1"></i>Clinical Guideline
+                        {% elif 'meta' in evidence_source.source_type %}
+                            <i class="fas fa-layer-group mr-1"></i>Meta-Analysis
+                        {% elif 'systematic' in evidence_source.source_type %}
+                            <i class="fas fa-search mr-1"></i>Systematic Review
+                        {% else %}
+                            <i class="fas fa-file-alt mr-1"></i>{{ evidence_source.get_source_type_display }}
+                        {% endif %}
+                    </span>
+                    
+                    {% if evidence_source.evidence_strength == 'high' %}
+                        <span class="inline-block px-3 py-1 bg-emerald-500/30 text-emerald-100 rounded-full text-xs font-semibold">
+                            <i class="fas fa-star mr-1"></i>HIGH STRENGTH
+                        </span>
+                    {% elif evidence_source.evidence_strength == 'moderate' %}
+                        <span class="inline-block px-3 py-1 bg-amber-500/30 text-amber-100 rounded-full text-xs font-semibold">
+                            <i class="fas fa-star-half-alt mr-1"></i>MODERATE STRENGTH
+                        </span>
+                    {% else %}
+                        <span class="inline-block px-3 py-1 bg-red-500/30 text-red-100 rounded-full text-xs font-semibold">
+                            <i class="fas fa-exclamation-circle mr-1"></i>LOW STRENGTH
+                        </span>
+                    {% endif %}
+                </div>
+                
+                <h1 class="text-2xl sm:text-3xl font-bold leading-tight">{{ evidence_source.title }}</h1>
+            </div>
+            
+            <!-- Metadata -->
+            <div class="p-6 border-b border-border">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {% if evidence_source.authors %}
+                    <div>
+                        <h4 class="text-xs font-semibold text-muted-foreground uppercase mb-1">Authors</h4>
+                        <p class="text-foreground text-sm">{{ evidence_source.authors }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if evidence_source.publication_year %}
+                    <div>
+                        <h4 class="text-xs font-semibold text-muted-foreground uppercase mb-1">Publication Year</h4>
+                        <p class="text-foreground text-sm">{{ evidence_source.publication_year }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if evidence_source.journal_or_organization %}
+                    <div>
+                        <h4 class="text-xs font-semibold text-muted-foreground uppercase mb-1">Journal/Organization</h4>
+                        <p class="text-foreground text-sm">{{ evidence_source.journal_or_organization }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if evidence_source.pmid %}
+                    <div>
+                        <h4 class="text-xs font-semibold text-muted-foreground uppercase mb-1">PMID</h4>
+                        <p class="text-foreground text-sm">
+                            <a href="https://pubmed.ncbi.nlm.nih.gov/{{ evidence_source.pmid }}" 
+                               target="_blank" 
+                               class="text-primary hover:underline">
+                                {{ evidence_source.pmid }} <i class="fas fa-external-link-alt text-xs ml-1"></i>
+                            </a>
+                        </p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if evidence_source.doi %}
+                    <div>
+                        <h4 class="text-xs font-semibold text-muted-foreground uppercase mb-1">DOI</h4>
+                        <p class="text-foreground text-sm">
+                            <a href="https://doi.org/{{ evidence_source.doi }}" 
+                               target="_blank" 
+                               class="text-primary hover:underline">
+                                {{ evidence_source.doi }} <i class="fas fa-external-link-alt text-xs ml-1"></i>
+                            </a>
+                        </p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if evidence_source.guideline_version %}
+                    <div>
+                        <h4 class="text-xs font-semibold text-muted-foreground uppercase mb-1">Version</h4>
+                        <p class="text-foreground text-sm">{{ evidence_source.guideline_version }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Tags -->
+            {% if cancer_types or treatment_types %}
+            <div class="p-6 border-b border-border">
+                {% if cancer_types %}
+                <div class="mb-4">
+                    <h4 class="text-xs font-semibold text-muted-foreground uppercase mb-2">Cancer Types</h4>
+                    <div class="flex flex-wrap gap-2">
+                        {% for cancer_type in cancer_types %}
+                        <span class="inline-block px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-xs font-medium">
+                            {{ cancer_type }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if treatment_types %}
+                <div>
+                    <h4 class="text-xs font-semibold text-muted-foreground uppercase mb-2">Treatment Types</h4>
+                    <div class="flex flex-wrap gap-2">
+                        {% for treatment_type in treatment_types %}
+                        <span class="inline-block px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-full text-xs font-medium">
+                            {{ treatment_type }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            <!-- Abstract -->
+            {% if evidence_source.abstract %}
+            <div class="p-6 border-b border-border">
+                <h3 class="text-lg font-semibold text-foreground mb-3">
+                    <i class="fas fa-file-alt mr-2 text-primary"></i>Abstract
+                </h3>
+                <p class="text-muted-foreground leading-relaxed">{{ evidence_source.abstract }}</p>
+            </div>
+            {% endif %}
+            
+            <!-- Key Findings -->
+            {% if evidence_source.key_findings %}
+            <div class="p-6 border-b border-border">
+                <h3 class="text-lg font-semibold text-foreground mb-3">
+                    <i class="fas fa-lightbulb mr-2 text-amber-500"></i>Key Findings
+                </h3>
+                <div class="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
+                    {{ evidence_source.key_findings|linebreaks }}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- External Links -->
+            <div class="p-6 flex flex-wrap gap-3">
+                {% if evidence_source.pmid %}
+                <a href="https://pubmed.ncbi.nlm.nih.gov/{{ evidence_source.pmid }}" 
+                   target="_blank" 
+                   class="inline-flex items-center px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors text-sm font-medium">
+                    <i class="fas fa-external-link-alt mr-2"></i>View on PubMed
+                </a>
+                {% endif %}
+                
+                {% if evidence_source.guideline_url %}
+                <a href="{{ evidence_source.guideline_url }}" 
+                   target="_blank" 
+                   class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors text-sm font-medium">
+                    <i class="fas fa-external-link-alt mr-2"></i>View Full Guideline
+                </a>
+                {% endif %}
+                
+                {% if evidence_source.pdf_url %}
+                <a href="{{ evidence_source.pdf_url }}" 
+                   target="_blank" 
+                   class="inline-flex items-center px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors text-sm font-medium">
+                    <i class="fas fa-file-pdf mr-2"></i>Download PDF
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Usage Statistics -->
+        <div class="bg-card border border-border rounded-lg shadow-sm p-6 mb-8">
+            <h3 class="text-lg font-semibold text-foreground mb-4">
+                <i class="fas fa-chart-pie mr-2 text-primary"></i>Usage Statistics
+            </h3>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20 rounded-lg p-4">
+                    <h4 class="text-xs font-semibold text-muted-foreground uppercase mb-1">Times Referenced</h4>
+                    <p class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ usage_count }}</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 rounded-lg p-4">
+                    <h4 class="text-xs font-semibold text-muted-foreground uppercase mb-1">Average Impact</h4>
+                    <p class="text-3xl font-bold text-purple-600 dark:text-purple-400">{{ average_impact|floatformat:1 }}%</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Related Recommendations -->
+        {% if related_recommendations %}
+        <div class="bg-card border border-border rounded-lg shadow-sm p-6">
+            <h3 class="text-lg font-semibold text-foreground mb-4">
+                <i class="fas fa-link mr-2 text-primary"></i>Related Recommendations
+            </h3>
+            
+            <div class="space-y-4">
+                {% for rec in related_recommendations %}
+                <div class="bg-accent/30 rounded-lg p-4 border-l-4 border-primary">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div class="flex-1">
+                            <span class="inline-block px-2 py-0.5 bg-primary/20 text-primary rounded text-xs font-semibold mb-2">
+                                {{ rec.recommendation_type }}
+                            </span>
+                            <p class="text-foreground text-sm">{{ rec.recommendation_text|truncatewords:30 }}</p>
+                            <p class="text-muted-foreground text-xs mt-1">
+                                Treatment Plan: {{ rec.treatment_plan.id|truncatechars:12 }}
+                            </p>
+                        </div>
+                        <div>
+                            <a href="{% url 'cancer_detection:evidence_explanation' rec.treatment_plan.id rec.id %}" 
+                               class="inline-flex items-center px-3 py-1.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors text-xs font-medium">
+                                View Details <i class="fas fa-arrow-right ml-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div class="bg-card border border-border rounded-lg p-8 text-center">
+            <i class="fas fa-info-circle text-3xl text-muted-foreground mb-3 opacity-50"></i>
+            <p class="text-muted-foreground">This evidence source has not been linked to any treatment recommendations yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

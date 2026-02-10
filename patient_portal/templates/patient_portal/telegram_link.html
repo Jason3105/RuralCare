@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% block title %}Link Telegram Account{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <nav class="mb-4">
+                <a href="{% url 'patient_portal:notification_preferences' %}" class="text-primary hover:underline text-sm">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Notification Preferences
+                </a>
+            </nav>
+            <h1 class="text-3xl font-bold text-foreground">Link Telegram Account</h1>
+            <p class="text-muted-foreground mt-1">Get instant treatment notifications on your phone</p>
+        </div>
+
+        {% if is_linked %}
+        <!-- Already Linked -->
+        <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-6 mb-6">
+            <div class="flex items-start space-x-4">
+                <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i class="fab fa-telegram text-green-600 text-xl"></i>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold text-green-900 dark:text-green-100 mb-2">Account Linked!</h3>
+                    <p class="text-green-700 dark:text-green-300 mb-3">
+                        Your Telegram account <strong>@{{ telegram_username }}</strong> is connected.
+                    </p>
+                    <p class="text-sm text-green-600 dark:text-green-400 mb-4">
+                        You're receiving notifications: <strong>{{ notifications_enabled|yesno:"Yes,No" }}</strong>
+                    </p>
+                    
+                    <form method="post" action="{% url 'patient_portal:unlink_telegram' %}" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" 
+                                onclick="return confirm('Are you sure you want to unlink your Telegram account?')"
+                                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                            <i class="fas fa-unlink mr-2"></i>Unlink Account
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <!-- Link Instructions -->
+        <div class="bg-card border border-border/50 rounded-xl p-6 mb-6">
+            <div class="flex items-start space-x-4 mb-6">
+                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i class="fab fa-telegram text-blue-600 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-foreground mb-2">Connect Your Telegram</h3>
+                    <p class="text-muted-foreground">
+                        Get instant notifications about your treatment, appointments, and medication reminders directly on Telegram.
+                    </p>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Step 1 -->
+                <div class="flex items-start space-x-4">
+                    <div class="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center flex-shrink-0 font-semibold">
+                        1
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-foreground mb-2">Click the Link Button</h4>
+                        <p class="text-muted-foreground mb-3">
+                            Click the button below to open Telegram and start a chat with our notification bot.
+                        </p>
+                        <a href="{{ deep_link }}" 
+                           target="_blank"
+                           class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+                            <i class="fab fa-telegram mr-2 text-xl"></i>
+                            Open Telegram Bot
+                        </a>
+                    </div>
+                </div>
+
+                <div class="border-t border-border"></div>
+
+                <!-- Step 2 -->
+                <div class="flex items-start space-x-4">
+                    <div class="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center flex-shrink-0 font-semibold">
+                        2
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-foreground mb-2">Send /start to the Bot</h4>
+                        <p class="text-muted-foreground">
+                            Once you open the chat, send the <code class="px-2 py-1 bg-accent rounded text-sm">/start</code> command to link your account automatically.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="border-t border-border"></div>
+
+                <!-- Step 3 -->
+                <div class="flex items-start space-x-4">
+                    <div class="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center flex-shrink-0 font-semibold">
+                        3
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-foreground mb-2">Start Receiving Notifications</h4>
+                        <p class="text-muted-foreground">
+                            You'll receive a confirmation message and start getting notifications for:
+                        </p>
+                        <ul class="mt-3 space-y-2">
+                            <li class="flex items-center text-muted-foreground">
+                                <i class="fas fa-check text-green-600 mr-3"></i>
+                                Symptom log reminders
+                            </li>
+                            <li class="flex items-center text-muted-foreground">
+                                <i class="fas fa-check text-green-600 mr-3"></i>
+                                Appointment notifications
+                            </li>
+                            <li class="flex items-center text-muted-foreground">
+                                <i class="fas fa-check text-green-600 mr-3"></i>
+                                Medication reminders
+                            </li>
+                            <li class="flex items-center text-muted-foreground">
+                                <i class="fas fa-check text-green-600 mr-3"></i>
+                                Doctor reviews and updates
+                            </li>
+                            <li class="flex items-center text-muted-foreground">
+                                <i class="fas fa-check text-green-600 mr-3"></i>
+                                Treatment plan changes
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Privacy Notice -->
+        <div class="bg-accent/30 border border-border rounded-xl p-4">
+            <div class="flex items-start space-x-3">
+                <i class="fas fa-shield-alt text-primary mt-1"></i>
+                <div>
+                    <h4 class="font-semibold text-foreground mb-1">Privacy & Security</h4>
+                    <p class="text-sm text-muted-foreground">
+                        Your Telegram account will only receive notifications related to your treatment. 
+                        We never share your medical information through Telegram. 
+                        You can unlink your account at any time.
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Help Section -->
+        <div class="mt-8 bg-card border border-border/50 rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-foreground mb-4">Need Help?</h3>
+            <div class="space-y-3">
+                <div>
+                    <p class="font-medium text-foreground">What if the link doesn't work?</p>
+                    <p class="text-sm text-muted-foreground">
+                        Make sure you have Telegram installed on your device. You can download it from 
+                        <a href="https://telegram.org/" target="_blank" class="text-primary hover:underline">telegram.org</a>
+                    </p>
+                </div>
+                <div>
+                    <p class="font-medium text-foreground">Can I disable notifications later?</p>
+                    <p class="text-sm text-muted-foreground">
+                        Yes! You can manage Telegram notifications in your notification preferences or send /stop to the bot.
+                    </p>
+                </div>
+                <div>
+                    <p class="font-medium text-foreground">Is my data secure?</p>
+                    <p class="text-sm text-muted-foreground">
+                        We only send notification summaries via Telegram. Full medical details remain in the secure portal.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

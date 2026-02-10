@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+{% block title %}My Health Portal{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Welcome Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-foreground">Welcome, {{ user.username }}</h1>
+            <p class="text-muted-foreground mt-1">Your personal health portal for treatment tracking and symptom management</p>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-card border border-border/50 rounded-xl p-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                        <i class="fas fa-file-medical text-blue-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-foreground">{{ active_plans_count }}</p>
+                        <p class="text-sm text-muted-foreground">Active Plans</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-card border border-border/50 rounded-xl p-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                        <i class="fas fa-clipboard-list text-green-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-foreground">{{ symptom_logs_count }}</p>
+                        <p class="text-sm text-muted-foreground">Symptoms Logged</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-card border border-border/50 rounded-xl p-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center">
+                        <i class="fas fa-bell text-amber-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-foreground">{{ unread_alerts_count }}</p>
+                        <p class="text-sm text-muted-foreground">Unread Alerts</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-card border border-border/50 rounded-xl p-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
+                        <i class="fas fa-calendar-check text-purple-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-foreground">{{ upcoming_reminders_count }}</p>
+                        <p class="text-sm text-muted-foreground">Upcoming</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <a href="{% url 'patient_portal:symptom_log_create' %}" 
+               class="bg-primary text-primary-foreground rounded-xl p-6 hover:bg-primary/90 transition-colors text-center">
+                <i class="fas fa-plus-circle text-3xl mb-3"></i>
+                <h3 class="font-semibold">Log Symptoms</h3>
+                <p class="text-sm opacity-80 mt-1">Record how you're feeling today</p>
+            </a>
+            <a href="{% url 'patient_portal:confidence_view' %}" 
+               class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-md transition-all text-center">
+                <i class="fas fa-chart-pie text-3xl mb-3 text-primary"></i>
+                <h3 class="font-semibold text-foreground">Treatment Confidence</h3>
+                <p class="text-sm text-muted-foreground mt-1">Understand your plan's confidence</p>
+            </a>
+            <a href="{% url 'patient_portal:side_effects_list' %}" 
+               class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-md transition-all text-center">
+                <i class="fas fa-exclamation-triangle text-3xl mb-3 text-amber-500"></i>
+                <h3 class="font-semibold text-foreground">Side Effects</h3>
+                <p class="text-sm text-muted-foreground mt-1">What to expect & manage</p>
+            </a>
+            <a href="{% url 'patient_portal:alerts_list' %}" 
+               class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-md transition-all text-center">
+                <i class="fas fa-bell text-3xl mb-3 text-blue-500"></i>
+                <h3 class="font-semibold text-foreground">Alerts & Reminders</h3>
+                <p class="text-sm text-muted-foreground mt-1">Stay on track</p>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Recent Symptoms -->
+            <div class="lg:col-span-2 bg-card border border-border/50 rounded-xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold text-foreground">Recent Symptom Logs</h2>
+                    <a href="{% url 'patient_portal:symptom_log_list' %}" class="text-primary hover:underline text-sm">View All</a>
+                </div>
+                <div class="space-y-4">
+                    {% for log in recent_logs %}
+                    <div class="border border-border rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-sm text-muted-foreground">{{ log.submitted_at|date:"M d, Y H:i" }}</span>
+                            <span class="text-sm font-medium
+                                {% if log.overall_wellbeing <= 2 %}text-red-600
+                                {% elif log.overall_wellbeing <= 3 %}text-amber-600
+                                {% else %}text-green-600{% endif %}">
+                                Wellness: {{ log.overall_wellbeing|default:"N/A" }}/5
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-4 gap-2 text-center text-xs">
+                            <div class="p-2 bg-accent/30 rounded">
+                                <p class="text-muted-foreground">Pain</p>
+                                <p class="font-bold">{{ log.pain|default:"0" }}/5</p>
+                            </div>
+                            <div class="p-2 bg-accent/30 rounded">
+                                <p class="text-muted-foreground">Fatigue</p>
+                                <p class="font-bold">{{ log.fatigue|default:"0" }}/5</p>
+                            </div>
+                            <div class="p-2 bg-accent/30 rounded">
+                                <p class="text-muted-foreground">Nausea</p>
+                                <p class="font-bold">{{ log.nausea|default:"0" }}/5</p>
+                            </div>
+                            <div class="p-2 bg-accent/30 rounded">
+                                <p class="text-muted-foreground">Sleep</p>
+                                <p class="font-bold">{{ log.sleep_problems|default:"0" }}/5</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-8">
+                        <i class="fas fa-clipboard-list text-4xl text-muted-foreground mb-3"></i>
+                        <p class="text-muted-foreground mb-4">No symptom logs yet</p>
+                        <a href="{% url 'patient_portal:symptom_log_create' %}" 
+                           class="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
+                            <i class="fas fa-plus mr-2"></i>Log Your First Symptoms
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Alerts & Reminders -->
+            <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold text-foreground">Alerts</h2>
+                    <a href="{% url 'patient_portal:alerts_list' %}" class="text-primary hover:underline text-sm">View All</a>
+                </div>
+                <div class="space-y-3">
+                    {% for alert in recent_alerts %}
+                    <div class="border-l-4 p-3 rounded-r-lg
+                        {% if alert.is_urgent %}border-red-500 bg-red-50 dark:bg-red-900/10
+                        {% else %}border-blue-500 bg-blue-50 dark:bg-blue-900/10{% endif %}">
+                        <p class="font-medium text-foreground text-sm">{{ alert.title }}</p>
+                        <p class="text-xs text-muted-foreground mt-1">{{ alert.created_at|date:"M d, Y" }}</p>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-6">
+                        <i class="fas fa-check-circle text-3xl text-green-500 mb-2"></i>
+                        <p class="text-muted-foreground text-sm">No pending alerts</p>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Upcoming Reminders -->
+                {% if upcoming_reminders %}
+                <div class="mt-6 pt-6 border-t border-border">
+                    <h3 class="font-semibold text-foreground mb-3">Upcoming</h3>
+                    <div class="space-y-2">
+                        {% for reminder in upcoming_reminders %}
+                        <div class="flex items-center space-x-3 text-sm">
+                            <i class="fas fa-calendar text-muted-foreground"></i>
+                            <div>
+                                <p class="text-foreground">{{ reminder.title }}</p>
+                                <p class="text-xs text-muted-foreground">{{ reminder.scheduled_for|date:"M d, Y H:i" }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Treatment Explanations -->
+        {% if treatment_explanations %}
+        <div class="mt-6 bg-card border border-border/50 rounded-xl p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-foreground">Your Treatment Explained</h2>
+                <a href="{% url 'patient_portal:treatment_explanation_list' %}" class="text-primary hover:underline text-sm">View All</a>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for explanation in treatment_explanations %}
+                <a href="{% url 'patient_portal:treatment_explanation_detail' explanation.id %}" 
+                   class="border border-border rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <h3 class="font-semibold text-foreground mb-2">{{ explanation.treatment_plan.cancer_type }} Treatment</h3>
+                    <p class="text-sm text-muted-foreground line-clamp-2">{{ explanation.simple_summary|truncatechars:100 }}</p>
+                    <p class="text-primary text-sm mt-2">Read more <i class="fas fa-arrow-right ml-1"></i></p>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

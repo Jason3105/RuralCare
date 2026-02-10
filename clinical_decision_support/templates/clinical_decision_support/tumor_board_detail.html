@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+{% block title %}Tumor Board: {{ session.title }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <nav class="mb-4">
+                <a href="{% url 'clinical_decision_support:tumor_board_list' %}" class="text-primary hover:underline text-sm">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Sessions
+                </a>
+            </nav>
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-foreground">{{ session.title }}</h1>
+                    <p class="text-muted-foreground mt-1">
+                        Patient: <span class="text-foreground">{{ session.patient.username }}</span> |
+                        Created {{ session.created_at|timesince }} ago
+                    </p>
+                </div>
+                <div class="mt-4 md:mt-0 flex items-center space-x-3">
+                    <!-- Status Badge -->
+                    <span class="px-3 py-1 rounded-full text-sm font-medium
+                        {% if session.status == 'draft' %}bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300
+                        {% elif session.status == 'active' %}bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400
+                        {% elif session.status == 'consensus_reached' %}bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400
+                        {% elif session.status == 'activated' %}bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400
+                        {% else %}bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400{% endif %}">
+                        {{ session.get_status_display }}
+                    </span>
+                    
+                    {% if session.status == 'consensus_reached' and is_lead %}
+                    <form method="post" action="{% url 'clinical_decision_support:tumor_board_activate' session.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                            <i class="fas fa-check-circle mr-2"></i>Activate Plan
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Session Details -->
+                <div class="bg-card border border-border/50 rounded-xl p-6">
+                    <h2 class="text-xl font-semibold text-foreground mb-4">Session Details</h2>
+                    {% if session.description %}
+                    <p class="text-muted-foreground mb-4">{{ session.description }}</p>
+                    {% endif %}
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <span class="text-sm text-muted-foreground">Treatment Plan</span>
+                            <p class="text-foreground">{{ session.treatment_plan.cancer_type }} - Stage {{ session.treatment_plan.cancer_stage }}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm text-muted-foreground">Scheduled At</span>
+                            <p class="text-foreground">{% if session.scheduled_at %}{{ session.scheduled_at|date:"M d, Y H:i" }}{% else %}Not scheduled{% endif %}</p>
+                        </div>
+                        <div>
+                            <span class="text-sm text-muted-foreground">Consensus Required</span>
+                            <p class="text-foreground">{{ session.required_consensus_percentage }}%</p>
+                        </div>
+                        <div>
+                            <span class="text-sm text-muted-foreground">Current Consensus</span>
+                            <p class="text-foreground font-semibold {% if session.current_consensus_percentage >= session.required_consensus_percentage %}text-green-600{% else %}text-amber-600{% endif %}">
+                                {{ session.current_consensus_percentage|floatformat:0 }}%
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Consensus Progress -->
+                <div class="bg-card border border-border/50 rounded-xl p-6">
+                    <h2 class="text-xl font-semibold text-foreground mb-4">Consensus Progress</h2>
+                    <div class="mb-4">
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-muted-foreground">Progress to Consensus</span>
+                            <span class="font-medium {% if session.current_consensus_percentage >= session.required_consensus_percentage %}text-green-600{% else %}text-foreground{% endif %}">
+                                {{ session.current_consensus_percentage|floatformat:0 }}% / {{ session.required_consensus_percentage }}%
+                            </span>
+                        </div>
+                        <div class="h-4 bg-accent/30 rounded-full overflow-hidden">
+                            <div class="h-full rounded-full transition-all duration-500
+                                {% if session.current_consensus_percentage >= session.required_consensus_percentage %}bg-green-500{% else %}bg-primary{% endif %}"
+                                 style="width: {{ session.current_consensus_percentage|floatformat:0 }}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div class="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                            <i class="fas fa-check text-green-600 mb-1"></i>
+                            <p class="text-2xl font-bold text-green-600">{{ decisions_approved }}</p>
+                            <p class="text-xs text-muted-foreground">Approved</p>
+                        </div>
+                        <div class="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                            <i class="fas fa-times text-red-600 mb-1"></i>
+                            <p class="text-2xl font-bold text-red-600">{{ decisions_rejected }}</p>
+                            <p class="text-xs text-muted-foreground">Rejected</p>
+                        </div>
+                        <div class="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                            <i class="fas fa-edit text-amber-600 mb-1"></i>
+                            <p class="text-2xl font-bold text-amber-600">{{ decisions_modify }}</p>
+                            <p class="text-xs text-muted-foreground">Modify</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Member Decisions -->
+                <div class="bg-card border border-border/50 rounded-xl p-6">
+                    <h2 class="text-xl font-semibold text-foreground mb-4">Member Decisions</h2>
+                    <div class="space-y-4">
+                        {% for member in members %}
+                        <div class="border border-border rounded-lg p-4">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user-md text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-foreground">Dr. {{ member.doctor.username }}</p>
+                                        <p class="text-sm text-muted-foreground">{{ member.specialization }}</p>
+                                        {% if member.is_lead %}<span class="text-xs text-primary font-medium">Lead</span>{% endif %}
+                                    </div>
+                                </div>
+                                <div>
+                                    {% if member.decision %}
+                                    <span class="px-2 py-1 rounded text-xs font-medium
+                                        {% if member.decision == 'approved' %}bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400
+                                        {% elif member.decision == 'rejected' %}bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400
+                                        {% else %}bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400{% endif %}">
+                                        {{ member.get_decision_display }}
+                                    </span>
+                                    {% else %}
+                                    <span class="px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                                        Pending
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% if member.comments %}
+                            <div class="mt-3 pl-13">
+                                <p class="text-sm text-muted-foreground bg-accent/30 rounded-lg p-3">
+                                    "{{ member.comments }}"
+                                </p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% empty %}
+                        <p class="text-muted-foreground text-center py-4">No members yet. Invite specialists to join.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- My Decision Form -->
+                {% if current_member and not current_member.decision and session.status == 'active' %}
+                <div class="bg-card border border-border/50 rounded-xl p-6">
+                    <h2 class="text-xl font-semibold text-foreground mb-4">Submit Your Decision</h2>
+                    <form method="post" action="{% url 'clinical_decision_support:tumor_board_decision' session.id %}" class="space-y-4">
+                        {% csrf_token %}
+                        <div>
+                            <label class="block text-sm font-medium text-foreground mb-2">Your Decision *</label>
+                            <div class="grid grid-cols-3 gap-3">
+                                <label class="relative cursor-pointer">
+                                    <input type="radio" name="decision" value="approved" class="peer sr-only" required>
+                                    <div class="p-4 border-2 border-border rounded-lg text-center peer-checked:border-green-500 peer-checked:bg-green-50 dark:peer-checked:bg-green-900/20 transition-all">
+                                        <i class="fas fa-check text-green-500 text-xl mb-2"></i>
+                                        <p class="font-medium">Approve</p>
+                                    </div>
+                                </label>
+                                <label class="relative cursor-pointer">
+                                    <input type="radio" name="decision" value="rejected" class="peer sr-only">
+                                    <div class="p-4 border-2 border-border rounded-lg text-center peer-checked:border-red-500 peer-checked:bg-red-50 dark:peer-checked:bg-red-900/20 transition-all">
+                                        <i class="fas fa-times text-red-500 text-xl mb-2"></i>
+                                        <p class="font-medium">Reject</p>
+                                    </div>
+                                </label>
+                                <label class="relative cursor-pointer">
+                                    <input type="radio" name="decision" value="request_modification" class="peer sr-only">
+                                    <div class="p-4 border-2 border-border rounded-lg text-center peer-checked:border-amber-500 peer-checked:bg-amber-50 dark:peer-checked:bg-amber-900/20 transition-all">
+                                        <i class="fas fa-edit text-amber-500 text-xl mb-2"></i>
+                                        <p class="font-medium">Modify</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="comments" class="block text-sm font-medium text-foreground mb-2">Comments (Required for Reject/Modify)</label>
+                            <textarea id="comments" name="comments" rows="3"
+                                      class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary"
+                                      placeholder="Provide your clinical reasoning..."></textarea>
+                        </div>
+                        <button type="submit" class="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                            Submit Decision
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Quick Actions -->
+                {% if is_lead %}
+                <div class="bg-card border border-border/50 rounded-xl p-6">
+                    <h3 class="text-lg font-semibold text-foreground mb-4">Lead Actions</h3>
+                    <div class="space-y-3">
+                        <a href="{% url 'clinical_decision_support:tumor_board_invite' session.id %}" 
+                           class="w-full flex items-center justify-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                            <i class="fas fa-user-plus mr-2"></i>Invite Members
+                        </a>
+                        {% if session.status == 'draft' %}
+                        <form method="post" action="{% url 'clinical_decision_support:tumor_board_activate' session.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="w-full flex items-center justify-center px-4 py-2 border border-primary text-primary rounded-lg hover:bg-primary/10 transition-colors">
+                                <i class="fas fa-play mr-2"></i>Start Session
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Treatment Plan Summary -->
+                <div class="bg-card border border-border/50 rounded-xl p-6">
+                    <h3 class="text-lg font-semibold text-foreground mb-4">Treatment Plan</h3>
+                    <div class="space-y-3 text-sm">
+                        <div>
+                            <span class="text-muted-foreground">Cancer Type</span>
+                            <p class="font-medium text-foreground">{{ session.treatment_plan.cancer_type }}</p>
+                        </div>
+                        <div>
+                            <span class="text-muted-foreground">Stage</span>
+                            <p class="font-medium text-foreground">{{ session.treatment_plan.cancer_stage }}</p>
+                        </div>
+                        <div>
+                            <span class="text-muted-foreground">Primary Treatment</span>
+                            <p class="font-medium text-foreground">{{ session.treatment_plan.primary_treatment }}</p>
+                        </div>
+                        <a href="{% url 'cancer_detection:treatment_plan_detail' session.treatment_plan.id %}" 
+                           class="block text-center text-primary hover:underline mt-4">
+                            View Full Plan <i class="fas fa-external-link-alt ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Audit Log -->
+                <div class="bg-card border border-border/50 rounded-xl p-6">
+                    <h3 class="text-lg font-semibold text-foreground mb-4">Activity Log</h3>
+                    <div class="space-y-3 max-h-64 overflow-y-auto">
+                        {% for log in audit_logs %}
+                        <div class="flex items-start space-x-3 text-sm">
+                            <div class="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+                            <div>
+                                <p class="text-foreground">{{ log.action_description }}</p>
+                                <p class="text-xs text-muted-foreground">{{ log.created_at|timesince }} ago</p>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted-foreground text-sm">No activity yet</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

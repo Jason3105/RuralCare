@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block title %}XAI Dashboard - Explainable AI{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-foreground">Explainable AI Dashboard</h1>
+                    <p class="text-muted-foreground mt-1">Understand the factors driving AI treatment recommendations</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                        <i class="fas fa-user-md mr-2"></i>Doctor Only
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Disclaimer -->
+        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mb-6">
+            <div class="flex items-start space-x-3">
+                <i class="fas fa-exclamation-triangle text-amber-500 mt-0.5"></i>
+                <div>
+                    <p class="text-sm font-medium text-amber-800 dark:text-amber-400">Clinical Decision Support Only</p>
+                    <p class="text-xs text-amber-700 dark:text-amber-500">These explanations are for clinical decision support. Final treatment decisions should be made by qualified healthcare professionals in consultation with the patient.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-card border border-border/50 rounded-xl p-4 mb-6">
+            <form method="get" class="flex flex-wrap gap-4 items-end">
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-sm font-medium text-muted-foreground mb-1">Patient</label>
+                    <select name="patient" class="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary focus:border-primary">
+                        <option value="">All Patients</option>
+                        {% for patient in patients %}
+                        <option value="{{ patient.id }}" {% if selected_patient == patient.id|stringformat:"s" %}selected{% endif %}>
+                            {{ patient.username }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                    <i class="fas fa-filter mr-2"></i>Filter
+                </button>
+            </form>
+        </div>
+
+        <!-- XAI Records -->
+        <div class="space-y-4">
+            {% for xai in page_obj %}
+            <div class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+                <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                    <div class="flex-1">
+                        <div class="flex items-center space-x-3 mb-3">
+                            <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <i class="fas fa-brain text-primary"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-foreground">{{ xai.treatment_plan.cancer_type }} Treatment</h3>
+                                <p class="text-sm text-muted-foreground">Patient: {{ xai.patient.username }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Top Contributing Factors -->
+                        <div class="mt-4">
+                            <h4 class="text-sm font-medium text-muted-foreground mb-2">Top Contributing Factors</h4>
+                            <div class="space-y-2">
+                                {% for factor in xai.contributing_factors|slice:":3" %}
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-foreground">{{ factor.factor }}: {{ factor.value }}</span>
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-24 bg-muted rounded-full h-2">
+                                            <div class="h-2 rounded-full bg-primary" style="width: {{ factor.influence }}%"></div>
+                                        </div>
+                                        <span class="text-xs text-muted-foreground w-10 text-right">{{ factor.influence|floatformat:1 }}%</span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Summary -->
+                        <p class="mt-4 text-sm text-muted-foreground line-clamp-2">{{ xai.recommendation_summary }}</p>
+                    </div>
+
+                    <div class="flex flex-col items-end space-y-2">
+                        <p class="text-xs text-muted-foreground">{{ xai.created_at|date:"M d, Y H:i" }}</p>
+                        <a href="{% url 'clinical_decision_support:xai_detail' xai.id %}" 
+                           class="px-4 py-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors text-sm font-medium">
+                            View Full Explanation <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="bg-card border border-border/50 rounded-xl p-12 text-center">
+                <i class="fas fa-brain text-4xl text-muted-foreground/50 mb-4"></i>
+                <h3 class="text-lg font-semibold text-foreground mb-2">No XAI Explanations</h3>
+                <p class="text-muted-foreground">Generate XAI explanations from treatment plans to understand AI decisions.</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="mt-6 flex justify-center">
+            <nav class="flex items-center space-x-2">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 border border-border rounded-lg hover:bg-accent transition-colors">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                {% endif %}
+                <span class="px-4 py-2 text-sm text-muted-foreground">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 border border-border rounded-lg hover:bg-accent transition-colors">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

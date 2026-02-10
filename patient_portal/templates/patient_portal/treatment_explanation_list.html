@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block title %}Treatment Explanations{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <nav class="mb-4">
+                <a href="{% url 'patient_portal:overview' %}" class="text-primary hover:underline text-sm">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Portal
+                </a>
+            </nav>
+            <h1 class="text-3xl font-bold text-foreground">Your Treatment Explained</h1>
+            <p class="text-muted-foreground mt-1">Simple explanations of your treatment plans in easy-to-understand language</p>
+        </div>
+
+        <!-- Explanations List -->
+        <div class="space-y-6">
+            {% for item in explanations %}
+            <div class="bg-card border border-border/50 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h2 class="text-xl font-semibold text-foreground">{{ item.plan.cancer_type }} Treatment</h2>
+                            <p class="text-muted-foreground text-sm">
+                                Stage {{ item.plan.cancer_stage }} | 
+                                Created {{ item.plan.created_at|date:"M d, Y" }}
+                            </p>
+                        </div>
+                        <span class="px-3 py-1 {% if item.plan.status == 'active' %}bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400{% else %}bg-primary/10 text-primary{% endif %} rounded-full text-sm font-medium">
+                            {{ item.plan.get_status_display }}
+                        </span>
+                    </div>
+
+                    <!-- Treatment Overview -->
+                    <div class="bg-accent/30 rounded-lg p-4 mb-4">
+                        {% if item.has_stored and item.explanation.plain_language_explanation %}
+                        <p class="text-foreground">{{ item.explanation.plain_language_explanation|truncatechars:200 }}</p>
+                        {% else %}
+                        <p class="text-foreground">
+                            <strong>Primary Treatments:</strong> 
+                            {% for treatment in item.explanation.treatments %}
+                                {{ treatment }}{% if not forloop.last %}, {% endif %}
+                            {% empty %}
+                                Information available in details
+                            {% endfor %}
+                        </p>
+                        {% if item.explanation.targeted %}
+                        <p class="text-foreground mt-2">
+                            <strong>Targeted Therapies:</strong>
+                            {% for t in item.explanation.targeted %}
+                                {{ t }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </p>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Plan Metrics -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                        {% if item.plan.predicted_5yr_survival %}
+                        <div class="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                            <p class="text-lg font-bold text-green-600">{{ item.plan.predicted_5yr_survival|floatformat:0 }}%</p>
+                            <p class="text-xs text-muted-foreground">5-Year Survival</p>
+                        </div>
+                        {% endif %}
+                        {% if item.plan.remission_probability %}
+                        <div class="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                            <p class="text-lg font-bold text-blue-600">{{ item.plan.remission_probability|floatformat:0 }}%</p>
+                            <p class="text-xs text-muted-foreground">Remission Rate</p>
+                        </div>
+                        {% endif %}
+                        {% if item.plan.quality_of_life_score %}
+                        <div class="text-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                            <p class="text-lg font-bold text-purple-600">{{ item.plan.quality_of_life_score }}/100</p>
+                            <p class="text-xs text-muted-foreground">Quality of Life</p>
+                        </div>
+                        {% endif %}
+                        <div class="text-center p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                            <i class="fas fa-calendar-check text-amber-600 text-lg"></i>
+                            <p class="text-xs text-muted-foreground mt-1">{{ item.plan.status|title }}</p>
+                        </div>
+                    </div>
+
+                    <a href="{% url 'patient_portal:treatment_explanation_detail' item.plan.id %}" 
+                       class="inline-flex items-center text-primary hover:underline font-medium">
+                        Read Full Explanation <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="bg-card border border-border/50 rounded-xl p-12 text-center">
+                <i class="fas fa-book-reader text-4xl text-muted-foreground mb-4"></i>
+                <h3 class="text-lg font-medium text-foreground mb-2">No Treatment Plans Yet</h3>
+                <p class="text-muted-foreground">Treatment plans will appear here once your doctor creates them for you.</p>
+                <p class="text-muted-foreground text-sm mt-2">Your healthcare team will explain everything in simple terms.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

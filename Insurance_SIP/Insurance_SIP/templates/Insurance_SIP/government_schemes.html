@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Government Schemes - Insurance Portal{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class="mb-4">Government Insurance Schemes</h2>
+            
+            <!-- Filters -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Scheme Type</label>
+                            <select name="type" class="form-select">
+                                <option value="">All Types</option>
+                                {% for value, label in scheme_types %}
+                                <option value="{{ value }}" {% if request.GET.type == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">State</label>
+                            <input type="text" name="state" class="form-control" placeholder="Enter state" value="{{ request.GET.state }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Search</label>
+                            <input type="text" name="search" class="form-control" placeholder="Search schemes..." value="{{ request.GET.search }}">
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">Apply Filters</button>
+                            <a href="{% url 'insurance:government_schemes' %}" class="btn btn-secondary">Clear</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Schemes List -->
+            <div class="row">
+                {% for scheme in schemes %}
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ scheme.name }}</h5>
+                            <p class="card-text">{{ scheme.short_description }}</p>
+                            <div class="mb-2">
+                                <span class="badge bg-primary">{{ scheme.get_scheme_type_display }}</span>
+                                {% if scheme.state %}<span class="badge bg-secondary">{{ scheme.state }}</span>{% endif %}
+                            </div>
+                            <p class="text-muted mb-2">
+                                <strong>Coverage:</strong> ₹{{ scheme.coverage_amount|floatformat:0 }}
+                            </p>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{% url 'insurance:scheme_detail' scheme.id %}" class="btn btn-sm btn-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info">No schemes found matching your criteria.</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

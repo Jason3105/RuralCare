@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Patient Login{% endblock %}
+
+{% block content %}
+<div class="fade-in max-w-2xl mx-auto">
+    <div class="text-center mb-10">
+        <h2 class="text-4xl sm:text-5xl font-bold text-foreground mb-3">Patient Login</h2>
+        <p class="text-lg text-muted-foreground">Sign in to access your personalized treatment plans and medical records</p>
+    </div>
+
+    <div class="bg-card border border-border/50 rounded-2xl p-8 sm:p-12 shadow-sm">
+        <div id="loading" class="hidden text-center py-8">
+            <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-primary border-t-transparent"></div>
+            <p class="text-muted-foreground mt-4 text-lg">Signing you in...</p>
+        </div>
+
+        <div id="login-button-container">
+            <button id="google-login-btn" class="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:shadow-xl text-white font-bold py-4 px-6 border-0 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-105">
+                <i class="fab fa-google mr-3 text-lg"></i>
+                <span>Sign in with Google</span>
+            </button>
+        </div>
+
+        <div class="mt-8 text-center">
+            <a href="{% url 'login' %}" class="text-muted-foreground hover:text-foreground transition-colors font-medium">
+                <i class="fas fa-arrow-left mr-2"></i>Back to login selection
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const SUPABASE_URL = '{{ SUPABASE_URL }}';
+    const SUPABASE_KEY = '{{ SUPABASE_KEY }}';
+    const USER_TYPE = 'patient';
+
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    document.getElementById('google-login-btn').addEventListener('click', async () => {
+        const loading = document.getElementById('loading');
+        const buttonContainer = document.getElementById('login-button-container');
+        
+        loading.classList.remove('hidden');
+        buttonContainer.classList.add('hidden');
+
+        try {
+            // Store user type in sessionStorage before redirect
+            sessionStorage.setItem('user_type', USER_TYPE);
+
+            const { data, error } = await supabaseClient.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.origin + '/auth/callback/?user_type=' + USER_TYPE
+                }
+            });
+
+            if (error) throw error;
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Login failed: ' + error.message);
+            loading.classList.add('hidden');
+            buttonContainer.classList.remove('hidden');
+        }
+    });
+</script>
+{% endblock %}

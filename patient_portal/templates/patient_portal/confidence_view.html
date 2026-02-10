@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% block title %}Treatment Confidence{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <nav class="mb-4">
+                <a href="{% url 'patient_portal:overview' %}" class="text-primary hover:underline text-sm">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Portal
+                </a>
+            </nav>
+            <h1 class="text-3xl font-bold text-foreground">Treatment Confidence</h1>
+            <p class="text-muted-foreground mt-1">Understand how confident your care team is in your treatment plan</p>
+        </div>
+
+        {% if records %}
+        {% for item in records %}
+        <div class="bg-card border border-border/50 rounded-xl p-6 mb-6">
+            <!-- Plan Info -->
+            <div class="mb-6">
+                <h2 class="text-xl font-semibold text-foreground">{{ item.analysis_type }}</h2>
+                <p class="text-muted-foreground">{{ item.created_at|date:"M d, Y" }}</p>
+            </div>
+
+            <!-- Confidence Score - Visual -->
+            <div class="mb-8">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-lg font-medium text-foreground">Confidence Level</span>
+                    <span class="text-2xl font-bold
+                        {% if item.confidence_level == 'high' %}text-green-600
+                        {% elif item.confidence_level == 'medium' %}text-amber-600
+                        {% else %}text-blue-600{% endif %}">
+                        {{ item.confidence_label }}
+                    </span>
+                </div>
+                <div class="h-4 bg-accent/30 rounded-full overflow-hidden">
+                    <div class="h-full rounded-full transition-all duration-1000
+                        {% if item.confidence_level == 'high' %}bg-green-500{% elif item.confidence_level == 'medium' %}bg-amber-500{% else %}bg-blue-500{% endif %}"
+                         style="width: {% if item.confidence_level == 'high' %}90{% elif item.confidence_level == 'medium' %}65{% else %}40{% endif %}%"></div>
+                </div>
+            </div>
+
+            <!-- What This Means -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-5 mb-6">
+                <h3 class="font-semibold text-blue-800 dark:text-blue-400 mb-3">
+                    <i class="fas fa-info-circle mr-2"></i>What This Means For You
+                </h3>
+                <p class="text-blue-700 dark:text-blue-300">
+                    {% if item.patient_explanation %}
+                    {{ item.patient_explanation }}
+                    {% elif item.confidence_level == 'high' %}
+                    Your treatment plan is based on strong evidence and your doctor team is very confident it's the right approach for you. The recommendations align well with established medical guidelines and your specific health profile.
+                    {% elif item.confidence_level == 'medium' %}
+                    Your treatment plan is well-supported, though your doctors may want to monitor your response closely. Some aspects of your case are less common, which is normal - your team has accounted for this in your plan.
+                    {% else %}
+                    Your case may have unique aspects that require personalized attention. Your doctors are working with the best available information and will adjust the plan as they learn more about how you respond to treatment.
+                    {% endif %}
+                </p>
+            </div>
+
+            <!-- Confidence Level Indicator -->
+            <div class="grid grid-cols-3 gap-4 mb-6">
+                <div class="text-center p-4 rounded-lg
+                    {% if item.confidence_level == 'high' %}bg-green-100 dark:bg-green-900/30 border-2 border-green-500
+                    {% else %}bg-accent/30 border border-border{% endif %}">
+                    <i class="fas fa-thumbs-up text-2xl {% if item.confidence_level == 'high' %}text-green-600{% else %}text-muted-foreground{% endif %} mb-2"></i>
+                    <p class="font-semibold {% if item.confidence_level == 'high' %}text-green-700 dark:text-green-400{% else %}text-muted-foreground{% endif %}">High</p>
+                    <p class="text-xs {% if item.confidence_level == 'high' %}text-green-600{% else %}text-muted-foreground{% endif %}">Strong Evidence</p>
+                </div>
+                <div class="text-center p-4 rounded-lg
+                    {% if item.confidence_level == 'medium' %}bg-amber-100 dark:bg-amber-900/30 border-2 border-amber-500
+                    {% else %}bg-accent/30 border border-border{% endif %}">
+                    <i class="fas fa-balance-scale text-2xl {% if item.confidence_level == 'medium' %}text-amber-600{% else %}text-muted-foreground{% endif %} mb-2"></i>
+                    <p class="font-semibold {% if item.confidence_level == 'medium' %}text-amber-700 dark:text-amber-400{% else %}text-muted-foreground{% endif %}">Moderate</p>
+                    <p class="text-xs {% if item.confidence_level == 'medium' %}text-amber-600{% else %}text-muted-foreground{% endif %}">Good Support</p>
+                </div>
+                <div class="text-center p-4 rounded-lg
+                    {% if item.confidence_level == 'low' %}bg-blue-100 dark:bg-blue-900/30 border-2 border-blue-500
+                    {% else %}bg-accent/30 border border-border{% endif %}">
+                    <i class="fas fa-search text-2xl {% if item.confidence_level == 'low' %}text-blue-600{% else %}text-muted-foreground{% endif %} mb-2"></i>
+                    <p class="font-semibold {% if item.confidence_level == 'low' %}text-blue-700 dark:text-blue-400{% else %}text-muted-foreground{% endif %}">Developing</p>
+                    <p class="text-xs {% if item.confidence_level == 'low' %}text-blue-600{% else %}text-muted-foreground{% endif %}">Personalized</p>
+                </div>
+            </div>
+
+            <!-- Simple Breakdown -->
+            <div class="border border-border rounded-xl p-5">
+                <h3 class="font-semibold text-foreground mb-4">What Supports Your Plan</h3>
+                <div class="space-y-4">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-microscope text-green-600 text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-foreground">Imaging & Lab Results</p>
+                            <p class="text-sm text-muted-foreground">Your scans and test results help doctors understand your specific situation</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-book-medical text-blue-600 text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-foreground">Medical Guidelines</p>
+                            <p class="text-sm text-muted-foreground">Your treatment follows proven approaches used successfully for similar cases</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-user-md text-purple-600 text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-foreground">Expert Review</p>
+                            <p class="text-sm text-muted-foreground">Specialists have reviewed and customized this plan for you</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Questions to Ask -->
+            <div class="mt-6 bg-accent/30 rounded-xl p-5">
+                <h3 class="font-semibold text-foreground mb-3">
+                    <i class="fas fa-question-circle text-primary mr-2"></i>Questions You Can Ask Your Doctor
+                </h3>
+                <ul class="space-y-2 text-sm text-muted-foreground">
+                    <li class="flex items-start space-x-2">
+                        <i class="fas fa-chevron-right text-primary mt-1 text-xs"></i>
+                        <span>"What makes you confident this treatment is right for me?"</span>
+                    </li>
+                    <li class="flex items-start space-x-2">
+                        <i class="fas fa-chevron-right text-primary mt-1 text-xs"></i>
+                        <span>"How will we know if the treatment is working?"</span>
+                    </li>
+                    <li class="flex items-start space-x-2">
+                        <i class="fas fa-chevron-right text-primary mt-1 text-xs"></i>
+                        <span>"What alternatives exist if we need to change the plan?"</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="bg-card border border-border/50 rounded-xl p-12 text-center">
+            <i class="fas fa-chart-pie text-4xl text-muted-foreground mb-4"></i>
+            <h3 class="text-lg font-medium text-foreground mb-2">No Treatment Plans Available</h3>
+            <p class="text-muted-foreground">Confidence information will appear once your doctor creates a treatment plan for you</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

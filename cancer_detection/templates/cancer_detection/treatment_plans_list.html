@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Treatment Plans - Cancer Detection{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-foreground">Treatment Plans</h1>
+                    <p class="text-muted-foreground mt-1">Your personalized AI-generated treatment pathways</p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <a href="{% url 'cancer_detection:create_comprehensive_plan' %}" 
+                       class="inline-flex items-center justify-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all hover:scale-105">
+                        <i class="fas fa-project-diagram mr-2"></i>
+                        Comprehensive Plan
+                    </a>
+                    <a href="{% url 'cancer_detection:analysis_list' %}" 
+                       class="inline-flex items-center justify-center px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-all hover:scale-105">
+                        <i class="fas fa-plus mr-2"></i>
+                        Generate Plan
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-lg transition-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-muted-foreground mb-1">Total Plans</p>
+                        <p class="text-3xl font-bold text-foreground">{{ total_plans|default:0 }}</p>
+                    </div>
+                    <div class="bg-primary/10 p-3 rounded-lg">
+                        <i class="fas fa-clipboard-list text-primary text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-lg transition-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-muted-foreground mb-1">Active Plans</p>
+                        <p class="text-3xl font-bold text-green-600">{{ active_plans|default:0 }}</p>
+                    </div>
+                    <div class="bg-green-600/10 p-3 rounded-lg">
+                        <i class="fas fa-heartbeat text-green-600 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-lg transition-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-muted-foreground mb-1">Pending Review</p>
+                        <p class="text-3xl font-bold text-blue-600">{{ pending_review|default:0 }}</p>
+                    </div>
+                    <div class="bg-blue-600/10 p-3 rounded-lg">
+                        <i class="fas fa-hourglass-half text-blue-600 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Treatment Plans List -->
+        {% if page_obj %}
+        <div class="space-y-4">
+            {% for plan in page_obj %}
+            <div class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-lg transition-all">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div class="flex-1">
+                        <div class="flex items-center flex-wrap gap-3 mb-3">
+                            <h3 class="text-xl font-semibold text-foreground">{{ plan.plan_name }}</h3>
+                            {% if plan.status == 'draft' %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400">
+                                <i class="fas fa-file-alt mr-1"></i>Draft
+                            </span>
+                            {% elif plan.status == 'pending_review' %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
+                                <i class="fas fa-clock mr-1"></i>Pending Review
+                            </span>
+                            {% elif plan.status == 'approved' %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
+                                <i class="fas fa-check-circle mr-1"></i>Approved
+                            </span>
+                            {% elif plan.status == 'active' %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
+                                <i class="fas fa-play-circle mr-1"></i>Active
+                            </span>
+                            {% elif plan.status == 'completed' %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-400">
+                                <i class="fas fa-check-double mr-1"></i>Completed
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                            <div class="p-3 bg-accent/30 rounded-lg">
+                                <p class="text-xs text-muted-foreground uppercase tracking-wide mb-1">Cancer Type</p>
+                                <p class="text-sm font-semibold text-foreground">{{ plan.cancer_type|title }}</p>
+                            </div>
+                            <div class="p-3 bg-accent/30 rounded-lg">
+                                <p class="text-xs text-muted-foreground uppercase tracking-wide mb-1">Stage</p>
+                                <p class="text-sm font-semibold text-foreground">Stage {{ plan.cancer_stage }}</p>
+                            </div>
+                            {% if plan.predicted_5yr_survival %}
+                            <div class="p-3 bg-accent/30 rounded-lg">
+                                <p class="text-xs text-muted-foreground uppercase tracking-wide mb-1">5-Yr Survival</p>
+                                <p class="text-sm font-semibold text-green-600">{{ plan.predicted_5yr_survival|floatformat:1 }}%</p>
+                            </div>
+                            {% endif %}
+                            {% if plan.remission_probability %}
+                            <div class="p-3 bg-accent/30 rounded-lg">
+                                <p class="text-xs text-muted-foreground uppercase tracking-wide mb-1">Remission Rate</p>
+                                <p class="text-sm font-semibold text-blue-600">{{ plan.remission_probability|floatformat:1 }}%</p>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="flex items-center text-sm text-muted-foreground">
+                            <i class="fas fa-calendar-alt mr-2"></i>
+                            Created {{ plan.created_at|date:"M d, Y" }}
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-2 lg:min-w-[200px]">
+                        <a href="{% url 'cancer_detection:treatment_plan_detail' plan.id %}" 
+                           class="inline-flex items-center justify-center px-6 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-all hover:scale-105">
+                            <i class="fas fa-eye mr-2"></i>
+                            View Details
+                        </a>
+                        {% if plan.status == 'draft' %}
+                        <a href="{% url 'cancer_detection:treatment_plan_detail' plan.id %}" 
+                           class="inline-flex items-center justify-center px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all hover:scale-105">
+                            <i class="fas fa-edit mr-2"></i>
+                            Edit Plan
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="mt-8 flex flex-wrap items-center justify-center gap-2">
+            {% if page_obj.has_previous %}
+            <a href="?page=1" class="px-4 py-2 rounded-lg bg-card border border-border/50 hover:bg-accent transition-all text-foreground font-medium">
+                <i class="fas fa-angle-double-left mr-1"></i>First
+            </a>
+            <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-2 rounded-lg bg-card border border-border/50 hover:bg-accent transition-all text-foreground font-medium">
+                <i class="fas fa-angle-left mr-1"></i>Previous
+            </a>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <span class="px-4 py-2 rounded-lg bg-primary text-primary-foreground font-semibold">{{ num }}</span>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <a href="?page={{ num }}" class="px-4 py-2 rounded-lg bg-card border border-border/50 hover:bg-accent transition-all text-foreground font-medium">{{ num }}</a>
+            {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-2 rounded-lg bg-card border border-border/50 hover:bg-accent transition-all text-foreground font-medium">
+                Next<i class="fas fa-angle-right ml-1"></i>
+            </a>
+            <a href="?page={{ page_obj.paginator.num_pages }}" class="px-4 py-2 rounded-lg bg-card border border-border/50 hover:bg-accent transition-all text-foreground font-medium">
+                Last<i class="fas fa-angle-double-right ml-1"></i>
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% else %}
+        <!-- Empty State -->
+        <div class="bg-card border border-border/50 rounded-xl p-12 text-center">
+            <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-clipboard-list text-primary text-3xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-foreground mb-2">No Treatment Plans Yet</h3>
+            <p class="text-muted-foreground mb-8 max-w-md mx-auto">Start by analyzing a cancer image to generate your first personalized treatment plan.</p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <a href="{% url 'cancer_detection:analysis_list' %}" 
+                   class="inline-flex items-center justify-center px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-all hover:scale-105">
+                    <i class="fas fa-microscope mr-2"></i>
+                    View Analyses
+                </a>
+                <a href="{% url 'cancer_detection:upload_image' %}" 
+                   class="inline-flex items-center justify-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all hover:scale-105">
+                    <i class="fas fa-upload mr-2"></i>
+                    Upload New Scan
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

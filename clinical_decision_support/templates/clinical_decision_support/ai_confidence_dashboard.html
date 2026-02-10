@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% block title %}AI Confidence Dashboard - Doctor{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-foreground">AI Confidence Dashboard</h1>
+                    <p class="text-muted-foreground mt-1">Monitor AI analysis confidence scores and uncertainty factors</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                        <i class="fas fa-user-md mr-2"></i>Doctor Only
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confidence Legend -->
+        <div class="bg-card border border-border/50 rounded-xl p-4 mb-6">
+            <h3 class="text-sm font-semibold text-foreground mb-3">Confidence Indicators</h3>
+            <div class="flex flex-wrap gap-4">
+                <div class="flex items-center space-x-2" title="Score ≥ 80%: High confidence based on comprehensive data">
+                    <div class="w-4 h-4 rounded-full bg-green-500"></div>
+                    <span class="text-sm text-muted-foreground">High (≥80%)</span>
+                    <i class="fas fa-info-circle text-muted-foreground/50 cursor-help"></i>
+                </div>
+                <div class="flex items-center space-x-2" title="Score 50-79%: Moderate confidence, some data may be missing">
+                    <div class="w-4 h-4 rounded-full bg-amber-500"></div>
+                    <span class="text-sm text-muted-foreground">Moderate (50-79%)</span>
+                    <i class="fas fa-info-circle text-muted-foreground/50 cursor-help"></i>
+                </div>
+                <div class="flex items-center space-x-2" title="Score < 50%: Low confidence, significant data gaps or conflicts">
+                    <div class="w-4 h-4 rounded-full bg-red-500"></div>
+                    <span class="text-sm text-muted-foreground">Low (<50%)</span>
+                    <i class="fas fa-info-circle text-muted-foreground/50 cursor-help"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-card border border-border/50 rounded-xl p-4 mb-6">
+            <form method="get" class="flex flex-wrap gap-4 items-end">
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-sm font-medium text-muted-foreground mb-1">Patient</label>
+                    <select name="patient" class="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary focus:border-primary">
+                        <option value="">All Patients</option>
+                        {% for patient in patients %}
+                        <option value="{{ patient.id }}" {% if selected_patient == patient.id|stringformat:"s" %}selected{% endif %}>
+                            {{ patient.username }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-sm font-medium text-muted-foreground mb-1">Analysis Type</label>
+                    <select name="type" class="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary focus:border-primary">
+                        <option value="">All Types</option>
+                        {% for value, label in analysis_types %}
+                        <option value="{{ value }}" {% if selected_type == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-sm font-medium text-muted-foreground mb-1">Confidence Level</label>
+                    <select name="level" class="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary focus:border-primary">
+                        <option value="">All Levels</option>
+                        {% for value, label in confidence_levels %}
+                        <option value="{{ value }}" {% if selected_level == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                    <i class="fas fa-filter mr-2"></i>Filter
+                </button>
+            </form>
+        </div>
+
+        <!-- Confidence Records -->
+        <div class="space-y-4">
+            {% for record in page_obj %}
+            <div class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div class="flex-1">
+                        <div class="flex items-center space-x-3 mb-2">
+                            <!-- Confidence Indicator -->
+                            <div class="w-12 h-12 rounded-full flex items-center justify-center font-bold text-white
+                                {% if record.overall_confidence >= 80 %}bg-green-500
+                                {% elif record.overall_confidence >= 50 %}bg-amber-500
+                                {% else %}bg-red-500{% endif %}">
+                                {{ record.overall_confidence|floatformat:0 }}%
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-foreground">{{ record.get_analysis_type_display }}</h3>
+                                <p class="text-sm text-muted-foreground">Patient: {{ record.patient.username }}</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Score Breakdown -->
+                        <div class="grid grid-cols-3 gap-4 mt-4">
+                            <div class="text-center p-2 bg-background rounded-lg">
+                                <p class="text-xs text-muted-foreground">Data Quality</p>
+                                <p class="text-lg font-semibold text-foreground">{{ record.data_quality_score|floatformat:0 }}%</p>
+                            </div>
+                            <div class="text-center p-2 bg-background rounded-lg">
+                                <p class="text-xs text-muted-foreground">Model Certainty</p>
+                                <p class="text-lg font-semibold text-foreground">{{ record.model_certainty_score|floatformat:0 }}%</p>
+                            </div>
+                            <div class="text-center p-2 bg-background rounded-lg">
+                                <p class="text-xs text-muted-foreground">Evidence Strength</p>
+                                <p class="text-lg font-semibold text-foreground">{{ record.evidence_strength_score|floatformat:0 }}%</p>
+                            </div>
+                        </div>
+
+                        <!-- Uncertainty Reasons -->
+                        {% if record.uncertainty_reasons %}
+                        <div class="mt-4">
+                            <p class="text-sm font-medium text-muted-foreground mb-2">Uncertainty Reasons:</p>
+                            <div class="flex flex-wrap gap-2">
+                                {% for reason in record.uncertainty_reasons %}
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i>{{ reason }}
+                                </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex flex-col items-end space-y-2">
+                        <p class="text-xs text-muted-foreground">{{ record.created_at|date:"M d, Y H:i" }}</p>
+                        <a href="{% url 'clinical_decision_support:ai_confidence_detail' record.id %}" 
+                           class="px-4 py-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors text-sm font-medium">
+                            View Details <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="bg-card border border-border/50 rounded-xl p-12 text-center">
+                <i class="fas fa-chart-line text-4xl text-muted-foreground/50 mb-4"></i>
+                <h3 class="text-lg font-semibold text-foreground mb-2">No Confidence Records</h3>
+                <p class="text-muted-foreground">Generate confidence analysis from treatment plans to see data here.</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="mt-6 flex justify-center">
+            <nav class="flex items-center space-x-2">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 border border-border rounded-lg hover:bg-accent transition-colors">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                {% endif %}
+                
+                <span class="px-4 py-2 text-sm text-muted-foreground">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 border border-border rounded-lg hover:bg-accent transition-colors">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

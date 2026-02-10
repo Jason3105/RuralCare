@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RuralCare | Professional Dashboard</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            slate: { 850: '#151e32', 900: '#0f172a', 950: '#020617' },
+            primary: { 500: '#3b82f6', 600: '#2563eb', glow: 'rgba(59, 130, 246, 0.5)' },
+            public: { 500: '#f59e0b', 600: '#d97706', glow: 'rgba(245, 158, 11, 0.5)' }
+          },
+          boxShadow: {
+            'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+            'glow-primary': '0 0 15px rgba(59, 130, 246, 0.3)',
+            'glow-public': '0 0 15px rgba(245, 158, 11, 0.3)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    body { overflow: hidden; }
+    #map { height: 100vh; width: 100%; z-index: 0; background: #0f172a; }
+
+    /* --- Glassmorphism Sidebar --- */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 10px 0 30px rgba(0,0,0,0.4);
+    }
+
+    /* --- Scrollbar --- */
+    .custom-scroll::-webkit-scrollbar { width: 4px; }
+    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+    .custom-scroll::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,0.1); border-radius: 10px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background-color: rgba(255,255,255,0.2); }
+
+    /* --- Map Marker Animations --- */
+    .pin-base {
+      border-radius: 50%;
+      border: 2px solid #0f172a;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .pin-base:hover { transform: scale(1.25); z-index: 999 !important; }
+    
+    .pin-partner { background: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); }
+    .pin-public  { background: #f59e0b; box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2); }
+    .pin-user    { 
+      background: #ef4444; border: 2px solid white; 
+      animation: pulse-ring 2s infinite;
+    }
+
+    @keyframes pulse-ring {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+
+    /* --- Custom Popup Styling --- */
+    .leaflet-popup-content-wrapper {
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(4px);
+      color: #e2e8f0;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      padding: 0;
+    }
+    .leaflet-popup-tip { background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-top: none; border-left: none;}
+    .leaflet-popup-content { margin: 0; width: 260px !important; }
+    .leaflet-container a.leaflet-popup-close-button {
+      color: #64748b; top: 12px; right: 12px; font-size: 16px;
+    }
+    .leaflet-container a.leaflet-popup-close-button:hover { color: #fff; }
+
+    /* --- List Item Transitions --- */
+    .list-card { transition: all 0.2s ease; }
+    .list-card:hover { transform: translateY(-2px); }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-200 antialiased">
+
+  <div class="fixed top-0 left-0 h-full w-full md:w-[400px] z-[1000] glass-panel flex flex-col transform transition-transform duration-500 -translate-x-full md:translate-x-0" id="sidebar">
+    
+    <div class="p-6 border-b border-white/5">
+      <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-bold text-white tracking-tight flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-primary-500/20">
+            <i class="fa-solid fa-staff-snake text-white text-sm"></i>
+          </div>
+          RuralCare
+        </h1>
+        <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Live</span>
+        </div>
+      </div>
+
+      <div class="bg-slate-900/50 p-1 rounded-xl border border-white/5 flex gap-1 relative">
+        <button onclick="switchTab('partner')" id="tab-partner" class="flex-1 py-2.5 text-xs font-semibold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 text-white bg-slate-800 shadow-sm border border-white/5">
+          <i class="fa-solid fa-network-wired"></i> Network
+        </button>
+        <button onclick="switchTab('public')" id="tab-public" class="flex-1 py-2.5 text-xs font-semibold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 text-slate-400 hover:text-white">
+          <i class="fa-solid fa-earth-americas"></i> Public
+        </button>
+      </div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto custom-scroll relative bg-gradient-to-b from-transparent to-slate-900/30">
+      
+      <div id="list-partner" class="p-4 space-y-3">
+        <div class="text-center py-10 text-slate-500">
+           <i class="fa-solid fa-circle-notch fa-spin text-primary-500 mb-2"></i>
+           <p class="text-xs">Loading network partners...</p>
+        </div>
+      </div>
+
+      <div id="list-public" class="p-4 space-y-3 hidden">
+        <div class="flex flex-col items-center justify-center py-10 text-slate-500 gap-3" id="public-status">
+          <i class="fa-solid fa-circle-notch fa-spin text-2xl text-public-500"></i>
+          <span class="text-xs font-medium">Scanning satellite data...</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="p-4 border-t border-white/5 bg-slate-900/40 backdrop-blur-sm">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400">
+                <i class="fa-solid fa-location-crosshairs"></i>
+            </div>
+            <div>
+                <p class="text-xs text-slate-400">Search Radius</p>
+                <p class="text-sm font-semibold text-white">3.0 Kilometers</p>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <div id="map"></div>
+
+  <button onclick="document.getElementById('sidebar').classList.toggle('-translate-x-full')" class="md:hidden fixed top-4 left-4 z-[1000] bg-slate-900/80 backdrop-blur text-white w-10 h-10 rounded-xl border border-white/10 shadow-lg flex items-center justify-center active:scale-95 transition">
+    <i class="fa-solid fa-bars"></i>
+  </button>
+
+  <div class="fixed bottom-8 right-4 md:right-8 z-[900] flex flex-col gap-2">
+    
+    <div class="glass-panel p-1 rounded-xl border border-white/10 shadow-2xl flex flex-col gap-1 w-12 hover:w-32 transition-all duration-300 group overflow-hidden">
+        
+        <button onclick="setLayer('dark')" id="btn-dark" class="w-full h-10 rounded-lg flex items-center gap-3 px-3 hover:bg-white/10 transition text-primary-500 bg-white/5">
+            <i class="fa-solid fa-map w-4 text-center"></i>
+            <span class="text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap text-white">Dark Mode</span>
+        </button>
+
+        <button onclick="setLayer('light')" id="btn-light" class="w-full h-10 rounded-lg flex items-center gap-3 px-3 hover:bg-white/10 transition text-slate-400">
+            <i class="fa-regular fa-map w-4 text-center"></i>
+            <span class="text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap text-white">Light Mode</span>
+        </button>
+
+        <button onclick="setLayer('satellite')" id="btn-satellite" class="w-full h-10 rounded-lg flex items-center gap-3 px-3 hover:bg-white/10 transition text-slate-400">
+            <i class="fa-solid fa-satellite w-4 text-center"></i>
+            <span class="text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap text-white">Satellite</span>
+        </button>
+    </div>
+
+    <button onclick="recenterMap()" class="glass-panel w-12 h-12 rounded-xl flex items-center justify-center text-white hover:text-primary-400 transition hover:scale-105 active:scale-95 border border-white/10">
+        <i class="fa-solid fa-location-arrow"></i>
+    </button>
+  </div>
+
+<script>
+    // --- STATE & CONFIG ---
+    let map, userPos;
+    let currentLayer = null;
+    const clinics = { partner: [], public: [] };
+    
+    // Map Layers Configuration
+    const layers = {
+        dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '© CARTO', maxZoom: 19
+        }),
+        light: L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '© CARTO', maxZoom: 19
+        }),
+        satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: '© Esri', maxZoom: 19
+        })
+    };
+
+    // Custom Icons with Tailwind Classes injected
+    const createIcon = (type) => {
+        return L.divIcon({ 
+            className: `pin-base pin-${type} flex items-center justify-center`, 
+            iconSize: type === 'user' ? [24, 24] : [16, 16],
+            html: type === 'user' ? '<div class="w-2 h-2 bg-white rounded-full"></div>' : ''
+        });
+    };
+
+    // --- INITIALIZATION ---
+    navigator.geolocation.getCurrentPosition(initApp, 
+        () => {
+            alert("Location access needed for this app. Please enable it.");
+        }
+    );
+
+    function initApp(pos) {
+        userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+
+        // 1. Setup Map
+        map = L.map('map', { zoomControl: false }).setView([userPos.lat, userPos.lng], 14);
+        setLayer('dark'); // Default
+        
+        // User Marker
+        L.marker([userPos.lat, userPos.lng], {icon: createIcon('user')})
+          .bindPopup("<b class='text-slate-800'>Your Location</b>")
+          .addTo(map);
+
+        // 2. Fetch YOUR Backend Data (Supabase/API)
+        fetchPartnerClinics();
+
+        // 3. Fetch Public Data (Overpass/OSM)
+        fetchPublicData();
+    }
+
+    // --- FUNCTIONALITY 1: BACKEND API (YOUR SUPABASE/DB) ---
+    function fetchPartnerClinics() {
+        // Calling the specific endpoint from your original script
+        fetch(`/api/nearby-clinics/?lat=${userPos.lat}&lng=${userPos.lng}`)
+            .then(res => res.json())
+            .then(data => {
+                if (!data.clinics || data.clinics.length === 0) {
+                    clinics.partner = [];
+                    renderList('partner');
+                    return;
+                }
+
+                // Map API data to UI structure
+                clinics.partner = data.clinics.map(c => ({
+                    name: c.name,
+                    address: c.address || "Address unavailable",
+                    phone: c.phone || "",
+                    lat: c.lat,
+                    lng: c.lng,
+                    distance: c.distance, // Assuming API calculates distance, otherwise use helper
+                    source: 'partner'
+                }));
+
+                // Create markers
+                clinics.partner.forEach(c => createMarker(c, 'partner'));
+
+                // Render sidebar list
+                renderList('partner');
+            })
+            .catch(err => {
+                console.error("Partner fetch failed:", err);
+                document.getElementById('list-partner').innerHTML = `<div class="text-red-400 text-center text-xs mt-4">Failed to load network data.</div>`;
+            });
+    }
+
+    // --- FUNCTIONALITY 2: PUBLIC DATA (OVERPASS API) ---
+    function fetchPublicData() {
+        // Robust query for nodes and ways (buildings)
+        const query = `
+            [out:json][timeout:25];
+            (
+              node["amenity"="clinic"](around:3000,${userPos.lat},${userPos.lng});
+              node["amenity"="hospital"](around:3000,${userPos.lat},${userPos.lng});
+              way["amenity"="clinic"](around:3000,${userPos.lat},${userPos.lng});
+              way["amenity"="hospital"](around:3000,${userPos.lat},${userPos.lng});
+            );
+            out center;
+        `;
+        
+        const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                const results = data.elements.map(el => {
+                    // Extract center for 'ways' (buildings) or 'nodes' (points)
+                    const lat = el.lat || el.center.lat;
+                    const lng = el.lon || el.center.lon;
+                    
+                    return {
+                        name: el.tags.name || "Public Health Facility",
+                        address: el.tags['addr:street'] || "Public Listing",
+                        phone: el.tags['phone'] || "No phone",
+                        lat: lat,
+                        lng: lng,
+                        distance: (distance(userPos.lat, userPos.lng, lat, lng)).toFixed(2),
+                        source: 'public'
+                    };
+                });
+
+                clinics.public = results;
+                document.getElementById('public-status').style.display = 'none';
+                renderList('public'); // Pre-render list (hidden)
+                
+                results.forEach(c => createMarker(c, 'public'));
+            })
+            .catch(err => {
+                document.getElementById('public-status').innerHTML = "<span class='text-red-400 text-xs'>Public data unavailable</span>";
+            });
+    }
+
+    // --- UI BUILDERS & HELPERS ---
+    
+    // Layer Switcher
+    function setLayer(layerName) {
+        ['dark', 'light', 'satellite'].forEach(l => {
+            const btn = document.getElementById(`btn-${l}`);
+            if(l === layerName) {
+                btn.classList.add('text-primary-500', 'bg-white/5');
+                btn.classList.remove('text-slate-400');
+            } else {
+                btn.classList.remove('text-primary-500', 'bg-white/5');
+                btn.classList.add('text-slate-400');
+            }
+        });
+
+        if (currentLayer) map.removeLayer(currentLayer);
+        currentLayer = layers[layerName];
+        map.addLayer(currentLayer);
+    }
+
+    function recenterMap() {
+        if(userPos) map.flyTo([userPos.lat, userPos.lng], 15, { duration: 1.5 });
+    }
+
+    function createMarker(c, type) {
+        const marker = L.marker([c.lat, c.lng], { icon: createIcon(type) }).addTo(map);
+        
+        const dirLink = `https://www.google.com/maps/dir/?api=1&origin=${userPos.lat},${userPos.lng}&destination=${c.lat},${c.lng}`;
+        
+        const accentColor = type === 'partner' ? 'text-primary-500' : 'text-public-500';
+        const btnColor = type === 'partner' ? 'bg-primary-600 hover:bg-primary-500' : 'bg-public-600 hover:bg-public-500';
+
+        const popupContent = `
+            <div class="p-4 font-sans">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-[10px] uppercase font-bold tracking-wider text-slate-500 border border-slate-700 px-2 py-0.5 rounded-full">${type === 'partner' ? 'Network' : 'Public'}</span>
+                    <i class="fa-solid fa-location-dot ${accentColor}"></i>
+                </div>
+                <h3 class="font-bold text-base text-white leading-tight mb-1">${c.name}</h3>
+                <p class="text-xs text-slate-400 mb-4">${c.address}</p>
+                
+                <a href="${dirLink}" target="_blank" class="block w-full text-center ${btnColor} text-white text-xs font-bold py-2.5 rounded-lg shadow-lg transition-transform active:scale-95">
+                  Navigate Now
+                </a>
+            </div>
+        `;
+        
+        marker.bindPopup(popupContent);
+        c.markerRef = marker;
+    }
+
+    function renderList(type) {
+        const container = document.getElementById(`list-${type}`);
+        container.innerHTML = "";
+        
+        const data = clinics[type];
+        
+        if(data.length === 0) {
+             container.innerHTML = `<div class="text-slate-500 text-center text-sm mt-10">No ${type} clinics found nearby.</div>`;
+             return;
+        }
+
+        data.forEach(c => {
+            const card = document.createElement('div');
+            const glowClass = type === 'partner' ? 'hover:shadow-glow-primary hover:border-primary-500/50' : 'hover:shadow-glow-public hover:border-public-500/50';
+            const iconClass = type === 'partner' ? 'text-primary-500' : 'text-public-500';
+            const bgHover = type === 'partner' ? 'group-hover:bg-primary-500/10' : 'group-hover:bg-public-500/10';
+
+            card.className = `list-card bg-slate-800/50 backdrop-blur p-4 rounded-xl border border-white/5 ${glowClass} cursor-pointer group`;
+            card.innerHTML = `
+                <div class="flex justify-between items-start gap-3">
+                    <div class="mt-1 ${iconClass}">
+                        <i class="fa-solid ${type === 'partner' ? 'fa-star' : 'fa-building'}"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-sm text-slate-200 group-hover:text-white transition-colors">${c.name}</h4>
+                        <p class="text-xs text-slate-500 mt-1 truncate">${c.address}</p>
+                    </div>
+                    <div class="flex flex-col items-end gap-1">
+                        <span class="${bgHover} ${iconClass} transition-colors text-[10px] font-bold px-2 py-1 rounded-md font-mono">${c.distance}km</span>
+                    </div>
+                </div>
+            `;
+            
+            card.addEventListener('click', () => {
+                map.flyTo([c.lat, c.lng], 16, { duration: 1.5 });
+                if(c.markerRef) {
+                    setTimeout(() => c.markerRef.openPopup(), 1500); 
+                }
+            });
+
+            container.appendChild(card);
+        });
+    }
+
+    function switchTab(tab) {
+        const tPartner = document.getElementById('tab-partner');
+        const tPublic = document.getElementById('tab-public');
+        
+        // Reset Styles
+        [tPartner, tPublic].forEach(t => {
+            t.className = "flex-1 py-2.5 text-xs font-semibold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 text-slate-400 hover:text-white";
+        });
+
+        // Apply Active Style
+        const activeBtn = document.getElementById(`tab-${tab}`);
+        activeBtn.className = "flex-1 py-2.5 text-xs font-semibold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 text-white bg-slate-800 shadow-sm border border-white/5 shadow-lg";
+
+        // Toggle Content
+        document.getElementById('list-partner').classList.add('hidden');
+        document.getElementById('list-public').classList.add('hidden');
+        document.getElementById(`list-${tab}`).classList.remove('hidden');
+    }
+
+    // Distance Helper (Haversine Formula)
+    function distance(lat1, lon1, lat2, lon2) {
+        const R = 6371; 
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+</script>
+</body>
+</html>

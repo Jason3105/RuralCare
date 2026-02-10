@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Track Application - RuralCare{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-12">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Success Message -->
+        <div class="bg-green-50 border-2 border-green-200 rounded-2xl p-8 mb-8 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                <i class="fas fa-check-circle text-green-600 text-3xl"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Application Submitted Successfully!</h1>
+            <p class="text-lg text-gray-600 mb-4">Your application ID: <span class="font-mono font-bold text-blue-600">{{ application.application_id }}</span></p>
+            <p class="text-gray-600">We will review your application within 24-48 hours and send you an update via email.</p>
+        </div>
+
+        <!-- Application Details -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+            <div class="bg-gradient-to-r from-blue-600 to-green-600 px-8 py-6 text-white">
+                <h2 class="text-2xl font-bold">Application Details</h2>
+            </div>
+            
+            <div class="p-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <div class="text-sm text-gray-500 mb-1">Policy Name</div>
+                        <div class="font-semibold text-gray-900">{{ application.policy.name }}</div>
+                    </div>
+                    
+                    <div>
+                        <div class="text-sm text-gray-500 mb-1">Application Status</div>
+                        <div>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold
+                                {% if application.status == 'submitted' %}bg-blue-100 text-blue-800
+                                {% elif application.status == 'under_review' %}bg-yellow-100 text-yellow-800
+                                {% elif application.status == 'approved' %}bg-green-100 text-green-800
+                                {% elif application.status == 'rejected' %}bg-red-100 text-red-800
+                                {% endif %}">
+                                <i class="fas fa-circle text-xs mr-2"></i>
+                                {{ application.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="text-sm text-gray-500 mb-1">Applicant Name</div>
+                        <div class="font-semibold text-gray-900">{{ application.applicant_name }}</div>
+                    </div>
+                    
+                    <div>
+                        <div class="text-sm text-gray-500 mb-1">Age</div>
+                        <div class="font-semibold text-gray-900">{{ application.applicant_age }} years</div>
+                    </div>
+                    
+                    <div>
+                        <div class="text-sm text-gray-500 mb-1">State</div>
+                        <div class="font-semibold text-gray-900">{{ application.applicant_state }}</div>
+                    </div>
+                    
+                    {% if application.applicant_income %}
+                    <div>
+                        <div class="text-sm text-gray-500 mb-1">Annual Income</div>
+                        <div class="font-semibold text-gray-900">₹{{ application.applicant_income }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    <div>
+                        <div class="text-sm text-gray-500 mb-1">Submitted On</div>
+                        <div class="font-semibold text-gray-900">{{ application.created_at|date:"F d, Y" }}</div>
+                    </div>
+                    
+                    <div>
+                        <div class="text-sm text-gray-500 mb-1">Last Updated</div>
+                        <div class="font-semibold text-gray-900">{{ application.updated_at|date:"F d, Y" }}</div>
+                    </div>
+                </div>
+                
+                {% if application.notes %}
+                <div class="mt-6 pt-6 border-t">
+                    <div class="text-sm text-gray-500 mb-2">Your Notes</div>
+                    <div class="bg-gray-50 rounded-lg p-4 text-gray-700">{{ application.notes }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Uploaded Documents -->
+        {% if application.documents_uploaded %}
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+            <div class="bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-6 text-white">
+                <h2 class="text-2xl font-bold">Uploaded Documents</h2>
+            </div>
+            
+            <div class="p-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for key, doc in application.documents_uploaded.items %}
+                    <div class="border-2 border-gray-200 rounded-lg p-4 flex items-center justify-between hover:border-blue-400 transition-colors">
+                        <div class="flex items-center">
+                            <i class="fas fa-file-pdf text-red-500 text-2xl mr-4"></i>
+                            <div>
+                                <div class="font-semibold text-gray-900">{{ doc.name }}</div>
+                                <div class="text-xs text-gray-500">Uploaded</div>
+                            </div>
+                        </div>
+                        <a href="{{ doc.url }}" target="_blank" class="text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Application Timeline -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+            <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-6 text-white">
+                <h2 class="text-2xl font-bold">Application Timeline</h2>
+            </div>
+            
+            <div class="p-8">
+                <div class="space-y-6">
+                    <!-- Submitted -->
+                    <div class="flex items-start">
+                        <div class="flex flex-col items-center mr-4">
+                            <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="h-full w-0.5 bg-gray-300 mt-2"></div>
+                        </div>
+                        <div class="flex-1 pb-8">
+                            <div class="font-semibold text-gray-900">Application Submitted</div>
+                            <div class="text-sm text-gray-500">{{ application.created_at|date:"F d, Y - h:i A" }}</div>
+                            <div class="text-sm text-gray-600 mt-1">Your application has been received successfully</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Under Review -->
+                    <div class="flex items-start">
+                        <div class="flex flex-col items-center mr-4">
+                            <div class="w-10 h-10 {% if application.status in 'under_review,approved,rejected' %}bg-yellow-500{% else %}bg-gray-300{% endif %} rounded-full flex items-center justify-center text-white">
+                                {% if application.status in 'under_review,approved,rejected' %}
+                                <i class="fas fa-check"></i>
+                                {% else %}
+                                <i class="fas fa-clock"></i>
+                                {% endif %}
+                            </div>
+                            <div class="h-full w-0.5 bg-gray-300 mt-2"></div>
+                        </div>
+                        <div class="flex-1 pb-8">
+                            <div class="font-semibold text-gray-900">Under Review</div>
+                            <div class="text-sm text-gray-500">Pending</div>
+                            <div class="text-sm text-gray-600 mt-1">Our team will review your documents</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Approved/Rejected -->
+                    <div class="flex items-start">
+                        <div class="flex flex-col items-center mr-4">
+                            <div class="w-10 h-10 {% if application.status == 'approved' %}bg-green-500{% elif application.status == 'rejected' %}bg-red-500{% else %}bg-gray-300{% endif %} rounded-full flex items-center justify-center text-white">
+                                {% if application.status == 'approved' %}
+                                <i class="fas fa-check"></i>
+                                {% elif application.status == 'rejected' %}
+                                <i class="fas fa-times"></i>
+                                {% else %}
+                                <i class="fas fa-clock"></i>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="font-semibold text-gray-900">Final Decision</div>
+                            <div class="text-sm text-gray-500">Pending</div>
+                            <div class="text-sm text-gray-600 mt-1">You will be notified of the decision</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4">
+            <a href="{% url 'insurance:landing' %}" class="flex-1 bg-white text-gray-900 border-2 border-gray-300 px-6 py-3 rounded-xl font-semibold text-center hover:bg-gray-50 transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Insurance
+            </a>
+            <a href="{% url 'patient_dashboard' %}" class="flex-1 bg-gradient-to-r from-blue-600 to-green-600 text-white px-6 py-3 rounded-xl font-semibold text-center hover:shadow-lg transition-all">
+                <i class="fas fa-home mr-2"></i>Go to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

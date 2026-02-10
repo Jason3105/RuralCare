@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block title %}Invite Members - {{ session.title }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <nav class="mb-4">
+                <a href="{% url 'clinical_decision_support:tumor_board_detail' session.id %}" class="text-primary hover:underline text-sm">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Session
+                </a>
+            </nav>
+            <h1 class="text-3xl font-bold text-foreground">Invite Specialists</h1>
+            <p class="text-muted-foreground mt-1">Add multidisciplinary team members to: {{ session.title }}</p>
+        </div>
+
+        <!-- Current Members -->
+        <div class="bg-card border border-border/50 rounded-xl p-6 mb-6">
+            <h2 class="text-lg font-semibold text-foreground mb-4">Current Members ({{ current_members|length }})</h2>
+            <div class="space-y-3">
+                {% for member in current_members %}
+                <div class="flex items-center justify-between p-3 bg-accent/20 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user-md text-primary text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-foreground">Dr. {{ member.doctor.username }}</p>
+                            <p class="text-xs text-muted-foreground">{{ member.specialization }}</p>
+                        </div>
+                    </div>
+                    {% if member.is_lead %}
+                    <span class="text-xs px-2 py-1 bg-primary/20 text-primary rounded">Lead</span>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <p class="text-muted-foreground text-sm">No members yet</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Invite Form -->
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <div class="bg-card border border-border/50 rounded-xl p-6 space-y-6">
+                <h2 class="text-lg font-semibold text-foreground">Add New Member</h2>
+                
+                <!-- Doctor Selection -->
+                <div>
+                    <label for="doctor_id" class="block text-sm font-medium text-foreground mb-2">Select Doctor *</label>
+                    <select id="doctor_id" name="doctor_id" required
+                            class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary focus:border-primary">
+                        <option value="">Choose a doctor...</option>
+                        {% for doctor in available_doctors %}
+                        <option value="{{ doctor.id }}">Dr. {{ doctor.username }} ({{ doctor.email }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Specialization -->
+                <div>
+                    <label for="specialization" class="block text-sm font-medium text-foreground mb-2">Specialization *</label>
+                    <select id="specialization" name="specialization" required
+                            class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary focus:border-primary">
+                        <option value="">Select specialization...</option>
+                        <option value="oncologist">Medical Oncologist</option>
+                        <option value="surgical_oncologist">Surgical Oncologist</option>
+                        <option value="radiation_oncologist">Radiation Oncologist</option>
+                        <option value="pathologist">Pathologist</option>
+                        <option value="radiologist">Radiologist</option>
+                        <option value="geneticist">Geneticist</option>
+                        <option value="palliative_care">Palliative Care Specialist</option>
+                        <option value="pharmacist">Clinical Pharmacist</option>
+                        <option value="nurse_navigator">Nurse Navigator</option>
+                        <option value="other">Other Specialist</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Recommended Specialties Info -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-lightbulb text-blue-500 mt-0.5"></i>
+                    <div class="text-sm text-blue-800 dark:text-blue-400">
+                        <p class="font-medium">Recommended Team Composition:</p>
+                        <div class="mt-2 grid grid-cols-2 gap-2">
+                            <span><i class="fas fa-check text-green-500 mr-1"></i>Medical Oncologist</span>
+                            <span><i class="fas fa-check text-green-500 mr-1"></i>Surgical Oncologist</span>
+                            <span><i class="fas fa-check text-green-500 mr-1"></i>Radiation Oncologist</span>
+                            <span><i class="fas fa-check text-green-500 mr-1"></i>Pathologist</span>
+                            <span><i class="fas fa-check text-green-500 mr-1"></i>Radiologist</span>
+                            <span><i class="fas fa-check text-green-500 mr-1"></i>Palliative Care</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="flex justify-end space-x-4">
+                <a href="{% url 'clinical_decision_support:tumor_board_detail' session.id %}" 
+                   class="px-6 py-2 border border-border rounded-lg hover:bg-accent transition-colors">
+                    Done
+                </a>
+                <button type="submit" class="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                    <i class="fas fa-plus mr-2"></i>Add Member
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

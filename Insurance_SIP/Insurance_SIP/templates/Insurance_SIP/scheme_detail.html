@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ scheme.name }} - Insurance Portal{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Breadcrumb -->
+        <nav class="mb-6">
+            <a href="{% url 'insurance:landing' %}" class="text-primary hover:underline text-sm">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Insurance Portal
+            </a>
+        </nav>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Header Card -->
+                <div class="bg-card border border-border/50 rounded-xl shadow-sm overflow-hidden">
+                    <div class="bg-gradient-to-r from-primary/10 to-primary/5 px-6 py-8 border-b border-border/50">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h1 class="text-3xl font-bold text-foreground mb-2">{{ scheme.name }}</h1>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-3 py-1 bg-primary text-primary-foreground text-sm font-medium rounded-full">
+                                        {{ scheme.get_scheme_type_display }}
+                                    </span>
+                                    {% if scheme.state %}
+                                    <span class="px-3 py-1 bg-accent text-foreground text-sm font-medium rounded-full">
+                                        <i class="fas fa-map-marker-alt mr-1"></i>{{ scheme.state }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm text-muted-foreground mb-1">Coverage Amount</p>
+                                <p class="text-3xl font-bold text-primary">₹{{ scheme.coverage_amount|floatformat:0 }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold text-foreground mb-3">
+                            <i class="fas fa-info-circle mr-2 text-primary"></i>Description
+                        </h3>
+                        <p class="text-foreground/80 leading-relaxed">{{ scheme.description }}</p>
+                    </div>
+                </div>
+
+                <!-- Benefits Card -->
+                <div class="bg-card border border-border/50 rounded-xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold text-foreground mb-4">
+                        <i class="fas fa-gift mr-2 text-green-500"></i>Benefits
+                    </h3>
+                    <div class="prose prose-sm max-w-none text-foreground/80">
+                        {{ scheme.benefits|linebreaks }}
+                    </div>
+                </div>
+
+                <!-- Required Documents Card -->
+                <div class="bg-card border border-border/50 rounded-xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold text-foreground mb-4">
+                        <i class="fas fa-file-alt mr-2 text-blue-500"></i>Required Documents
+                    </h3>
+                    <div class="prose prose-sm max-w-none text-foreground/80">
+                        {{ scheme.required_documents|linebreaks }}
+                    </div>
+                </div>
+
+                <!-- Application Steps Card -->
+                <div class="bg-card border border-border/50 rounded-xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold text-foreground mb-4">
+                        <i class="fas fa-list-ol mr-2 text-purple-500"></i>Application Steps
+                    </h3>
+                    <div class="prose prose-sm max-w-none text-foreground/80">
+                        {{ scheme.application_steps|linebreaks }}
+                    </div>
+                </div>
+
+                {% if scheme.official_website %}
+                <!-- Official Website Card -->
+                <div class="bg-card border border-border/50 rounded-xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold text-foreground mb-3">
+                        <i class="fas fa-external-link-alt mr-2 text-primary"></i>Official Website
+                    </h3>
+                    <a href="{{ scheme.official_website }}" target="_blank" 
+                       class="inline-flex items-center text-primary hover:text-primary/80 hover:underline">
+                        {{ scheme.official_website }}
+                        <i class="fas fa-arrow-up-right-from-square ml-2 text-xs"></i>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Eligibility Card -->
+                {% if eligibility %}
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200/50 dark:border-blue-800/50 rounded-xl shadow-sm overflow-hidden">
+                    <div class="bg-blue-500 text-white px-6 py-4">
+                        <h3 class="text-lg font-semibold flex items-center">
+                            <i class="fas fa-check-circle mr-2"></i>Eligibility Criteria
+                        </h3>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-birthday-cake text-blue-500 mt-1"></i>
+                            <div>
+                                <p class="text-sm text-muted-foreground">Age Range</p>
+                                <p class="font-semibold text-foreground">{{ eligibility.min_age }} - {{ eligibility.max_age }} years</p>
+                            </div>
+                        </div>
+                        
+                        {% if eligibility.max_income %}
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-rupee-sign text-green-500 mt-1"></i>
+                            <div>
+                                <p class="text-sm text-muted-foreground">Maximum Income</p>
+                                <p class="font-semibold text-foreground">₹{{ eligibility.max_income|floatformat:0 }} per year</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if eligibility.state %}
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-map-marker-alt text-red-500 mt-1"></i>
+                            <div>
+                                <p class="text-sm text-muted-foreground">State</p>
+                                <p class="font-semibold text-foreground">{{ eligibility.state }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if eligibility.gender %}
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-venus-mars text-purple-500 mt-1"></i>
+                            <div>
+                                <p class="text-sm text-muted-foreground">Gender</p>
+                                <p class="font-semibold text-foreground">{{ eligibility.gender }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if eligibility.additional_criteria %}
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-info-circle text-amber-500 mt-1"></i>
+                            <div>
+                                <p class="text-sm text-muted-foreground">Additional Criteria</p>
+                                <p class="font-medium text-foreground">{{ eligibility.additional_criteria }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Application Status or Apply Button -->
+                {% if user.is_authenticated %}
+                    {% if user_application %}
+                    <!-- Existing Application Status -->
+                    <div class="bg-card border border-border/50 rounded-xl shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 border-b border-border/50 bg-accent/30">
+                            <h3 class="text-lg font-semibold text-foreground">
+                                <i class="fas fa-file-alt mr-2"></i>Your Application
+                            </h3>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div>
+                                <p class="text-sm text-muted-foreground mb-1">Application ID</p>
+                                <p class="font-mono font-semibold text-foreground">{{ user_application.application_id }}</p>
+                            </div>
+                            
+                            <div>
+                                <p class="text-sm text-muted-foreground mb-2">Status</p>
+                                <span class="px-3 py-1 text-sm font-medium rounded-full
+                                    {% if user_application.status == 'approved' %}bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400
+                                    {% elif user_application.status == 'rejected' %}bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400
+                                    {% elif user_application.status == 'under_review' %}bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400
+                                    {% elif user_application.status == 'documents_required' %}bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400
+                                    {% else %}bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400{% endif %}">
+                                    {{ user_application.get_status_display }}
+                                </span>
+                            </div>
+                            
+                            <div>
+                                <p class="text-sm text-muted-foreground mb-1">Applied On</p>
+                                <p class="text-sm text-foreground">{{ user_application.created_at|date:"F d, Y" }}</p>
+                            </div>
+
+                            {% if user_application.documents_uploaded %}
+                            <div class="pt-4 border-t border-border/50">
+                                <p class="text-sm font-semibold text-foreground mb-3">
+                                    <i class="fas fa-paperclip mr-2"></i>Uploaded Documents
+                                </p>
+                                <div class="space-y-2">
+                                    {% for doc_name, doc_url in user_application.documents_uploaded.items %}
+                                    <div class="flex items-center justify-between p-2 bg-accent/20 rounded-lg">
+                                        <span class="text-sm text-foreground truncate flex-1">{{ doc_name }}</span>
+                                        <a href="{{ doc_url }}" target="_blank" 
+                                           class="text-primary hover:text-primary/80 ml-2">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <a href="{% url 'insurance:application_detail' user_application.id %}" 
+                               class="block w-full text-center px-4 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium">
+                                View Application Details
+                            </a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <!-- Apply Button -->
+                    <div class="bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-xl shadow-sm overflow-hidden">
+                        <div class="p-6 text-center space-y-4">
+                            <i class="fas fa-file-signature text-4xl text-primary"></i>
+                            <h3 class="text-xl font-bold text-foreground">Ready to Apply?</h3>
+                            <p class="text-sm text-muted-foreground">Start your application process now and get covered</p>
+                            <a href="{% url 'insurance:apply_scheme' scheme.id %}" 
+                               class="block w-full px-6 py-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all transform hover:scale-105 font-semibold text-lg shadow-lg">
+                                <i class="fas fa-paper-plane mr-2"></i>Apply Now
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% else %}
+                <!-- Login Required -->
+                <div class="bg-card border border-border/50 rounded-xl shadow-sm overflow-hidden">
+                    <div class="p-6 text-center space-y-4">
+                        <i class="fas fa-lock text-4xl text-muted-foreground"></i>
+                        <h3 class="text-lg font-semibold text-foreground">Login Required</h3>
+                        <p class="text-sm text-muted-foreground">Please login to apply for this scheme</p>
+                        <a href="{% url 'login' %}" 
+                           class="block w-full px-4 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Login
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Quick Info Card -->
+                <div class="bg-card border border-border/50 rounded-xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold text-foreground mb-4">
+                        <i class="fas fa-question-circle mr-2 text-primary"></i>Need Help?
+                    </h3>
+                    <div class="space-y-3 text-sm text-foreground/80">
+                        <p><i class="fas fa-phone mr-2 text-green-500"></i>Helpline: 1800-XXX-XXXX</p>
+                        <p><i class="fas fa-envelope mr-2 text-blue-500"></i>support@insurance.gov.in</p>
+                        <p><i class="fas fa-clock mr-2 text-amber-500"></i>Mon-Fri: 9AM - 6PM</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

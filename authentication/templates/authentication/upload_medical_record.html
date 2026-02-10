@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Medical Record{% endblock %}
+
+{% block content %}
+<div class="fade-in max-w-4xl mx-auto py-8">
+    <!-- Header -->
+    <div class="mb-6 sm:mb-8">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+            <div>
+                <h1 class="text-3xl sm:text-4xl font-bold text-foreground mb-2">Upload Medical Record</h1>
+                <p class="text-sm sm:text-base text-muted-foreground">Upload your medical reports for AI-powered analysis and secure storage</p>
+            </div>
+            <a href="{% url 'medical_records_list' %}" class="inline-flex items-center px-6 py-3 bg-muted hover:bg-muted/80 text-foreground font-bold rounded-xl transition-all duration-200 text-sm sm:text-base">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Back to Records
+            </a>
+        </div>
+    </div>
+
+    <!-- Upload Form -->
+    <div class="bg-card border border-border/50 rounded-2xl p-8 sm:p-12 shadow-sm">
+        <form method="post" enctype="multipart/form-data" id="uploadForm">
+            {% csrf_token %}
+            
+            <div class="space-y-6">
+                <!-- Record Type -->
+                <div>
+                    <label for="{{ form.document_type.id_for_label }}" class="block text-sm font-medium text-foreground mb-2">
+                        <i class="fas fa-file-medical mr-2 text-primary"></i>Record Type <span class="text-red-600 dark:text-red-400">*</span>
+                    </label>
+                    {{ form.document_type }}
+                    {% if form.document_type.errors %}
+                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.document_type.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Title -->
+                <div>
+                    <label for="{{ form.title.id_for_label }}" class="block text-sm font-medium text-foreground mb-2">
+                        <i class="fas fa-heading mr-2 text-primary"></i>Title <span class="text-red-600 dark:text-red-400">*</span>
+                    </label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.title.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-muted-foreground">Give a descriptive title to identify this record easily</p>
+                </div>
+
+                <!-- Report Date -->
+                <div>
+                    <label for="{{ form.report_date.id_for_label }}" class="block text-sm font-medium text-foreground mb-2">
+                        <i class="fas fa-calendar mr-2 text-primary"></i>Report Date
+                    </label>
+                    {{ form.report_date }}
+                    {% if form.report_date.errors %}
+                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.report_date.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-muted-foreground">The date when this report was created</p>
+                </div>
+
+
+
+                <!-- File Upload -->
+                <div>
+                    <label class="block text-sm font-medium text-foreground mb-2">
+                        <i class="fas fa-file-upload mr-2 text-primary"></i>Upload File <span class="text-red-600 dark:text-red-400">*</span>
+                    </label>
+                    
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed border-border rounded-xl hover:border-primary transition-colors bg-accent/50 cursor-pointer" id="dropZone">
+                        <div class="space-y-1 text-center">
+                            <i class="fas fa-cloud-upload-alt text-4xl sm:text-5xl text-muted-foreground mx-auto block mb-3" id="uploadIcon"></i>
+                            <div id="uploadText">
+                                <div class="flex flex-col sm:flex-row text-sm text-muted-foreground justify-center items-center">
+                                    <label for="{{ form.document_file.id_for_label }}" class="relative cursor-pointer bg-card rounded-md font-medium text-primary hover:text-primary/80 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-ring px-2">
+                                        <span>Upload a file</span>
+                                        {{ form.document_file }}
+                                    </label>
+                                    <p class="sm:pl-1">or drag and drop</p>
+                                </div>
+                                <p class="text-xs text-muted-foreground mt-2">PDF, JPG, JPEG, PNG up to 10MB</p>
+                            </div>
+                            <div id="fileInfo" class="hidden mt-4">
+                                <div class="bg-primary/10 dark:bg-primary/20 rounded-xl p-4 inline-block border border-primary/20">
+                                    <i class="fas fa-file-pdf text-2xl text-primary mb-2"></i>
+                                    <p class="text-sm font-medium text-foreground" id="fileName"></p>
+                                    <p class="text-xs text-muted-foreground" id="fileSize"></p>
+                                </div>
+                                <button type="button" onclick="clearFile()" class="mt-2 text-sm text-red-600 dark:text-red-400 hover:underline">
+                                    <i class="fas fa-times mr-1"></i>Remove
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% if form.document_file.errors %}
+                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.document_file.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Info Box -->
+                <div class="bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/30 p-4 rounded-xl">
+                    <div class="flex items-start">
+                        <i class="fas fa-info-circle text-blue-600 dark:text-blue-400 mr-3 mt-1 flex-shrink-0"></i>
+                        <div>
+                            <h3 class="text-sm font-semibold text-foreground mb-1">AI Processing</h3>
+                            <p class="text-xs sm:text-sm text-muted-foreground">
+                                Our AI will automatically extract text and medical data from your uploaded document using OCR technology. This process may take a few moments.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-primary to-primary/90 hover:shadow-xl text-primary-foreground font-bold py-3 px-6 rounded-xl transition-all duration-200 hover:scale-105 flex items-center justify-center">
+                        <i class="fas fa-upload mr-2"></i>
+                        Upload & Process
+                    </button>
+                    <a href="{% url 'medical_records_list' %}" class="flex-1 bg-muted hover:bg-muted/80 text-foreground font-bold py-3 px-6 rounded-xl transition-all duration-200 flex items-center justify-center">
+                        <i class="fas fa-times mr-2"></i>
+                        Cancel
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// File upload handling
+const fileInput = document.getElementById('{{ form.document_file.id_for_label }}');
+const dropZone = document.getElementById('dropZone');
+const uploadText = document.getElementById('uploadText');
+const fileInfo = document.getElementById('fileInfo');
+const fileName = document.getElementById('fileName');
+const fileSize = document.getElementById('fileSize');
+const uploadIcon = document.getElementById('uploadIcon');
+
+fileInput.addEventListener('change', handleFileSelect);
+
+dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('border-primary', 'bg-primary/5');
+});
+
+dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('border-primary', 'bg-primary/5');
+});
+
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('border-primary', 'bg-primary/5');
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        fileInput.files = files;
+        handleFileSelect();
+    }
+});
+
+function handleFileSelect() {
+    const file = fileInput.files[0];
+    if (file) {
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+        uploadText.classList.add('hidden');
+        uploadIcon.classList.add('hidden');
+        fileInfo.classList.remove('hidden');
+    }
+}
+
+function clearFile() {
+    fileInput.value = '';
+    uploadText.classList.remove('hidden');
+    uploadIcon.classList.remove('hidden');
+    fileInfo.classList.add('hidden');
+}
+
+function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+}
+</script>
+{% endblock %}

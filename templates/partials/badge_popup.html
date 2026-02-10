@@ -1,0 +1,281 @@
+<!-- Badge Achievement Pop-up -->
+<div id="badgePopup" class="fixed top-0 left-0 w-full h-full z-50 flex items-center justify-center pointer-events-none" style="display: none;">
+    <!-- Backdrop -->
+    <div id="badgeBackdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm opacity-0 transition-opacity duration-300"></div>
+    
+    <!-- Pop-up Container -->
+    <div id="badgeContainer" class="relative z-10 max-w-md w-full mx-4 transform scale-0 opacity-0 transition-all duration-500">
+        <!-- Badge Card -->
+        <div class="bg-gradient-to-br from-yellow-400 via-yellow-500 to-orange-500 rounded-3xl shadow-2xl p-8 text-center relative overflow-hidden">
+            <!-- Animated Background Effects -->
+            <div class="absolute inset-0 opacity-20">
+                <div class="absolute top-0 left-0 w-32 h-32 bg-white rounded-full -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
+                <div class="absolute bottom-0 right-0 w-40 h-40 bg-white rounded-full translate-x-1/2 translate-y-1/2 animate-pulse" style="animation-delay: 0.5s;"></div>
+            </div>
+            
+            <!-- Content -->
+            <div class="relative z-10">
+                <!-- Close Button -->
+                <button onclick="closeBadgePopup()" class="absolute top-4 right-4 text-white/80 hover:text-white transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+                
+                <!-- Trophy Icon -->
+                <div class="mb-6 animate-bounce" style="animation-duration: 1s; animation-iteration-count: 3;">
+                    <div class="inline-flex items-center justify-center w-24 h-24 bg-white/20 rounded-full backdrop-blur-sm">
+                        <i id="badgeIcon" class="fas fa-trophy text-6xl text-white drop-shadow-lg"></i>
+                    </div>
+                </div>
+                
+                <!-- Title -->
+                <h2 id="badgeTitle" class="text-3xl font-bold text-white mb-2 drop-shadow-lg">Achievement Unlocked!</h2>
+                
+                <!-- Badge Name -->
+                <h3 id="badgeName" class="text-2xl font-semibold text-white mb-4 drop-shadow-md"></h3>
+                
+                <!-- Badge Description -->
+                <p id="badgeDescription" class="text-white/90 mb-6 text-lg drop-shadow-sm"></p>
+                
+                <!-- Points Reward -->
+                <div id="badgePoints" class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 text-white font-semibold mb-4">
+                    <i class="fas fa-star text-yellow-300"></i>
+                    <span id="pointsValue">+0</span> <span>Points</span>
+                </div>
+                
+                <!-- Rarity Badge -->
+                <div id="badgeRarity" class="inline-block mt-4">
+                    <span id="rarityText" class="px-4 py-2 rounded-full text-sm font-semibold text-white bg-white/20 backdrop-blur-sm"></span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Level Up Card (if applicable) -->
+        <div id="levelUpCard" class="mt-4 bg-gradient-to-br from-purple-500 via-pink-500 to-red-500 rounded-3xl shadow-2xl p-6 text-center transform scale-0 opacity-0 transition-all duration-500" style="display: none;">
+            <div class="relative z-10">
+                <div class="mb-4 animate-bounce" style="animation-duration: 1s; animation-iteration-count: 3;">
+                    <i class="fas fa-star text-5xl text-white drop-shadow-lg"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-white mb-2 drop-shadow-lg">Level Up!</h3>
+                <p id="levelUpText" class="text-white/90 text-lg drop-shadow-sm"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes badgePopIn {
+        0% {
+            transform: scale(0) rotate(-180deg);
+            opacity: 0;
+        }
+        50% {
+            transform: scale(1.1) rotate(10deg);
+        }
+        100% {
+            transform: scale(1) rotate(0deg);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes confetti {
+        0% {
+            transform: translateY(0) rotate(0deg);
+            opacity: 1;
+        }
+        100% {
+            transform: translateY(-100vh) rotate(720deg);
+            opacity: 0;
+        }
+    }
+    
+    .badge-pop-in {
+        animation: badgePopIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+    
+    .confetti-piece {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background: #f0f0f0;
+        animation: confetti 3s linear forwards;
+    }
+</style>
+
+<script>
+    let badgeQueue = [];
+    let isShowingBadge = false;
+    
+    function showBadgePopup(badgeData, levelUpData = null) {
+        if (!badgeData && !levelUpData) return;
+        
+        const popup = document.getElementById('badgePopup');
+        const backdrop = document.getElementById('badgeBackdrop');
+        const container = document.getElementById('badgeContainer');
+        const levelUpCard = document.getElementById('levelUpCard');
+        
+        // Show popup
+        popup.style.display = 'flex';
+        popup.style.pointerEvents = 'auto';
+        
+        // Show badge if available
+        if (badgeData) {
+            document.getElementById('badgeName').textContent = badgeData.name;
+            document.getElementById('badgeDescription').textContent = badgeData.description;
+            document.getElementById('pointsValue').textContent = `+${badgeData.points_reward || 0}`;
+            
+            // Set icon
+            const iconEl = document.getElementById('badgeIcon');
+            if (badgeData.icon_name) {
+                iconEl.className = `fas ${badgeData.icon_name} text-6xl text-white drop-shadow-lg`;
+            } else if (badgeData.icon_url) {
+                iconEl.innerHTML = `<img src="${badgeData.icon_url}" alt="${badgeData.name}" class="w-16 h-16 object-contain">`;
+            }
+            
+            // Set rarity
+            const rarityText = document.getElementById('rarityText');
+            const rarityColors = {
+                'common': 'bg-gray-500',
+                'uncommon': 'bg-green-500',
+                'rare': 'bg-blue-500',
+                'epic': 'bg-purple-500',
+                'legendary': 'bg-yellow-500'
+            };
+            rarityText.textContent = badgeData.rarity.charAt(0).toUpperCase() + badgeData.rarity.slice(1);
+            rarityText.className = `px-4 py-2 rounded-full text-sm font-semibold text-white ${rarityColors[badgeData.rarity] || 'bg-gray-500'}`;
+        }
+        
+        // Show level up if available
+        if (levelUpData && levelUpData.leveled_up) {
+            levelUpCard.style.display = 'block';
+            document.getElementById('levelUpText').textContent = 
+                `Congratulations! You reached Level ${levelUpData.new_level}!`;
+        }
+        
+        // Animate backdrop
+        setTimeout(() => {
+            backdrop.style.opacity = '1';
+        }, 10);
+        
+        // Animate container
+        setTimeout(() => {
+            container.style.transform = 'scale(1)';
+            container.style.opacity = '1';
+            container.classList.add('badge-pop-in');
+            
+            if (levelUpData && levelUpData.leveled_up) {
+                setTimeout(() => {
+                    levelUpCard.style.transform = 'scale(1)';
+                    levelUpCard.style.opacity = '1';
+                }, 300);
+            }
+            
+            // Create confetti effect
+            createConfetti();
+        }, 50);
+        
+        // Auto-close after 5 seconds
+        setTimeout(() => {
+            closeBadgePopup();
+        }, 5000);
+    }
+    
+    function closeBadgePopup() {
+        const popup = document.getElementById('badgePopup');
+        const backdrop = document.getElementById('badgeBackdrop');
+        const container = document.getElementById('badgeContainer');
+        const levelUpCard = document.getElementById('levelUpCard');
+        
+        backdrop.style.opacity = '0';
+        container.style.transform = 'scale(0)';
+        container.style.opacity = '0';
+        levelUpCard.style.transform = 'scale(0)';
+        levelUpCard.style.opacity = '0';
+        
+        setTimeout(() => {
+            popup.style.display = 'none';
+            popup.style.pointerEvents = 'none';
+            levelUpCard.style.display = 'none';
+            isShowingBadge = false;
+            
+            // Process next badge in queue
+            if (badgeQueue.length > 0) {
+                const next = badgeQueue.shift();
+                showBadgePopup(next.badge, next.levelUp);
+            }
+        }, 300);
+    }
+    
+    function createConfetti() {
+        const colors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8'];
+        const confettiCount = 50;
+        
+        for (let i = 0; i < confettiCount; i++) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti-piece';
+            confetti.style.left = Math.random() * 100 + '%';
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.animationDelay = Math.random() * 2 + 's';
+            confetti.style.width = (Math.random() * 10 + 5) + 'px';
+            confetti.style.height = confetti.style.width;
+            
+            document.getElementById('badgePopup').appendChild(confetti);
+            
+            setTimeout(() => {
+                confetti.remove();
+            }, 3000);
+        }
+    }
+    
+    // Check for new badges periodically
+    function checkForNewBadges() {
+        {% if user.is_authenticated and user.user_type == 'patient' %}
+        fetch('{% url "patient_portal:api_check_badges" %}', {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.has_new) {
+                if (data.badges && data.badges.length > 0) {
+                    // Show each badge
+                    data.badges.forEach((badge, index) => {
+                        setTimeout(() => {
+                            if (isShowingBadge) {
+                                badgeQueue.push({ badge: badge, levelUp: null });
+                            } else {
+                                isShowingBadge = true;
+                                showBadgePopup(badge, data.level_up);
+                            }
+                        }, index * 6000); // 6 seconds between badges
+                    });
+                } else if (data.level_up && data.level_up.leveled_up) {
+                    if (isShowingBadge) {
+                        badgeQueue.push({ badge: null, levelUp: data.level_up });
+                    } else {
+                        isShowingBadge = true;
+                        showBadgePopup(null, data.level_up);
+                    }
+                }
+            }
+        })
+        .catch(error => console.error('Error checking badges:', error));
+        {% endif %}
+    }
+    
+    // Check immediately on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(checkForNewBadges, 1000); // Wait 1 second after page load
+        
+        // Check every 10 seconds
+        setInterval(checkForNewBadges, 10000);
+    });
+    
+    // Also check after form submissions (for symptom logging, etc.)
+    document.addEventListener('submit', function(e) {
+        setTimeout(checkForNewBadges, 2000); // Check 2 seconds after form submission
+    });
+</script>
+

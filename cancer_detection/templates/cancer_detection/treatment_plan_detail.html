@@ -1,0 +1,459 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ plan.plan_name }} - Treatment Plan{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-4xl font-bold text-slate-900">{{ plan.plan_name }}</h1>
+                    <p class="text-slate-600 mt-2">Personalized Treatment Pathway</p>
+                </div>
+                <div class="mt-4 sm:mt-0 flex items-center space-x-3">
+                    {% if plan.status == 'draft' %}
+                    <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-800">
+                        <svg class="w-2 h-2 mr-2 rounded-full" fill="currentColor" viewBox="0 0 8 8">
+                            <circle cx="4" cy="4" r="3"/>
+                        </svg>
+                        Draft
+                    </span>
+                    {% elif plan.status == 'pending_review' %}
+                    <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                        <svg class="w-2 h-2 mr-2 rounded-full" fill="currentColor" viewBox="0 0 8 8">
+                            <circle cx="4" cy="4" r="3"/>
+                        </svg>
+                        Pending Review
+                    </span>
+                    {% elif plan.status == 'approved' %}
+                    <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-800">
+                        <svg class="w-2 h-2 mr-2 rounded-full" fill="currentColor" viewBox="0 0 8 8">
+                            <circle cx="4" cy="4" r="3"/>
+                        </svg>
+                        Approved
+                    </span>
+                    {% elif plan.status == 'active' %}
+                    <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-800">
+                        <svg class="w-2 h-2 mr-2 rounded-full" fill="currentColor" viewBox="0 0 8 8">
+                            <circle cx="4" cy="4" r="3"/>
+                        </svg>
+                        Active
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mb-6">
+            {% for message in messages %}
+            <div class="bg-{{ message.tags|default:'blue' }}-50 border border-{{ message.tags|default:'blue' }}-200 rounded-2xl p-4 text-{{ message.tags|default:'blue' }}-800">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+                <div class="text-sm text-slate-600 mb-2">5-Year Survival Rate</div>
+                <div class="text-3xl font-bold text-primary">
+                    {% if plan.predicted_5yr_survival %}
+                        {{ plan.predicted_5yr_survival|floatformat:1 }}%
+                    {% else %}
+                        —
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+                <div class="text-sm text-slate-600 mb-2">Remission Probability</div>
+                <div class="text-3xl font-bold text-primary">
+                    {% if plan.remission_probability %}
+                        {{ plan.remission_probability|floatformat:1 }}%
+                    {% else %}
+                        —
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+                <div class="text-sm text-slate-600 mb-2">Quality of Life Score</div>
+                <div class="text-3xl font-bold text-primary">
+                    {% if plan.quality_of_life_score %}
+                        {{ plan.quality_of_life_score|floatformat:1 }}/10
+                    {% else %}
+                        —
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+                <div class="text-sm text-slate-600 mb-2">Treatment Phases</div>
+                <div class="text-3xl font-bold text-primary">
+                    {% if plan.treatment_pathway %}
+                        {{ plan.treatment_pathway|length }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Patient Profile Section -->
+                <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+                    <h2 class="text-2xl font-bold text-slate-900 mb-6">Patient Profile</h2>
+                    {% if patient_profile %}
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <p class="text-sm text-slate-600">Age</p>
+                            <p class="text-lg font-semibold text-slate-900">{{ patient_profile.age }} years</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-slate-600">Performance Status</p>
+                            <p class="text-lg font-semibold text-slate-900">ECOG {{ patient_profile.performance_status }}</p>
+                        </div>
+                        {% if patient_profile.comorbidities %}
+                        <div class="col-span-2">
+                            <p class="text-sm text-slate-600 mb-2">Comorbidities</p>
+                            <div class="flex flex-wrap gap-2">
+                                {% for comorbidity in patient_profile.comorbidities %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-slate-100 text-slate-800">
+                                    {{ comorbidity }}
+                                </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if patient_profile.lab_values %}
+                        <div class="col-span-2">
+                            <p class="text-sm text-slate-600 mb-3">Lab Values</p>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                {% for key, value in patient_profile.lab_values.items %}
+                                <div class="p-3 bg-slate-50 rounded-lg border border-border/30">
+                                    <p class="text-xs text-slate-600 uppercase tracking-wide">{{ key }}</p>
+                                    <p class="text-sm font-semibold text-slate-900 mt-1">{{ value }}</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Tumor Analysis Section -->
+                <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+                    <h2 class="text-2xl font-bold text-slate-900 mb-6">Tumor Analysis</h2>
+                    {% if tumor_analysis %}
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="p-4 bg-slate-50 rounded-xl border border-border/30">
+                                <p class="text-sm text-slate-600">Cancer Type</p>
+                                <p class="text-lg font-semibold text-slate-900 mt-1">{{ tumor_analysis.cancer_type|title }}</p>
+                            </div>
+                            <div class="p-4 bg-slate-50 rounded-xl border border-border/30">
+                                <p class="text-sm text-slate-600">Stage</p>
+                                <p class="text-lg font-semibold text-slate-900 mt-1">Stage {{ tumor_analysis.stage }}</p>
+                            </div>
+                            <div class="p-4 bg-slate-50 rounded-xl border border-border/30">
+                                <p class="text-sm text-slate-600">Size</p>
+                                <p class="text-lg font-semibold text-slate-900 mt-1">{{ tumor_analysis.size_mm|default:"—" }} mm</p>
+                            </div>
+                            <div class="p-4 bg-slate-50 rounded-xl border border-border/30">
+                                <p class="text-sm text-slate-600">Location</p>
+                                <p class="text-lg font-semibold text-slate-900 mt-1">{{ tumor_analysis.location|title|default:"—" }}</p>
+                            </div>
+                        </div>
+                        {% if tumor_analysis.metastasis %}
+                        <div class="p-4 bg-red-50 border border-red-200 rounded-xl">
+                            <p class="text-sm font-semibold text-red-800">⚠️ Distant Metastasis Present</p>
+                            {% if tumor_analysis.metastasis_sites %}
+                            <p class="text-sm text-red-700 mt-1">Affected sites: {{ tumor_analysis.metastasis_sites|join:", "|title }}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Treatment Recommendations -->
+                <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+                    <h2 class="text-2xl font-bold text-slate-900 mb-6">Treatment Recommendations</h2>
+                    
+                    <!-- Primary Treatment -->
+                    {% if plan.primary_treatments %}
+                    <div class="mb-8">
+                        <h3 class="text-lg font-semibold text-slate-900 mb-4 flex items-center">
+                            <span class="w-8 h-8 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center mr-3 text-sm font-bold">1</span>
+                            Primary Treatment
+                        </h3>
+                        <div class="space-y-3">
+                            {% for treatment in plan.primary_treatments %}
+                            <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                                <p class="font-semibold text-slate-900">{{ treatment }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Adjuvant Treatment -->
+                    {% if plan.adjuvant_treatments %}
+                    <div class="mb-8">
+                        <h3 class="text-lg font-semibold text-slate-900 mb-4 flex items-center">
+                            <span class="w-8 h-8 bg-green-100 text-green-700 rounded-full flex items-center justify-center mr-3 text-sm font-bold">2</span>
+                            Adjuvant Treatment
+                        </h3>
+                        <div class="space-y-3">
+                            {% for treatment in plan.adjuvant_treatments %}
+                            <div class="p-4 bg-green-50 border border-green-200 rounded-xl">
+                                <p class="font-semibold text-slate-900">{{ treatment }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Targeted Therapies -->
+                    {% if plan.targeted_therapies %}
+                    <div class="mb-8">
+                        <h3 class="text-lg font-semibold text-slate-900 mb-4 flex items-center">
+                            <span class="w-8 h-8 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center mr-3 text-sm font-bold">3</span>
+                            Targeted Therapies
+                        </h3>
+                        <div class="space-y-3">
+                            {% for therapy in plan.targeted_therapies %}
+                            <div class="p-4 bg-purple-50 border border-purple-200 rounded-xl">
+                                <p class="font-semibold text-slate-900">{{ therapy }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Side Effects -->
+                {% if plan.side_effects %}
+                <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+                    <h2 class="text-2xl font-bold text-slate-900 mb-6">Expected Side Effects</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-border/50">
+                                    <th class="text-left py-3 px-4 font-semibold text-slate-900">Side Effect</th>
+                                    <th class="text-left py-3 px-4 font-semibold text-slate-900">Severity</th>
+                                    <th class="text-left py-3 px-4 font-semibold text-slate-900">Frequency</th>
+                                    <th class="text-left py-3 px-4 font-semibold text-slate-900">Management</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for effect in plan.side_effects %}
+                                <tr class="border-b border-border/30 hover:bg-slate-50 transition">
+                                    <td class="py-4 px-4 text-slate-900">{{ effect.name|default:effect }}</td>
+                                    <td class="py-4 px-4">
+                                        {% if effect.severity %}
+                                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium
+                                                {% if effect.severity == 'severe' %}
+                                                    bg-red-100 text-red-800
+                                                {% elif effect.severity == 'moderate' %}
+                                                    bg-yellow-100 text-yellow-800
+                                                {% else %}
+                                                    bg-green-100 text-green-800
+                                                {% endif %}">
+                                                {{ effect.severity|title }}
+                                            </span>
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                    <td class="py-4 px-4">{{ effect.frequency|default:"—" }}</td>
+                                    <td class="py-4 px-4">{{ effect.management|default:"—" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Genetic Profile Card -->
+                {% if genetic_profile %}
+                <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+                    <h3 class="text-lg font-bold text-slate-900 mb-4">Genetic Profile</h3>
+                    
+                    {% if genetic_profile.mutations %}
+                    <div class="mb-4">
+                        <p class="text-sm font-semibold text-slate-700 mb-2">Mutations</p>
+                        <div class="space-y-2">
+                            {% for mutation in genetic_profile.mutations %}
+                            <div class="flex items-center">
+                                <span class="w-2 h-2 bg-primary rounded-full mr-2"></span>
+                                <span class="text-sm text-slate-700">{{ mutation }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if genetic_profile.pd_l1_status %}
+                    <div class="p-3 bg-slate-50 rounded-lg border border-border/30">
+                        <p class="text-xs text-slate-600 uppercase tracking-wide">PD-L1 Status</p>
+                        <p class="text-sm font-semibold text-slate-900 mt-1">{{ genetic_profile.pd_l1_status }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                    <a href="{% url 'cancer_detection:visualize_pathway' plan_id=plan.id %}" 
+                       class="flex-1 bg-gradient-to-r from-primary to-primary/90 hover:shadow-xl text-primary-foreground font-bold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center hover:scale-105">
+                        <i class="fas fa-route mr-2"></i>
+                        Visualize Pathway
+                    </a>
+                    <a href="{% url 'cancer_detection:decision_support' plan_id=plan.id %}" 
+                       class="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:shadow-xl text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center hover:scale-105">
+                        <i class="fas fa-handshake mr-2"></i>
+                        Decision Support
+                    </a>
+                    {% if plan.status == 'draft' %}
+                    <form method="post" action="{% url 'cancer_detection:submit_treatment_plan_review' plan_id=plan.id %}" class="flex-1">
+                        {% csrf_token %}
+                        <button type="submit" 
+                            class="w-full bg-card border-2 border-primary hover:bg-primary hover:text-primary-foreground text-primary font-bold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center">
+                            <i class="fas fa-paper-plane mr-2"></i>
+                            Submit for Review
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+                
+                <!-- Action Buttons (Original) -->
+                {% if plan.status == 'draft' %}
+                <form method="POST" action="{% url 'cancer_detection:submit_treatment_plan_review' plan.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full bg-gradient-to-r from-primary to-primary/90 hover:shadow-lg text-white font-semibold py-3 px-4 rounded-xl transition duration-200">
+                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Submit for Review
+                    </button>
+                </form>
+                {% endif %}
+
+                <a href="{% url 'cancer_detection:treatment_plans_list' %}" class="block w-full bg-muted hover:bg-slate-200 text-slate-900 font-semibold py-3 px-4 rounded-xl transition duration-200 text-center">
+                    Back to Plans
+                </a>
+
+                <!-- Monitoring Plan -->
+                {% if plan.monitoring_plan %}
+                <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+                    <h3 class="text-lg font-bold text-slate-900 mb-4">Monitoring Plan</h3>
+                    <div class="space-y-3 text-sm">
+                        {% for key, value in plan.monitoring_plan.items %}
+                        <div class="p-2 bg-slate-50 rounded border border-border/30">
+                            <p class="font-semibold text-slate-800">{{ key|title }}</p>
+                            <p class="text-slate-600 mt-1">{{ value }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Contraindications -->
+                {% if plan.contraindications %}
+                <div class="bg-red-50 border border-red-200 rounded-2xl p-6">
+                    <h3 class="text-lg font-bold text-red-800 mb-4">⚠️ Contraindications</h3>
+                    <ul class="space-y-2 text-sm text-red-700">
+                        {% for contraindication in plan.contraindications %}
+                        <li class="flex items-start">
+                            <span class="mr-2">•</span>
+                            <span>{{ contraindication }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Treatment Pathway Timeline -->
+        {% if plan.treatment_pathway %}
+        <div class="mt-8 bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+            <h2 class="text-2xl font-bold text-slate-900 mb-8">Treatment Pathway Timeline</h2>
+            
+            <div class="space-y-6">
+                {% for phase in plan.treatment_pathway %}
+                <div class="relative">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <div class="flex items-center justify-center h-12 w-12 rounded-full bg-primary text-white font-bold">
+                                {{ forloop.counter }}
+                            </div>
+                        </div>
+                        <div class="ml-6 flex-1">
+                            <h3 class="text-lg font-semibold text-slate-900">{% if phase.phase %}{{ phase.phase|title }}{% else %}Phase {{ forloop.counter }}{% endif %}</h3>
+                            {% if phase.duration %}
+                            <p class="text-sm text-slate-600 mt-1">Duration: {{ phase.duration }}</p>
+                            {% endif %}
+                            {% if phase.treatments %}
+                            <ul class="mt-3 space-y-2">
+                                {% for treatment in phase.treatments %}
+                                <li class="flex items-center text-sm text-slate-700">
+                                    <span class="w-2 h-2 bg-primary rounded-full mr-3"></span>
+                                    {{ treatment }}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                            {% if phase.milestones %}
+                            <div class="mt-3 p-3 bg-slate-50 rounded-lg border border-border/30">
+                                <p class="text-xs font-semibold text-slate-700 uppercase tracking-wide">Milestones</p>
+                                <p class="text-sm text-slate-700 mt-1">{{ phase.milestones }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if not forloop.last %}
+                    <div class="ml-6 mt-6 h-12 w-1 bg-primary/20 ml-5"></div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Clinical Trials -->
+        {% if plan.clinical_trials %}
+        <div class="mt-8 bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+            <h2 class="text-2xl font-bold text-slate-900 mb-6">Relevant Clinical Trials</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for trial in plan.clinical_trials %}
+                <div class="p-6 border border-border/50 rounded-xl hover:shadow-md transition">
+                    <h3 class="font-semibold text-slate-900 mb-2">{{ trial.name|default:"Clinical Trial" }}</h3>
+                    {% if trial.phase %}
+                    <p class="text-sm text-slate-600 mb-3">Phase {{ trial.phase }}</p>
+                    {% endif %}
+                    {% if trial.description %}
+                    <p class="text-sm text-slate-700 mb-4">{{ trial.description }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

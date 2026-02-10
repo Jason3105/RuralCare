@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% block title %}AI Confidence Detail - {{ confidence.get_analysis_type_display }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Breadcrumb -->
+        <nav class="mb-6">
+            <ol class="flex items-center space-x-2 text-sm">
+                <li><a href="{% url 'clinical_decision_support:ai_confidence_dashboard' %}" class="text-primary hover:underline">AI Confidence</a></li>
+                <li class="text-muted-foreground">/</li>
+                <li class="text-muted-foreground">{{ confidence.get_analysis_type_display }}</li>
+            </ol>
+        </nav>
+
+        <!-- Header -->
+        <div class="bg-card border border-border/50 rounded-xl p-6 mb-6">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div class="flex items-center space-x-4">
+                    <!-- Large Confidence Indicator -->
+                    <div class="w-24 h-24 rounded-full flex items-center justify-center font-bold text-2xl text-white shadow-lg
+                        {% if confidence.overall_confidence >= 80 %}bg-gradient-to-br from-green-500 to-green-600
+                        {% elif confidence.overall_confidence >= 50 %}bg-gradient-to-br from-amber-500 to-amber-600
+                        {% else %}bg-gradient-to-br from-red-500 to-red-600{% endif %}">
+                        {{ confidence.overall_confidence|floatformat:0 }}%
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-foreground">{{ confidence.get_analysis_type_display }}</h1>
+                        <p class="text-muted-foreground">Patient: {{ confidence.patient.username }}</p>
+                        <span class="inline-flex items-center px-3 py-1 mt-2 rounded-full text-sm font-medium
+                            {% if confidence.confidence_level == 'high' %}bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400
+                            {% elif confidence.confidence_level == 'moderate' %}bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400
+                            {% else %}bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400{% endif %}">
+                            {{ confidence.get_confidence_level_display }}
+                        </span>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm text-muted-foreground">Generated: {{ confidence.created_at|date:"M d, Y H:i" }}</p>
+                    <p class="text-sm text-muted-foreground">Updated: {{ confidence.updated_at|date:"M d, Y H:i" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Score Breakdown -->
+            <div class="bg-card border border-border/50 rounded-xl p-6">
+                <h2 class="text-lg font-semibold text-foreground mb-4">
+                    <i class="fas fa-chart-pie text-primary mr-2"></i>Score Breakdown
+                </h2>
+                <div class="space-y-4">
+                    <!-- Data Quality -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-sm font-medium text-foreground">Data Quality</span>
+                            <span class="text-sm font-semibold text-foreground">{{ confidence.data_quality_score|floatformat:1 }}%</span>
+                        </div>
+                        <div class="w-full bg-muted rounded-full h-3">
+                            <div class="h-3 rounded-full transition-all duration-500
+                                {% if confidence.data_quality_score >= 80 %}bg-green-500
+                                {% elif confidence.data_quality_score >= 50 %}bg-amber-500
+                                {% else %}bg-red-500{% endif %}"
+                                style="width: {{ confidence.data_quality_score }}%"></div>
+                        </div>
+                        <p class="text-xs text-muted-foreground mt-1" title="Based on completeness of required data sources">
+                            Measures completeness of patient data
+                        </p>
+                    </div>
+
+                    <!-- Model Certainty -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-sm font-medium text-foreground">Model Certainty</span>
+                            <span class="text-sm font-semibold text-foreground">{{ confidence.model_certainty_score|floatformat:1 }}%</span>
+                        </div>
+                        <div class="w-full bg-muted rounded-full h-3">
+                            <div class="h-3 rounded-full transition-all duration-500
+                                {% if confidence.model_certainty_score >= 80 %}bg-green-500
+                                {% elif confidence.model_certainty_score >= 50 %}bg-amber-500
+                                {% else %}bg-red-500{% endif %}"
+                                style="width: {{ confidence.model_certainty_score }}%"></div>
+                        </div>
+                        <p class="text-xs text-muted-foreground mt-1" title="AI model's internal certainty in its predictions">
+                            AI model's prediction confidence
+                        </p>
+                    </div>
+
+                    <!-- Evidence Strength -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-sm font-medium text-foreground">Evidence Strength</span>
+                            <span class="text-sm font-semibold text-foreground">{{ confidence.evidence_strength_score|floatformat:1 }}%</span>
+                        </div>
+                        <div class="w-full bg-muted rounded-full h-3">
+                            <div class="h-3 rounded-full transition-all duration-500
+                                {% if confidence.evidence_strength_score >= 80 %}bg-green-500
+                                {% elif confidence.evidence_strength_score >= 50 %}bg-amber-500
+                                {% else %}bg-red-500{% endif %}"
+                                style="width: {{ confidence.evidence_strength_score }}%"></div>
+                        </div>
+                        <p class="text-xs text-muted-foreground mt-1" title="Based on clinical trials, guidelines, and case studies">
+                            Supporting medical evidence
+                        </p>
+                    </div>
+
+                    {% if confidence.ocr_quality_score %}
+                    <!-- OCR Quality -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-sm font-medium text-foreground">OCR Quality</span>
+                            <span class="text-sm font-semibold text-foreground">{{ confidence.ocr_quality_score|floatformat:1 }}%</span>
+                        </div>
+                        <div class="w-full bg-muted rounded-full h-3">
+                            <div class="h-3 rounded-full transition-all duration-500
+                                {% if confidence.ocr_quality_score >= 80 %}bg-green-500
+                                {% elif confidence.ocr_quality_score >= 50 %}bg-amber-500
+                                {% else %}bg-red-500{% endif %}"
+                                style="width: {{ confidence.ocr_quality_score }}%"></div>
+                        </div>
+                        <p class="text-xs text-muted-foreground mt-1">Document text extraction quality</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Uncertainty Reasons -->
+            <div class="bg-card border border-border/50 rounded-xl p-6">
+                <h2 class="text-lg font-semibold text-foreground mb-4">
+                    <i class="fas fa-exclamation-triangle text-amber-500 mr-2"></i>Uncertainty Factors
+                </h2>
+                
+                {% if confidence.uncertainty_reasons %}
+                <div class="space-y-3">
+                    {% for reason in confidence.uncertainty_reasons %}
+                    <div class="flex items-start space-x-3 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                        <i class="fas fa-exclamation-circle text-red-500 mt-0.5"></i>
+                        <span class="text-sm text-foreground">{{ reason }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="flex items-center space-x-3 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                    <i class="fas fa-check-circle text-green-500"></i>
+                    <span class="text-sm text-foreground">No significant uncertainty factors identified</span>
+                </div>
+                {% endif %}
+
+                <!-- Missing Data Sources -->
+                {% if confidence.missing_data_sources %}
+                <div class="mt-6">
+                    <h3 class="text-sm font-semibold text-foreground mb-3">Missing Data Sources</h3>
+                    <div class="flex flex-wrap gap-2">
+                        {% for source in confidence.missing_data_sources %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
+                            <i class="fas fa-database mr-1"></i>{{ source }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Conflicting Outputs -->
+                {% if confidence.conflicting_outputs %}
+                <div class="mt-6">
+                    <h3 class="text-sm font-semibold text-foreground mb-3">Conflicting Outputs</h3>
+                    <div class="space-y-2">
+                        {% for conflict in confidence.conflicting_outputs %}
+                        <div class="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                            <p class="text-sm text-foreground">
+                                <strong>{{ conflict.source1 }}</strong> vs <strong>{{ conflict.source2 }}</strong>: {{ conflict.conflict }}
+                            </p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Evidence Breakdown -->
+            <div class="bg-card border border-border/50 rounded-xl p-6">
+                <h2 class="text-lg font-semibold text-foreground mb-4">
+                    <i class="fas fa-book-medical text-primary mr-2"></i>Evidence Breakdown
+                </h2>
+                {% if confidence.evidence_breakdown %}
+                <div class="grid grid-cols-2 gap-4">
+                    {% for key, value in confidence.evidence_breakdown.items %}
+                    <div class="p-4 bg-background rounded-lg text-center">
+                        <p class="text-2xl font-bold text-primary">{{ value }}</p>
+                        <p class="text-xs text-muted-foreground capitalize">{{ key|cut:"_" }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted-foreground">No evidence breakdown available</p>
+                {% endif %}
+            </div>
+
+            <!-- Detailed Explanation -->
+            <div class="bg-card border border-border/50 rounded-xl p-6">
+                <h2 class="text-lg font-semibold text-foreground mb-4">
+                    <i class="fas fa-file-alt text-primary mr-2"></i>Detailed Explanation
+                </h2>
+                <div class="prose prose-sm dark:prose-invert max-w-none">
+                    <pre class="whitespace-pre-wrap text-sm text-foreground bg-background p-4 rounded-lg">{{ confidence.detailed_explanation }}</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patient Explanation (Preview) -->
+        <div class="mt-6 bg-card border border-border/50 rounded-xl p-6">
+            <h2 class="text-lg font-semibold text-foreground mb-4">
+                <i class="fas fa-user text-primary mr-2"></i>Patient-Friendly Explanation
+                <span class="text-xs font-normal text-muted-foreground ml-2">(What the patient will see)</span>
+            </h2>
+            <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <p class="text-foreground">{{ confidence.patient_explanation }}</p>
+            </div>
+        </div>
+
+        <!-- Back Button -->
+        <div class="mt-6">
+            <a href="{% url 'clinical_decision_support:ai_confidence_dashboard' %}" 
+               class="inline-flex items-center px-4 py-2 border border-border rounded-lg hover:bg-accent transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,687 @@
+{% extends 'base.html' %}
+{% load media_tags %}
+
+{% block title %}Patient Profile - Doctor Portal{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Header -->
+    <div class="mb-8">
+        <a href="{% url 'doctor_qr_scanner' %}" class="text-primary hover:text-primary/80 text-sm font-semibold inline-flex items-center mb-4">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Scanner
+        </a>
+        <div class="flex items-center justify-between">
+            <h1 class="text-3xl md:text-4xl font-bold text-foreground">Patient Profile</h1>
+            <span class="px-4 py-2 bg-blue-500/10 border border-blue-500/20 text-blue-700 dark:text-blue-400 rounded-lg text-sm font-semibold">
+                <i class="fas fa-shield-alt mr-2"></i>Scanned Access
+            </span>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Patient Info -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Patient Basic Info -->
+            <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+                <h2 class="text-xl font-bold text-foreground mb-6 flex items-center">
+                    <i class="fas fa-user mr-3 text-blue-600 dark:text-blue-400"></i>
+                    Patient Information
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Left Column -->
+                    <div class="space-y-6">
+                        <div>
+                            <p class="text-xs text-muted-foreground uppercase tracking-wide font-semibold">Full Name</p>
+                            <p class="text-xl font-bold text-foreground mt-1">
+                                {{ patient.get_full_name|default:patient.username }}
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-muted-foreground uppercase tracking-wide font-semibold">Email</p>
+                            <p class="text-foreground mt-1">{{ patient.email|default:"Not provided" }}</p>
+                        </div>
+                        {% if patient.phone_number %}
+                        <div>
+                            <p class="text-xs text-muted-foreground uppercase tracking-wide font-semibold">Phone Number</p>
+                            <p class="text-foreground mt-1">{{ patient.phone_number }}</p>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <p class="text-xs text-muted-foreground uppercase tracking-wide font-semibold">Patient ID</p>
+                            <p class="text-lg font-mono text-foreground mt-1">{{ patient.id }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="space-y-6">
+                        {% if patient.patient_profile %}
+                            <div>
+                                <p class="text-xs text-muted-foreground uppercase tracking-wide font-semibold">Date of Birth</p>
+                                <p class="text-foreground mt-1">
+                                    {% if patient.patient_profile.date_of_birth %}
+                                        {{ patient.patient_profile.date_of_birth|date:"M d, Y" }}
+                                    {% else %}
+                                        <span class="text-muted-foreground">Not provided</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-muted-foreground uppercase tracking-wide font-semibold">Blood Group</p>
+                                <p class="text-xl font-bold text-red-600 dark:text-red-400 mt-1">
+                                    {{ patient.patient_profile.blood_group|default:"Not provided" }}
+                                </p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-muted-foreground uppercase tracking-wide font-semibold">Gender</p>
+                                <p class="text-foreground mt-1">
+                                    {{ patient.patient_profile.get_gender_display|default:"Not provided" }}
+                                </p>
+                            </div>
+                        {% else %}
+                            <p class="text-muted-foreground italic">Patient profile information not available</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emergency Contact & Address -->
+            {% if patient.patient_profile %}
+            {% if patient.patient_profile.address or patient.patient_profile.emergency_contact_name or patient.patient_profile.emergency_contact_phone %}
+            <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+                <h2 class="text-xl font-bold text-foreground mb-6 flex items-center">
+                    <i class="fas fa-address-card mr-3 text-purple-600 dark:text-purple-400"></i>
+                    Contact & Emergency Information
+                </h2>
+
+                <div class="space-y-6">
+                    {% if patient.patient_profile.address %}
+                    <div>
+                        <p class="text-xs text-muted-foreground uppercase tracking-wide font-semibold mb-2">Address</p>
+                        <p class="text-foreground whitespace-pre-line">{{ patient.patient_profile.address }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if patient.patient_profile.emergency_contact_name or patient.patient_profile.emergency_contact_phone %}
+                    <div class="pt-4 border-t border-border/20">
+                        <p class="text-xs text-muted-foreground uppercase tracking-wide font-semibold mb-3 flex items-center">
+                            <i class="fas fa-phone-alt text-red-600 dark:text-red-400 mr-2"></i>
+                            Emergency Contact
+                        </p>
+                        <div class="bg-red-500/5 border border-red-500/20 rounded-lg p-4">
+                            {% if patient.patient_profile.emergency_contact_name %}
+                            <p class="text-foreground font-semibold mb-1">{{ patient.patient_profile.emergency_contact_name }}</p>
+                            {% endif %}
+                            {% if patient.patient_profile.emergency_contact_phone %}
+                            <p class="text-foreground text-sm">
+                                <i class="fas fa-phone mr-2"></i>{{ patient.patient_profile.emergency_contact_phone }}
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Medical History Information -->
+            {% if patient.patient_profile.medical_history or patient.patient_profile.allergies or patient.patient_profile.current_medications %}
+            <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+                <h2 class="text-xl font-bold text-foreground mb-6 flex items-center">
+                    <i class="fas fa-notes-medical mr-3 text-red-600 dark:text-red-400"></i>
+                    Medical History & Conditions
+                </h2>
+
+                <div class="space-y-6">
+                    {% if patient.patient_profile.allergies %}
+                    <div class="bg-red-500/5 border border-red-500/20 rounded-lg p-4">
+                        <p class="text-xs text-red-700 dark:text-red-400 uppercase tracking-wide font-semibold mb-2 flex items-center">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            Allergies
+                        </p>
+                        <p class="text-foreground text-sm whitespace-pre-line">{{ patient.patient_profile.allergies }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if patient.patient_profile.current_medications %}
+                    <div>
+                        <p class="text-xs text-muted-foreground uppercase tracking-wide font-semibold mb-2 flex items-center">
+                            <i class="fas fa-pills mr-2"></i>
+                            Current Medications
+                        </p>
+                        <div class="bg-blue-500/5 border border-blue-500/20 rounded-lg p-4">
+                            <p class="text-foreground text-sm whitespace-pre-line">{{ patient.patient_profile.current_medications }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if patient.patient_profile.medical_history %}
+                    <div class="{% if patient.patient_profile.allergies or patient.patient_profile.current_medications %}pt-4 border-t border-border/20{% endif %}">
+                        <p class="text-xs text-muted-foreground uppercase tracking-wide font-semibold mb-2 flex items-center">
+                            <i class="fas fa-file-medical mr-2"></i>
+                            Medical History
+                        </p>
+                        <div class="bg-muted/30 rounded-lg p-4">
+                            <p class="text-foreground text-sm whitespace-pre-line">{{ patient.patient_profile.medical_history }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            {% endif %}
+
+            <!-- Medical Summary Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-orange-500/10 border border-orange-500/20 rounded-xl p-4 text-center">
+                    <p class="text-xs text-muted-foreground uppercase tracking-wide font-semibold mb-2">Cancer Analyses</p>
+                    <p class="text-3xl font-bold text-orange-600 dark:text-orange-400">
+                        {{ patient_data.cancer_analyses|length }}
+                    </p>
+                </div>
+                <div class="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-center">
+                    <p class="text-xs text-muted-foreground uppercase tracking-wide font-semibold mb-2">Treatment Plans</p>
+                    <p class="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                        {{ patient_data.treatment_plans|length }}
+                    </p>
+                </div>
+                <div class="bg-green-500/10 border border-green-500/20 rounded-xl p-4 text-center">
+                    <p class="text-xs text-muted-foreground uppercase tracking-wide font-semibold mb-2">Medical Records</p>
+                    <p class="text-3xl font-bold text-green-600 dark:text-green-400">
+                        {{ patient_data.medical_records|length }}
+                    </p>
+                </div>
+                <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-center">
+                    <p class="text-xs text-muted-foreground uppercase tracking-wide font-semibold mb-2">Tumors Detected</p>
+                    <p class="text-3xl font-bold text-red-600 dark:text-red-400">
+                        {% with tumors=patient_data.cancer_analyses|dictsort:"tumor_detected" %}
+                            {% for analysis in patient_data.cancer_analyses %}
+                                {% if analysis.tumor_detected %}1{% endif %}
+                            {% endfor %}
+                        {% endwith %}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Cancer Analyses Section -->
+            {% if patient_data.cancer_analyses %}
+                <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+                    <h2 class="text-xl font-bold text-foreground mb-6 flex items-center">
+                        <i class="fas fa-microscope mr-3 text-orange-600 dark:text-orange-400"></i>
+                        Cancer Detection Analyses ({{ patient_data.cancer_analyses|length }})
+                    </h2>
+
+                    <div class="space-y-6">
+                        {% for analysis in cancer_analyses_objects %}
+                            <div class="border border-border/20 rounded-xl p-5 hover:border-orange-500/50 transition-all group">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-3 mb-2">
+                                            <span class="px-3 py-1 bg-orange-500/20 text-orange-700 dark:text-orange-400 text-xs font-semibold rounded-full">
+                                                {{ analysis.image_type|upper }}
+                                            </span>
+                                            {% if analysis.tumor_detected %}
+                                                <span class="px-3 py-1 bg-red-500/20 text-red-700 dark:text-red-400 text-xs font-semibold rounded-full">
+                                                    <i class="fas fa-exclamation-triangle mr-1"></i>Tumor Detected
+                                                </span>
+                                            {% else %}
+                                                <span class="px-3 py-1 bg-green-500/20 text-green-700 dark:text-green-400 text-xs font-semibold rounded-full">
+                                                    <i class="fas fa-check-circle mr-1"></i>Clear
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                                            <i class="far fa-clock mr-1.5"></i>{{ analysis.created_at|date:"M d, Y at g:i A" }}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Medical Image Display -->
+                                {% if analysis.image %}
+                                <div class="mt-4 mb-4">
+                                    <div class="relative group/image">
+                                        <img src="{{ analysis.image|local_media_url }}" 
+                                             alt="{{ analysis.image_type }} scan" 
+                                             class="w-full h-64 object-contain bg-gray-900 rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                                             onclick="openImageModal('{{ analysis.image|local_media_url }}', '{{ analysis.image_type|upper }} Scan - {{ analysis.created_at|date:'M d, Y' }}')">
+                                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity pointer-events-none">
+                                            <span class="bg-black/70 text-white px-4 py-2 rounded-lg">
+                                                <i class="fas fa-search-plus mr-2"></i>Click to enlarge
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-muted-foreground mt-2 flex items-center justify-center">
+                                        <i class="fas fa-file-image mr-1"></i>{{ analysis.original_filename|default:"Medical Scan Image" }}
+                                    </p>
+                                </div>
+                                {% endif %}
+
+                                {% if analysis.tumor_detected %}
+                                    <div class="mt-4 pt-4 border-t border-border/20">
+                                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                            {% if analysis.tumor_type %}
+                                            <div class="col-span-2">
+                                                <p class="text-xs text-muted-foreground uppercase tracking-wide font-semibold">Tumor Type</p>
+                                                <p class="text-sm font-semibold text-foreground mt-1">{{ analysis.tumor_type }}</p>
+                                            </div>
+                                            {% endif %}
+                                            {% if analysis.tumor_stage %}
+                                            <div>
+                                                <p class="text-xs text-muted-foreground uppercase tracking-wide font-semibold">Stage</p>
+                                                <p class="text-sm font-semibold text-red-600 dark:text-red-400 mt-1">{{ analysis.tumor_stage }}</p>
+                                            </div>
+                                            {% endif %}
+                                            {% if analysis.tumor_size_mm %}
+                                            <div>
+                                                <p class="text-xs text-muted-foreground uppercase tracking-wide font-semibold">Size</p>
+                                                <p class="text-sm font-semibold text-foreground mt-1">{{ analysis.tumor_size_mm|floatformat:1 }} mm</p>
+                                            </div>
+                                            {% endif %}
+                                            {% if analysis.tumor_location %}
+                                            <div>
+                                                <p class="text-xs text-muted-foreground uppercase tracking-wide font-semibold">Location</p>
+                                                <p class="text-sm font-semibold text-foreground mt-1">{{ analysis.tumor_location }}</p>
+                                            </div>
+                                            {% endif %}
+                                            {% if analysis.detection_confidence %}
+                                            <div>
+                                                <p class="text-xs text-muted-foreground uppercase tracking-wide font-semibold">Confidence</p>
+                                                <p class="text-sm font-semibold text-orange-600 dark:text-orange-400 mt-1">{{ analysis.detection_confidence|floatformat:1 }}%</p>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        {% if analysis.notes %}
+                                        <div class="mt-4 pt-4 border-t border-border/20">
+                                            <p class="text-xs text-muted-foreground uppercase tracking-wide font-semibold mb-2">Analysis Notes</p>
+                                            <p class="text-sm text-foreground bg-muted/30 p-3 rounded-lg">{{ analysis.notes }}</p>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Treatment Plans Section -->
+            {% if patient_data.treatment_plans %}
+                <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+                    <h2 class="text-xl font-bold text-foreground mb-6 flex items-center">
+                        <i class="fas fa-heartbeat mr-3 text-blue-600 dark:text-blue-400"></i>
+                        Treatment Plans ({{ patient_data.treatment_plans|length }})
+                    </h2>
+
+                    <div class="space-y-4">
+                        {% for plan in patient_data.treatment_plans %}
+                            <div class="border border-border/20 rounded-xl p-5 hover:border-blue-500/50 transition-all">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="flex-1">
+                                        <h3 class="font-bold text-foreground">{{ plan.cancer_type|title }} - Stage {{ plan.stage }}</h3>
+                                        <p class="text-sm text-muted-foreground mt-1">
+                                            <i class="fas fa-calendar mr-1"></i>{{ plan.created_at|date:"M d, Y" }}
+                                        </p>
+                                    </div>
+                                    <span class="px-3 py-1 bg-blue-500/20 text-blue-700 dark:text-blue-400 text-xs font-semibold rounded-full">
+                                        {{ plan.status|upper }}
+                                    </span>
+                                </div>
+
+                                <div class="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-border/20">
+                                    <div>
+                                        <p class="text-xs text-muted-foreground">5-Year Survival</p>
+                                        <p class="text-lg font-bold text-blue-600 dark:text-blue-400">
+                                            {{ plan.five_year_survival_rate }}%
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-muted-foreground">Remission</p>
+                                        <p class="text-lg font-bold text-green-600 dark:text-green-400">
+                                            {{ plan.remission_rate }}%
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-muted-foreground">QOL Score</p>
+                                        <p class="text-lg font-bold text-purple-600 dark:text-purple-400">
+                                            {{ plan.quality_of_life_score }}/10
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {% if plan.description %}
+                                    <p class="text-sm text-foreground mt-4">{{ plan.description }}</p>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Medical Records Section -->
+            {% if medical_records_objects %}
+                <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+                    <h2 class="text-xl font-bold text-foreground mb-6 flex items-center">
+                        <i class="fas fa-file-pdf mr-3 text-green-600 dark:text-green-400"></i>
+                        Medical Records ({{ medical_records_objects|length }})
+                    </h2>
+
+                    <div class="space-y-4">
+                        {% for record in medical_records_objects %}
+                            <div class="border border-border/20 rounded-xl p-5 hover:border-green-500/50 transition-all">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="flex-1">
+                                        <h3 class="font-bold text-foreground">{{ record.title }}</h3>
+                                        <p class="text-sm text-muted-foreground mt-1">
+                                            <i class="fas fa-file-alt mr-1"></i>{{ record.get_document_type_display }}
+                                        </p>
+                                    </div>
+                                    {% if record.ocr_status == 'completed' %}
+                                        <span class="px-3 py-1 bg-green-500/20 text-green-700 dark:text-green-400 text-xs font-semibold rounded-full">
+                                            <i class="fas fa-check-circle mr-1"></i>OCR Ready
+                                        </span>
+                                    {% elif record.ocr_status == 'processing' %}
+                                        <span class="px-3 py-1 bg-blue-500/20 text-blue-700 dark:text-blue-400 text-xs font-semibold rounded-full">
+                                            <i class="fas fa-spinner mr-1"></i>Processing
+                                        </span>
+                                    {% else %}
+                                        <span class="px-3 py-1 bg-gray-500/20 text-gray-700 dark:text-gray-400 text-xs font-semibold rounded-full">
+                                            {{ record.get_ocr_status_display }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Document Action Buttons -->
+                                {% if record.document_file %}
+                                <div class="mt-4 flex gap-3">
+                                    <a href="{{ record.document_file|local_media_url }}" target="_blank" 
+                                       class="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2.5 rounded-lg transition-all text-center font-semibold text-sm inline-flex items-center justify-center">
+                                        <i class="fas fa-eye mr-2"></i>View Document
+                                    </a>
+                                    <a href="{{ record.document_file|local_media_url }}" download 
+                                       class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg transition-all text-center font-semibold text-sm inline-flex items-center justify-center">
+                                        <i class="fas fa-download mr-2"></i>Download
+                                    </a>
+                                </div>
+                                {% endif %}
+
+                                {% if record.extracted_text %}
+                                    <div class="mt-4 pt-4 border-t border-border/20">
+                                        <p class="text-xs font-semibold text-muted-foreground mb-2 flex items-center">
+                                            <i class="fas fa-text mr-1"></i>Extracted Text (OCR):
+                                        </p>
+                                        <div class="bg-muted/30 p-3 rounded-lg max-h-40 overflow-y-auto">
+                                            <p class="text-sm text-foreground whitespace-pre-line">{{ record.extracted_text|truncatewords:100 }}</p>
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                <div class="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+                                    {% if record.report_date %}
+                                        <span>
+                                            <i class="fas fa-calendar mr-1"></i>Report Date: {{ record.report_date|date:"M d, Y" }}
+                                        </span>
+                                    {% endif %}
+                                    <span>
+                                        <i class="fas fa-clock mr-1"></i>Uploaded: {{ record.created_at|date:"M d, Y" }}
+                                    </span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Quick Info Card -->
+            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm sticky top-8">
+                <h3 class="font-bold text-foreground mb-4 flex items-center">
+                    <i class="fas fa-info-circle mr-2 text-blue-600 dark:text-blue-400"></i>
+                    Access Information
+                </h3>
+
+                <div class="space-y-4 text-sm">
+                    <div>
+                        <p class="text-xs text-muted-foreground uppercase tracking-wide font-semibold">Access Type</p>
+                        <p class="text-foreground mt-1 flex items-center">
+                            <i class="fas fa-qrcode text-primary mr-2"></i>QR Code Scan
+                        </p>
+                    </div>
+
+                    <div class="pt-4 border-t border-border/20">
+                        <p class="text-xs text-muted-foreground uppercase tracking-wide font-semibold">Accessed At</p>
+                        <p class="text-foreground mt-1">
+                            {% if recent_scan %}
+                                {{ recent_scan.scan_timestamp|date:"M d, Y" }} at {{ recent_scan.scan_timestamp|date:"g:i A" }}
+                            {% else %}
+                                {{ "now"|date:"M d, Y - g:i A" }}
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div class="pt-4 border-t border-border/20">
+                        <p class="text-xs text-muted-foreground uppercase tracking-wide font-semibold">Doctor</p>
+                        <p class="text-foreground mt-1">{{ request.user.get_full_name|default:request.user.username }}</p>
+                    </div>
+
+                    {% if recent_scan.blockchain_tx_hash %}
+                    <div class="pt-4 border-t border-border/20">
+                        <p class="text-xs text-muted-foreground uppercase tracking-wide font-semibold mb-2">
+                            <i class="fab fa-ethereum mr-1"></i>Blockchain Verification
+                        </p>
+                        {% if recent_scan.blockchain_block_number %}
+                        <div class="bg-green-500/10 border border-green-500/30 rounded-lg p-3 space-y-2">
+                            <p class="text-xs text-green-700 dark:text-green-400 font-semibold flex items-center">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                Confirmed on Ethereum Sepolia
+                            </p>
+                            <p class="text-xs text-muted-foreground">
+                                Block #{{ recent_scan.blockchain_block_number }}
+                            </p>
+                            {% if recent_scan.blockchain_log_id %}
+                            <p class="text-xs text-muted-foreground">
+                                Log ID: #{{ recent_scan.blockchain_log_id }}
+                            </p>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <div class="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 space-y-2" id="blockchain-pending-status" data-tx-hash="{{ recent_scan.blockchain_tx_hash }}">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <p class="text-xs text-blue-700 dark:text-blue-400 font-semibold flex items-center">
+                                        <i class="fas fa-clock mr-2"></i>
+                                        <span class="blockchain-status-text">Transaction Pending Confirmation</span>
+                                    </p>
+                                    <span class="text-xs text-muted-foreground checking-indicator"></span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-muted-foreground blockchain-message">
+                                Checking status automatically every 10 seconds...
+                            </p>
+                        </div>
+                        {% endif %}
+                        <a href="https://sepolia.etherscan.io/tx/{% if recent_scan.blockchain_tx_hash|slice:':2' == '0x' %}{{ recent_scan.blockchain_tx_hash }}{% else %}0x{{ recent_scan.blockchain_tx_hash }}{% endif %}" 
+                           target="_blank"
+                           class="inline-flex items-center text-xs text-primary hover:text-primary/80 font-semibold mt-2">
+                            <i class="fas fa-external-link-alt mr-1"></i>
+                            View Transaction on Etherscan
+                        </a>
+                        <p class="text-xs text-muted-foreground font-mono break-all mt-1">
+                            {% if recent_scan.blockchain_tx_hash|slice:':2' == '0x' %}{{ recent_scan.blockchain_tx_hash }}{% else %}0x{{ recent_scan.blockchain_tx_hash }}{% endif %}
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    <div class="pt-4 border-t border-border/20 bg-blue-500/5 rounded-lg p-3">
+                        <p class="text-xs font-semibold text-blue-700 dark:text-blue-400">
+                            <i class="fas fa-shield-alt mr-1"></i>
+                            This information is confidential and accessed securely via QR code authentication.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+                <h3 class="font-bold text-foreground mb-4">Actions</h3>
+
+                <div class="space-y-3">
+                    <a href="{% url 'doctor_qr_scanner' %}" class="w-full bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-3 rounded-lg transition-all text-center font-semibold flex items-center justify-center group hover:scale-105">
+                        <i class="fas fa-qrcode mr-2"></i>Scan Another
+                    </a>
+                    <a href="{% url 'doctor_dashboard' %}" class="w-full bg-muted hover:bg-muted/90 text-foreground px-4 py-3 rounded-lg transition-all text-center font-semibold flex items-center justify-center group hover:scale-105">
+                        <i class="fas fa-home mr-2"></i>Dashboard
+                    </a>
+                </div>
+            </div>
+
+            <!-- Security Notice -->
+            <div class="bg-green-500/10 border border-green-500/20 rounded-2xl p-6">
+                <h3 class="font-bold text-green-700 dark:text-green-400 mb-3 flex items-center">
+                    <i class="fas fa-lock mr-2"></i>Security
+                </h3>
+
+                <ul class="space-y-2 text-xs text-foreground">
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-600 dark:text-green-400 mr-2 mt-0.5 flex-shrink-0"></i>
+                        <span>Encrypted token verification</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-600 dark:text-green-400 mr-2 mt-0.5 flex-shrink-0"></i>
+                        <span>Doctor authentication required</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-600 dark:text-green-400 mr-2 mt-0.5 flex-shrink-0"></i>
+                        <span>Access audit logged</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-600 dark:text-green-400 mr-2 mt-0.5 flex-shrink-0"></i>
+                        <span>HTTPS encrypted connection</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image Modal for Full-Size Viewing -->
+<div id="imageModal" class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onclick="closeImageModal()">
+    <div class="relative max-w-7xl max-h-full" onclick="event.stopPropagation()">
+        <button onclick="closeImageModal()" class="absolute -top-12 right-0 text-white hover:text-gray-300 text-2xl">
+            <i class="fas fa-times-circle"></i>
+        </button>
+        <img id="modalImage" src="" alt="Medical Scan" class="max-w-full max-h-[90vh] object-contain rounded-lg">
+        <p id="modalCaption" class="text-white text-center mt-4 text-lg font-semibold"></p>
+    </div>
+</div>
+
+<script>
+function openImageModal(imageUrl, caption) {
+    const modal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+    const modalCaption = document.getElementById('modalCaption');
+    
+    modalImage.src = imageUrl;
+    modalCaption.textContent = caption;
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeImageModal() {
+    const modal = document.getElementById('imageModal');
+    modal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+// Close modal on Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeImageModal();
+    }
+});
+
+// Auto-refresh for doctor's view
+function checkDoctorBlockchainStatus(txHash) {
+    const pendingDiv = document.getElementById('blockchain-pending-status');
+    if (!pendingDiv) {
+        return; // Already confirmed or element removed
+    }
+    
+    const statusText = pendingDiv.querySelector('.blockchain-status-text');
+    const checkingIndicator = pendingDiv.querySelector('.checking-indicator');
+    
+    // Ensure tx_hash has 0x prefix
+    if (!txHash.startsWith('0x')) {
+        txHash = '0x' + txHash;
+    }
+    
+    // Show checking indicator
+    if (checkingIndicator) {
+        checkingIndicator.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    }
+    
+    // Call refresh API
+    fetch('{% url "refresh_blockchain_status" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ tx_hash: txHash })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (data.confirmed || data.already_confirmed) {
+                // Replace pending div with confirmed status
+                pendingDiv.outerHTML = `
+                    <div class="bg-green-500/10 border border-green-500/30 rounded-lg p-3">
+                        <p class="text-xs text-green-700 dark:text-green-400 font-semibold flex items-center">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            Blockchain Verified
+                        </p>
+                        <p class="text-xs text-muted-foreground mt-1">
+                            Block #${data.block_number}
+                        </p>
+                        ${data.log_id ? `<p class="text-xs text-muted-foreground">Log ID: #${data.log_id}</p>` : ''}
+                    </div>
+                `;
+                console.log(`✓ Transaction ${txHash} confirmed in block ${data.block_number}`);
+            } else if (data.pending) {
+                // Still pending, hide indicator and schedule next check
+                if (checkingIndicator) {
+                    checkingIndicator.innerHTML = '';
+                }
+                setTimeout(() => checkDoctorBlockchainStatus(txHash), 10000); // Check again in 10 seconds
+            }
+        } else {
+            // Error occurred, hide indicator and retry
+            if (checkingIndicator) {
+                checkingIndicator.innerHTML = '';
+            }
+            console.error('Error checking blockchain status:', data.error || data.message);
+            setTimeout(() => checkDoctorBlockchainStatus(txHash), 15000); // Retry in 15 seconds
+        }
+    })
+    .catch(error => {
+        if (checkingIndicator) {
+            checkingIndicator.innerHTML = '';
+        }
+        console.error('Error refreshing status:', error);
+        setTimeout(() => checkDoctorBlockchainStatus(txHash), 15000); // Retry in 15 seconds
+    });
+}
+
+// Start auto-refresh on page load if transaction is pending
+document.addEventListener('DOMContentLoaded', function() {
+    const pendingDiv = document.getElementById('blockchain-pending-status');
+    if (pendingDiv) {
+        const txHash = pendingDiv.getAttribute('data-tx-hash');
+        if (txHash) {
+            setTimeout(() => checkDoctorBlockchainStatus(txHash), 5000); // Start checking after 5 seconds
+        }
+    }
+});
+</script>
+{% endblock %}

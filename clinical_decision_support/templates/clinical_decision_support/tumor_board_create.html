@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% block title %}Create Tumor Board Session{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <nav class="mb-4">
+                <a href="{% url 'clinical_decision_support:tumor_board_list' %}" class="text-primary hover:underline text-sm">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Sessions
+                </a>
+            </nav>
+            <h1 class="text-3xl font-bold text-foreground">Create Tumor Board Session</h1>
+            <p class="text-muted-foreground mt-1">Set up a multidisciplinary review for collaborative treatment planning</p>
+        </div>
+
+        <!-- Form -->
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <div class="bg-card border border-border/50 rounded-xl p-6 space-y-6">
+                <!-- Title -->
+                <div>
+                    <label for="title" class="block text-sm font-medium text-foreground mb-2">Session Title *</label>
+                    <input type="text" id="title" name="title" required
+                           class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary focus:border-primary"
+                           placeholder="e.g., Lung Cancer Case - Stage IIIA Review">
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label for="description" class="block text-sm font-medium text-foreground mb-2">Description</label>
+                    <textarea id="description" name="description" rows="4"
+                              class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary focus:border-primary"
+                              placeholder="Briefly describe the case and key points for discussion..."></textarea>
+                </div>
+
+                <!-- Patient Selection -->
+                <div>
+                    <label for="patient_id" class="block text-sm font-medium text-foreground mb-2">Select Patient *</label>
+                    <select id="patient_id" name="patient_id" required onchange="loadPlans(this.value)"
+                            class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary focus:border-primary">
+                        <option value="">Choose a patient...</option>
+                        {% for patient in patients %}
+                        <option value="{{ patient.id }}">{{ patient.username }} - {{ patient.email }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Treatment Plan Selection -->
+                <div>
+                    <label for="plan_id" class="block text-sm font-medium text-foreground mb-2">Select Treatment Plan *</label>
+                    <select id="plan_id" name="plan_id" required
+                            class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary focus:border-primary">
+                        <option value="">First select a patient...</option>
+                    </select>
+                </div>
+
+                <!-- Scheduled Date/Time -->
+                <div>
+                    <label for="scheduled_at" class="block text-sm font-medium text-foreground mb-2">Schedule Session (Optional)</label>
+                    <input type="datetime-local" id="scheduled_at" name="scheduled_at"
+                           class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary focus:border-primary">
+                    <p class="text-xs text-muted-foreground mt-1">Leave empty to start immediately as a draft</p>
+                </div>
+            </div>
+
+            <!-- Info Box -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+                    <div class="text-sm text-blue-800 dark:text-blue-400">
+                        <p class="font-medium">Next Steps After Creation:</p>
+                        <ul class="mt-2 space-y-1 list-disc list-inside">
+                            <li>Invite specialist doctors to the session</li>
+                            <li>Each member reviews the AI treatment plan</li>
+                            <li>Members submit their decisions and comments</li>
+                            <li>Consensus must be achieved before plan activation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="flex justify-end space-x-4">
+                <a href="{% url 'clinical_decision_support:tumor_board_list' %}" 
+                   class="px-6 py-2 border border-border rounded-lg hover:bg-accent transition-colors">
+                    Cancel
+                </a>
+                <button type="submit" class="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                    <i class="fas fa-plus mr-2"></i>Create Session
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function loadPlans(patientId) {
+    const planSelect = document.getElementById('plan_id');
+    planSelect.innerHTML = '<option value="">Loading plans...</option>';
+    
+    if (!patientId) {
+        planSelect.innerHTML = '<option value="">First select a patient...</option>';
+        return;
+    }
+    
+    fetch(`/clinical/api/patient/${patientId}/plans/`)
+        .then(response => response.json())
+        .then(data => {
+            planSelect.innerHTML = '<option value="">Select a treatment plan...</option>';
+            data.plans.forEach(plan => {
+                const option = document.createElement('option');
+                option.value = plan.id;
+                option.textContent = `${plan.cancer_type} - Stage ${plan.cancer_stage} (${plan.status})`;
+                planSelect.appendChild(option);
+            });
+        })
+        .catch(error => {
+            planSelect.innerHTML = '<option value="">Error loading plans</option>';
+        });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+{% block title %}Log Your Symptoms{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <nav class="mb-4">
+                <a href="{% url 'patient_portal:symptom_log_list' %}" class="text-primary hover:underline text-sm">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Logs
+                </a>
+            </nav>
+            <h1 class="text-3xl font-bold text-foreground">How Are You Feeling?</h1>
+            <p class="text-muted-foreground mt-1">Take a moment to record how you're doing today</p>
+        </div>
+
+        <!-- Form -->
+        <form method="post" action="{% url 'patient_portal:symptom_log_create' %}" class="space-y-6" id="symptom-log-form">
+            {% csrf_token %}
+            
+            <!-- Overall Wellness -->
+            <div class="bg-card border border-border/50 rounded-xl p-6">
+                <h2 class="text-lg font-semibold text-foreground mb-4">Overall Wellness</h2>
+                <p class="text-muted-foreground mb-4">How would you rate your overall feeling today?</p>
+                <div class="flex justify-between gap-2">
+                    {% for i in "12345" %}
+                    <label class="flex-1 cursor-pointer">
+                        <input type="radio" name="overall_wellness" value="{{ i }}" class="peer sr-only" {% if i == "3" %}checked{% endif %}>
+                        <div class="p-4 border-2 border-border rounded-xl text-center peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+                            <span class="text-3xl mb-2 block">
+                                {% if i == "1" %}😫{% elif i == "2" %}😔{% elif i == "3" %}😐{% elif i == "4" %}🙂{% else %}😄{% endif %}
+                            </span>
+                            <span class="text-sm font-medium text-foreground">{{ i }}</span>
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+                <div class="flex justify-between text-xs text-muted-foreground mt-2">
+                    <span>Very Poor</span>
+                    <span>Excellent</span>
+                </div>
+            </div>
+
+            <!-- Pain Level -->
+            <div class="bg-card border border-border/50 rounded-xl p-6">
+                <h2 class="text-lg font-semibold text-foreground mb-4">Pain Level</h2>
+                <p class="text-muted-foreground mb-4">Rate your pain on a scale of 0-10</p>
+                <div class="space-y-4">
+                    <input type="range" name="pain_level" id="pain_level" min="0" max="10" value="0"
+                           class="w-full h-2 bg-accent rounded-lg appearance-none cursor-pointer slider-thumb"
+                           oninput="document.getElementById('pain_value').textContent = this.value">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-muted-foreground">No Pain</span>
+                        <span id="pain_value" class="text-2xl font-bold text-primary">0</span>
+                        <span class="text-sm text-muted-foreground">Worst Pain</span>
+                    </div>
+                </div>
+                <div>
+                    <label for="pain_location" class="block text-sm font-medium text-foreground mt-4 mb-2">Where is the pain? (optional)</label>
+                    <input type="text" id="pain_location" name="pain_location"
+                           class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground"
+                           placeholder="e.g., lower back, head, stomach">
+                </div>
+            </div>
+
+            <!-- Common Symptoms Grid -->
+            <div class="bg-card border border-border/50 rounded-xl p-6">
+                <h2 class="text-lg font-semibold text-foreground mb-4">Common Symptoms</h2>
+                <p class="text-muted-foreground mb-4">Rate each symptom (1 = None, 5 = Severe)</p>
+                
+                <div class="space-y-6">
+                    <!-- Fatigue -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="font-medium text-foreground"><i class="fas fa-battery-quarter text-amber-500 mr-2"></i>Fatigue/Tiredness</label>
+                        </div>
+                        <div class="flex gap-2">
+                            {% for i in "12345" %}
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" name="fatigue" value="{{ i }}" class="peer sr-only" {% if i == "1" %}checked{% endif %}>
+                                <div class="py-2 border border-border rounded text-center peer-checked:border-primary peer-checked:bg-primary/10 transition-all">
+                                    <span class="font-medium">{{ i }}</span>
+                                </div>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Nausea -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="font-medium text-foreground"><i class="fas fa-dizzy text-green-500 mr-2"></i>Nausea</label>
+                        </div>
+                        <div class="flex gap-2">
+                            {% for i in "12345" %}
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" name="nausea" value="{{ i }}" class="peer sr-only" {% if i == "1" %}checked{% endif %}>
+                                <div class="py-2 border border-border rounded text-center peer-checked:border-primary peer-checked:bg-primary/10 transition-all">
+                                    <span class="font-medium">{{ i }}</span>
+                                </div>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Vomiting -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="font-medium text-foreground"><i class="fas fa-head-side-cough text-red-500 mr-2"></i>Vomiting</label>
+                        </div>
+                        <div class="flex gap-2">
+                            {% for i in "12345" %}
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" name="vomiting" value="{{ i }}" class="peer sr-only" {% if i == "1" %}checked{% endif %}>
+                                <div class="py-2 border border-border rounded text-center peer-checked:border-primary peer-checked:bg-primary/10 transition-all">
+                                    <span class="font-medium">{{ i }}</span>
+                                </div>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Appetite -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="font-medium text-foreground"><i class="fas fa-utensils text-orange-500 mr-2"></i>Appetite Loss</label>
+                        </div>
+                        <div class="flex gap-2">
+                            {% for i in "12345" %}
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" name="appetite_loss" value="{{ i }}" class="peer sr-only" {% if i == "1" %}checked{% endif %}>
+                                <div class="py-2 border border-border rounded text-center peer-checked:border-primary peer-checked:bg-primary/10 transition-all">
+                                    <span class="font-medium">{{ i }}</span>
+                                </div>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Breathing -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="font-medium text-foreground"><i class="fas fa-lungs text-blue-500 mr-2"></i>Breathing Difficulty</label>
+                        </div>
+                        <div class="flex gap-2">
+                            {% for i in "12345" %}
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" name="breathing_difficulty" value="{{ i }}" class="peer sr-only" {% if i == "1" %}checked{% endif %}>
+                                <div class="py-2 border border-border rounded text-center peer-checked:border-primary peer-checked:bg-primary/10 transition-all">
+                                    <span class="font-medium">{{ i }}</span>
+                                </div>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Symptoms -->
+            <div class="bg-card border border-border/50 rounded-xl p-6">
+                <h2 class="text-lg font-semibold text-foreground mb-4">Other Symptoms</h2>
+                
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <!-- Sleep Quality -->
+                    <div>
+                        <label class="block text-sm font-medium text-foreground mb-2">Sleep Quality (1-5)</label>
+                        <select name="sleep_quality" class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground">
+                            <option value="5">5 - Excellent</option>
+                            <option value="4">4 - Good</option>
+                            <option value="3" selected>3 - Fair</option>
+                            <option value="2">2 - Poor</option>
+                            <option value="1">1 - Very Poor</option>
+                        </select>
+                    </div>
+
+                    <!-- Mood -->
+                    <div>
+                        <label class="block text-sm font-medium text-foreground mb-2">Mood (1-5)</label>
+                        <select name="mood" class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground">
+                            <option value="5">5 - Very Good</option>
+                            <option value="4">4 - Good</option>
+                            <option value="3" selected>3 - Neutral</option>
+                            <option value="2">2 - Low</option>
+                            <option value="1">1 - Very Low</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Checkboxes for other symptoms -->
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <label class="flex items-center space-x-2 cursor-pointer p-2 hover:bg-accent/30 rounded">
+                        <input type="checkbox" name="has_fever" class="rounded border-border">
+                        <span class="text-foreground">Fever</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer p-2 hover:bg-accent/30 rounded">
+                        <input type="checkbox" name="has_diarrhea" class="rounded border-border">
+                        <span class="text-foreground">Diarrhea</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer p-2 hover:bg-accent/30 rounded">
+                        <input type="checkbox" name="has_constipation" class="rounded border-border">
+                        <span class="text-foreground">Constipation</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer p-2 hover:bg-accent/30 rounded">
+                        <input type="checkbox" name="has_mouth_sores" class="rounded border-border">
+                        <span class="text-foreground">Mouth Sores</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer p-2 hover:bg-accent/30 rounded">
+                        <input type="checkbox" name="has_skin_issues" class="rounded border-border">
+                        <span class="text-foreground">Skin Changes</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer p-2 hover:bg-accent/30 rounded">
+                        <input type="checkbox" name="has_numbness" class="rounded border-border">
+                        <span class="text-foreground">Numbness/Tingling</span>
+                    </label>
+                </div>
+
+                <!-- Additional Notes -->
+                <div>
+                    <label for="additional_symptoms" class="block text-sm font-medium text-foreground mb-2">Additional Notes</label>
+                    <textarea id="additional_symptoms" name="additional_symptoms" rows="3"
+                              class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground"
+                              placeholder="Anything else you want to share about how you're feeling..."></textarea>
+                </div>
+            </div>
+
+            <!-- Medications -->
+            <div class="bg-card border border-border/50 rounded-xl p-6">
+                <h2 class="text-lg font-semibold text-foreground mb-4">Medications Today</h2>
+                <label class="flex items-center space-x-3 cursor-pointer">
+                    <input type="checkbox" name="medications_taken" checked class="rounded border-border w-5 h-5">
+                    <span class="text-foreground">I took all my prescribed medications today</span>
+                </label>
+                <div class="mt-4">
+                    <label for="missed_medications" class="block text-sm font-medium text-foreground mb-2">If any missed, which ones?</label>
+                    <input type="text" id="missed_medications" name="missed_medications"
+                           class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground"
+                           placeholder="Leave blank if none missed">
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="flex justify-end space-x-4">
+                <a href="{% url 'patient_portal:symptom_log_list' %}" 
+                   class="px-6 py-3 border border-border rounded-lg hover:bg-accent transition-colors">
+                    Cancel
+                </a>
+                <button type="submit" class="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                    <i class="fas fa-save mr-2"></i>Save Log
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: hsl(var(--primary));
+        cursor: pointer;
+    }
+    input[type="range"]::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: hsl(var(--primary));
+        cursor: pointer;
+        border: none;
+    }
+</style>
+{% endblock %}

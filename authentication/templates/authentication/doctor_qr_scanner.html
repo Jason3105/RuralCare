@@ -1,0 +1,397 @@
+{% extends 'base.html' %}
+
+{% block title %}QR Code Scanner - Doctor Portal{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Header -->
+    <div class="mb-8">
+        <a href="{% url 'doctor_dashboard' %}" class="text-primary hover:text-primary/80 text-sm font-semibold inline-flex items-center mb-4">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+        </a>
+        <h1 class="text-3xl md:text-4xl font-bold text-foreground">Patient QR Code Scanner</h1>
+        <p class="text-muted-foreground mt-2">Scan patient QR codes to access their complete medical profile</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Scanner Area -->
+        <div class="lg:col-span-2">
+            <!-- Camera Stream -->
+            <div class="bg-card border border-border/50 rounded-2xl overflow-hidden shadow-sm">
+                <div id="scanner-container" class="bg-black relative">
+                    <video id="camera-stream" autoplay playsinline muted style="width: 100%; height: auto; max-height: 600px; display: none;"></video>
+                    <div id="no-camera" class="text-center py-24 text-white">
+                        <i class="fas fa-camera text-6xl mb-4 inline-block opacity-50"></i>
+                        <p class="text-lg opacity-75">Camera initializing...</p>
+                    </div>
+                    <canvas id="scanner-canvas" style="display: none;"></canvas>
+                </div>
+
+                <!-- Status Messages -->
+                <div class="p-6 border-t border-border/20">
+                    <div id="scan-status" class="text-center">
+                        <p class="text-muted-foreground">Waiting for camera access...</p>
+                    </div>
+                    <div id="scan-error" class="mt-4 p-4 bg-red-500/10 border border-red-500/20 text-red-700 dark:text-red-400 rounded-lg hidden">
+                        <i class="fas fa-exclamation-circle mr-2"></i>
+                        <span id="error-message"></span>
+                    </div>
+                    <div id="scan-success" class="mt-4 p-4 bg-green-500/10 border border-green-500/20 text-green-700 dark:text-green-400 rounded-lg hidden">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        <span id="success-message">Patient found! Loading profile...</span>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="p-6 border-t border-border/20 space-y-3">
+                    <button id="start-btn" class="w-full bg-gradient-to-r from-primary to-primary/90 hover:shadow-lg text-primary-foreground px-6 py-3 rounded-lg transition-all duration-300 font-semibold flex items-center justify-center group hover:scale-105">
+                        <i class="fas fa-play mr-2"></i>
+                        Start Camera
+                    </button>
+                    <button id="stop-btn" class="w-full bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg transition-all duration-300 font-semibold flex items-center justify-center group hover:scale-105 hidden">
+                        <i class="fas fa-stop mr-2"></i>
+                        Stop Camera
+                    </button>
+                    <button id="upload-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-all duration-300 font-semibold flex items-center justify-center group hover:scale-105">
+                        <i class="fas fa-image mr-2"></i>
+                        Upload QR Image
+                    </button>
+                    <input type="file" id="file-input" accept="image/*" style="display: none;" onchange="handleFileUpload(event)">
+                </div>
+            </div>
+
+            <!-- Scanned Patient Profile (will be populated after scan) -->
+            <div id="patient-profile" class="mt-8 hidden">
+                <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-foreground">Patient Profile</h2>
+                        <a href="{% url 'doctor_qr_scanner' %}" class="text-primary hover:text-primary/80 text-sm font-semibold">Scan Another</a>
+                    </div>
+
+                    <!-- Patient Info -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 pb-8 border-b border-border/20">
+                        <div>
+                            <p class="text-xs text-muted-foreground uppercase tracking-wide">Name</p>
+                            <p id="patient-name" class="text-xl font-semibold text-foreground"></p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-muted-foreground uppercase tracking-wide">Patient ID</p>
+                            <p id="patient-id" class="text-lg font-mono text-foreground"></p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-muted-foreground uppercase tracking-wide">Email</p>
+                            <p id="patient-email" class="text-foreground"></p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-muted-foreground uppercase tracking-wide">Blood Group</p>
+                            <p id="patient-blood" class="text-lg font-semibold text-foreground"></p>
+                        </div>
+                    </div>
+
+                    <!-- Medical Summary -->
+                    <div class="grid grid-cols-4 gap-4 mb-8">
+                        <div class="bg-orange-500/10 p-4 rounded-lg">
+                            <p class="text-xs text-muted-foreground uppercase tracking-wide">Cancer Analyses</p>
+                            <p class="text-2xl font-bold text-orange-600 dark:text-orange-400" id="summary-analyses">0</p>
+                        </div>
+                        <div class="bg-blue-500/10 p-4 rounded-lg">
+                            <p class="text-xs text-muted-foreground uppercase tracking-wide">Treatment Plans</p>
+                            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400" id="summary-plans">0</p>
+                        </div>
+                        <div class="bg-green-500/10 p-4 rounded-lg">
+                            <p class="text-xs text-muted-foreground uppercase tracking-wide">Medical Records</p>
+                            <p class="text-2xl font-bold text-green-600 dark:text-green-400" id="summary-records">0</p>
+                        </div>
+                        <div class="bg-purple-500/10 p-4 rounded-lg">
+                            <p class="text-xs text-muted-foreground uppercase tracking-wide">Tumors Detected</p>
+                            <p class="text-2xl font-bold text-purple-600 dark:text-purple-400" id="summary-tumors">0</p>
+                        </div>
+                    </div>
+
+                    <!-- Recent Analyses -->
+                    <div id="analyses-section" class="mb-8 hidden">
+                        <h3 class="text-lg font-bold text-foreground mb-4">Recent Cancer Analyses</h3>
+                        <div id="analyses-list" class="space-y-3"></div>
+                    </div>
+
+                    <!-- Recent Treatment Plans -->
+                    <div id="plans-section" class="mb-8 hidden">
+                        <h3 class="text-lg font-bold text-foreground mb-4">Recent Treatment Plans</h3>
+                        <div id="plans-list" class="space-y-3"></div>
+                    </div>
+
+                    <!-- Recent Medical Records -->
+                    <div id="records-section" class="hidden">
+                        <h3 class="text-lg font-bold text-foreground mb-4">Recent Medical Records</h3>
+                        <div id="records-list" class="space-y-3"></div>
+                    </div>
+
+                    <!-- Full Profile Button -->
+                    <div class="mt-8 pt-8 border-t border-border/20">
+                        <a id="full-profile-btn" href="#" class="w-full bg-gradient-to-r from-primary to-primary/90 hover:shadow-lg text-primary-foreground px-6 py-3 rounded-lg transition-all duration-300 font-semibold flex items-center justify-center group hover:scale-105">
+                            <i class="fas fa-expand mr-2"></i>
+                            View Complete Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Sidebar -->
+        <div class="space-y-6">
+            <!-- Instructions Card -->
+            <div class="bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 border border-primary/20 rounded-2xl p-6">
+                <h3 class="text-lg font-bold text-foreground mb-4 flex items-center">
+                    <i class="fas fa-info-circle mr-2 text-primary"></i>
+                    How to Use
+                </h3>
+                <ol class="text-sm text-muted-foreground space-y-3">
+                    <li class="flex items-start">
+                        <span class="font-bold text-primary mr-3">1.</span>
+                        <span>Click "Start Camera" to enable your device camera</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="font-bold text-primary mr-3">2.</span>
+                        <span>Point camera at patient's QR code</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="font-bold text-primary mr-3">3.</span>
+                        <span>Patient profile loads automatically</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="font-bold text-primary mr-3">4.</span>
+                        <span>Click "View Complete Profile" for details</span>
+                    </li>
+                </ol>
+            </div>
+
+            <!-- Security Info -->
+            <div class="bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/30 rounded-2xl p-6">
+                <h3 class="font-bold text-foreground mb-3 flex items-center">
+                    <i class="fas fa-shield-alt mr-2 text-blue-600 dark:text-blue-400"></i>
+                    Security & Privacy
+                </h3>
+                <ul class="text-sm text-muted-foreground space-y-2">
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-600 dark:text-green-400 mr-3 mt-0.5 flex-shrink-0"></i>
+                        <span>All scans are logged and audited</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-600 dark:text-green-400 mr-3 mt-0.5 flex-shrink-0"></i>
+                        <span>Only authenticated doctors can scan</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-600 dark:text-green-400 mr-3 mt-0.5 flex-shrink-0"></i>
+                        <span>Encrypted communication</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-600 dark:text-green-400 mr-3 mt-0.5 flex-shrink-0"></i>
+                        <span>Patient can see all scan records</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Tech Details -->
+            <div class="bg-card border border-border/50 rounded-2xl p-6">
+                <h3 class="font-bold text-foreground mb-3">Supported Browsers</h3>
+                <ul class="text-sm text-muted-foreground space-y-2">
+                    <li><i class="fas fa-check-circle text-green-600 mr-2"></i>Chrome/Edge (recommended)</li>
+                    <li><i class="fas fa-check-circle text-green-600 mr-2"></i>Firefox</li>
+                    <li><i class="fas fa-check-circle text-green-600 mr-2"></i>Safari (iOS 15+)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- jsQR Library -->
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+
+<script>
+let currentStream = null;
+let scanningActive = false;
+let lastScannedCode = null;
+
+const startBtn = document.getElementById('start-btn');
+const stopBtn = document.getElementById('stop-btn');
+const uploadBtn = document.getElementById('upload-btn');
+const fileInput = document.getElementById('file-input');
+const videoStream = document.getElementById('camera-stream');
+const canvas = document.getElementById('scanner-canvas');
+const noCameraDiv = document.getElementById('no-camera');
+const scanStatus = document.getElementById('scan-status');
+const scanError = document.getElementById('scan-error');
+const scanSuccess = document.getElementById('scan-success');
+const patientProfile = document.getElementById('patient-profile');
+
+startBtn.addEventListener('click', startCamera);
+stopBtn.addEventListener('click', stopCamera);
+uploadBtn.addEventListener('click', () => fileInput.click());
+
+async function startCamera() {
+    try {
+        startBtn.style.display = 'none';
+        stopBtn.style.display = 'flex';
+        scanStatus.innerHTML = '<p class="text-white">Camera starting...</p>';
+        
+        currentStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'environment' }
+        });
+        
+        videoStream.srcObject = currentStream;
+        videoStream.style.display = 'block';
+        noCameraDiv.style.display = 'none';
+        
+        scanningActive = true;
+        scanStatus.innerHTML = '<p class="text-white">Point camera at QR code...</p>';
+        scan();
+    } catch (error) {
+        showError('Unable to access camera. Please check permissions.');
+        console.error('Camera error:', error);
+    }
+}
+
+function stopCamera() {
+    if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+    }
+    scanningActive = false;
+    startBtn.style.display = 'flex';
+    stopBtn.style.display = 'none';
+    videoStream.style.display = 'none';
+    noCameraDiv.style.display = 'flex';
+    scanStatus.innerHTML = '<p class="text-muted-foreground">Camera stopped</p>';
+}
+
+function scan() {
+    if (!scanningActive) return;
+    
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    canvas.width = videoStream.videoWidth;
+    canvas.height = videoStream.videoHeight;
+    ctx.drawImage(videoStream, 0, 0);
+    
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 2 });
+    
+    if (code && code.data !== lastScannedCode) {
+        lastScannedCode = code.data;
+        processQRCode(code.data);
+    }
+    
+    requestAnimationFrame(scan);
+}
+
+async function processQRCode(token) {
+    scanningActive = false;
+    if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+    }
+    
+    try {
+        showSuccess('QR code found! Processing...');
+        
+        const response = await fetch('{% url "scan_qr_code" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ token: token })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            displayPatientProfile(data.patient);
+            showSuccess('Patient profile loaded successfully!');
+        } else {
+            showError(data.error || 'Failed to process QR code');
+            startBtn.style.display = 'flex';
+            stopBtn.style.display = 'none';
+        }
+    } catch (error) {
+        showError('Error processing QR code: ' + error.message);
+        startBtn.style.display = 'flex';
+        stopBtn.style.display = 'none';
+    }
+}
+
+function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.getElementById('scanner-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height);
+            
+            if (code) {
+                processQRCode(code.data);
+            } else {
+                showError('No QR code found in image');
+            }
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function displayPatientProfile(patient) {
+    patientProfile.classList.remove('hidden');
+    
+    document.getElementById('patient-name').textContent = 
+        `${patient.first_name} ${patient.last_name}` || patient.username;
+    document.getElementById('patient-id').textContent = patient.id.substring(0, 12) + '...';
+    document.getElementById('patient-email').textContent = patient.email;
+    document.getElementById('patient-blood').textContent = 
+        patient.profile.blood_group || 'Not provided';
+    
+    document.getElementById('summary-analyses').textContent = patient.summary.total_analyses;
+    document.getElementById('summary-plans').textContent = patient.summary.total_treatment_plans;
+    document.getElementById('summary-records').textContent = patient.summary.total_medical_records;
+    document.getElementById('summary-tumors').textContent = patient.summary.total_with_tumors;
+    
+    // Analyses
+    if (patient.cancer_analyses && patient.cancer_analyses.length > 0) {
+        const analysesList = document.getElementById('analyses-list');
+        analysesList.innerHTML = patient.cancer_analyses.map(a => `
+            <div class="border border-border/20 rounded-lg p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="font-semibold text-foreground">${a.image_type.toUpperCase()}</span>
+                    ${a.tumor_detected ? '<span class="bg-red-500/20 text-red-700 text-xs px-2 py-1 rounded">Tumor Detected</span>' : '<span class="bg-green-500/20 text-green-700 text-xs px-2 py-1 rounded">Clear</span>'}
+                </div>
+                <p class="text-xs text-muted-foreground">${new Date(a.created_at).toLocaleDateString()}</p>
+            </div>
+        `).join('');
+        document.getElementById('analyses-section').classList.remove('hidden');
+    }
+    
+    // Full profile button
+    document.getElementById('full-profile-btn').href = `/doctor/patient/${patient.id}/profile/`;
+}
+
+function showError(message) {
+    const errorDiv = document.getElementById('scan-error');
+    document.getElementById('error-message').textContent = message;
+    errorDiv.classList.remove('hidden');
+    scanError.classList.remove('hidden');
+    scanSuccess.classList.add('hidden');
+}
+
+function showSuccess(message) {
+    const successDiv = document.getElementById('scan-success');
+    document.getElementById('success-message').textContent = message;
+    successDiv.classList.remove('hidden');
+    scanError.classList.add('hidden');
+}
+</script>
+{% endblock %}

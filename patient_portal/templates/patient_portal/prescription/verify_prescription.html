@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify Prescription{% endblock %}
+
+{% block content %}
+<div class="fade-in max-w-4xl mx-auto">
+    <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-lg text-center">
+        {% if error %}
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-red-100 dark:bg-red-900/30 mb-6">
+                <i class="fas fa-times-circle text-4xl text-red-600 dark:text-red-400"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-foreground mb-4">Verification Failed</h1>
+            <p class="text-muted-foreground mb-8">{{ error }}</p>
+        {% else %}
+            {% if blockchain_verified %}
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 mb-6">
+                    <i class="fas fa-check-circle text-4xl text-green-600 dark:text-green-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-foreground mb-4">Prescription Verified ✓</h1>
+                <p class="text-green-600 dark:text-green-400 font-semibold mb-8">
+                    This prescription is authentic and verified on blockchain
+                </p>
+            {% else %}
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-yellow-100 dark:bg-yellow-900/30 mb-6">
+                    <i class="fas fa-exclamation-triangle text-4xl text-yellow-600 dark:text-yellow-400"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-foreground mb-4">Prescription Found</h1>
+                <p class="text-yellow-600 dark:text-yellow-400 font-semibold mb-8">
+                    Prescription found but not blockchain verified
+                </p>
+            {% endif %}
+
+            <!-- Prescription Details -->
+            <div class="bg-accent/30 rounded-xl p-6 mb-6 text-left">
+                <h2 class="text-xl font-bold text-foreground mb-4">Prescription Details</h2>
+                
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <p class="text-sm text-muted-foreground mb-1">Prescription ID</p>
+                        <p class="font-mono text-sm">{{ prescription.id }}</p>
+                    </div>
+                    
+                    <div>
+                        <p class="text-sm text-muted-foreground mb-1">Issued Date</p>
+                        <p class="font-medium">{{ issued_date|date:"F d, Y" }}</p>
+                    </div>
+                    
+                    <div>
+                        <p class="text-sm text-muted-foreground mb-1">Patient Name</p>
+                        <p class="font-medium">{{ patient_name }}</p>
+                    </div>
+                    
+                    <div>
+                        <p class="text-sm text-muted-foreground mb-1">Doctor Name</p>
+                        <p class="font-medium">{{ doctor_name }}</p>
+                    </div>
+                </div>
+            </div>
+
+            {% if blockchain_verified %}
+            <!-- Blockchain Verification Details -->
+            <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-6 text-left">
+                <h3 class="text-lg font-bold text-green-800 dark:text-green-300 mb-4 flex items-center gap-2">
+                    <i class="fas fa-shield-alt"></i>
+                    Blockchain Verification
+                </h3>
+                
+                <div class="space-y-3">
+                    <div>
+                        <p class="text-sm text-green-700 dark:text-green-400 mb-1">Transaction Hash</p>
+                        <p class="font-mono text-xs bg-white dark:bg-gray-800 p-2 rounded border break-all">
+                            {{ tx_hash }}
+                        </p>
+                    </div>
+                    
+                    <div>
+                        <p class="text-sm text-green-700 dark:text-green-400 mb-1">Document Hash</p>
+                        <p class="font-mono text-xs bg-white dark:bg-gray-800 p-2 rounded border break-all">
+                            {{ prescription.pdf_hash }}
+                        </p>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
+                        <i class="fas fa-info-circle"></i>
+                        <p>This prescription's authenticity has been permanently recorded on the Ethereum blockchain</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            <div class="mt-8 flex gap-4 justify-center">
+                <a href="{{ request.build_absolute_uri }}" target="_blank" 
+                   class="px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg">
+                    <i class="fas fa-link mr-2"></i>Copy Verification Link
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Info Box -->
+    <div class="mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+        <div class="flex items-start gap-4">
+            <i class="fas fa-info-circle text-2xl text-blue-600 dark:text-blue-400 mt-1"></i>
+            <div>
+                <h3 class="font-bold text-blue-800 dark:text-blue-300 mb-2">About Blockchain Verification</h3>
+                <p class="text-sm text-blue-700 dark:text-blue-400">
+                    RuralCare uses blockchain technology to ensure prescription authenticity. 
+                    Each prescription is hashed and stored immutably on the Ethereum blockchain, 
+                    making it impossible to forge or tamper with medical records.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Copy verification link on click
+document.querySelector('[href="{{ request.build_absolute_uri }}"]')?.addEventListener('click', function(e) {
+    e.preventDefault();
+    navigator.clipboard.writeText('{{ request.build_absolute_uri }}');
+    this.innerHTML = '<i class="fas fa-check mr-2"></i>Link Copied!';
+    setTimeout(() => {
+        this.innerHTML = '<i class="fas fa-link mr-2"></i>Copy Verification Link';
+    }, 2000);
+});
+</script>
+{% endblock %}

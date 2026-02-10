@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Apply for {{ scheme.name }} - Insurance Portal{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Apply for {{ scheme.name }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Full Name *</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="age" class="form-label">Age *</label>
+                            <input type="number" class="form-control" id="age" name="age" min="0" max="120" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="income" class="form-label">Annual Income (₹)</label>
+                            <input type="number" class="form-control" id="income" name="income" step="0.01" min="0">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="state" class="form-label">State *</label>
+                            <input type="text" class="form-control" id="state" name="state" required>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <strong>Note:</strong> This is a basic application. You may be asked to submit additional documents later.
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">Submit Application</button>
+                            <a href="{% url 'insurance:scheme_detail' scheme.id %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

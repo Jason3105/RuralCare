@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ policy.name }} - RuralCare{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Back Button -->
+        <div class="mb-6">
+            <a href="{% url 'insurance:landing' %}" class="inline-flex items-center text-blue-600 hover:text-blue-800">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Back to Insurance
+            </a>
+        </div>
+
+        <!-- Policy Header -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+            <div class="bg-gradient-to-r from-blue-600 to-green-600 px-8 py-12 text-white">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                    <div class="flex-1">
+                        <h1 class="text-4xl font-bold mb-4">{{ policy.name }}</h1>
+                        <p class="text-xl text-blue-100 mb-6">{{ policy.short_description }}</p>
+                        
+                        <div class="flex flex-wrap gap-4">
+                            <div class="bg-white/20 backdrop-blur-sm rounded-lg px-6 py-3">
+                                <div class="text-sm text-blue-100">Monthly Premium</div>
+                                <div class="text-2xl font-bold">₹{{ policy.premium_per_month }}/month</div>
+                            </div>
+                            <div class="bg-white/20 backdrop-blur-sm rounded-lg px-6 py-3">
+                                <div class="text-sm text-blue-100">Coverage Amount</div>
+                                <div class="text-2xl font-bold">₹{{ policy.coverage_amount|floatformat:0 }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 md:mt-0 md:ml-8">
+                        <a href="{% url 'insurance:apply_policy' policy.id %}" 
+                           class="inline-block bg-white text-blue-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transform hover:scale-105 transition-all shadow-xl">
+                            <i class="fas fa-shopping-cart mr-2"></i>Buy Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Description -->
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                        <i class="fas fa-info-circle text-blue-600 mr-2"></i>About This Policy
+                    </h2>
+                    <p class="text-gray-700 leading-relaxed">{{ policy.description }}</p>
+                </div>
+
+                <!-- Key Features -->
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                        <i class="fas fa-star text-yellow-500 mr-2"></i>Key Features
+                    </h2>
+                    <div class="space-y-3">
+                        {% for feature in policy.key_features.splitlines %}
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                            <span class="text-gray-700">{{ feature|slice:"2:" }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Add-ons -->
+                {% if policy.add_ons_available %}
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl shadow-lg p-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                        <i class="fas fa-plus-circle text-purple-600 mr-2"></i>Available Add-ons
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {% for addon in policy.add_ons_available.splitlines %}
+                        <div class="bg-white rounded-lg p-4 flex items-center shadow-sm">
+                            <i class="fas fa-gift text-purple-500 mr-3"></i>
+                            <span class="text-gray-700">{{ addon|slice:"2:" }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- How to Apply -->
+                <div class="bg-blue-50 rounded-xl shadow-lg p-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                        <i class="fas fa-clipboard-list text-blue-600 mr-2"></i>How to Apply
+                    </h2>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold mr-4 flex-shrink-0">1</div>
+                            <div>
+                                <div class="font-semibold text-gray-900">Click "Buy Now"</div>
+                                <div class="text-gray-600">Start your application process</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold mr-4 flex-shrink-0">2</div>
+                            <div>
+                                <div class="font-semibold text-gray-900">Fill Application Form</div>
+                                <div class="text-gray-600">Provide your personal and income details</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold mr-4 flex-shrink-0">3</div>
+                            <div>
+                                <div class="font-semibold text-gray-900">Upload Documents</div>
+                                <div class="text-gray-600">Aadhaar, PAN, income proof, and medical records</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold mr-4 flex-shrink-0">4</div>
+                            <div>
+                                <div class="font-semibold text-gray-900">Submit & Track</div>
+                                <div class="text-gray-600">Submit application and track status in your dashboard</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Quick Info -->
+                <div class="bg-white rounded-xl shadow-lg p-6 sticky top-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Policy Details</h3>
+                    
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center pb-3 border-b">
+                            <span class="text-gray-600">Policy Type</span>
+                            <span class="font-semibold text-gray-900 capitalize">{{ policy.policy_type }}</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center pb-3 border-b">
+                            <span class="text-gray-600">Age Range</span>
+                            <span class="font-semibold text-gray-900">{{ policy.min_age }}-{{ policy.max_age }} years</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center pb-3 border-b">
+                            <span class="text-gray-600">Cashless Hospitals</span>
+                            <span class="font-semibold">
+                                {% if policy.cashless_hospitals %}
+                                <i class="fas fa-check-circle text-green-500"></i> Available
+                                {% else %}
+                                <i class="fas fa-times-circle text-red-500"></i> Not Available
+                                {% endif %}
+                            </span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center pb-3 border-b">
+                            <span class="text-gray-600">Claim Support</span>
+                            <span class="font-semibold">
+                                {% if policy.claim_support %}
+                                <i class="fas fa-check-circle text-green-500"></i> 24/7 Support
+                                {% else %}
+                                <i class="fas fa-times-circle text-red-500"></i> Limited
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-6 border-t">
+                        <a href="{% url 'insurance:apply_policy' policy.id %}" 
+                           class="block w-full bg-gradient-to-r from-blue-600 to-green-600 text-white text-center py-3 rounded-lg font-bold hover:shadow-lg transform hover:scale-105 transition-all">
+                            <i class="fas fa-shopping-cart mr-2"></i>Buy This Policy
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Need Help -->
+                <div class="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Need Help?</h3>
+                    <p class="text-gray-600 mb-4">Our insurance experts are here to assist you</p>
+                    <div class="space-y-2">
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-phone text-orange-500 mr-3"></i>
+                            <span>1800-XXX-XXXX</span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-envelope text-orange-500 mr-3"></i>
+                            <span>support@ruralcare.in</span>
+                        </div>
+                        <div class="flex items-center text-gray-700">
+                            <i class="fas fa-clock text-orange-500 mr-3"></i>
+                            <span>Mon-Sat: 9 AM - 6 PM</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

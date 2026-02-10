@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+
+{% block title %}Prescription{% endblock %}
+
+{% block content %}
+<div class="fade-in max-w-5xl mx-auto">
+    <div class="bg-card border border-border/50 rounded-2xl p-6 sm:p-8 shadow-sm">
+        <div class="flex items-center justify-between mb-6">
+            <h1 class="text-3xl font-bold text-foreground">Prescription Details</h1>
+            <div class="flex gap-3">
+                <a href="{% url 'patient_portal:download_prescription' prescription.id %}" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg">
+                    <i class="fas fa-download mr-2"></i>Download PDF
+                </a>
+            </div>
+        </div>
+
+        <!-- Verification Status -->
+        {% if prescription.is_verified %}
+        <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 mb-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-shield-alt text-2xl text-green-600 dark:text-green-400"></i>
+                    <div>
+                        <p class="font-bold text-green-800 dark:text-green-300">Blockchain Verified</p>
+                        <p class="text-sm text-green-700 dark:text-green-400">This prescription is verified on the blockchain</p>
+                        {% if prescription.blockchain_tx_hash %}
+                        <p class="text-xs text-green-600 dark:text-green-500 mt-1 font-mono">
+                            TX: {{ prescription.blockchain_tx_hash|truncatechars:20 }}
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if prescription.blockchain_tx_hash %}
+                <a href="https://sepolia.etherscan.io/tx/{{ prescription.blockchain_tx_hash }}" 
+                   target="_blank"
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg transition-colors">
+                    <i class="fas fa-external-link-alt"></i>
+                    View on Etherscan
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Patient & Doctor Info -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <!-- Patient Info -->
+            <div class="bg-accent/30 rounded-xl p-4">
+                <h3 class="font-semibold text-lg mb-3 flex items-center gap-2">
+                    <i class="fas fa-user text-primary"></i>
+                    Patient Information
+                </h3>
+                <div class="space-y-2">
+                    <div>
+                        <p class="text-sm text-muted-foreground">Name</p>
+                        <p class="font-medium">{{ prescription.patient.first_name }} {{ prescription.patient.last_name }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-muted-foreground">Email</p>
+                        <p class="font-medium">{{ prescription.patient.email }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Doctor Info -->
+            <div class="bg-accent/30 rounded-xl p-4">
+                <h3 class="font-semibold text-lg mb-3 flex items-center gap-2">
+                    <i class="fas fa-user-md text-primary"></i>
+                    Doctor Information
+                </h3>
+                <div class="space-y-2">
+                    <div>
+                        <p class="text-sm text-muted-foreground">Name</p>
+                        <p class="font-medium">Dr. {{ prescription.doctor.first_name }} {{ prescription.doctor.last_name }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-muted-foreground">Issued On</p>
+                        <p class="font-medium">{{ prescription.created_at|date:"F d, Y" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diagnosis -->
+        {% if prescription.diagnosis %}
+        <div class="mb-6">
+            <h3 class="font-semibold text-lg mb-2">Diagnosis</h3>
+            <div class="bg-accent/30 rounded-xl p-4">
+                <p>{{ prescription.diagnosis }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Medicines -->
+        <div class="mb-6">
+            <h3 class="font-semibold text-lg mb-4">Medicines Prescribed</h3>
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-border overflow-hidden">
+                <table class="w-full">
+                    <thead class="bg-primary text-primary-foreground">
+                        <tr>
+                            <th class="px-4 py-3 text-left">#</th>
+                            <th class="px-4 py-3 text-left">Medicine</th>
+                            <th class="px-4 py-3 text-left">Dosage</th>
+                            <th class="px-4 py-3 text-left">Frequency</th>
+                            <th class="px-4 py-3 text-left">Timing</th>
+                            <th class="px-4 py-3 text-left">Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for medicine in medicines %}
+                        <tr class="border-t border-border {% cycle 'bg-accent/10' '' %}">
+                            <td class="px-4 py-3">{{ forloop.counter }}</td>
+                            <td class="px-4 py-3 font-medium">{{ medicine.medicine_name }}</td>
+                            <td class="px-4 py-3">{{ medicine.dosage }}</td>
+                            <td class="px-4 py-3">{{ medicine.get_frequency_display }}</td>
+                            <td class="px-4 py-3">{{ medicine.get_timing_display }}</td>
+                            <td class="px-4 py-3">{{ medicine.duration_days }} days</td>
+                        </tr>
+                        {% if medicine.instructions %}
+                        <tr class="border-t border-border bg-blue-50 dark:bg-blue-900/10">
+                            <td></td>
+                            <td colspan="5" class="px-4 py-2 text-sm italic">
+                                <i class="fas fa-info-circle text-blue-600 mr-2"></i>{{ medicine.instructions }}
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Additional Notes -->
+        {% if prescription.doctor_notes %}
+        <div class="mb-6">
+            <h3 class="font-semibold text-lg mb-2">Additional Notes</h3>
+            <div class="bg-accent/30 rounded-xl p-4">
+                <p>{{ prescription.doctor_notes }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Follow-up Instructions -->
+        {% if prescription.follow_up_instructions %}
+        <div class="mb-6">
+            <h3 class="font-semibold text-lg mb-2">Follow-up Instructions</h3>
+            <div class="bg-accent/30 rounded-xl p-4">
+                <p>{{ prescription.follow_up_instructions }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Verification QR Code -->
+        {% if prescription.qr_code %}
+        <div class="mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6 text-center">
+            <h3 class="font-semibold text-lg mb-4">Verify This Prescription</h3>
+            <img src="{{ prescription.qr_code.url }}" alt="Verification QR" class="mx-auto w-40 h-40 mb-4">
+            <p class="text-sm text-muted-foreground mb-2">Scan to verify prescription authenticity</p>
+            <a href="{% url 'patient_portal:verify_prescription' prescription.id %}" class="text-primary hover:underline text-sm">
+                {{ prescription.verification_url }}
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

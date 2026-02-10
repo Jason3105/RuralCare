@@ -1,0 +1,295 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Medicine Identifier - Upload{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8">
+    <div class="container mx-auto px-4 max-w-4xl">
+        <!-- Header -->
+        <div class="text-center mb-8 fade-in">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 mb-4">
+                <i class="fas fa-pills text-3xl text-white"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Medicine Identifier</h1>
+            <p class="text-gray-600 dark:text-gray-400">Upload an image of any medicine to get complete details powered by AI</p>
+        </div>
+
+        <!-- Upload Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden fade-in mb-8">
+            <div class="p-8">
+                <form method="POST" enctype="multipart/form-data" id="uploadForm" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <!-- Drop Zone -->
+                    <div id="dropZone" class="relative border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-12 text-center hover:border-blue-500 dark:hover:border-blue-400 transition-all cursor-pointer bg-gray-50 dark:bg-gray-700/50">
+                        <input type="file" name="image" id="imageInput" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required>
+                        
+                        <div id="uploadPlaceholder">
+                            <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 flex items-center justify-center">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-blue-500 dark:text-blue-400"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Drop your medicine image here</h3>
+                            <p class="text-gray-500 dark:text-gray-400 mb-4">or click to browse</p>
+                            <div class="flex flex-wrap justify-center gap-2 text-sm text-gray-400">
+                                <span class="px-2 py-1 bg-gray-100 dark:bg-gray-600 rounded">JPG</span>
+                                <span class="px-2 py-1 bg-gray-100 dark:bg-gray-600 rounded">PNG</span>
+                                <span class="px-2 py-1 bg-gray-100 dark:bg-gray-600 rounded">WEBP</span>
+                                <span class="px-2 py-1 bg-gray-100 dark:bg-gray-600 rounded">Max 10MB</span>
+                            </div>
+                        </div>
+                        
+                        <div id="imagePreview" class="hidden">
+                            <img id="previewImg" src="" alt="Preview" class="max-h-64 mx-auto rounded-lg shadow-lg">
+                            <p id="fileName" class="mt-4 text-gray-700 dark:text-gray-300 font-medium"></p>
+                            <button type="button" id="removeImage" class="mt-2 text-red-500 hover:text-red-600 text-sm">
+                                <i class="fas fa-times mr-1"></i>Remove image
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Supported Medicines Info -->
+                    <div class="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-4">
+                        <h4 class="font-medium text-blue-800 dark:text-blue-300 mb-2">
+                            <i class="fas fa-info-circle mr-2"></i>Supported Medicine Types
+                        </h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-white dark:bg-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-300">
+                                <i class="fas fa-tablets mr-1 text-blue-500"></i>Tablets
+                            </span>
+                            <span class="px-3 py-1 bg-white dark:bg-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-300">
+                                <i class="fas fa-capsules mr-1 text-purple-500"></i>Capsules
+                            </span>
+                            <span class="px-3 py-1 bg-white dark:bg-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-300">
+                                <i class="fas fa-prescription-bottle mr-1 text-green-500"></i>Syrups
+                            </span>
+                            <span class="px-3 py-1 bg-white dark:bg-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-300">
+                                <i class="fas fa-pump-soap mr-1 text-pink-500"></i>Creams/Lotions
+                            </span>
+                            <span class="px-3 py-1 bg-white dark:bg-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-300">
+                                <i class="fas fa-syringe mr-1 text-red-500"></i>Injections
+                            </span>
+                            <span class="px-3 py-1 bg-white dark:bg-gray-700 rounded-full text-sm text-gray-700 dark:text-gray-300">
+                                <i class="fas fa-eye-dropper mr-1 text-cyan-500"></i>Drops
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Tips for Better Results -->
+                    <div class="bg-amber-50 dark:bg-amber-900/30 rounded-xl p-4">
+                        <h4 class="font-medium text-amber-800 dark:text-amber-300 mb-2">
+                            <i class="fas fa-lightbulb mr-2"></i>Tips for Better Results
+                        </h4>
+                        <ul class="text-sm text-amber-700 dark:text-amber-400 space-y-1">
+                            <li><i class="fas fa-check mr-2 text-amber-500"></i>Use good lighting and avoid shadows</li>
+                            <li><i class="fas fa-check mr-2 text-amber-500"></i>Make sure the medicine name and dosage are clearly visible</li>
+                            <li><i class="fas fa-check mr-2 text-amber-500"></i>Capture the full medicine packaging or label</li>
+                            <li><i class="fas fa-check mr-2 text-amber-500"></i>Avoid blurry or tilted images</li>
+                        </ul>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" id="submitBtn" class="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                        <span id="submitText">
+                            <i class="fas fa-search mr-2"></i>Identify Medicine
+                        </span>
+                        <span id="loadingText" class="hidden">
+                            <i class="fas fa-spinner fa-spin mr-2"></i>Analyzing image...
+                        </span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- How It Works -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden fade-in mb-8">
+            <div class="p-8">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 text-center">How It Works</h2>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="text-center">
+                        <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                            <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">1</span>
+                        </div>
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Upload Image</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Take a clear photo of your medicine package, tablet strip, or bottle label</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
+                            <span class="text-2xl font-bold text-purple-600 dark:text-purple-400">2</span>
+                        </div>
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-2">AI Analysis</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Our OpenCV & AI system extracts text and analyzes visual features</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                            <span class="text-2xl font-bold text-green-600 dark:text-green-400">3</span>
+                        </div>
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Get Details</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Receive comprehensive information about uses, side effects, warnings & more</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Identifications -->
+        {% if recent_identifications %}
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden fade-in">
+            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-bold text-gray-900 dark:text-white">
+                        <i class="fas fa-history mr-2 text-gray-500"></i>Recent Identifications
+                    </h2>
+                    <a href="{% url 'medicine_identifier:history' %}" class="text-blue-600 dark:text-blue-400 hover:underline text-sm">
+                        View All <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="divide-y divide-gray-200 dark:divide-gray-700">
+                {% for item in recent_identifications %}
+                <a href="{% url 'medicine_identifier:result' item.id %}" class="block p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
+                            {% if item.image %}
+                            <img src="{{ item.image.url }}" alt="Medicine" class="w-full h-full object-cover">
+                            {% else %}
+                            <div class="w-full h-full flex items-center justify-center">
+                                <i class="fas fa-pills text-gray-400"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-medium text-gray-900 dark:text-white truncate">
+                                {{ item.medicine_name|default:"Unknown Medicine" }}
+                            </h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                {{ item.created_at|date:"M d, Y H:i" }}
+                            </p>
+                        </div>
+                        <div>
+                            {% if item.status == 'completed' and item.identification_confidence >= 0.6 %}
+                            <span class="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300 text-xs rounded-full">
+                                Identified
+                            </span>
+                            {% elif item.status == 'completed' %}
+                            <span class="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300 text-xs rounded-full">
+                                Partial
+                            </span>
+                            {% elif item.status == 'invalid_image' %}
+                            <span class="px-2 py-1 bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-300 text-xs rounded-full">
+                                Invalid Image
+                            </span>
+                            {% elif item.status == 'failed' %}
+                            <span class="px-2 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-300 text-xs rounded-full">
+                                Failed
+                            </span>
+                            {% else %}
+                            <span class="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 text-xs rounded-full">
+                                {{ item.status|title }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Disclaimer -->
+        <div class="mt-8 p-4 bg-yellow-50 dark:bg-yellow-900/30 rounded-xl">
+            <p class="text-sm text-yellow-800 dark:text-yellow-300 text-center">
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                <strong>Important:</strong> This tool is for informational purposes only. Always consult a healthcare professional before taking any medication.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dropZone = document.getElementById('dropZone');
+    const imageInput = document.getElementById('imageInput');
+    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    const fileName = document.getElementById('fileName');
+    const removeImage = document.getElementById('removeImage');
+    const uploadForm = document.getElementById('uploadForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const submitText = document.getElementById('submitText');
+    const loadingText = document.getElementById('loadingText');
+
+    // Handle drag and drop
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight(e) {
+        dropZone.classList.add('border-blue-500', 'bg-blue-50', 'dark:bg-blue-900/30');
+    }
+
+    function unhighlight(e) {
+        dropZone.classList.remove('border-blue-500', 'bg-blue-50', 'dark:bg-blue-900/30');
+    }
+
+    dropZone.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length) {
+            imageInput.files = files;
+            showPreview(files[0]);
+        }
+    }
+
+    // Handle file selection
+    imageInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            showPreview(this.files[0]);
+        }
+    });
+
+    function showPreview(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            fileName.textContent = file.name;
+            uploadPlaceholder.classList.add('hidden');
+            imagePreview.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Remove image
+    removeImage.addEventListener('click', function(e) {
+        e.stopPropagation();
+        imageInput.value = '';
+        previewImg.src = '';
+        fileName.textContent = '';
+        uploadPlaceholder.classList.remove('hidden');
+        imagePreview.classList.add('hidden');
+    });
+
+    // Handle form submission
+    uploadForm.addEventListener('submit', function() {
+        submitBtn.disabled = true;
+        submitText.classList.add('hidden');
+        loadingText.classList.remove('hidden');
+    });
+});
+</script>
+{% endblock %}

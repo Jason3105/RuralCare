@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+
+{% block title %}Data Analysis Dashboard{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold text-foreground mb-3">Data Analysis Dashboard</h1>
+        <p class="text-lg text-muted-foreground">View and analyze your histopathology reports and genomic profiles</p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="bg-card border border-border/50 rounded-xl shadow-sm p-6 hover:shadow-xl transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-muted-foreground font-medium mb-2">Histopathology Reports</p>
+                    <p class="text-4xl font-bold text-primary">{{ histopathology_reports.count }}</p>
+                </div>
+                <div class="bg-primary/10 rounded-xl p-4">
+                    <i class="fas fa-microscope text-3xl text-primary"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-card border border-border/50 rounded-xl shadow-sm p-6 hover:shadow-xl transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-muted-foreground font-medium mb-2">Genomic Profiles</p>
+                    <p class="text-4xl font-bold text-primary">{{ genomic_profiles.count }}</p>
+                </div>
+                <div class="bg-primary/10 rounded-xl p-4">
+                    <i class="fas fa-dna text-3xl text-primary"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Histopathology Reports Section -->
+    <div class="mb-10">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-foreground">Histopathology Reports</h2>
+            <a href="{% url 'cancer_detection:upload_histopathology' %}" 
+               class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all duration-300 flex items-center space-x-2">
+                <i class="fas fa-plus"></i>
+                <span>Upload New Report</span>
+            </a>
+        </div>
+
+        {% if histopathology_reports %}
+            <div class="grid grid-cols-1 gap-4">
+                {% for report in histopathology_reports %}
+                <div class="bg-card border border-border/50 rounded-xl shadow-sm p-6 hover:shadow-xl transition-all duration-300">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-3 mb-3">
+                                <h3 class="text-xl font-semibold text-foreground">{{ report.cancer_type|default:"Cancer Type Not Specified" }}</h3>
+                                {% if report.grade %}
+                                    <span class="px-3 py-1 bg-primary/10 text-primary text-sm font-medium rounded-full">
+                                        Grade {{ report.grade }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                {% if report.tumor_size %}
+                                <div class="flex items-center space-x-2 text-sm">
+                                    <span class="text-muted-foreground">Tumor Size:</span>
+                                    <span class="font-medium text-foreground">{{ report.tumor_size }}</span>
+                                </div>
+                                {% endif %}
+                                
+                                {% if report.stage %}
+                                <div class="flex items-center space-x-2 text-sm">
+                                    <span class="text-muted-foreground">Stage:</span>
+                                    <span class="font-medium text-foreground">{{ report.stage }}</span>
+                                </div>
+                                {% endif %}
+                                
+                                {% if report.lymph_node_involvement %}
+                                <div class="flex items-center space-x-2 text-sm">
+                                    <span class="text-muted-foreground">Lymph Nodes:</span>
+                                    <span class="font-medium text-foreground">{{ report.lymph_node_involvement }}</span>
+                                </div>
+                                {% endif %}
+                                
+                                <div class="flex items-center space-x-2 text-sm">
+                                    <span class="text-muted-foreground">Date:</span>
+                                    <span class="font-medium text-foreground">{{ report.created_at|date:"M d, Y" }}</span>
+                                </div>
+                            </div>
+                            
+                            {% if report.diagnosis %}
+                            <div class="mb-3">
+                                <p class="text-sm text-muted-foreground mb-1">Diagnosis:</p>
+                                <p class="text-sm text-foreground">{{ report.diagnosis|truncatewords:30 }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <a href="{% url 'cancer_detection:histopathology_detail' report.id %}" 
+                           class="ml-4 px-4 py-2 bg-accent/50 hover:bg-accent text-foreground rounded-lg transition-all duration-300 text-sm font-medium">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="mt-6 text-center">
+                <a href="{% url 'cancer_detection:histopathology_list' %}" 
+                   class="text-primary hover:text-primary/80 font-medium transition-colors">
+                    View All Histopathology Reports →
+                </a>
+            </div>
+        {% else %}
+            <div class="bg-card border border-border/50 rounded-xl shadow-sm p-12 text-center">
+                <i class="fas fa-microscope text-6xl text-muted-foreground/30 mb-4"></i>
+                <p class="text-muted-foreground mb-4">No histopathology reports found</p>
+                <a href="{% url 'cancer_detection:upload_histopathology' %}" 
+                   class="inline-block px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all duration-300">
+                    Upload Your First Report
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Genomic Profiles Section -->
+    <div class="mb-10">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-foreground">Genomic Profiles</h2>
+            <a href="{% url 'cancer_detection:upload_genomic' %}" 
+               class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all duration-300 flex items-center space-x-2">
+                <i class="fas fa-plus"></i>
+                <span>Upload New Profile</span>
+            </a>
+        </div>
+
+        {% if genomic_profiles %}
+            <div class="grid grid-cols-1 gap-4">
+                {% for profile in genomic_profiles %}
+                <div class="bg-card border border-border/50 rounded-xl shadow-sm p-6 hover:shadow-xl transition-all duration-300">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <h3 class="text-xl font-semibold text-foreground">Genomic Profile</h3>
+                                <span class="text-sm text-muted-foreground">{{ profile.analyzed_at|date:"M d, Y" }}</span>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                {% if profile.mutations %}
+                                <div>
+                                    <p class="text-sm text-muted-foreground mb-2">Mutations Detected:</p>
+                                    <div class="flex flex-wrap gap-2">
+                                        {% for mutation, value in profile.mutations.items %}
+                                        <span class="px-2 py-1 bg-red-500/10 text-red-600 dark:text-red-400 text-xs font-medium rounded">
+                                            {{ mutation }}: {{ value }}
+                                        </span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                {% if profile.biomarkers %}
+                                <div>
+                                    <p class="text-sm text-muted-foreground mb-2">Biomarkers:</p>
+                                    <div class="flex flex-wrap gap-2">
+                                        {% for marker, value in profile.biomarkers.items %}
+                                        <span class="px-2 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-medium rounded">
+                                            {{ marker }}: {{ value }}
+                                        </span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                                {% if profile.pd_l1_status %}
+                                <div>
+                                    <span class="text-muted-foreground">PD-L1:</span>
+                                    <span class="font-medium text-foreground ml-1">{{ profile.pd_l1_status }}</span>
+                                </div>
+                                {% endif %}
+                                
+                                {% if profile.msi_status %}
+                                <div>
+                                    <span class="text-muted-foreground">MSI:</span>
+                                    <span class="font-medium text-foreground ml-1">{{ profile.msi_status }}</span>
+                                </div>
+                                {% endif %}
+                                
+                                {% if profile.tumor_mutational_burden %}
+                                <div>
+                                    <span class="text-muted-foreground">TMB:</span>
+                                    <span class="font-medium text-foreground ml-1">{{ profile.tumor_mutational_burden }}</span>
+                                </div>
+                                {% endif %}
+                                
+                                {% if profile.test_type %}
+                                <div>
+                                    <span class="text-muted-foreground">Test:</span>
+                                    <span class="font-medium text-foreground ml-1">{{ profile.test_type }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <a href="{% url 'cancer_detection:genomic_detail' profile.id %}" 
+                           class="ml-4 px-4 py-2 bg-accent/50 hover:bg-accent text-foreground rounded-lg transition-all duration-300 text-sm font-medium">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="mt-6 text-center">
+                <a href="{% url 'cancer_detection:genomic_list' %}" 
+                   class="text-primary hover:text-primary/80 font-medium transition-colors">
+                    View All Genomic Profiles →
+                </a>
+            </div>
+        {% else %}
+            <div class="bg-card border border-border/50 rounded-xl shadow-sm p-12 text-center">
+                <i class="fas fa-dna text-6xl text-muted-foreground/30 mb-4"></i>
+                <p class="text-muted-foreground mb-4">No genomic profiles found</p>
+                <a href="{% url 'cancer_detection:upload_genomic' %}" 
+                   class="inline-block px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all duration-300">
+                    Upload Your First Profile
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

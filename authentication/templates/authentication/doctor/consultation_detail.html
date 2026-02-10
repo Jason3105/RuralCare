@@ -1,0 +1,320 @@
+{% extends 'base.html' %}
+{% block title %}Consultation Details{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <nav class="mb-4">
+            <a href="{% url 'doctor_consultation_dashboard' %}" class="text-primary hover:underline text-sm">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+            </a>
+        </nav>
+
+        <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-foreground">Consultation Details</h1>
+                <p class="text-muted-foreground mt-1">View and manage consultation information</p>
+            </div>
+            <div class="flex gap-3">
+                {% if consultation.status == 'scheduled' %}
+                <a href="{% url 'patient_portal:initiate_call' consultation.id %}" 
+                   class="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-all inline-flex items-center gap-2">
+                    <i class="fas fa-video"></i>
+                    <span>Start Call</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Status Badge -->
+        <div class="mb-6">
+            {% if consultation.status == 'scheduled' %}
+            <span class="inline-flex items-center px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg font-semibold">
+                <i class="fas fa-clock mr-2"></i>Scheduled
+            </span>
+            {% elif consultation.status == 'completed' %}
+            <span class="inline-flex items-center px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg font-semibold">
+                <i class="fas fa-check-circle mr-2"></i>Completed
+            </span>
+            {% elif consultation.status == 'cancelled' %}
+            <span class="inline-flex items-center px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg font-semibold">
+                <i class="fas fa-times-circle mr-2"></i>Cancelled
+            </span>
+            {% endif %}
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Patient Information -->
+                <div class="bg-card border border-border/50 rounded-xl p-6">
+                    <h2 class="text-xl font-semibold text-foreground mb-4 flex items-center">
+                        <i class="fas fa-user-circle text-primary mr-2"></i>Patient Information
+                    </h2>
+                    <div class="flex items-start space-x-4">
+                        {% if consultation.patient.profile_picture %}
+                        <img src="{{ consultation.patient.profile_picture }}" alt="{{ consultation.patient.first_name }}" 
+                             class="w-20 h-20 rounded-full object-cover">
+                        {% else %}
+                        <div class="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center">
+                            <span class="text-2xl font-bold text-primary">
+                                {{ consultation.patient.first_name.0 }}{{ consultation.patient.last_name.0 }}
+                            </span>
+                        </div>
+                        {% endif %}
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-foreground text-xl">
+                                {{ consultation.patient.first_name }} {{ consultation.patient.last_name }}
+                            </h3>
+                            <p class="text-sm text-muted-foreground mt-1">{{ consultation.patient.email }}</p>
+                            {% if consultation.patient.phone_number %}
+                            <p class="text-sm text-muted-foreground mt-1">
+                                <i class="fas fa-phone mr-1"></i>{{ consultation.patient.phone_number }}
+                            </p>
+                            {% endif %}
+                            {% if consultation.patient.date_of_birth %}
+                            <p class="text-sm text-muted-foreground mt-1">
+                                <i class="fas fa-birthday-cake mr-1"></i>{{ consultation.patient.date_of_birth|date:"M d, Y" }}
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Consultation Information -->
+                <div class="bg-card border border-border/50 rounded-xl p-6">
+                    <h2 class="text-xl font-semibold text-foreground mb-4 flex items-center">
+                        <i class="fas fa-calendar-alt text-primary mr-2"></i>Consultation Information
+                    </h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="p-4 bg-accent/30 rounded-lg">
+                            <p class="text-sm text-muted-foreground mb-1">Scheduled Date & Time</p>
+                            <p class="text-foreground font-semibold">
+                                {{ consultation.scheduled_datetime|date:"M d, Y" }} at {{ consultation.scheduled_datetime|date:"g:i A" }}
+                            </p>
+                        </div>
+                        <div class="p-4 bg-accent/30 rounded-lg">
+                            <p class="text-sm text-muted-foreground mb-1">Consultation Type</p>
+                            <p class="text-foreground font-semibold">
+                                {% if consultation.mode == 'video' %}
+                                <i class="fas fa-video text-blue-500 mr-1"></i>Video Call
+                                {% else %}
+                                <i class="fas fa-phone text-green-500 mr-1"></i>Phone Call
+                                {% endif %}
+                            </p>
+                        </div>
+                        {% if consultation.started_at %}
+                        <div class="p-4 bg-accent/30 rounded-lg">
+                            <p class="text-sm text-muted-foreground mb-1">Started At</p>
+                            <p class="text-foreground font-semibold">
+                                {{ consultation.started_at|date:"M d, Y g:i A" }}
+                            </p>
+                        </div>
+                        {% endif %}
+                        {% if consultation.completed_at %}
+                        <div class="p-4 bg-accent/30 rounded-lg">
+                            <p class="text-sm text-muted-foreground mb-1">Completed At</p>
+                            <p class="text-foreground font-semibold">
+                                {{ consultation.completed_at|date:"M d, Y g:i A" }}
+                            </p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Medical Notes Form -->
+                <form method="post" class="bg-card border border-border/50 rounded-xl p-6">
+                    {% csrf_token %}
+                    <h2 class="text-xl font-semibold text-foreground mb-4 flex items-center">
+                        <i class="fas fa-notes-medical text-primary mr-2"></i>Medical Notes & Prescription
+                    </h2>
+                    
+                    
+                    <!-- Check if prescriptions exist -->
+                    {% if consultation.prescriptions.exists %}
+                    <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 mb-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <p class="font-semibold text-green-800 dark:text-green-300">
+                                <i class="fas fa-file-prescription mr-2"></i>Prescriptions ({{ consultation.prescriptions.count }})
+                            </p>
+                            <a href="{% url 'patient_portal:create_prescription' consultation.id %}" 
+                               class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold text-sm">
+                                <i class="fas fa-plus mr-1"></i>New Prescription
+                            </a>
+                        </div>
+                        <div class="space-y-2">
+                            {% for prescription in consultation.prescriptions.all %}
+                            <div class="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-green-200 dark:border-green-700">
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                        {{ prescription.created_at|date:"M d, Y g:i A" }}
+                                        {% if prescription.is_verified %}
+                                        <i class="fas fa-shield-check text-green-600 ml-2" title="Blockchain Verified"></i>
+                                        {% endif %}
+                                    </p>
+                                    <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">{{ prescription.diagnosis|truncatewords:10 }}</p>
+                                </div>
+                                <div class="flex gap-2">
+                                    <a href="{% url 'patient_portal:view_prescription' prescription.id %}" 
+                                       class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold">
+                                        <i class="fas fa-eye mr-1"></i>View
+                                    </a>
+                                    <a href="{% url 'patient_portal:download_prescription' prescription.id %}" 
+                                       class="px-3 py-1.5 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-xs font-semibold">
+                                        <i class="fas fa-download mr-1"></i>PDF
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% else %}
+                    <!-- Show prescription creation button if consultation is scheduled or completed -->
+                    {% if consultation.status == 'scheduled' or consultation.status == 'completed' %}
+                    <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-4">
+                        <p class="text-sm text-blue-700 dark:text-blue-400 mb-3">
+                            <i class="fas fa-info-circle mr-2"></i>Create a detailed prescription with medicines, dosages, and blockchain verification
+                        </p>
+                        <a href="{% url 'patient_portal:create_prescription' consultation.id %}" 
+                           class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold">
+                            <i class="fas fa-file-prescription mr-2"></i>Create Prescription
+                        </a>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                    
+                    <div class="space-y-4">
+                        <!-- Doctor's Notes -->
+                        <div>
+                            <label for="doctor_notes" class="block text-sm font-medium text-foreground mb-2">
+                                Doctor's Notes
+                            </label>
+                            <textarea 
+                                id="doctor_notes" 
+                                name="doctor_notes" 
+                                rows="6"
+                                class="w-full px-4 py-3 bg-background border border-border/50 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-foreground"
+                                placeholder="Enter your consultation notes, observations, and recommendations..."
+                                {% if consultation.status == 'completed' and not request.user == consultation.doctor %}disabled{% endif %}
+                            >{{ consultation.doctor_notes }}</textarea>
+                        </div>
+
+                        <!-- Prescription (Legacy - kept for backward compatibility) -->
+                        <div>
+                            <label for="prescription" class="block text-sm font-medium text-foreground mb-2">
+                                Quick Prescription Notes
+                                <span class="text-xs text-muted-foreground ml-2">(For detailed prescription, use "Create Prescription" button above)</span>
+                            </label>
+                            <textarea 
+                                id="prescription" 
+                                name="prescription" 
+                                rows="4"
+                                class="w-full px-4 py-3 bg-background border border-border/50 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-foreground"
+                                placeholder="Quick prescription notes..."
+                                {% if consultation.status == 'completed' and not request.user == consultation.doctor %}disabled{% endif %}
+                            >{{ consultation.prescription }}</textarea>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        {% if consultation.status != 'completed' %}
+                        <div class="flex flex-col sm:flex-row gap-3 pt-4">
+                            <button type="submit" name="save_notes"
+                                    class="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-3 rounded-lg transition-all inline-flex items-center justify-center gap-2">
+                                <i class="fas fa-save"></i>
+                                <span>Save Notes</span>
+                            </button>
+                            <button type="submit" name="mark_completed"
+                                    class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg transition-all inline-flex items-center justify-center gap-2">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Mark as Completed</span>
+                            </button>
+                        </div>
+                        {% else %}
+                        <div class="p-4 bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg">
+                            <p class="text-green-700 dark:text-green-400 text-sm font-medium">
+                                <i class="fas fa-info-circle mr-2"></i>This consultation has been completed.
+                            </p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Quick Actions -->
+                <div class="bg-card border border-border/50 rounded-xl p-6">
+                    <h3 class="text-lg font-semibold text-foreground mb-4">Quick Actions</h3>
+                    <div class="space-y-3">
+                        {% if consultation.status == 'scheduled' %}
+                        <a href="{% url 'patient_portal:initiate_call' consultation.id %}" 
+                           class="w-full flex items-center justify-between p-3 bg-green-600/10 hover:bg-green-600/20 border border-green-600/20 rounded-lg transition-all group">
+                            <span class="text-green-700 dark:text-green-400 font-medium">Start Video Call</span>
+                            <i class="fas fa-video text-green-600 group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'doctor_consultations' %}" 
+                           class="w-full flex items-center justify-between p-3 bg-accent/30 hover:bg-accent/50 rounded-lg transition-all group">
+                            <span class="text-foreground font-medium">All Consultations</span>
+                            <i class="fas fa-list text-primary group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                        <a href="{% url 'doctor_consultation_dashboard' %}" 
+                           class="w-full flex items-center justify-between p-3 bg-accent/30 hover:bg-accent/50 rounded-lg transition-all group">
+                            <span class="text-foreground font-medium">Dashboard</span>
+                            <i class="fas fa-home text-primary group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Timeline -->
+                <div class="bg-card border border-border/50 rounded-xl p-6">
+                    <h3 class="text-lg font-semibold text-foreground mb-4">Timeline</h3>
+                    <div class="space-y-4">
+                        {% if consultation.created_at %}
+                        <div class="flex gap-3">
+                            <div class="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-blue-500"></div>
+                            <div>
+                                <p class="text-sm font-medium text-foreground">Created</p>
+                                <p class="text-xs text-muted-foreground">{{ consultation.created_at|date:"M d, Y g:i A" }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if consultation.started_at %}
+                        <div class="flex gap-3">
+                            <div class="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-green-500"></div>
+                            <div>
+                                <p class="text-sm font-medium text-foreground">Started</p>
+                                <p class="text-xs text-muted-foreground">{{ consultation.started_at|date:"M d, Y g:i A" }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if consultation.completed_at %}
+                        <div class="flex gap-3">
+                            <div class="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-purple-500"></div>
+                            <div>
+                                <p class="text-sm font-medium text-foreground">Completed</p>
+                                <p class="text-xs text-muted-foreground">{{ consultation.completed_at|date:"M d, Y g:i A" }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Consultation Stats -->
+                {% if consultation.started_at and consultation.completed_at %}
+                <div class="bg-card border border-border/50 rounded-xl p-6">
+                    <h3 class="text-lg font-semibold text-foreground mb-4">Duration</h3>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-primary">
+                            {% widthratio consultation.completed_at|timeuntil:consultation.started_at 1 60 %} min
+                        </div>
+                        <p class="text-sm text-muted-foreground mt-1">Total consultation time</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Eligibility Results - Insurance Portal{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">Your Eligibility Results</h4>
+                </div>
+                <div class="card-body">
+                    <p><strong>Age:</strong> {{ age }} years</p>
+                    <p><strong>Annual Income:</strong> ₹{{ income|floatformat:0 }}</p>
+                    <p><strong>State:</strong> {{ state }}</p>
+                </div>
+            </div>
+            
+            {% if eligible_schemes %}
+            <h3 class="mb-3">You are eligible for {{ eligible_schemes|length }} scheme(s):</h3>
+            
+            <div class="row">
+                {% for scheme in eligible_schemes %}
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 border-success">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ scheme.name }}</h5>
+                            <p class="card-text">{{ scheme.short_description }}</p>
+                            <div class="mb-2">
+                                <span class="badge bg-primary">{{ scheme.get_scheme_type_display }}</span>
+                                {% if scheme.state %}<span class="badge bg-secondary">{{ scheme.state }}</span>{% endif %}
+                                <span class="badge bg-success">✓ Eligible</span>
+                            </div>
+                            <p class="text-success mb-2">
+                                <strong>Coverage:</strong> ₹{{ scheme.coverage_amount|floatformat:0 }}
+                            </p>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{% url 'insurance:scheme_detail' scheme.id %}" class="btn btn-sm btn-primary">View Details</a>
+                            {% if user.is_authenticated %}
+                            <a href="{% url 'insurance:apply_scheme' scheme.id %}" class="btn btn-sm btn-success">Apply Now</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                <h5>No schemes found</h5>
+                <p>Unfortunately, we couldn't find any schemes matching your criteria at this time.</p>
+                <p>Please check back later or try adjusting your details.</p>
+            </div>
+            {% endif %}
+            
+            <div class="mt-4">
+                <a href="{% url 'insurance:check_eligibility' %}" class="btn btn-secondary">Check Again</a>
+                <a href="{% url 'insurance:government_schemes' %}" class="btn btn-primary">View All Schemes</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

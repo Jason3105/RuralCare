@@ -1,0 +1,11 @@
+{
+  "contract_name": "PrescriptionVerifier",
+  "contract_address": "0x59bbb036024215F5905449a62c42b6B1E520535A",
+  "transaction_hash": "0xb63591993e129dad8c82f58ac7debe877488fd58ecfc1464b4b9eadeed956cf7",
+  "block_number": 10099512,
+  "deployer": "0xceB0045BFD429eC942aDEc9e84B1F0f2c52C29AD",
+  "network": "sepolia",
+  "chain_id": 11155111,
+  "gas_used": 1382839,
+  "etherscan_url": "https://sepolia.etherscan.io/address/0x59bbb036024215F5905449a62c42b6B1E520535A"
+}

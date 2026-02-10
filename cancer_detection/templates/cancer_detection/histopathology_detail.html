@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block title %}Histopathology Report Details{% endblock %}
+
+{% block content %}
+<div class="fade-in max-w-6xl mx-auto">
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-3xl sm:text-4xl font-bold text-foreground mb-2">Histopathology Report</h1>
+            <p class="text-muted-foreground">Uploaded on {{ report.created_at|date:"F d, Y" }}</p>
+        </div>
+        <div class="mt-4 sm:mt-0 flex gap-3">
+            <a href="{% url 'cancer_detection:histopathology_list' %}" 
+               class="bg-card border-2 border-border hover:border-primary text-foreground font-semibold py-2 px-4 rounded-lg transition-all">
+                <i class="fas fa-arrow-left mr-2"></i>Back to List
+            </a>
+            {% if report.status == 'analyzed' %}
+            <a href="{% url 'cancer_detection:create_comprehensive_plan' %}" 
+               class="bg-gradient-to-r from-green-500 to-green-600 hover:shadow-xl text-white font-semibold py-2 px-4 rounded-lg transition-all">
+                <i class="fas fa-project-diagram mr-2"></i>Use in Plan
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Status Badge -->
+    <div class="mb-6">
+        {% if report.status == 'analyzed' %}
+        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+            <i class="fas fa-check-circle mr-2"></i>Analyzed
+        </span>
+        {% elif report.status == 'analyzing' %}
+        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+            <i class="fas fa-spinner fa-spin mr-2"></i>Analyzing
+        </span>
+        {% endif %}
+        {% if report.analysis_confidence %}
+        <span class="ml-3 inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary">
+            Confidence: {{ report.analysis_confidence|floatformat:0 }}%
+        </span>
+        {% endif %}
+    </div>
+
+    {% if report %}
+    <!-- Extracted Information -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <!-- Cancer Information -->
+        <div class="bg-card border border-border/50 rounded-2xl p-6">
+            <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
+                <i class="fas fa-info-circle text-primary mr-2"></i>Cancer Information
+            </h2>
+            <div class="space-y-3">
+                {% if report.cancer_type %}
+                <div class="flex justify-between">
+                    <span class="text-muted-foreground">Type:</span>
+                    <span class="font-semibold text-foreground">{{ report.cancer_type|title }}</span>
+                </div>
+                {% endif %}
+                {% if report.cancer_subtype %}
+                <div class="flex justify-between">
+                    <span class="text-muted-foreground">Subtype:</span>
+                    <span class="font-semibold text-foreground">{{ report.cancer_subtype }}</span>
+                </div>
+                {% endif %}
+                {% if report.grade %}
+                <div class="flex justify-between">
+                    <span class="text-muted-foreground">Grade:</span>
+                    <span class="font-semibold text-foreground">{{ report.grade }}</span>
+                </div>
+                {% endif %}
+                {% if report.stage %}
+                <div class="flex justify-between">
+                    <span class="text-muted-foreground">Stage:</span>
+                    <span class="font-semibold text-foreground">Stage {{ report.stage }}</span>
+                </div>
+                {% endif %}
+                {% if report.tnm_staging %}
+                <div class="flex justify-between">
+                    <span class="text-muted-foreground">TNM:</span>
+                    <span class="font-semibold text-foreground">{{ report.tnm_staging }}</span>
+                </div>
+                {% endif %}
+                {% if report.tumor_size_mm %}
+                <div class="flex justify-between">
+                    <span class="text-muted-foreground">Tumor Size:</span>
+                    <span class="font-semibold text-foreground">{{ report.tumor_size_mm|floatformat:1 }} mm</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Surgical Information -->
+        <div class="bg-card border border-border/50 rounded-2xl p-6">
+            <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
+                <i class="fas fa-cut text-primary mr-2"></i>Surgical Information
+            </h2>
+            <div class="space-y-3">
+                {% if report.margin_status %}
+                <div class="flex justify-between">
+                    <span class="text-muted-foreground">Margins:</span>
+                    <span class="font-semibold text-foreground {% if report.margin_status == 'negative' %}text-green-600{% else %}text-red-600{% endif %}">
+                        {{ report.margin_status|title }}
+                    </span>
+                </div>
+                {% endif %}
+                {% if report.lymph_node_status %}
+                <div class="flex justify-between">
+                    <span class="text-muted-foreground">Lymph Nodes:</span>
+                    <span class="font-semibold text-foreground">
+                        {% if report.lymph_node_status.involved %}
+                            {{ report.lymph_node_status.positive_count|default:"Positive" }} of {{ report.lymph_node_status.total_count|default:"" }} positive
+                        {% else %}
+                            Negative
+                        {% endif %}
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Biomarkers -->
+    {% if report.biomarkers %}
+    <div class="bg-card border border-border/50 rounded-2xl p-6 mb-8">
+        <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
+            <i class="fas fa-dna text-primary mr-2"></i>Biomarkers
+        </h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {% for biomarker, value in report.biomarkers.items %}
+            <div class="bg-background rounded-lg p-4">
+                <div class="text-sm text-muted-foreground mb-1">{{ biomarker|upper }}</div>
+                <div class="font-semibold text-foreground">
+                    {% if value.status %}
+                        {{ value.status|title }}
+                    {% elif value.percentage %}
+                        {{ value.percentage }}%
+                    {% else %}
+                        {{ value|title }}
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Additional Findings -->
+    {% if analysis_data.additional_findings %}
+    <div class="bg-card border border-border/50 rounded-2xl p-6 mb-8">
+        <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
+            <i class="fas fa-search text-primary mr-2"></i>Additional Findings
+        </h2>
+        <div class="flex flex-wrap gap-2">
+            {% for finding in analysis_data.additional_findings %}
+            <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-semibold">
+                {{ finding|title }}
+            </span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Raw Report Text -->
+    {% if report.report_text %}
+    <div class="bg-card border border-border/50 rounded-2xl p-6">
+        <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
+            <i class="fas fa-file-alt text-primary mr-2"></i>Report Text
+        </h2>
+        <div class="bg-background rounded-lg p-4 max-h-96 overflow-y-auto">
+            <pre class="text-sm text-foreground whitespace-pre-wrap font-mono">{{ report.report_text }}</pre>
+        </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="bg-card border border-border/50 rounded-2xl p-12 text-center">
+        <i class="fas fa-exclamation-circle text-4xl text-yellow-500 mb-4"></i>
+        <h3 class="text-xl font-bold text-foreground mb-2">Report Not Found</h3>
+        <p class="text-muted-foreground">The report could not be loaded</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

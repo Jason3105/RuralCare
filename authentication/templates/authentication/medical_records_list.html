@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+
+{% block title %}My Medical Records{% endblock %}
+
+{% block content %}
+<div class="fade-in max-w-7xl mx-auto py-8">
+    <!-- Header -->
+    <div class="mb-6 sm:mb-8">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+            <div>
+                <h1 class="text-3xl sm:text-4xl font-bold text-foreground mb-2">Medical Records</h1>
+                <p class="text-sm sm:text-base text-muted-foreground">Manage and view your medical documents with AI-powered insights</p>
+            </div>
+            <a href="{% url 'upload_medical_record' %}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-primary to-primary/90 hover:shadow-xl text-primary-foreground font-bold rounded-xl transition-all duration-200 hover:scale-105">
+                <i class="fas fa-plus mr-2"></i>
+                Upload Record
+            </a>
+        </div>
+    </div>
+
+    {% if records %}
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-muted-foreground mb-1">Total Records</p>
+                        <p class="text-3xl font-bold text-foreground">{{ total_records }}</p>
+                    </div>
+                    <div class="bg-blue-500/10 dark:bg-blue-500/20 p-3 rounded-xl">
+                        <i class="fas fa-file-medical text-2xl text-blue-600 dark:text-blue-400"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-muted-foreground mb-1">Processed</p>
+                        <p class="text-3xl font-bold text-foreground">{{ completed_records }}</p>
+                    </div>
+                    <div class="bg-green-500/10 dark:bg-green-500/20 p-3 rounded-xl">
+                        <i class="fas fa-check-circle text-2xl text-green-600 dark:text-green-400"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-muted-foreground mb-1">Processing</p>
+                        <p class="text-3xl font-bold text-foreground">{{ processing_records }}</p>
+                    </div>
+                    <div class="bg-yellow-500/10 dark:bg-yellow-500/20 p-3 rounded-xl">
+                        <i class="fas fa-spinner text-2xl text-yellow-600 dark:text-yellow-400"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Records Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {% for record in records %}
+            <a href="{% url 'medical_record_detail' record.id %}" class="block bg-card border border-border/50 rounded-2xl overflow-hidden hover:shadow-lg hover:border-primary transition-all duration-200 group">
+                <!-- Card Header -->
+                <div class="bg-gradient-to-r from-primary/10 to-primary/5 p-4 border-b border-border/50">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-center space-x-3 flex-1 min-w-0">
+                            <div class="bg-primary/20 p-2.5 rounded-lg flex-shrink-0">
+                                <i class="fas fa-file-alt text-lg text-primary"></i>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <h3 class="text-base font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                                    {{ record.title }}
+                                </h3>
+                                <p class="text-xs text-muted-foreground mt-0.5">
+                                    <i class="fas fa-folder mr-1"></i>{{ record.get_record_type_display }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Content -->
+                <div class="p-4 space-y-3">
+                    <!-- Date -->
+                    {% if record.report_date %}
+                    <div class="flex items-center text-sm">
+                        <i class="fas fa-calendar text-muted-foreground mr-2 w-4"></i>
+                        <span class="text-foreground">{{ record.report_date|date:"M d, Y" }}</span>
+                    </div>
+                    {% endif %}
+
+                    <!-- Description -->
+                    {% if record.description %}
+                    <div class="flex items-start text-sm">
+                        <i class="fas fa-align-left text-muted-foreground mr-2 w-4 mt-0.5"></i>
+                        <p class="text-muted-foreground line-clamp-2 flex-1">{{ record.description }}</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- OCR Status -->
+                    <div class="flex items-center text-sm pt-2 border-t border-border/50">
+                        {% if record.ocr_status == 'completed' %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-500/10 dark:bg-green-500/20 text-green-700 dark:text-green-400">
+                                <i class="fas fa-check-circle mr-1.5"></i>
+                                Processed
+                            </span>
+                            {% if record.ocr_confidence %}
+                            <span class="ml-auto text-xs text-muted-foreground">
+                                <i class="fas fa-chart-line mr-1"></i>{{ record.ocr_confidence|floatformat:0 }}%
+                            </span>
+                            {% endif %}
+                        {% elif record.ocr_status == 'processing' %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-500/10 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400">
+                                <i class="fas fa-spinner fa-spin mr-1.5"></i>
+                                Processing...
+                            </span>
+                        {% elif record.ocr_status == 'failed' %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-500/10 dark:bg-red-500/20 text-red-700 dark:text-red-400">
+                                <i class="fas fa-exclamation-circle mr-1.5"></i>
+                                Failed
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-500/10 dark:bg-gray-500/20 text-gray-700 dark:text-gray-400">
+                                <i class="fas fa-clock mr-1.5"></i>
+                                Pending
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Upload Date -->
+                    <div class="text-xs text-muted-foreground pt-2">
+                        <i class="fas fa-clock mr-1"></i>
+                        Uploaded {{ record.created_at|timesince }} ago
+                    </div>
+                </div>
+
+                <!-- Card Footer -->
+                <div class="px-4 py-3 bg-accent/50 border-t border-border/50">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-muted-foreground">
+                            <i class="fas fa-file mr-1"></i>{{ record.file.name|slice:"-20:" }}
+                        </span>
+                        <i class="fas fa-arrow-right text-primary opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+
+    {% else %}
+        <!-- Empty State -->
+        <div class="bg-card border border-border/50 rounded-2xl p-12 text-center shadow-sm">
+            <div class="max-w-md mx-auto">
+                <div class="bg-primary/10 dark:bg-primary/20 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-folder-open text-4xl text-primary"></i>
+                </div>
+                <h3 class="text-xl sm:text-2xl font-bold text-foreground mb-3">No Medical Records Yet</h3>
+                <p class="text-sm sm:text-base text-muted-foreground mb-8">
+                    Start building your health record by uploading your first medical document. Our AI will automatically extract and organize the information for you.
+                </p>
+                <a href="{% url 'upload_medical_record' %}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-primary to-primary/90 hover:shadow-xl text-primary-foreground font-bold rounded-xl transition-all duration-200 hover:scale-105">
+                    <i class="fas fa-upload mr-2"></i>
+                    Upload Your First Record
+                </a>
+                
+                <div class="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
+                    <div class="flex items-start space-x-3">
+                        <div class="bg-blue-500/10 dark:bg-blue-500/20 p-2 rounded-xl flex-shrink-0">
+                            <i class="fas fa-shield-alt text-blue-600 dark:text-blue-400"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-foreground text-sm">Secure Storage</h4>
+                            <p class="text-xs text-muted-foreground mt-1">Your data is encrypted and protected</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-3">
+                        <div class="bg-green-500/10 dark:bg-green-500/20 p-2 rounded-xl flex-shrink-0">
+                            <i class="fas fa-robot text-green-600 dark:text-green-400"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-foreground text-sm">AI Analysis</h4>
+                            <p class="text-xs text-muted-foreground mt-1">Automated data extraction using OCR</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-3">
+                        <div class="bg-purple-500/10 dark:bg-purple-500/20 p-2 rounded-xl flex-shrink-0">
+                            <i class="fas fa-chart-line text-purple-600 dark:text-purple-400"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-foreground text-sm">Easy Access</h4>
+                            <p class="text-xs text-muted-foreground mt-1">View your records anytime, anywhere</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+{% if records %}
+<script>
+// Auto-refresh for processing records
+const processingRecords = document.querySelectorAll('[data-status="processing"]');
+if (processingRecords.length > 0) {
+    setTimeout(() => {
+        location.reload();
+    }, 10000); // Refresh every 10 seconds
+}
+</script>
+{% endif %}
+{% endblock %}

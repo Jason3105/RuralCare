@@ -1,0 +1,1715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Cancer Treatment Planning System{% endblock %}</title>
+    
+    <!-- Favicon -->
+    {% load static %}
+    <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
+    
+    <!-- Preconnect to CDNs -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    
+    <!-- Font Awesome from jsDelivr -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" crossorigin="anonymous">
+    
+    <!-- Tailwind CSS - CDN for development (switch to build process for production) -->
+    <!-- For production: run 'npm install -D tailwindcss' and build CSS file -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(var(--border))",
+                        input: "hsl(var(--input))",
+                        ring: "hsl(var(--ring))",
+                        background: "hsl(var(--background))",
+                        foreground: "hsl(var(--foreground))",
+                        primary: {
+                            DEFAULT: "hsl(var(--primary))",
+                            foreground: "hsl(var(--primary-foreground))",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(var(--secondary))",
+                            foreground: "hsl(var(--secondary-foreground))",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(var(--muted))",
+                            foreground: "hsl(var(--muted-foreground))",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(var(--accent))",
+                            foreground: "hsl(var(--accent-foreground))",
+                        },
+                        card: {
+                            DEFAULT: "hsl(var(--card))",
+                            foreground: "hsl(var(--card-foreground))",
+                        },
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 222.2 84% 4.9%;
+            --card: 0 0% 100%;
+            --card-foreground: 222.2 84% 4.9%;
+            --primary: 221.2 83.2% 53.3%;
+            --primary-foreground: 210 40% 98%;
+            --secondary: 210 40% 96.1%;
+            --secondary-foreground: 222.2 47.4% 11.2%;
+            --muted: 210 40% 96.1%;
+            --muted-foreground: 215.4 16.3% 46.9%;
+            --accent: 210 40% 96.1%;
+            --accent-foreground: 222.2 47.4% 11.2%;
+            --border: 214.3 31.8% 91.4%;
+            --input: 214.3 31.8% 91.4%;
+            --ring: 221.2 83.2% 53.3%;
+        }
+        
+        .dark {
+            --background: 222.2 84% 4.9%;
+            --foreground: 210 40% 98%;
+            --card: 222.2 84% 4.9%;
+            --card-foreground: 210 40% 98%;
+            --primary: 217.2 91.2% 59.8%;
+            --primary-foreground: 222.2 47.4% 11.2%;
+            --secondary: 217.2 32.6% 17.5%;
+            --secondary-foreground: 210 40% 98%;
+            --muted: 217.2 32.6% 17.5%;
+            --muted-foreground: 215 20.2% 65.1%;
+            --accent: 217.2 32.6% 17.5%;
+            --accent-foreground: 210 40% 98%;
+            --border: 217.2 32.6% 17.5%;
+            --input: 217.2 32.6% 17.5%;
+            --ring: 224.3 76.3% 48%;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes slideInDown {
+            from { 
+                opacity: 0; 
+                transform: translateY(-20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        .slide-in-down {
+            animation: slideInDown 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes slideInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        .slide-in-up {
+            animation: slideInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes scaleIn {
+            from { 
+                opacity: 0; 
+                transform: scale(0.95); 
+            }
+            to { 
+                opacity: 1; 
+                transform: scale(1); 
+            }
+        }
+        .scale-in {
+            animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .pulse-subtle {
+            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        /* Dropdown toggle */
+        .dropdown-menu {
+            display: none;
+            opacity: 0;
+            transform: translateY(-8px);
+            pointer-events: none;
+        }
+        .dropdown-menu.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+            animation: slideInDown 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Smooth transitions */
+        * {
+            transition: background-color 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s;
+        }
+        
+        /* Button transitions */
+        button, a {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Card hover effects */
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Backdrop blur support */
+        @supports (backdrop-filter: blur(10px)) {
+            .backdrop-blur-sm {
+                backdrop-filter: blur(10px);
+            }
+        }
+        
+        /* Voice Assistant Styles */
+        .voice-assistant-toggle {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .voice-assistant-btn {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .voice-assistant-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 40px rgba(59, 130, 246, 0.5);
+        }
+        
+        .voice-assistant-btn.active {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 8px 32px rgba(16, 185, 129, 0.4);
+        }
+        
+        .voice-assistant-btn.listening {
+            animation: pulse-ring 1.5s infinite;
+        }
+        
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+        
+        .voice-assistant-panel {
+            position: fixed;
+            bottom: 100px;
+            right: 24px;
+            width: 380px;
+            height: 580px;
+            max-width: calc(100vw - 48px);
+            max-height: calc(100vh - 140px);
+            background: linear-gradient(180deg, #0a1628 0%, #1e3a5f 50%, #0f172a 100%);
+            border-radius: 24px;
+            box-shadow: 0 25px 80px -12px rgba(0, 0, 0, 0.5), 0 0 60px rgba(59, 130, 246, 0.2);
+            z-index: 9998;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .voice-assistant-panel.open {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+        
+        .voice-panel-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+            background: linear-gradient(180deg, rgba(10, 22, 40, 0.95) 0%, transparent 100%);
+        }
+        
+        .voice-panel-title {
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .voice-panel-title .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: status-pulse 2s infinite;
+        }
+        
+        @keyframes status-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .close-panel-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 10px;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .close-panel-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        /* 3D Model Container */
+        .doctor-3d-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        .doctor-3d-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        /* Response Text Overlay */
+        .response-overlay {
+            position: absolute;
+            bottom: 140px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            padding: 18px 22px;
+            color: white;
+            font-size: 14px;
+            line-height: 1.8;
+            max-height: 220px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            scroll-behavior: smooth;
+        }
+        
+        .response-overlay.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .response-overlay::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .response-overlay::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+        
+        .response-overlay::-webkit-scrollbar-thumb {
+            background: rgba(59, 130, 246, 0.6);
+            border-radius: 3px;
+            transition: background 0.2s;
+        }
+        
+        .response-overlay::-webkit-scrollbar-thumb:hover {
+            background: rgba(59, 130, 246, 0.8);
+        }
+        
+        .response-overlay strong {
+            color: #60a5fa;
+            font-weight: 600;
+        }
+        
+        .response-overlay ul, .response-overlay ol {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+        
+        .response-overlay li {
+            margin: 4px 0;
+        }
+        
+        .response-overlay p {
+            margin: 6px 0;
+        }
+        
+        .response-overlay a.voice-response-link {
+            color: #60a5fa;
+            text-decoration: underline;
+            font-weight: 600;
+            cursor: pointer;
+            transition: color 0.2s, opacity 0.2s;
+        }
+        .response-overlay a.voice-response-link:hover {
+            color: #93c5fd;
+            opacity: 0.95;
+        }
+        .response-overlay code {
+            background: rgba(59, 130, 246, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        
+        /* Voice Control Footer */
+        .voice-control-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background: linear-gradient(0deg, rgba(10, 22, 40, 0.98) 0%, transparent 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .voice-status {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+            text-align: center;
+            min-height: 20px;
+        }
+        
+        .voice-status.listening {
+            color: #10b981;
+        }
+        
+        .voice-status.speaking {
+            color: #3b82f6;
+        }
+        
+        .mic-main-btn {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        
+        .mic-main-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 12px 40px rgba(59, 130, 246, 0.5);
+        }
+        
+        .mic-main-btn.recording {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            box-shadow: 0 8px 32px rgba(239, 68, 68, 0.5);
+            animation: mic-pulse 1s infinite;
+        }
+        
+        @keyframes mic-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .mic-main-btn::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .mic-main-btn.recording::before {
+            border-color: rgba(239, 68, 68, 0.5);
+            animation: ring-expand 1.5s infinite;
+        }
+        
+        @keyframes ring-expand {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        
+        /* Sound Wave Visualization */
+        .sound-waves {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            height: 40px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .sound-waves.active {
+            opacity: 1;
+        }
+        
+        .sound-wave-bar {
+            width: 4px;
+            height: 8px;
+            background: linear-gradient(180deg, #3b82f6 0%, #60a5fa 100%);
+            border-radius: 2px;
+            animation: wave-idle 1.5s ease-in-out infinite;
+        }
+        
+        .sound-waves.active .sound-wave-bar {
+            animation: wave-active 0.5s ease-in-out infinite;
+        }
+        
+        .sound-wave-bar:nth-child(1) { animation-delay: 0s; }
+        .sound-wave-bar:nth-child(2) { animation-delay: 0.1s; }
+        .sound-wave-bar:nth-child(3) { animation-delay: 0.2s; }
+        .sound-wave-bar:nth-child(4) { animation-delay: 0.3s; }
+        .sound-wave-bar:nth-child(5) { animation-delay: 0.4s; }
+        .sound-wave-bar:nth-child(6) { animation-delay: 0.3s; }
+        .sound-wave-bar:nth-child(7) { animation-delay: 0.2s; }
+        
+        @keyframes wave-idle {
+            0%, 100% { height: 8px; }
+            50% { height: 12px; }
+        }
+        
+        @keyframes wave-active {
+            0%, 100% { height: 8px; }
+            50% { height: 32px; }
+        }
+        
+        /* Thinking/Processing Indicator */
+        .thinking-indicator {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 13px;
+        }
+        
+        .thinking-indicator.visible {
+            display: flex;
+        }
+        
+        .thinking-dots {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .thinking-dots span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #3b82f6;
+            animation: thinking 1.4s infinite ease-in-out;
+        }
+        
+        .thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes thinking {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+            30% { transform: translateY(-8px); opacity: 1; }
+        }
+        
+        /* Dark mode adjustments */
+        .dark .voice-assistant-panel {
+            box-shadow: 0 25px 80px -12px rgba(0, 0, 0, 0.7), 0 0 60px rgba(59, 130, 246, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-background text-foreground min-h-screen">
+    <!-- Navigation -->
+    {% if user.is_authenticated %}
+        {% if user.user_type == 'doctor' %}
+            {% include 'partials/navbar_doctor.html' %}
+        {% else %}
+            {% include 'partials/navbar_patient.html' %}
+        {% endif %}
+    {% else %}
+        {% include 'partials/navbar_guest.html' %}
+    {% endif %}
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 space-y-3">
+            {% for message in messages %}
+                <div class="bg-{{ message.tags }}-50 border border-{{ message.tags }}-200 text-{{ message.tags }}-800 px-4 py-3 rounded-lg relative scale-in shadow-sm flex items-start space-x-3" role="alert">
+                    {% if message.tags == 'success' %}
+                        <i class="fas fa-check-circle text-{{ message.tags }}-600 mt-0.5 flex-shrink-0"></i>
+                    {% elif message.tags == 'error' %}
+                        <i class="fas fa-exclamation-circle text-{{ message.tags }}-600 mt-0.5 flex-shrink-0"></i>
+                    {% elif message.tags == 'warning' %}
+                        <i class="fas fa-exclamation-triangle text-{{ message.tags }}-600 mt-0.5 flex-shrink-0"></i>
+                    {% else %}
+                        <i class="fas fa-info-circle text-{{ message.tags }}-600 mt-0.5 flex-shrink-0"></i>
+                    {% endif %}
+                    <span class="flex-1">{{ message }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Badge Pop-up (for patients) -->
+    {% if user.is_authenticated and user.user_type == 'patient' %}
+        {% include 'partials/badge_popup.html' %}
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        // Theme Toggle with smooth transition
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.classList.contains('dark');
+            
+            if (isDark) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        
+        // Initialize theme from localStorage
+        (function() {
+            const theme = localStorage.getItem('theme');
+            if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+        
+        function toggleDropdown() {
+            const dropdown = document.getElementById('doctorDropdown');
+            const chevron = document.getElementById('doctorChevron');
+            dropdown.classList.toggle('show');
+            chevron.style.transform = dropdown.classList.contains('show') ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+        
+        function togglePatientDropdown() {
+            const dropdown = document.getElementById('patientDropdown');
+            const chevron = document.getElementById('patientChevron');
+            dropdown.classList.toggle('show');
+            chevron.style.transform = dropdown.classList.contains('show') ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+        
+        function toggleDetectionDropdown() {
+            const dropdown = document.getElementById('detectionDropdown');
+            const chevron = document.getElementById('detectionChevron');
+            if (dropdown && chevron) {
+                dropdown.classList.toggle('show');
+                chevron.style.transform = dropdown.classList.contains('show') ? 'rotate(180deg)' : 'rotate(0deg)';
+            }
+        }
+
+        function toggleTreatmentDropdown() {
+            const dropdown = document.getElementById('treatmentDropdown');
+            const chevron = document.getElementById('treatmentChevron');
+            if (dropdown && chevron) {
+                dropdown.classList.toggle('show');
+                chevron.style.transform = dropdown.classList.contains('show') ? 'rotate(180deg)' : 'rotate(0deg)';
+            }
+        }
+
+        function toggleDataAnalysisDropdown() {
+            const dropdown = document.getElementById('dataAnalysisDropdown');
+            const chevron = document.getElementById('dataAnalysisChevron');
+            if (dropdown && chevron) {
+                dropdown.classList.toggle('show');
+                chevron.style.transform = dropdown.classList.contains('show') ? 'rotate(180deg)' : 'rotate(0deg)';
+            }
+        }
+
+        function toggleClinicalDropdown() {
+            const dropdown = document.getElementById('clinicalDropdown');
+            const chevron = document.getElementById('clinicalChevron');
+            if (dropdown && chevron) {
+                dropdown.classList.toggle('show');
+                chevron.style.transform = dropdown.classList.contains('show') ? 'rotate(180deg)' : 'rotate(0deg)';
+            }
+        }
+
+        function togglePortalDropdown() {
+            const dropdown = document.getElementById('portalDropdown');
+            const chevron = document.getElementById('portalChevron');
+            if (dropdown && chevron) {
+                dropdown.classList.toggle('show');
+                chevron.style.transform = dropdown.classList.contains('show') ? 'rotate(180deg)' : 'rotate(0deg)';
+            }
+        }
+
+        // Close dropdown when clicking outside
+        window.addEventListener('click', function(e) {
+            const doctorDropdown = document.getElementById('doctorDropdown');
+            const patientDropdown = document.getElementById('patientDropdown');
+            const detectionDropdown = document.getElementById('detectionDropdown');
+            const treatmentDropdown = document.getElementById('treatmentDropdown');
+            const dataAnalysisDropdown = document.getElementById('dataAnalysisDropdown');
+            const clinicalDropdown = document.getElementById('clinicalDropdown');
+            const portalDropdown = document.getElementById('portalDropdown');
+            
+            const doctorButton = e.target.closest('button[onclick="toggleDropdown()"]');
+            const patientButton = e.target.closest('button[onclick="togglePatientDropdown()"]');
+            const detectionButton = e.target.closest('button[onclick="toggleDetectionDropdown()"]');
+            const treatmentButton = e.target.closest('button[onclick="toggleTreatmentDropdown()"]');
+            const dataAnalysisButton = e.target.closest('button[onclick="toggleDataAnalysisDropdown()"]');
+            const clinicalButton = e.target.closest('button[onclick="toggleClinicalDropdown()"]');
+            const portalButton = e.target.closest('button[onclick="togglePortalDropdown()"]');
+            const themeButton = e.target.closest('button[onclick="toggleTheme()"]');
+            
+            if (!doctorButton && doctorDropdown && !doctorDropdown.contains(e.target)) {
+                doctorDropdown.classList.remove('show');
+                const chevron = document.getElementById('doctorChevron');
+                if (chevron) chevron.style.transform = 'rotate(0deg)';
+            }
+            
+            if (!patientButton && patientDropdown && !patientDropdown.contains(e.target)) {
+                patientDropdown.classList.remove('show');
+                const chevron = document.getElementById('patientChevron');
+                if (chevron) chevron.style.transform = 'rotate(0deg)';
+            }
+            
+            if (!detectionButton && detectionDropdown && !detectionDropdown.contains(e.target)) {
+                detectionDropdown.classList.remove('show');
+                const chevron = document.getElementById('detectionChevron');
+                if (chevron) chevron.style.transform = 'rotate(0deg)';
+            }
+            
+            if (!treatmentButton && treatmentDropdown && !treatmentDropdown.contains(e.target)) {
+                treatmentDropdown.classList.remove('show');
+                const chevron = document.getElementById('treatmentChevron');
+                if (chevron) chevron.style.transform = 'rotate(0deg)';
+            }
+            
+            if (!dataAnalysisButton && dataAnalysisDropdown && !dataAnalysisDropdown.contains(e.target)) {
+                dataAnalysisDropdown.classList.remove('show');
+                const chevron = document.getElementById('dataAnalysisChevron');
+                if (chevron) chevron.style.transform = 'rotate(0deg)';
+            }
+
+            if (!clinicalButton && clinicalDropdown && !clinicalDropdown.contains(e.target)) {
+                clinicalDropdown.classList.remove('show');
+                const chevron = document.getElementById('clinicalChevron');
+                if (chevron) chevron.style.transform = 'rotate(0deg)';
+            }
+
+            if (!portalButton && portalDropdown && !portalDropdown.contains(e.target)) {
+                portalDropdown.classList.remove('show');
+                const chevron = document.getElementById('portalChevron');
+                if (chevron) chevron.style.transform = 'rotate(0deg)';
+            }
+        });
+    </script>
+    
+    <!-- Voice Assistant -->
+    <div class="voice-assistant-toggle" id="voiceAssistantToggle">
+        <button class="voice-assistant-btn" id="voiceAssistantBtn" title="Voice Assistant - Click to talk with Dr. MedAssist">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                <line x1="12" x2="12" y1="19" y2="22"/>
+            </svg>
+        </button>
+    </div>
+    
+    <div class="voice-assistant-panel" id="voiceAssistantPanel">
+        <!-- Header -->
+        <div class="voice-panel-header">
+            <div class="voice-panel-title">
+                <span class="status-dot"></span>
+                Dr. MedAssist
+            </div>
+            <button class="close-panel-btn" onclick="toggleVoicePanel()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        
+        <!-- 3D Doctor Model Container - Full Body -->
+        <div class="doctor-3d-container" id="doctor3DContainer">
+            <canvas id="doctorCanvas"></canvas>
+        </div>
+        
+        <!-- Response Text Overlay -->
+        <div class="response-overlay" id="responseOverlay">
+            Hello! I'm Dr. MedAssist, your AI medical assistant. Click the microphone and speak to me!
+        </div>
+        
+        <!-- Voice Control Footer -->
+        <div class="voice-control-footer">
+            <!-- Thinking Indicator -->
+            <div class="thinking-indicator" id="thinkingIndicator">
+                <div class="thinking-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <span>Thinking...</span>
+            </div>
+            
+            <!-- Sound Waves -->
+            <div class="sound-waves" id="soundWaves">
+                <div class="sound-wave-bar"></div>
+                <div class="sound-wave-bar"></div>
+                <div class="sound-wave-bar"></div>
+                <div class="sound-wave-bar"></div>
+                <div class="sound-wave-bar"></div>
+                <div class="sound-wave-bar"></div>
+                <div class="sound-wave-bar"></div>
+            </div>
+            
+            <!-- Voice Status -->
+            <div class="voice-status" id="voiceStatus">Click to speak</div>
+            
+            <!-- Main Mic Button -->
+            <button class="mic-main-btn" id="micMainBtn" title="Click and speak">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                    <line x1="12" x2="12" y1="19" y2="22"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Three.js for 3D Doctor Model -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    
+    <script>
+        // Voice Assistant State
+        const VoiceAssistant = {
+            isOpen: false,
+            isListening: false,
+            isSpeaking: false,
+            isProcessing: false,
+            conversationHistory: [],
+            recognition: null,
+            synthesis: window.speechSynthesis,
+            doctor3D: null,
+            animationId: null
+        };
+        
+        // Initialize Full Body 3D Doctor Model
+        function initDoctor3D() {
+            const container = document.getElementById('doctor3DContainer');
+            const canvas = document.getElementById('doctorCanvas');
+            
+            if (!container || !canvas) return;
+            
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+            
+            const renderer = new THREE.WebGLRenderer({ 
+                canvas: canvas, 
+                alpha: true, 
+                antialias: true 
+            });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setClearColor(0x000000, 0);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            
+            // Lighting Setup
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+            scene.add(ambientLight);
+            
+            const mainLight = new THREE.DirectionalLight(0xffffff, 1);
+            mainLight.position.set(3, 5, 5);
+            mainLight.castShadow = true;
+            scene.add(mainLight);
+            
+            const fillLight = new THREE.DirectionalLight(0x88ccff, 0.5);
+            fillLight.position.set(-3, 3, 3);
+            scene.add(fillLight);
+            
+            const rimLight = new THREE.DirectionalLight(0x3b82f6, 0.6);
+            rimLight.position.set(0, 2, -5);
+            scene.add(rimLight);
+            
+            const bottomLight = new THREE.PointLight(0x1d4ed8, 0.3);
+            bottomLight.position.set(0, -2, 2);
+            scene.add(bottomLight);
+            
+            // Create Full Body Male Doctor
+            const doctorGroup = new THREE.Group();
+            
+            // Materials
+            const skinMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0xd4a574,
+                shininess: 30 
+            });
+            
+            const hairMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0x1a1a2e,
+                shininess: 40
+            });
+            
+            const coatMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0xffffff,
+                shininess: 60
+            });
+            
+            const scrubsMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0x1e88e5,
+                shininess: 30
+            });
+            
+            const pantsMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0x1565c0,
+                shininess: 20
+            });
+            
+            const shoeMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0x2d2d2d,
+                shininess: 50
+            });
+            
+            // === HEAD ===
+            const headGeometry = new THREE.SphereGeometry(0.28, 32, 32);
+            const head = new THREE.Mesh(headGeometry, skinMaterial);
+            head.position.y = 2.1;
+            head.scale.set(1, 1.1, 1);
+            doctorGroup.add(head);
+            
+            // Hair
+            const hairGeometry = new THREE.SphereGeometry(0.3, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+            const hair = new THREE.Mesh(hairGeometry, hairMaterial);
+            hair.position.y = 2.18;
+            hair.scale.set(1, 0.8, 1);
+            doctorGroup.add(hair);
+            
+            // Hair sides
+            const hairSideGeo = new THREE.BoxGeometry(0.08, 0.15, 0.1);
+            const leftHairSide = new THREE.Mesh(hairSideGeo, hairMaterial);
+            leftHairSide.position.set(-0.24, 2.1, 0.05);
+            doctorGroup.add(leftHairSide);
+            
+            const rightHairSide = new THREE.Mesh(hairSideGeo, hairMaterial);
+            rightHairSide.position.set(0.24, 2.1, 0.05);
+            doctorGroup.add(rightHairSide);
+            
+            // Face Details
+            // Eyebrows
+            const eyebrowGeometry = new THREE.BoxGeometry(0.1, 0.015, 0.02);
+            const eyebrowMaterial = new THREE.MeshPhongMaterial({ color: 0x1a1a2e });
+            
+            const leftEyebrow = new THREE.Mesh(eyebrowGeometry, eyebrowMaterial);
+            leftEyebrow.position.set(-0.085, 2.18, 0.24);
+            leftEyebrow.rotation.z = 0.1;
+            doctorGroup.add(leftEyebrow);
+            
+            const rightEyebrow = new THREE.Mesh(eyebrowGeometry, eyebrowMaterial);
+            rightEyebrow.position.set(0.085, 2.18, 0.24);
+            rightEyebrow.rotation.z = -0.1;
+            doctorGroup.add(rightEyebrow);
+            
+            // Eyes
+            const eyeGeometry = new THREE.SphereGeometry(0.04, 16, 16);
+            const eyeWhiteMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
+            const pupilGeometry = new THREE.SphereGeometry(0.02, 16, 16);
+            const pupilMaterial = new THREE.MeshPhongMaterial({ color: 0x2d4a3e });
+            const irisGeometry = new THREE.SphereGeometry(0.025, 16, 16);
+            const irisMaterial = new THREE.MeshPhongMaterial({ color: 0x4a6741 });
+            
+            // Left Eye
+            const leftEyeWhite = new THREE.Mesh(eyeGeometry, eyeWhiteMaterial);
+            leftEyeWhite.position.set(-0.085, 2.12, 0.24);
+            doctorGroup.add(leftEyeWhite);
+            
+            const leftIris = new THREE.Mesh(irisGeometry, irisMaterial);
+            leftIris.position.set(-0.085, 2.12, 0.28);
+            leftIris.name = 'leftIris';
+            doctorGroup.add(leftIris);
+            
+            const leftPupil = new THREE.Mesh(pupilGeometry, pupilMaterial);
+            leftPupil.position.set(-0.085, 2.12, 0.29);
+            leftPupil.name = 'leftPupil';
+            doctorGroup.add(leftPupil);
+            
+            // Right Eye
+            const rightEyeWhite = new THREE.Mesh(eyeGeometry, eyeWhiteMaterial);
+            rightEyeWhite.position.set(0.085, 2.12, 0.24);
+            doctorGroup.add(rightEyeWhite);
+            
+            const rightIris = new THREE.Mesh(irisGeometry, irisMaterial);
+            rightIris.position.set(0.085, 2.12, 0.28);
+            rightIris.name = 'rightIris';
+            doctorGroup.add(rightIris);
+            
+            const rightPupil = new THREE.Mesh(pupilGeometry, pupilMaterial);
+            rightPupil.position.set(0.085, 2.12, 0.29);
+            rightPupil.name = 'rightPupil';
+            doctorGroup.add(rightPupil);
+            
+            // Nose
+            const noseGeometry = new THREE.ConeGeometry(0.025, 0.08, 8);
+            const nose = new THREE.Mesh(noseGeometry, skinMaterial);
+            nose.position.set(0, 2.05, 0.28);
+            nose.rotation.x = Math.PI / 2 - 0.3;
+            doctorGroup.add(nose);
+            
+            // Mouth
+            const mouthGroup = new THREE.Group();
+            mouthGroup.name = 'mouthGroup';
+            
+            const upperLipGeo = new THREE.TorusGeometry(0.04, 0.008, 8, 16, Math.PI);
+            const lipMaterial = new THREE.MeshPhongMaterial({ color: 0xb87a6b });
+            const upperLip = new THREE.Mesh(upperLipGeo, lipMaterial);
+            upperLip.rotation.x = Math.PI;
+            upperLip.rotation.z = Math.PI;
+            upperLip.position.y = 0.008;
+            mouthGroup.add(upperLip);
+            
+            const lowerLipGeo = new THREE.TorusGeometry(0.035, 0.01, 8, 16, Math.PI);
+            const lowerLip = new THREE.Mesh(lowerLipGeo, lipMaterial);
+            lowerLip.position.y = -0.008;
+            lowerLip.name = 'lowerLip';
+            mouthGroup.add(lowerLip);
+            
+            // Mouth interior (for animation)
+            const mouthInteriorGeo = new THREE.SphereGeometry(0.025, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2);
+            const mouthInteriorMat = new THREE.MeshPhongMaterial({ color: 0x4a1a1a });
+            const mouthInterior = new THREE.Mesh(mouthInteriorGeo, mouthInteriorMat);
+            mouthInterior.rotation.x = Math.PI;
+            mouthInterior.position.y = -0.01;
+            mouthInterior.scale.y = 0;
+            mouthInterior.name = 'mouthInterior';
+            mouthGroup.add(mouthInterior);
+            
+            mouthGroup.position.set(0, 1.96, 0.26);
+            doctorGroup.add(mouthGroup);
+            
+            // Ears
+            const earGeometry = new THREE.SphereGeometry(0.05, 16, 16);
+            const leftEar = new THREE.Mesh(earGeometry, skinMaterial);
+            leftEar.position.set(-0.28, 2.1, 0);
+            leftEar.scale.set(0.4, 1, 0.6);
+            doctorGroup.add(leftEar);
+            
+            const rightEar = new THREE.Mesh(earGeometry, skinMaterial);
+            rightEar.position.set(0.28, 2.1, 0);
+            rightEar.scale.set(0.4, 1, 0.6);
+            doctorGroup.add(rightEar);
+            
+            // === NECK ===
+            const neckGeometry = new THREE.CylinderGeometry(0.1, 0.12, 0.15, 16);
+            const neck = new THREE.Mesh(neckGeometry, skinMaterial);
+            neck.position.y = 1.78;
+            doctorGroup.add(neck);
+            
+            // === TORSO ===
+            // Scrubs shirt (under coat)
+            const torsoGeometry = new THREE.CylinderGeometry(0.28, 0.32, 0.7, 16);
+            const torso = new THREE.Mesh(torsoGeometry, scrubsMaterial);
+            torso.position.y = 1.35;
+            doctorGroup.add(torso);
+            
+            // Doctor's Coat
+            const coatGeometry = new THREE.CylinderGeometry(0.32, 0.38, 0.9, 16, 1, true);
+            const coat = new THREE.Mesh(coatGeometry, coatMaterial);
+            coat.position.y = 1.25;
+            doctorGroup.add(coat);
+            
+            // Coat lapels
+            const lapelGeometry = new THREE.BoxGeometry(0.08, 0.3, 0.02);
+            const leftLapel = new THREE.Mesh(lapelGeometry, coatMaterial);
+            leftLapel.position.set(-0.12, 1.5, 0.3);
+            leftLapel.rotation.y = 0.3;
+            leftLapel.rotation.z = 0.1;
+            doctorGroup.add(leftLapel);
+            
+            const rightLapel = new THREE.Mesh(lapelGeometry, coatMaterial);
+            rightLapel.position.set(0.12, 1.5, 0.3);
+            rightLapel.rotation.y = -0.3;
+            rightLapel.rotation.z = -0.1;
+            doctorGroup.add(rightLapel);
+            
+            // Stethoscope
+            const stethTubeGeometry = new THREE.TorusGeometry(0.12, 0.012, 8, 32, Math.PI * 1.2);
+            const stethMaterial = new THREE.MeshPhongMaterial({ color: 0x2d2d2d });
+            const stethTube = new THREE.Mesh(stethTubeGeometry, stethMaterial);
+            stethTube.position.set(0, 1.55, 0.25);
+            stethTube.rotation.x = 0.3;
+            stethTube.rotation.z = -0.1;
+            doctorGroup.add(stethTube);
+            
+            const stethHeadGeo = new THREE.CylinderGeometry(0.035, 0.035, 0.015, 16);
+            const stethHeadMat = new THREE.MeshPhongMaterial({ color: 0xC0C0C0 });
+            const stethHead = new THREE.Mesh(stethHeadGeo, stethHeadMat);
+            stethHead.position.set(0.08, 1.3, 0.35);
+            stethHead.rotation.x = Math.PI / 2;
+            doctorGroup.add(stethHead);
+            
+            // ID Badge
+            const badgeGeometry = new THREE.BoxGeometry(0.08, 0.1, 0.01);
+            const badgeMaterial = new THREE.MeshPhongMaterial({ color: 0x3b82f6 });
+            const badge = new THREE.Mesh(badgeGeometry, badgeMaterial);
+            badge.position.set(-0.22, 1.45, 0.32);
+            doctorGroup.add(badge);
+            
+            // Badge clip
+            const clipGeo = new THREE.BoxGeometry(0.04, 0.015, 0.01);
+            const clipMat = new THREE.MeshPhongMaterial({ color: 0xC0C0C0 });
+            const clip = new THREE.Mesh(clipGeo, clipMat);
+            clip.position.set(-0.22, 1.51, 0.32);
+            doctorGroup.add(clip);
+            
+            // === ARMS ===
+            // Shoulders
+            const shoulderGeometry = new THREE.SphereGeometry(0.1, 16, 16);
+            const leftShoulder = new THREE.Mesh(shoulderGeometry, coatMaterial);
+            leftShoulder.position.set(-0.35, 1.6, 0);
+            doctorGroup.add(leftShoulder);
+            
+            const rightShoulder = new THREE.Mesh(shoulderGeometry, coatMaterial);
+            rightShoulder.position.set(0.35, 1.6, 0);
+            doctorGroup.add(rightShoulder);
+            
+            // Upper Arms
+            const upperArmGeometry = new THREE.CapsuleGeometry(0.06, 0.25, 8, 16);
+            
+            const leftUpperArm = new THREE.Mesh(upperArmGeometry, coatMaterial);
+            leftUpperArm.position.set(-0.4, 1.4, 0);
+            leftUpperArm.rotation.z = 0.15;
+            leftUpperArm.name = 'leftUpperArm';
+            doctorGroup.add(leftUpperArm);
+            
+            const rightUpperArm = new THREE.Mesh(upperArmGeometry, coatMaterial);
+            rightUpperArm.position.set(0.4, 1.4, 0);
+            rightUpperArm.rotation.z = -0.15;
+            rightUpperArm.name = 'rightUpperArm';
+            doctorGroup.add(rightUpperArm);
+            
+            // Forearms
+            const forearmGeometry = new THREE.CapsuleGeometry(0.05, 0.22, 8, 16);
+            
+            const leftForearm = new THREE.Mesh(forearmGeometry, skinMaterial);
+            leftForearm.position.set(-0.45, 1.1, 0.05);
+            leftForearm.rotation.z = 0.1;
+            leftForearm.rotation.x = -0.2;
+            leftForearm.name = 'leftForearm';
+            doctorGroup.add(leftForearm);
+            
+            const rightForearm = new THREE.Mesh(forearmGeometry, skinMaterial);
+            rightForearm.position.set(0.45, 1.1, 0.05);
+            rightForearm.rotation.z = -0.1;
+            rightForearm.rotation.x = -0.2;
+            rightForearm.name = 'rightForearm';
+            doctorGroup.add(rightForearm);
+            
+            // Hands
+            const handGeometry = new THREE.SphereGeometry(0.045, 16, 16);
+            
+            const leftHand = new THREE.Mesh(handGeometry, skinMaterial);
+            leftHand.position.set(-0.48, 0.85, 0.1);
+            leftHand.scale.set(1, 1.2, 0.6);
+            leftHand.name = 'leftHand';
+            doctorGroup.add(leftHand);
+            
+            const rightHand = new THREE.Mesh(handGeometry, skinMaterial);
+            rightHand.position.set(0.48, 0.85, 0.1);
+            rightHand.scale.set(1, 1.2, 0.6);
+            rightHand.name = 'rightHand';
+            doctorGroup.add(rightHand);
+            
+            // === LOWER BODY ===
+            // Coat bottom
+            const coatBottomGeo = new THREE.CylinderGeometry(0.36, 0.3, 0.4, 16, 1, true);
+            const coatBottom = new THREE.Mesh(coatBottomGeo, coatMaterial);
+            coatBottom.position.y = 0.7;
+            doctorGroup.add(coatBottom);
+            
+            // Pants
+            const pantsGeometry = new THREE.CylinderGeometry(0.28, 0.24, 0.5, 16);
+            const pants = new THREE.Mesh(pantsGeometry, pantsMaterial);
+            pants.position.y = 0.45;
+            doctorGroup.add(pants);
+            
+            // Legs
+            const legGeometry = new THREE.CapsuleGeometry(0.08, 0.5, 8, 16);
+            
+            const leftLeg = new THREE.Mesh(legGeometry, pantsMaterial);
+            leftLeg.position.set(-0.12, 0.05, 0);
+            doctorGroup.add(leftLeg);
+            
+            const rightLeg = new THREE.Mesh(legGeometry, pantsMaterial);
+            rightLeg.position.set(0.12, 0.05, 0);
+            doctorGroup.add(rightLeg);
+            
+            // Shoes
+            const shoeGeometry = new THREE.BoxGeometry(0.1, 0.06, 0.18);
+            
+            const leftShoe = new THREE.Mesh(shoeGeometry, shoeMaterial);
+            leftShoe.position.set(-0.12, -0.27, 0.03);
+            doctorGroup.add(leftShoe);
+            
+            const rightShoe = new THREE.Mesh(shoeGeometry, shoeMaterial);
+            rightShoe.position.set(0.12, -0.27, 0.03);
+            doctorGroup.add(rightShoe);
+            
+            // Position doctor
+            doctorGroup.position.y = -0.8;
+            scene.add(doctorGroup);
+            
+            // Camera position
+            camera.position.set(0, 1.2, 3.5);
+            camera.lookAt(0, 1, 0);
+            
+            // Store references for animation
+            VoiceAssistant.doctor3D = {
+                scene,
+                camera,
+                renderer,
+                doctorGroup,
+                mouthGroup: doctorGroup.getObjectByName('mouthGroup'),
+                time: 0,
+                blinkTime: 0,
+                breathTime: 0
+            };
+            
+            // Handle resize
+            window.addEventListener('resize', () => {
+                if (VoiceAssistant.doctor3D && container) {
+                    const w = container.clientWidth;
+                    const h = container.clientHeight;
+                    camera.aspect = w / h;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(w, h);
+                }
+            });
+            
+            // Animation loop
+            function animate() {
+                VoiceAssistant.animationId = requestAnimationFrame(animate);
+                
+                if (VoiceAssistant.doctor3D) {
+                    const d = VoiceAssistant.doctor3D;
+                    d.time += 0.016;
+                    d.blinkTime += 0.016;
+                    d.breathTime += 0.016;
+                    
+                    // Subtle idle breathing
+                    d.doctorGroup.position.y = -0.8 + Math.sin(d.breathTime * 1.5) * 0.008;
+                    
+                    // Subtle body sway
+                    d.doctorGroup.rotation.y = Math.sin(d.time * 0.3) * 0.05;
+                    
+                    // Eye blinking
+                    const leftIris = d.doctorGroup.getObjectByName('leftIris');
+                    const rightIris = d.doctorGroup.getObjectByName('rightIris');
+                    if (leftIris && rightIris) {
+                        const blinkCycle = d.blinkTime % 4;
+                        if (blinkCycle > 3.9) {
+                            leftIris.scale.y = 0.1;
+                            rightIris.scale.y = 0.1;
+                        } else {
+                            leftIris.scale.y = 1;
+                            rightIris.scale.y = 1;
+                        }
+                    }
+                    
+                    // Arm animation
+                    const leftUpperArm = d.doctorGroup.getObjectByName('leftUpperArm');
+                    const rightUpperArm = d.doctorGroup.getObjectByName('rightUpperArm');
+                    if (leftUpperArm && rightUpperArm) {
+                        leftUpperArm.rotation.x = Math.sin(d.time * 0.5) * 0.05;
+                        rightUpperArm.rotation.x = Math.sin(d.time * 0.5 + 0.5) * 0.05;
+                    }
+                    
+                    // Mouth animation when speaking
+                    const mouthGroup = d.mouthGroup;
+                    if (mouthGroup) {
+                        const mouthInterior = mouthGroup.getObjectByName('mouthInterior');
+                        const lowerLip = mouthGroup.getObjectByName('lowerLip');
+                        
+                        if (VoiceAssistant.isSpeaking) {
+                            const mouthOpen = Math.abs(Math.sin(d.time * 12)) * 0.8 + 0.2;
+                            if (mouthInterior) {
+                                mouthInterior.scale.y = mouthOpen;
+                                mouthInterior.visible = true;
+                            }
+                            if (lowerLip) {
+                                lowerLip.position.y = -0.008 - mouthOpen * 0.015;
+                            }
+                        } else {
+                            if (mouthInterior) {
+                                mouthInterior.scale.y = 0;
+                                mouthInterior.visible = false;
+                            }
+                            if (lowerLip) {
+                                lowerLip.position.y = -0.008;
+                            }
+                        }
+                    }
+                    
+                    d.renderer.render(d.scene, d.camera);
+                }
+            }
+            
+            animate();
+        }
+        
+        // Toggle Voice Panel
+        function toggleVoicePanel() {
+            const panel = document.getElementById('voiceAssistantPanel');
+            const btn = document.getElementById('voiceAssistantBtn');
+            
+            VoiceAssistant.isOpen = !VoiceAssistant.isOpen;
+            
+            if (VoiceAssistant.isOpen) {
+                panel.classList.add('open');
+                btn.classList.add('active');
+                setTimeout(() => {
+                    if (!VoiceAssistant.doctor3D) {
+                        initDoctor3D();
+                    }
+                    showResponse("Hello! I'm Dr. MedAssist. Click the microphone and speak to me!");
+                }, 100);
+            } else {
+                panel.classList.remove('open');
+                btn.classList.remove('active');
+                stopListening();
+            }
+        }
+        
+        // In-build page links: phrases the assistant may say -> become clickable redirect links
+        function applyResponseLinks(formattedText, links) {
+            if (!links || links.length === 0) return formattedText;
+            // Sort by phrase length descending so "My Consultations" is replaced before "Consultations"
+            const sorted = [...links].sort((a, b) => (b.text.length - a.text.length));
+            let out = formattedText;
+            for (const link of sorted) {
+                const escaped = link.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const anchor = '<a href="' + link.url + '" class="voice-response-link" target="_blank" rel="noopener noreferrer" data-voice-link>' + link.text + '</a>';
+                out = out.replace(new RegExp(escaped, 'i'), anchor);
+            }
+            return out;
+        }
+        
+        // Show Response with Markdown Formatting and optional in-build redirect links
+        function showResponse(text, links) {
+            const overlay = document.getElementById('responseOverlay');
+            
+            // Convert markdown-like formatting to HTML
+            let formattedText = text
+                // Bold text: **text** -> <strong>text</strong>
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                // Bullet points: • or - at start of line
+                .replace(/^[•\-]\s(.+)$/gm, '<li>$1</li>')
+                // Numbers: 1. 2. 3. -> ordered list items
+                .replace(/^\d+\.\s(.+)$/gm, '<li>$1</li>');
+            
+            // Wrap consecutive <li> items in <ul> or <ol>
+            formattedText = formattedText.replace(/(<li>.*<\/li>\n?)+/g, function(match) {
+                // Check if it's numbered list or bullet list
+                if (text.match(/^\d+\.\s/m)) {
+                    return '<ol>' + match + '</ol>';
+                } else {
+                    return '<ul>' + match + '</ul>';
+                }
+            });
+            
+            // Convert newlines to <br> for remaining text
+            formattedText = formattedText.replace(/\n/g, '<br>');
+            
+            // Apply in-build redirect links (clickable phrases -> page URLs)
+            formattedText = applyResponseLinks(formattedText, links || []);
+            
+            overlay.innerHTML = formattedText;
+            overlay.classList.add('visible');
+            
+            // Delegate click on voice links so navigation works without leaving panel open
+            overlay.querySelectorAll('a.voice-response-link').forEach(function(a) {
+                a.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const href = this.getAttribute('href');
+                    if (href) window.open(href, '_blank', 'noopener,noreferrer');
+                });
+            });
+            
+            // Auto-scroll to bottom if content overflows
+            setTimeout(() => {
+                overlay.scrollTop = overlay.scrollHeight;
+            }, 100);
+        }
+        
+        // Initialize Speech Recognition
+        function initSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                VoiceAssistant.recognition = new SpeechRecognition();
+                VoiceAssistant.recognition.continuous = false;
+                VoiceAssistant.recognition.interimResults = true;
+                VoiceAssistant.recognition.lang = 'en-US';
+                
+                VoiceAssistant.recognition.onstart = () => {
+                    updateVoiceStatus('Listening...', 'listening');
+                    document.getElementById('soundWaves').classList.add('active');
+                };
+                
+                VoiceAssistant.recognition.onresult = (event) => {
+                    let finalTranscript = '';
+                    let interimTranscript = '';
+                    
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        if (event.results[i].isFinal) {
+                            finalTranscript += event.results[i][0].transcript;
+                        } else {
+                            interimTranscript += event.results[i][0].transcript;
+                        }
+                    }
+                    
+                    if (interimTranscript) {
+                        showResponse('🎤 "' + interimTranscript + '"');
+                    }
+                    
+                    if (finalTranscript) {
+                        stopListening();
+                        showResponse('🎤 "' + finalTranscript + '"');
+                        setTimeout(() => sendMessage(finalTranscript), 300);
+                    }
+                };
+                
+                VoiceAssistant.recognition.onend = () => {
+                    stopListening();
+                };
+                
+                VoiceAssistant.recognition.onerror = (event) => {
+                    console.error('Speech recognition error:', event.error);
+                    stopListening();
+                    if (event.error === 'no-speech') {
+                        showResponse("I didn't hear anything. Click the microphone and try again!");
+                    }
+                };
+            } else {
+                console.warn('Speech recognition not supported');
+                document.getElementById('voiceStatus').textContent = 'Voice not supported';
+            }
+        }
+        
+        // Update Voice Status
+        function updateVoiceStatus(text, state = '') {
+            const status = document.getElementById('voiceStatus');
+            status.textContent = text;
+            status.className = 'voice-status' + (state ? ' ' + state : '');
+        }
+        
+        // Start Listening
+        function startListening() {
+            if (VoiceAssistant.recognition && !VoiceAssistant.isListening && !VoiceAssistant.isProcessing) {
+                VoiceAssistant.isListening = true;
+                VoiceAssistant.recognition.start();
+                
+                const micBtn = document.getElementById('micMainBtn');
+                const mainBtn = document.getElementById('voiceAssistantBtn');
+                micBtn.classList.add('recording');
+                mainBtn.classList.add('listening');
+            }
+        }
+        
+        // Stop Listening
+        function stopListening() {
+            VoiceAssistant.isListening = false;
+            try {
+                if (VoiceAssistant.recognition) {
+                    VoiceAssistant.recognition.stop();
+                }
+            } catch (e) {}
+            
+            const micBtn = document.getElementById('micMainBtn');
+            const mainBtn = document.getElementById('voiceAssistantBtn');
+            const soundWaves = document.getElementById('soundWaves');
+            
+            micBtn.classList.remove('recording');
+            mainBtn.classList.remove('listening');
+            soundWaves.classList.remove('active');
+            
+            if (!VoiceAssistant.isProcessing) {
+                updateVoiceStatus('Click to speak');
+            }
+        }
+        
+        // Toggle Listening
+        function toggleListening() {
+            if (VoiceAssistant.isSpeaking) {
+                VoiceAssistant.synthesis.cancel();
+                VoiceAssistant.isSpeaking = false;
+                updateVoiceStatus('Click to speak');
+                return;
+            }
+            
+            if (VoiceAssistant.isListening) {
+                stopListening();
+            } else {
+                startListening();
+            }
+        }
+        
+        // Show/Hide Thinking
+        function setThinking(show) {
+            const indicator = document.getElementById('thinkingIndicator');
+            VoiceAssistant.isProcessing = show;
+            
+            if (show) {
+                indicator.classList.add('visible');
+                updateVoiceStatus('Processing...', 'speaking');
+            } else {
+                indicator.classList.remove('visible');
+            }
+        }
+        
+        // Text to Speech
+        function speak(text) {
+            if (VoiceAssistant.synthesis) {
+                VoiceAssistant.synthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.95;
+                utterance.pitch = 0.9;
+                utterance.volume = 1;
+                
+                // Try to find a male voice
+                const voices = VoiceAssistant.synthesis.getVoices();
+                const maleVoice = voices.find(v => 
+                    v.name.toLowerCase().includes('male') || 
+                    v.name.includes('David') ||
+                    v.name.includes('James') ||
+                    v.name.includes('Mark') ||
+                    v.name.includes('Daniel') ||
+                    v.name.includes('Google UK English Male')
+                ) || voices.find(v => v.lang.startsWith('en')) || voices[0];
+                
+                if (maleVoice) {
+                    utterance.voice = maleVoice;
+                }
+                
+                utterance.onstart = () => {
+                    VoiceAssistant.isSpeaking = true;
+                    updateVoiceStatus('Speaking...', 'speaking');
+                    document.getElementById('soundWaves').classList.add('active');
+                };
+                
+                utterance.onend = () => {
+                    VoiceAssistant.isSpeaking = false;
+                    updateVoiceStatus('Click to speak');
+                    document.getElementById('soundWaves').classList.remove('active');
+                };
+                
+                VoiceAssistant.synthesis.speak(utterance);
+            }
+        }
+        
+        // Send Message
+        async function sendMessage(message) {
+            if (!message || VoiceAssistant.isProcessing) return;
+            
+            setThinking(true);
+            
+            // Add to history
+            VoiceAssistant.conversationHistory.push({
+                role: 'user',
+                content: message
+            });
+            
+            try {
+                const response = await fetch('/api/voice-assistant/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        conversation_history: VoiceAssistant.conversationHistory.slice(-10)  // Send last 10 messages for better context
+                    })
+                });
+                
+                const data = await response.json();
+                setThinking(false);
+                
+                if (data.success) {
+                    showResponse(data.response, data.links || []);
+                    VoiceAssistant.conversationHistory.push({
+                        role: 'assistant',
+                        content: data.response
+                    });
+                    speak(data.response);
+                } else {
+                    showResponse("I apologize, but I encountered an issue. Please try again.");
+                    updateVoiceStatus('Click to speak');
+                }
+            } catch (error) {
+                setThinking(false);
+                showResponse("I'm having trouble connecting. Please try again.");
+                updateVoiceStatus('Click to speak');
+                console.error('Voice assistant error:', error);
+            }
+        }
+        
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            initSpeechRecognition();
+            
+            // Load voices
+            if (VoiceAssistant.synthesis) {
+                VoiceAssistant.synthesis.getVoices();
+                speechSynthesis.onvoiceschanged = () => {
+                    VoiceAssistant.synthesis.getVoices();
+                };
+            }
+            
+            // Main toggle button
+            document.getElementById('voiceAssistantBtn').addEventListener('click', toggleVoicePanel);
+            
+            // Main mic button
+            document.getElementById('micMainBtn').addEventListener('click', toggleListening);
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+    
+    {% if user.is_authenticated and user.user_type == 'patient' %}
+    <!-- Offline Sync Support for Patient Portal -->
+    <!-- Load scripts in order - dependencies must load first -->
+    <script src="{% static 'patient_portal/offline-db.js' %}"></script>
+    <script src="{% static 'patient_portal/offline-sync.js' %}"></script>
+    <script src="{% static 'patient_portal/offline-forms.js' %}"></script>
+    
+    <!-- Offline Status Indicator -->
+    <div id="offline-indicator" class="fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300 hidden">
+        <span class="flex items-center gap-2 text-sm font-medium">
+            <i class="fas fa-wifi"></i>
+            <span>Online</span>
+        </span>
+    </div>
+    
+    <style>
+        #offline-indicator {
+            background: #10b981;
+            color: white;
+        }
+        #offline-indicator.offline {
+            background: #ef4444;
+        }
+        #offline-indicator.online {
+            background: #10b981;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        .offline-sync-notification {
+            animation: slideIn 0.3s ease-out;
+        }
+    </style>
+    
+    <script>
+        // Register Service Worker for offline support
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/patient_portal/service-worker.js')
+                    .then((registration) => {
+                        console.log('Service Worker registered:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.error('Service Worker registration failed:', error);
+                    });
+            });
+        }
+        
+        // Show offline indicator when needed
+        document.addEventListener('DOMContentLoaded', () => {
+            const indicator = document.getElementById('offline-indicator');
+            if (indicator) {
+                // Show indicator after a short delay if offline
+                setTimeout(() => {
+                    if (!navigator.onLine) {
+                        indicator.classList.remove('hidden');
+                    }
+                }, 1000);
+            }
+        });
+    </script>
+    {% endif %}
+</body>
+</html>

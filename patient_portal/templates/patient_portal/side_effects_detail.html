@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+{% block title %}Side Effects - {{ plan.cancer_type }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <nav class="mb-4">
+                <a href="{% url 'patient_portal:side_effects_list' %}" class="text-primary hover:underline text-sm">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Side Effects
+                </a>
+            </nav>
+            <div class="flex items-start justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-foreground">{{ plan.cancer_type }} Treatment Side Effects</h1>
+                    <p class="text-muted-foreground mt-1">Stage {{ plan.cancer_stage }} | {{ plan.get_status_display }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Generated Info Overview -->
+        {% if ai_info.overview %}
+        <div class="bg-primary/5 border border-primary/20 rounded-xl p-6 mb-6">
+            <h2 class="text-lg font-semibold text-foreground mb-3">
+                <i class="fas fa-lightbulb text-primary mr-2"></i>Overview
+            </h2>
+            <p class="text-foreground text-lg leading-relaxed">{{ ai_info.overview }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Main Content -->
+        <div class="space-y-6">
+            <!-- Side Effects from Treatment Plan -->
+            {% if plan_side_effects %}
+            <div class="bg-card border border-border/50 rounded-xl p-6">
+                <h2 class="text-xl font-semibold text-foreground mb-4 flex items-center">
+                    <span class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-exclamation-triangle text-amber-600"></i>
+                    </span>
+                    Potential Side Effects
+                </h2>
+                <div class="space-y-4">
+                    {% for effect in plan_side_effects %}
+                    <div class="p-4 bg-accent/30 rounded-lg">
+                        {% if effect.effect %}
+                        <div class="flex items-start justify-between mb-2">
+                            <h3 class="font-medium text-foreground">{{ effect.effect }}</h3>
+                            {% if effect.severity %}
+                            <span class="px-2 py-1 text-xs rounded-full
+                                {% if effect.severity == 'high' or effect.severity == 'severe' %}bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400
+                                {% elif effect.severity == 'moderate' or effect.severity == 'medium' %}bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400
+                                {% else %}bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400{% endif %}">
+                                {{ effect.severity|title }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        {% if effect.probability %}
+                        <p class="text-sm text-muted-foreground mb-2">Likelihood: {{ effect.probability }}</p>
+                        {% endif %}
+                        {% if effect.management %}
+                        <div class="mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                            <p class="text-sm text-green-800 dark:text-green-400">
+                                <i class="fas fa-lightbulb mr-2"></i><strong>Management:</strong> {{ effect.management }}
+                            </p>
+                        </div>
+                        {% endif %}
+                        {% else %}
+                        <p class="text-foreground">{{ effect }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- AI-Generated Side Effects Info -->
+            {% if ai_info.side_effects %}
+            <div class="bg-card border border-border/50 rounded-xl p-6">
+                <h2 class="text-xl font-semibold text-foreground mb-4 flex items-center">
+                    <span class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-robot text-blue-600"></i>
+                    </span>
+                    Detailed Side Effect Guide
+                </h2>
+                <div class="space-y-4">
+                    {% for effect in ai_info.side_effects %}
+                    <div class="border border-border rounded-lg overflow-hidden">
+                        <div class="p-4 bg-accent/30 flex items-center justify-between">
+                            <h3 class="font-medium text-foreground">{{ effect.name }}</h3>
+                            <span class="px-2 py-1 text-xs rounded-full
+                                {% if effect.severity == 'high' %}bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400
+                                {% elif effect.severity == 'moderate' %}bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400
+                                {% else %}bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400{% endif %}">
+                                {{ effect.severity|title }}
+                            </span>
+                        </div>
+                        <div class="p-4 space-y-3">
+                            {% if effect.description %}
+                            <div>
+                                <p class="text-sm text-muted-foreground mb-1">What it feels like:</p>
+                                <p class="text-foreground">{{ effect.description }}</p>
+                            </div>
+                            {% endif %}
+                            {% if effect.management %}
+                            <div class="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                                <p class="text-sm text-green-800 dark:text-green-400">
+                                    <i class="fas fa-home mr-2"></i><strong>How to manage:</strong> {{ effect.management }}
+                                </p>
+                            </div>
+                            {% endif %}
+                            {% if effect.when_to_call %}
+                            <div class="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                                <p class="text-sm text-red-700 dark:text-red-400">
+                                    <i class="fas fa-phone mr-2"></i><strong>Call your doctor if:</strong> {{ effect.when_to_call }}
+                                </p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Treatment Info -->
+            {% if treatments %}
+            <div class="bg-card border border-border/50 rounded-xl p-6">
+                <h2 class="text-xl font-semibold text-foreground mb-4 flex items-center">
+                    <span class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-pills text-purple-600"></i>
+                    </span>
+                    Your Treatments
+                </h2>
+                <p class="text-sm text-muted-foreground mb-4">These are the treatments in your plan that may cause side effects:</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {% for treatment in treatments %}
+                    <div class="p-3 bg-accent/30 rounded-lg">
+                        {% if treatment.name %}
+                        <p class="font-medium text-foreground">{{ treatment.name }}</p>
+                        {% if treatment.type %}
+                        <p class="text-xs text-muted-foreground">{{ treatment.type }}</p>
+                        {% endif %}
+                        {% else %}
+                        <p class="text-foreground">{{ treatment }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- General Tips -->
+            {% if ai_info.general_tips %}
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+                <h2 class="text-xl font-semibold text-blue-800 dark:text-blue-400 mb-4 flex items-center">
+                    <span class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-lightbulb text-blue-600"></i>
+                    </span>
+                    General Tips
+                </h2>
+                <div class="space-y-3">
+                    {% for tip in ai_info.general_tips %}
+                    <div class="flex items-start space-x-3">
+                        <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <i class="fas fa-check text-white text-xs"></i>
+                        </div>
+                        <p class="text-blue-800 dark:text-blue-300">{{ tip }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- When to Call Doctor -->
+            {% if info.when_to_call_doctor %}
+            <div class="bg-red-50 dark:bg-red-900/10 border-2 border-red-300 dark:border-red-700 rounded-xl p-6">
+                <h2 class="text-xl font-semibold text-red-800 dark:text-red-400 mb-4 flex items-center">
+                    <span class="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-phone-alt text-red-600"></i>
+                    </span>
+                    When to Contact Your Doctor
+                </h2>
+                <p class="text-red-700 dark:text-red-300 mb-4">Call your healthcare team right away if you experience:</p>
+                <div class="space-y-2">
+                    {% for warning in info.when_to_call_doctor %}
+                    <div class="flex items-start space-x-3">
+                        <i class="fas fa-exclamation-circle text-red-500 mt-1"></i>
+                        <p class="text-red-700 dark:text-red-300">{{ warning }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="bg-red-50 dark:bg-red-900/10 border-2 border-red-300 dark:border-red-700 rounded-xl p-6">
+                <h2 class="text-xl font-semibold text-red-800 dark:text-red-400 mb-4 flex items-center">
+                    <span class="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-phone-alt text-red-600"></i>
+                    </span>
+                    When to Contact Your Doctor
+                </h2>
+                <p class="text-red-700 dark:text-red-300 mb-4">Call your healthcare team right away if you experience:</p>
+                <div class="space-y-2">
+                    <div class="flex items-start space-x-3">
+                        <i class="fas fa-exclamation-circle text-red-500 mt-1"></i>
+                        <p class="text-red-700 dark:text-red-300">Fever over 100.4°F (38°C)</p>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <i class="fas fa-exclamation-circle text-red-500 mt-1"></i>
+                        <p class="text-red-700 dark:text-red-300">Severe or worsening pain</p>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <i class="fas fa-exclamation-circle text-red-500 mt-1"></i>
+                        <p class="text-red-700 dark:text-red-300">Difficulty breathing</p>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <i class="fas fa-exclamation-circle text-red-500 mt-1"></i>
+                        <p class="text-red-700 dark:text-red-300">Unusual bleeding or bruising</p>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <i class="fas fa-exclamation-circle text-red-500 mt-1"></i>
+                        <p class="text-red-700 dark:text-red-300">Severe nausea or vomiting that doesn't stop</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Related Actions -->
+        <div class="mt-8 flex flex-col sm:flex-row gap-4">
+            <a href="{% url 'patient_portal:symptom_log_create' %}" 
+               class="flex-1 flex items-center justify-center px-4 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                <i class="fas fa-plus-circle mr-2"></i>Log Symptoms
+            </a>
+            <a href="{% url 'patient_portal:treatment_explanation_detail' plan.id %}" 
+               class="flex-1 flex items-center justify-center px-4 py-3 border border-border rounded-lg hover:bg-accent transition-colors text-foreground">
+                <i class="fas fa-book-reader mr-2"></i>Treatment Explanation
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

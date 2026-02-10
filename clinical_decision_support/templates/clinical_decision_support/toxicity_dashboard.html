@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% block title %}Toxicity Prediction Dashboard{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-foreground">Toxicity & Adverse Event Predictions</h1>
+            <p class="text-muted-foreground mt-1">Monitor predicted drug toxicities and recommended dose adjustments</p>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-card border border-border/50 rounded-xl p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-muted-foreground">Total Predictions</p>
+                        <p class="text-2xl font-bold text-foreground">{{ stats.total }}</p>
+                    </div>
+                    <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                        <i class="fas fa-flask text-primary"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-card border border-border/50 rounded-xl p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-muted-foreground">Low Risk</p>
+                        <p class="text-2xl font-bold text-green-600">{{ stats.low }}</p>
+                    </div>
+                    <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                        <i class="fas fa-check text-green-600"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-card border border-border/50 rounded-xl p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-muted-foreground">Moderate Risk</p>
+                        <p class="text-2xl font-bold text-amber-600">{{ stats.moderate }}</p>
+                    </div>
+                    <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center">
+                        <i class="fas fa-exclamation text-amber-600"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-card border border-border/50 rounded-xl p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-muted-foreground">High Risk</p>
+                        <p class="text-2xl font-bold text-red-600">{{ stats.high }}</p>
+                    </div>
+                    <div class="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                        <i class="fas fa-exclamation-triangle text-red-600"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-card border border-border/50 rounded-xl p-4 mb-6">
+            <form method="get" class="flex flex-wrap items-center gap-4">
+                <div class="flex-1 min-w-[200px]">
+                    <input type="text" name="patient" value="{{ request.GET.patient }}"
+                           class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground"
+                           placeholder="Search by patient name...">
+                </div>
+                <div>
+                    <select name="risk_level" class="px-4 py-2 bg-background border border-border rounded-lg text-foreground">
+                        <option value="">All Risk Levels</option>
+                        <option value="low" {% if request.GET.risk_level == 'low' %}selected{% endif %}>Low Risk</option>
+                        <option value="moderate" {% if request.GET.risk_level == 'moderate' %}selected{% endif %}>Moderate Risk</option>
+                        <option value="high" {% if request.GET.risk_level == 'high' %}selected{% endif %}>High Risk</option>
+                    </select>
+                </div>
+                <div>
+                    <select name="drug" class="px-4 py-2 bg-background border border-border rounded-lg text-foreground">
+                        <option value="">All Drugs</option>
+                        {% for drug in drugs %}
+                        <option value="{{ drug }}" {% if request.GET.drug == drug %}selected{% endif %}>{{ drug }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                    <i class="fas fa-filter mr-2"></i>Filter
+                </button>
+                <a href="{% url 'clinical_decision_support:toxicity_predict' %}" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                    <i class="fas fa-plus mr-2"></i>New Prediction
+                </a>
+            </form>
+        </div>
+
+        <!-- Predictions List -->
+        <div class="space-y-4">
+            {% for prediction in predictions %}
+            <div class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-start justify-between mb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-foreground">{{ prediction.patient.username }}</h3>
+                        <p class="text-sm text-muted-foreground">
+                            {{ prediction.drug_name }} | {{ prediction.predicted_at|date:"M d, Y H:i" }}
+                        </p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="px-3 py-1 rounded-full text-sm font-medium
+                            {% if prediction.overall_risk_level == 'low' %}bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400
+                            {% elif prediction.overall_risk_level == 'moderate' %}bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400
+                            {% else %}bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400{% endif %}">
+                            {{ prediction.get_overall_risk_level_display }} Risk
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Top Toxicities Preview -->
+                <div class="mb-4">
+                    <p class="text-sm text-muted-foreground mb-2">Predicted Toxicities:</p>
+                    <div class="flex flex-wrap gap-2">
+                        {% for toxicity in prediction.toxicity_predictions|slice:":4" %}
+                        <span class="px-2 py-1 text-xs rounded-full
+                            {% if toxicity.risk_level == 'high' %}bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400
+                            {% elif toxicity.risk_level == 'moderate' %}bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400
+                            {% else %}bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400{% endif %}">
+                            {{ toxicity.name }} (Grade {{ toxicity.ctcae_grade }})
+                        </span>
+                        {% empty %}
+                        <span class="text-sm text-muted-foreground">No specific toxicities predicted</span>
+                        {% endfor %}
+                        {% if prediction.toxicity_predictions|length > 4 %}
+                        <span class="px-2 py-1 text-xs bg-accent rounded-full text-muted-foreground">
+                            +{{ prediction.toxicity_predictions|length|add:"-4" }} more
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Dose Adjustment -->
+                {% if prediction.recommended_dose_adjustment %}
+                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 mb-4">
+                    <div class="flex items-start space-x-2">
+                        <i class="fas fa-prescription text-amber-500 mt-0.5"></i>
+                        <div class="text-sm">
+                            <p class="font-medium text-amber-700 dark:text-amber-400">Dose Adjustment Recommended</p>
+                            <p class="text-amber-600 dark:text-amber-300">{{ prediction.recommended_dose_adjustment }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Actions -->
+                <div class="flex justify-end">
+                    <a href="{% url 'clinical_decision_support:toxicity_detail' prediction.id %}" 
+                       class="text-primary hover:underline text-sm">
+                        View Full Prediction <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="bg-card border border-border/50 rounded-xl p-12 text-center">
+                <i class="fas fa-flask text-4xl text-muted-foreground mb-4"></i>
+                <h3 class="text-lg font-medium text-foreground mb-2">No Toxicity Predictions Found</h3>
+                <p class="text-muted-foreground mb-4">Create predictions to monitor potential drug toxicities</p>
+                <a href="{% url 'clinical_decision_support:toxicity_predict' %}" 
+                   class="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                    <i class="fas fa-plus mr-2"></i>Create Prediction
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if predictions.has_other_pages %}
+        <div class="mt-8 flex justify-center">
+            <nav class="flex items-center space-x-2">
+                {% if predictions.has_previous %}
+                <a href="?page={{ predictions.previous_page_number }}" class="px-3 py-1 bg-accent rounded hover:bg-accent/80">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                {% endif %}
+                <span class="px-3 py-1 text-muted-foreground">
+                    Page {{ predictions.number }} of {{ predictions.paginator.num_pages }}
+                </span>
+                {% if predictions.has_next %}
+                <a href="?page={{ predictions.next_page_number }}" class="px-3 py-1 bg-accent rounded hover:bg-accent/80">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

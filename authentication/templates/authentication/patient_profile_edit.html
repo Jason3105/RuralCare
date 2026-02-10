@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile - Patient{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header Card -->
+        <div class="bg-card border border-border rounded-lg overflow-hidden mb-6 fade-in transition-colors">
+            <div class="bg-gradient-to-r from-primary to-primary/80 px-4 sm:px-6 py-4 sm:py-6">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-user-edit text-2xl sm:text-3xl text-primary-foreground"></i>
+                        <h1 class="ml-3 sm:ml-4 text-2xl sm:text-3xl font-bold text-primary-foreground">Edit Your Profile</h1>
+                    </div>
+                    <a href="{% url 'patient_dashboard' %}" class="flex items-center px-4 py-2 bg-card text-foreground font-semibold rounded-md hover:bg-accent transition-colors text-sm sm:text-base">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Dashboard
+                    </a>
+                </div>
+            </div>
+            
+            <div class="bg-blue-500/10 dark:bg-blue-500/20 border-l-4 border-blue-500 px-4 sm:px-6 py-4">
+                <div class="flex items-start">
+                    <i class="fas fa-info-circle text-blue-600 dark:text-blue-400 mr-3 mt-1 flex-shrink-0"></i>
+                    <p class="text-sm sm:text-base text-foreground">
+                        Keep your medical profile up to date. This information helps doctors provide better care.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-6 bg-green-100 dark:bg-green-900/20 border-l-4 border-green-500 text-green-700 dark:text-green-400 px-6 py-4 rounded-r-lg shadow-md fade-in" role="alert">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            <p>{{ message }}</p>
+                        </div>
+                        <button type="button" class="text-green-700 dark:text-green-400 hover:text-green-900 dark:hover:text-green-200" onclick="this.parentElement.parentElement.remove()">
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Form Card -->
+        <div class="bg-card border border-border rounded-lg overflow-hidden fade-in transition-colors">
+            <form method="POST" id="profileForm" class="p-4 sm:p-8">
+                {% csrf_token %}
+                
+                <!-- Personal Information -->
+                <div class="mb-8">
+                    <h2 class="text-xl sm:text-2xl font-bold text-foreground mb-6 pb-2 border-b-2 border-primary flex items-center">
+                        <i class="fas fa-user text-primary mr-2"></i>
+                        Personal Information
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">
+                                First Name
+                            </label>
+                            {{ form.first_name }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">
+                                Last Name
+                            </label>
+                            {{ form.last_name }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">
+                                Email Address
+                            </label>
+                            {{ form.email }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">
+                                Phone Number
+                            </label>
+                            {{ form.phone_number }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Basic Health Information -->
+                <div class="mb-8">
+                    <h2 class="text-xl sm:text-2xl font-bold text-foreground mb-6 pb-2 border-b-2 border-primary flex items-center">
+                        <i class="fas fa-heart-pulse text-primary mr-2"></i>
+                        Basic Health Information
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">
+                                Date of Birth
+                            </label>
+                            {{ form.date_of_birth }}
+                            {% if form.date_of_birth.errors %}
+                                <p class="mt-2 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.date_of_birth.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">
+                                Gender
+                            </label>
+                            {{ form.gender }}
+                            {% if form.gender.errors %}
+                                <p class="mt-2 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.gender.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">
+                                Blood Group
+                            </label>
+                            {{ form.blood_group }}
+                            {% if form.blood_group.errors %}
+                                <p class="mt-2 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.blood_group.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="mt-6">
+                        <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">
+                            Address
+                        </label>
+                        {{ form.address }}
+                        {% if form.address.errors %}
+                            <p class="mt-2 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.address.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Emergency Contact -->
+                <div class="mb-8">
+                    <h2 class="text-xl sm:text-2xl font-bold text-foreground mb-6 pb-2 border-b-2 border-red-500 flex items-center">
+                        <i class="fas fa-phone-volume text-red-500 mr-2"></i>
+                        Emergency Contact
+                    </h2>
+                    <div class="bg-red-500/5 border border-red-500/20 rounded-lg p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">
+                                    Contact Name
+                                </label>
+                                {{ form.emergency_contact_name }}
+                                {% if form.emergency_contact_name.errors %}
+                                    <p class="mt-2 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.emergency_contact_name.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">
+                                    Contact Phone
+                                </label>
+                                {{ form.emergency_contact_phone }}
+                                {% if form.emergency_contact_phone.errors %}
+                                    <p class="mt-2 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.emergency_contact_phone.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Medical Information -->
+                <div class="mb-8">
+                    <h2 class="text-xl sm:text-2xl font-bold text-foreground mb-6 pb-2 border-b-2 border-green-500 flex items-center">
+                        <i class="fas fa-notes-medical text-green-500 mr-2"></i>
+                        Medical Information
+                    </h2>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">
+                                Medical History
+                            </label>
+                            {{ form.medical_history }}
+                            <p class="mt-2 text-sm text-muted-foreground">Include past illnesses, surgeries, and chronic conditions</p>
+                            {% if form.medical_history.errors %}
+                                <p class="mt-2 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.medical_history.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">
+                                Allergies
+                            </label>
+                            {{ form.allergies }}
+                            <p class="mt-2 text-sm text-muted-foreground">List any known allergies (medications, food, environmental)</p>
+                            {% if form.allergies.errors %}
+                                <p class="mt-2 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.allergies.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">
+                                Current Medications
+                            </label>
+                            {{ form.current_medications }}
+                            <p class="mt-2 text-sm text-muted-foreground">List all medications you are currently taking</p>
+                            {% if form.current_medications.errors %}
+                                <p class="mt-2 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.current_medications.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-border">
+                    <button type="submit" class="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 rounded-lg font-semibold transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 flex items-center justify-center">
+                        <i class="fas fa-save mr-2"></i>
+                        Save Changes
+                    </button>
+                    <a href="{% url 'patient_dashboard' %}" class="flex-1 bg-muted hover:bg-muted/80 text-foreground px-8 py-4 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center">
+                        <i class="fas fa-times mr-2"></i>
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Help Card -->
+        <div class="mt-6 bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/30 rounded-lg p-6 fade-in">
+            <div class="flex items-start">
+                <i class="fas fa-lightbulb text-blue-600 dark:text-blue-400 text-2xl mr-4 flex-shrink-0 mt-1"></i>
+                <div>
+                    <h3 class="text-lg font-bold text-foreground mb-2">Why update your profile?</h3>
+                    <ul class="space-y-2 text-sm text-muted-foreground">
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-blue-600 dark:text-blue-400 mr-2 mt-1 flex-shrink-0"></i>
+                            <span>Doctors can provide better diagnosis with complete medical history</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-blue-600 dark:text-blue-400 mr-2 mt-1 flex-shrink-0"></i>
+                            <span>Emergency contacts can be reached quickly in critical situations</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-blue-600 dark:text-blue-400 mr-2 mt-1 flex-shrink-0"></i>
+                            <span>Your QR code shares this information instantly with healthcare providers</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add smooth fade-in animation
+    document.addEventListener('DOMContentLoaded', function() {
+        const fadeElements = document.querySelectorAll('.fade-in');
+        fadeElements.forEach((el, index) => {
+            setTimeout(() => {
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    });
+</script>
+
+<style>
+    .fade-in {
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    }
+</style>
+{% endblock %}

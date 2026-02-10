@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+
+{% block title %}My Consultations{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Header -->
+    <div class="bg-card border border-border/50 rounded-2xl p-6 sm:p-8 mb-8 shadow-sm">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-3xl sm:text-4xl font-bold text-foreground mb-2">My Consultations</h1>
+                <p class="text-muted-foreground">View and manage your patient consultations</p>
+            </div>
+            <div class="flex gap-2">
+                <a href="{% url 'doctor_manage_availability' %}" class="px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary font-semibold rounded-lg transition-all">
+                    <i class="fas fa-calendar-alt mr-2"></i>Manage Availability
+                </a>
+                <a href="{% url 'doctor_consultation_requests' %}" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all">
+                    <i class="fas fa-inbox mr-2"></i>View Requests
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="mb-6 bg-card border border-border/50 rounded-xl p-2 inline-flex gap-2">
+        <a href="?status=" class="px-4 py-2 rounded-lg font-medium transition-all {% if not selected_status %}bg-primary text-primary-foreground{% else %}text-muted-foreground hover:bg-accent{% endif %}">
+            All
+        </a>
+        <a href="?status=scheduled" class="px-4 py-2 rounded-lg font-medium transition-all {% if selected_status == 'scheduled' %}bg-primary text-primary-foreground{% else %}text-muted-foreground hover:bg-accent{% endif %}">
+            Scheduled
+        </a>
+        <a href="?status=completed" class="px-4 py-2 rounded-lg font-medium transition-all {% if selected_status == 'completed' %}bg-primary text-primary-foreground{% else %}text-muted-foreground hover:bg-accent{% endif %}">
+            Completed
+        </a>
+        <a href="?status=cancelled" class="px-4 py-2 rounded-lg font-medium transition-all {% if selected_status == 'cancelled' %}bg-primary text-primary-foreground{% else %}text-muted-foreground hover:bg-accent{% endif %}">
+            Cancelled
+        </a>
+    </div>
+
+    <!-- Upcoming Consultations -->
+    {% if upcoming_consultations %}
+    <div class="bg-card border border-border/50 rounded-2xl p-6 sm:p-8 mb-8 shadow-sm">
+        <h2 class="text-2xl font-bold text-foreground mb-6 flex items-center gap-3">
+            <div class="bg-green-600/10 p-3 rounded-xl">
+                <i class="fas fa-calendar-check text-green-600 text-xl"></i>
+            </div>
+            Upcoming Consultations
+        </h2>
+        <div class="space-y-4">
+            {% for consultation in upcoming_consultations %}
+            <div class="bg-accent/30 border border-border/50 rounded-xl p-6 hover:shadow-md transition-all">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex items-start gap-4 flex-1">
+                        {% if consultation.patient.profile_picture %}
+                        <img src="{{ consultation.patient.profile_picture }}" alt="{{ consultation.patient.first_name }}" 
+                             class="w-14 h-14 rounded-full object-cover flex-shrink-0">
+                        {% else %}
+                        <div class="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                            <span class="text-xl font-bold text-primary">
+                                {{ consultation.patient.first_name.0 }}{{ consultation.patient.last_name.0 }}
+                            </span>
+                        </div>
+                        {% endif %}
+                        <div class="flex-1">
+                            <h3 class="font-bold text-lg text-foreground">{{ consultation.patient.first_name }} {{ consultation.patient.last_name }}</h3>
+                            <p class="text-sm text-muted-foreground">{{ consultation.patient.email }}</p>
+                            <div class="flex flex-wrap gap-3 mt-2">
+                                <span class="text-sm text-muted-foreground">
+                                    <i class="fas fa-calendar text-primary mr-1"></i>
+                                    {{ consultation.scheduled_datetime|date:"M d, Y" }}
+                                </span>
+                                <span class="text-sm text-muted-foreground">
+                                    <i class="fas fa-clock text-primary mr-1"></i>
+                                    {{ consultation.scheduled_datetime|time:"g:i A" }}
+                                </span>
+                                <span class="text-sm text-muted-foreground">
+                                    <i class="fas fa-hourglass-half text-primary mr-1"></i>
+                                    {{ consultation.duration_minutes }} mins
+                                </span>
+                                <span class="text-sm">
+                                    <i class="fas fa-{% if consultation.mode == 'video' %}video{% else %}phone{% endif %} text-primary mr-1"></i>
+                                    {{ consultation.mode|title }} Call
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                        <span class="px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-sm font-semibold rounded-lg">
+                            {{ consultation.status|title }}
+                        </span>
+                        <a href="{% url 'doctor_consultation_detail' consultation.id %}" 
+                           class="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-all inline-flex items-center gap-2">
+                            <i class="fas fa-eye"></i>
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Past Consultations -->
+    {% if past_consultations %}
+    <div class="bg-card border border-border/50 rounded-2xl p-6 sm:p-8 shadow-sm">
+        <h2 class="text-2xl font-bold text-foreground mb-6 flex items-center gap-3">
+            <div class="bg-blue-600/10 p-3 rounded-xl">
+                <i class="fas fa-history text-blue-600 text-xl"></i>
+            </div>
+            Past Consultations
+        </h2>
+        <div class="space-y-4">
+            {% for consultation in past_consultations %}
+            <div class="bg-accent/30 border border-border/50 rounded-xl p-6 hover:shadow-md transition-all opacity-75">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex items-start gap-4 flex-1">
+                        {% if consultation.patient.profile_picture %}
+                        <img src="{{ consultation.patient.profile_picture }}" alt="{{ consultation.patient.first_name }}" 
+                             class="w-14 h-14 rounded-full object-cover flex-shrink-0 grayscale">
+                        {% else %}
+                        <div class="w-14 h-14 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                            <span class="text-xl font-bold text-muted-foreground">
+                                {{ consultation.patient.first_name.0 }}{{ consultation.patient.last_name.0 }}
+                            </span>
+                        </div>
+                        {% endif %}
+                        <div class="flex-1">
+                            <h3 class="font-bold text-lg text-foreground">{{ consultation.patient.first_name }} {{ consultation.patient.last_name }}</h3>
+                            <p class="text-sm text-muted-foreground">{{ consultation.patient.email }}</p>
+                            <div class="flex flex-wrap gap-3 mt-2">
+                                <span class="text-sm text-muted-foreground">
+                                    <i class="fas fa-calendar text-muted-foreground mr-1"></i>
+                                    {{ consultation.scheduled_datetime|date:"M d, Y" }}
+                                </span>
+                                <span class="text-sm text-muted-foreground">
+                                    <i class="fas fa-clock text-muted-foreground mr-1"></i>
+                                    {{ consultation.scheduled_datetime|time:"g:i A" }}
+                                </span>
+                                <span class="text-sm">
+                                    <i class="fas fa-{% if consultation.mode == 'video' %}video{% else %}phone{% endif %} text-muted-foreground mr-1"></i>
+                                    {{ consultation.mode|title }} Call
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                        <span class="px-4 py-2 {% if consultation.status == 'completed' %}bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400{% elif consultation.status == 'cancelled' %}bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400{% else %}bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400{% endif %} text-sm font-semibold rounded-lg">
+                            {{ consultation.status|title }}
+                        </span>
+                        <a href="{% url 'doctor_consultation_detail' consultation.id %}" 
+                           class="px-4 py-2 bg-muted hover:bg-muted/80 text-foreground font-semibold rounded-lg transition-all inline-flex items-center gap-2">
+                            <i class="fas fa-eye"></i>
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- No Consultations -->
+    {% if not upcoming_consultations and not past_consultations %}
+    <div class="bg-card border border-border/50 rounded-2xl p-12 text-center shadow-sm">
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-muted/50 mb-6">
+            <i class="fas fa-calendar-times text-4xl text-muted-foreground"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-foreground mb-3">No Consultations Found</h3>
+        <p class="text-muted-foreground mb-8 max-w-md mx-auto">
+            {% if selected_status %}
+            No {{ selected_status }} consultations found. Try selecting a different filter.
+            {% else %}
+            You don't have any consultations yet. Check your consultation requests to schedule new appointments.
+            {% endif %}
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{% url 'doctor_consultation_requests' %}" class="px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-lg transition-all inline-flex items-center justify-center gap-2">
+                <i class="fas fa-inbox"></i>
+                View Requests
+            </a>
+            <a href="{% url 'doctor_dashboard' %}" class="px-6 py-3 bg-muted hover:bg-muted/80 text-foreground font-semibold rounded-lg transition-all inline-flex items-center justify-center gap-2">
+                <i class="fas fa-home"></i>
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

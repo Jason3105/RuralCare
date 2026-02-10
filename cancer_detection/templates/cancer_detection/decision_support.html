@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+
+{% block title %}Decision Support - {{ plan.plan_name }}{% endblock %}
+
+{% block content %}
+<div class="fade-in max-w-7xl mx-auto">
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-3xl sm:text-4xl font-bold text-foreground mb-2">Shared Decision Support</h1>
+            <p class="text-muted-foreground">{{ plan.plan_name }}</p>
+        </div>
+        <a href="{% url 'cancer_detection:treatment_plan_detail' plan_id=plan.id %}" 
+           class="mt-4 sm:mt-0 bg-card border-2 border-border hover:border-primary text-foreground font-semibold py-2 px-4 rounded-lg transition-all">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Plan
+        </a>
+    </div>
+
+    <!-- Treatment Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-card border border-border/50 rounded-2xl p-6">
+            <div class="text-sm text-muted-foreground mb-2">5-Year Survival</div>
+            <div class="text-3xl font-bold text-primary">
+                {% if plan.predicted_5yr_survival %}
+                    {{ plan.predicted_5yr_survival|floatformat:1 }}%
+                {% else %}
+                    —
+                {% endif %}
+            </div>
+        </div>
+        <div class="bg-card border border-border/50 rounded-2xl p-6">
+            <div class="text-sm text-muted-foreground mb-2">Response Probability</div>
+            <div class="text-3xl font-bold text-primary">
+                {% if plan.remission_probability %}
+                    {{ plan.remission_probability|floatformat:1 }}%
+                {% else %}
+                    —
+                {% endif %}
+            </div>
+        </div>
+        <div class="bg-card border border-border/50 rounded-2xl p-6">
+            <div class="text-sm text-muted-foreground mb-2">Quality of Life</div>
+            <div class="text-3xl font-bold text-primary">
+                {% if plan.quality_of_life_score %}
+                    {{ plan.quality_of_life_score }}/100
+                {% else %}
+                    —
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Treatment Recommendations -->
+    <div class="bg-card border border-border/50 rounded-2xl p-6 sm:p-10 mb-8">
+        <h2 class="text-2xl font-bold text-foreground mb-6 flex items-center">
+            <i class="fas fa-prescription text-primary mr-2"></i>Recommended Treatments
+        </h2>
+        
+        {% if plan.primary_treatments %}
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold text-foreground mb-3">Primary Treatment</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for treatment in plan.primary_treatments %}
+                <div class="bg-background border border-border/50 rounded-lg p-4">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                        <span class="font-semibold text-foreground">{{ treatment }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if plan.adjuvant_treatments %}
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold text-foreground mb-3">Adjuvant Treatment</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for treatment in plan.adjuvant_treatments %}
+                <div class="bg-background border border-border/50 rounded-lg p-4">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-plus-circle text-blue-600 mr-2"></i>
+                        <span class="font-semibold text-foreground">{{ treatment }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if plan.targeted_therapies %}
+        <div>
+            <h3 class="text-lg font-semibold text-foreground mb-3">Targeted Therapies</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for therapy in plan.targeted_therapies %}
+                <div class="bg-background border border-border/50 rounded-lg p-4">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-bullseye text-purple-600 mr-2"></i>
+                        <span class="font-semibold text-foreground">{{ therapy }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Side Effects -->
+    {% if plan.side_effects %}
+    <div class="bg-card border border-border/50 rounded-2xl p-6 sm:p-10 mb-8">
+        <h2 class="text-2xl font-bold text-foreground mb-6 flex items-center">
+            <i class="fas fa-exclamation-triangle text-yellow-500 mr-2"></i>Expected Side Effects
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for side_effect in plan.side_effects %}
+            <div class="bg-background border border-border/50 rounded-lg p-4">
+                <div class="flex items-start justify-between mb-2">
+                    <span class="font-semibold text-foreground">{{ side_effect.name }}</span>
+                    <span class="px-2 py-1 rounded text-xs font-semibold
+                        {% if side_effect.severity == 'severe' %}bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400
+                        {% elif side_effect.severity == 'moderate' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400
+                        {% else %}bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400{% endif %}">
+                        {{ side_effect.severity|title }}
+                    </span>
+                </div>
+                <p class="text-xs text-muted-foreground">Frequency: {{ side_effect.frequency|title }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Decision Support Tools -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <!-- Benefits vs Risks -->
+        <div class="bg-card border border-border/50 rounded-2xl p-6">
+            <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
+                <i class="fas fa-balance-scale text-primary mr-2"></i>Benefits vs Risks
+            </h2>
+            <div class="space-y-4">
+                <div>
+                    <h3 class="font-semibold text-green-600 mb-2">Benefits</h3>
+                    <ul class="space-y-1 text-sm text-foreground">
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-600 mr-2 mt-1"></i>
+                            <span>Improved survival probability</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-600 mr-2 mt-1"></i>
+                            <span>Personalized treatment approach</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-600 mr-2 mt-1"></i>
+                            <span>Evidence-based protocols</span>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-red-600 mb-2">Risks</h3>
+                    <ul class="space-y-1 text-sm text-foreground">
+                        <li class="flex items-start">
+                            <i class="fas fa-exclamation text-red-600 mr-2 mt-1"></i>
+                            <span>Treatment-related side effects</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-exclamation text-red-600 mr-2 mt-1"></i>
+                            <span>Quality of life impact</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-exclamation text-red-600 mr-2 mt-1"></i>
+                            <span>Uncertainty in outcomes</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Questions to Discuss -->
+        <div class="bg-card border border-border/50 rounded-2xl p-6">
+            <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
+                <i class="fas fa-question-circle text-primary mr-2"></i>Questions to Discuss
+            </h2>
+            <ul class="space-y-3 text-sm text-foreground">
+                <li class="flex items-start">
+                    <i class="fas fa-circle text-primary mr-2 mt-1.5 text-xs"></i>
+                    <span>What are the goals of this treatment plan?</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-circle text-primary mr-2 mt-1.5 text-xs"></i>
+                    <span>What are the alternative treatment options?</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-circle text-primary mr-2 mt-1.5 text-xs"></i>
+                    <span>How will side effects be managed?</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-circle text-primary mr-2 mt-1.5 text-xs"></i>
+                    <span>What is the expected timeline?</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-circle text-primary mr-2 mt-1.5 text-xs"></i>
+                    <span>Are there clinical trials available?</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex flex-col sm:flex-row gap-4">
+        <a href="{% url 'cancer_detection:visualize_pathway' plan_id=plan.id %}" 
+           class="flex-1 bg-gradient-to-r from-primary to-primary/90 hover:shadow-xl text-primary-foreground font-bold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center hover:scale-105">
+            <i class="fas fa-route mr-2"></i>
+            View Treatment Pathway
+        </a>
+        {% if plan.status == 'draft' %}
+        <form method="post" action="{% url 'cancer_detection:submit_treatment_plan_review' plan_id=plan.id %}" class="flex-1">
+            {% csrf_token %}
+            <button type="submit" 
+                class="w-full bg-card border-2 border-primary hover:bg-primary hover:text-primary-foreground text-primary font-bold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center">
+                <i class="fas fa-paper-plane mr-2"></i>
+                Submit for Review
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

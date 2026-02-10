@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Select User Type{% endblock %}
+
+{% block content %}
+<div class="fade-in min-h-screen py-12 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
+    <div class="max-w-5xl w-full">
+        <div class="text-center mb-12 sm:mb-16">
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-4">Welcome Back</h1>
+            <p class="text-lg sm:text-xl text-muted-foreground">Please select your account type to continue</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8 sm:gap-10">
+            <!-- Patient Login Card -->
+            <a href="{% url 'patient_login' %}" class="group">
+                <div class="bg-card border border-border/50 p-8 sm:p-10 rounded-2xl hover:shadow-2xl hover:border-primary/50 transition-all duration-300 transform hover:scale-105 cursor-pointer h-full flex flex-col">
+                    <div class="text-center mb-6">
+                        <div class="inline-flex items-center justify-center w-20 h-20 bg-blue-500/10 rounded-2xl mb-6 group-hover:bg-blue-500/20 transition-colors">
+                            <i class="fas fa-user-injured text-5xl text-blue-600"></i>
+                        </div>
+                        <h2 class="text-2xl sm:text-3xl font-bold text-foreground mb-3">Patient Login</h2>
+                        <p class="text-muted-foreground text-base sm:text-lg mb-8">Access your personalized treatment plans and medical records</p>
+                    </div>
+                    <div class="mt-auto">
+                        <div class="inline-block w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:shadow-lg text-white px-6 py-3 rounded-xl font-bold group-hover:scale-105 transition-all duration-200 text-center flex items-center justify-center gap-2">
+                            <span>Continue as Patient</span>
+                            <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Doctor Login Card -->
+            <a href="{% url 'doctor_login' %}" class="group">
+                <div class="bg-card border border-border/50 p-8 sm:p-10 rounded-2xl hover:shadow-2xl hover:border-green-500/50 transition-all duration-300 transform hover:scale-105 cursor-pointer h-full flex flex-col">
+                    <div class="text-center mb-6">
+                        <div class="inline-flex items-center justify-center w-20 h-20 bg-green-500/10 rounded-2xl mb-6 group-hover:bg-green-500/20 transition-colors">
+                            <i class="fas fa-user-md text-5xl text-green-600"></i>
+                        </div>
+                        <h2 class="text-2xl sm:text-3xl font-bold text-foreground mb-3">Doctor Login</h2>
+                        <p class="text-muted-foreground text-base sm:text-lg mb-8">Manage patient care and design treatment plans</p>
+                    </div>
+                    <div class="mt-auto">
+                        <div class="inline-block w-full bg-gradient-to-r from-green-600 to-green-500 hover:shadow-lg text-white px-6 py-3 rounded-xl font-bold group-hover:scale-105 transition-all duration-200 text-center flex items-center justify-center gap-2">
+                            <span>Continue as Doctor</span>
+                            <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Info Section -->
+        <div class="mt-16 sm:mt-20 grid md:grid-cols-3 gap-6">
+            <div class="text-center p-6 bg-primary/5 border border-primary/20 rounded-xl">
+                <i class="fas fa-shield-alt text-3xl text-primary mb-3 block"></i>
+                <h3 class="font-bold text-foreground mb-2">Secure Access</h3>
+                <p class="text-sm text-muted-foreground">OAuth 2.0 authentication protects your data</p>
+            </div>
+            <div class="text-center p-6 bg-primary/5 border border-primary/20 rounded-xl">
+                <i class="fas fa-lock text-3xl text-primary mb-3 block"></i>
+                <h3 class="font-bold text-foreground mb-2">Privacy First</h3>
+                <p class="text-sm text-muted-foreground">Your health information remains confidential</p>
+            </div>
+            <div class="text-center p-6 bg-primary/5 border border-primary/20 rounded-xl">
+                <i class="fas fa-zap text-3xl text-primary mb-3 block"></i>
+                <h3 class="font-bold text-foreground mb-2">Lightning Fast</h3>
+                <p class="text-sm text-muted-foreground">Powered by modern cloud infrastructure</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

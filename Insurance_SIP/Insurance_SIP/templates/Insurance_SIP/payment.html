@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Payment - {{ application.policy.name }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-12">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Payment Header -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+            <div class="bg-gradient-to-r from-blue-600 to-green-600 px-8 py-6 text-white">
+                <h1 class="text-3xl font-bold flex items-center">
+                    <i class="fas fa-credit-card mr-3"></i>
+                    Complete Your Payment
+                </h1>
+            </div>
+            
+            <div class="p-8">
+                <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 mb-6">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-info-circle text-blue-600 text-2xl mr-3"></i>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Secure Payment with Razorpay</h3>
+                            <p class="text-sm text-gray-600">Your payment information is encrypted and secure</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Policy Summary -->
+                <div class="mb-8">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">Policy Summary</h2>
+                    <div class="bg-gray-50 rounded-xl p-6 space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Policy Name</span>
+                            <span class="font-semibold text-gray-900">{{ application.policy.name }}</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Coverage Amount</span>
+                            <span class="font-semibold text-gray-900">₹{{ application.policy.coverage_amount|floatformat:0 }}</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Policy Type</span>
+                            <span class="font-semibold text-gray-900 capitalize">{{ application.policy.get_policy_type_display }}</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Application ID</span>
+                            <span class="font-mono font-semibold text-blue-600">{{ application.application_id }}</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Applicant Name</span>
+                            <span class="font-semibold text-gray-900">{{ application.applicant_name }}</span>
+                        </div>
+                        
+                        <div class="pt-4 mt-4 border-t-2 border-gray-300">
+                            <div class="flex justify-between items-center">
+                                <span class="text-lg font-semibold text-gray-900">First Month Premium</span>
+                                <span class="text-2xl font-bold text-blue-600">₹{{ application.policy.premium_per_month }}</span>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2 text-right">Subsequent months will be auto-debited</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Button -->
+                <button id="rzp-button" 
+                        class="w-full bg-gradient-to-r from-blue-600 to-green-600 text-white py-4 rounded-xl font-bold text-lg hover:shadow-2xl transform hover:scale-105 transition-all flex items-center justify-center">
+                    <i class="fas fa-lock mr-2"></i>
+                    Pay ₹{{ application.policy.premium_per_month }} Securely
+                </button>
+                
+                <div class="mt-6 text-center">
+                    <div class="flex items-center justify-center space-x-4 text-sm text-gray-500">
+                        <span class="flex items-center">
+                            <i class="fas fa-shield-alt text-green-500 mr-1"></i>
+                            SSL Secured
+                        </span>
+                        <span class="flex items-center">
+                            <i class="fas fa-lock text-green-500 mr-1"></i>
+                            256-bit Encryption
+                        </span>
+                        <span class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-1"></i>
+                            PCI DSS Compliant
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Accepted Payment Methods -->
+                <div class="mt-8 pt-6 border-t">
+                    <h3 class="text-sm font-semibold text-gray-600 mb-3 text-center">Accepted Payment Methods</h3>
+                    <div class="flex justify-center items-center space-x-6 flex-wrap gap-3">
+                        <div class="flex items-center space-x-2 text-sm text-gray-600">
+                            <i class="fab fa-cc-visa text-2xl text-blue-600"></i>
+                            <span>Visa</span>
+                        </div>
+                        <div class="flex items-center space-x-2 text-sm text-gray-600">
+                            <i class="fab fa-cc-mastercard text-2xl text-red-600"></i>
+                            <span>Mastercard</span>
+                        </div>
+                        <div class="flex items-center space-x-2 text-sm text-gray-600">
+                            <i class="fas fa-university text-2xl text-purple-600"></i>
+                            <span>Net Banking</span>
+                        </div>
+                        <div class="flex items-center space-x-2 text-sm text-gray-600">
+                            <i class="fas fa-wallet text-2xl text-green-600"></i>
+                            <span>UPI</span>
+                        </div>
+                        <div class="flex items-center space-x-2 text-sm text-gray-600">
+                            <i class="fas fa-mobile-alt text-2xl text-orange-600"></i>
+                            <span>Wallets</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Money Back Guarantee -->
+        <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+            <h3 class="font-bold text-gray-900 mb-2 flex items-center justify-center">
+                <i class="fas fa-undo text-green-500 mr-2"></i>
+                15-Day Money Back Guarantee
+            </h3>
+            <p class="text-sm text-gray-600">Not satisfied? Get a full refund within 15 days of purchase</p>
+        </div>
+    </div>
+</div>
+
+<!-- Razorpay Checkout Script -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.getElementById('rzp-button').onclick = function(e) {
+    e.preventDefault();
+    
+    var options = {
+        "key": "{{ razorpay_key_id }}",
+        "amount": "{{ amount }}",
+        "currency": "{{ currency }}",
+        "name": "RuralCare Insurance",
+        "description": "{{ application.policy.name }}",
+        "order_id": "{{ razorpay_order_id }}",
+        "handler": function (response) {
+            // Send payment details to backend
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{% url "insurance:payment_callback" %}';
+            
+            var fields = {
+                'razorpay_payment_id': response.razorpay_payment_id,
+                'razorpay_order_id': response.razorpay_order_id,
+                'razorpay_signature': response.razorpay_signature,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            };
+            
+            for (var key in fields) {
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = fields[key];
+                form.appendChild(input);
+            }
+            
+            document.body.appendChild(form);
+            form.submit();
+        },
+        "prefill": {
+            "name": "{{ user_name }}",
+            "email": "{{ user_email }}"
+        },
+        "notes": {
+            "application_id": "{{ application.application_id }}",
+            "policy_name": "{{ application.policy.name }}"
+        },
+        "theme": {
+            "color": "#2563eb"
+        },
+        "modal": {
+            "ondismiss": function() {
+                alert('Payment cancelled. You can retry anytime from your applications.');
+                window.location.href = '{% url "insurance:track_application" application.application_id %}';
+            }
+        }
+    };
+    
+    var rzp = new Razorpay(options);
+    rzp.open();
+};
+</script>
+{% endblock %}

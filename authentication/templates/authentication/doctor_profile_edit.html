@@ -1,0 +1,342 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile - Doctor{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header Card -->
+        <div class="bg-card border border-border rounded-lg overflow-hidden mb-6 fade-in transition-colors">
+            <div class="bg-gradient-to-r from-primary to-primary/80 px-4 sm:px-6 py-4 sm:py-6">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-user-edit text-2xl sm:text-3xl text-primary-foreground"></i>
+                        <h1 class="ml-3 sm:ml-4 text-2xl sm:text-3xl font-bold text-primary-foreground">Edit Your Profile</h1>
+                    </div>
+                    <a href="{% url 'doctor_dashboard' %}" class="flex items-center px-4 py-2 bg-card text-foreground font-semibold rounded-md hover:bg-accent transition-colors text-sm sm:text-base">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Dashboard
+                    </a>
+                </div>
+            </div>
+            
+            <div class="bg-blue-500/10 dark:bg-blue-500/20 border-l-4 border-blue-500 px-4 sm:px-6 py-4">
+                <div class="flex items-start">
+                    <i class="fas fa-info-circle text-blue-600 dark:text-blue-400 mr-3 mt-1 flex-shrink-0"></i>
+                    <p class="text-sm sm:text-base text-foreground">
+                        Update your profile information. Fields marked with <span class="text-red-600 dark:text-red-400 font-bold">*</span> are mandatory.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-6 bg-{{ message.tags }}-100 border-l-4 border-{{ message.tags }}-500 text-{{ message.tags }}-700 px-6 py-4 rounded-r-lg shadow-md fade-in" role="alert">
+                    <div class="flex justify-between items-center">
+                        <p>{{ message }}</p>
+                        <button type="button" class="text-{{ message.tags }}-700 hover:text-{{ message.tags }}-900" onclick="this.parentElement.parentElement.remove()">
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Form Card -->
+        <div class="bg-card border border-border rounded-lg overflow-hidden fade-in transition-colors">
+            <form method="POST" id="profileForm" class="p-4 sm:p-8">
+                {% csrf_token %}
+                
+                <!-- Basic Information -->
+                <div class="mb-8">
+                    <h2 class="text-xl sm:text-2xl font-bold text-foreground mb-6 pb-2 border-b-2 border-primary flex items-center">
+                        <i class="fas fa-user text-primary mr-2"></i>
+                        Basic Information
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">
+                                Gender <span class="text-red-600 dark:text-red-400">*</span>
+                            </label>
+                            {{ form.gender }}
+                            {% if form.gender.errors %}
+                                <p class="mt-2 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.gender.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">Date of Birth</label>
+                            {{ form.date_of_birth }}
+                            {% if form.date_of_birth.errors %}
+                                <p class="mt-2 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.date_of_birth.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Professional Information -->
+                <div class="mb-8">
+                    <div class="mb-8 flex items-center">
+                        <div class="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-certificate text-green-600 text-lg"></i>
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-bold text-foreground flex items-center">
+                            <i class="fas fa-certificate text-green-600 mr-2"></i>
+                            Professional Information
+                        </h2>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">
+                                Specialization <span class="text-red-600">*</span>
+                            </label>
+                            {{ form.specialization }}
+                            {% if form.specialization.errors %}
+                                <p class="mt-2 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.specialization.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">
+                                License Number <span class="text-red-600">*</span>
+                            </label>
+                            {{ form.license_number }}
+                            {% if form.license_number.errors %}
+                                <p class="mt-2 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.license_number.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">
+                                Years of Experience <span class="text-red-600">*</span>
+                            </label>
+                            {{ form.years_of_experience }}
+                            {% if form.years_of_experience.errors %}
+                                <p class="mt-2 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.years_of_experience.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">
+                                Medical Degree <span class="text-red-600">*</span>
+                            </label>
+                            {{ form.medical_degree }}
+                            {% if form.medical_degree.errors %}
+                                <p class="mt-2 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.medical_degree.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">Additional Qualifications</label>
+                        {{ form.additional_qualifications }}
+                        <p class="mt-2 text-sm text-muted-foreground">List any additional certifications, fellowships, or specializations</p>
+                        {% if form.additional_qualifications.errors %}
+                            <p class="mt-2 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.additional_qualifications.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Work Information -->
+                <div class="mb-8">
+                    <div class="mb-8 flex items-center">
+                        <div class="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-hospital text-blue-600 text-lg"></i>
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-bold text-foreground flex items-center">
+                            <i class="fas fa-hospital text-blue-600 mr-2"></i>
+                            Work Information
+                        </h2>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">
+                                Hospital/Clinic Affiliation <span class="text-red-600">*</span>
+                            </label>
+                            {{ form.hospital_affiliation }}
+                            {% if form.hospital_affiliation.errors %}
+                                <p class="mt-2 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.hospital_affiliation.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">Department</label>
+                            {{ form.department }}
+                            {% if form.department.errors %}
+                                <p class="mt-2 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.department.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location Information -->
+                <div class="mb-8">
+                    <div class="mb-8 flex items-center">
+                        <div class="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-map-marker-alt text-amber-600 text-lg"></i>
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-bold text-foreground flex items-center">
+                            <i class="fas fa-map-marker-alt text-amber-600 mr-2"></i>
+                            Location Information
+                        </h2>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">
+                            Clinic/Hospital Address <span class="text-red-600">*</span>
+                        </label>
+                        {{ form.clinic_address }}
+                        {% if form.clinic_address.errors %}
+                            <p class="mt-2 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.clinic_address.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">
+                                City <span class="text-red-600">*</span>
+                            </label>
+                            {{ form.city }}
+                            {% if form.city.errors %}
+                                <p class="mt-2 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.city.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">
+                                State <span class="text-red-600">*</span>
+                            </label>
+                            {{ form.state }}
+                            {% if form.state.errors %}
+                                <p class="mt-2 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.state.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">
+                                Pincode <span class="text-red-600">*</span>
+                            </label>
+                            {{ form.pincode }}
+                            {% if form.pincode.errors %}
+                                <p class="mt-2 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.pincode.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">Country</label>
+                        {{ form.country }}
+                        {% if form.country.errors %}
+                            <p class="mt-2 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.country.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Professional Details -->
+                <div class="mb-8">
+                    <div class="mb-8 flex items-center">
+                        <div class="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-briefcase text-purple-600 text-lg"></i>
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-bold text-foreground flex items-center">
+                            <i class="fas fa-briefcase text-purple-600 mr-2"></i>
+                            Professional Details
+                        </h2>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">Consultation Fee (₹)</label>
+                            {{ form.consultation_fee }}
+                            {% if form.consultation_fee.errors %}
+                                <p class="mt-2 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.consultation_fee.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">
+                                Languages Spoken <span class="text-red-600">*</span>
+                            </label>
+                            {{ form.languages_spoken }}
+                            <p class="mt-2 text-sm text-muted-foreground">Separate multiple languages with commas</p>
+                            {% if form.languages_spoken.errors %}
+                                <p class="mt-2 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.languages_spoken.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-foreground mb-3 uppercase tracking-wider">
+                            Bio/About Yourself <span class="text-red-600">*</span>
+                        </label>
+                        {{ form.bio }}
+                        <p class="mt-2 text-sm text-muted-foreground">Tell patients about your expertise and approach to treatment</p>
+                        {% if form.bio.errors %}
+                            <p class="mt-2 text-sm text-red-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.bio.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex items-center justify-between pt-8 border-t border-border/50">
+                    <a href="{% url 'doctor_dashboard' %}" class="px-6 py-3 bg-muted text-foreground font-semibold rounded-xl hover:bg-muted/80 transition-all duration-200">
+                        <i class="fas fa-times mr-2"></i>Cancel
+                    </a>
+                    <button type="submit" class="px-8 sm:px-10 py-3 bg-gradient-to-r from-primary-600 to-primary-500 hover:shadow-xl text-white font-bold rounded-xl transition-all duration-200 hover:scale-105 inline-flex items-center gap-3">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Update Profile</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Tailwind form styling with modern design system */
+    select, input[type="text"], input[type="number"], input[type="date"], textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border);
+        border-radius: 0.875rem;
+        background-color: var(--muted);
+        transition: all 0.2s;
+        font-size: 0.875rem;
+        color: var(--foreground);
+    }
+    
+    select:focus, input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
+        background-color: var(--muted);
+    }
+    
+    select:hover, input[type="text"]:hover, input[type="number"]:hover, input[type="date"]:hover, textarea:hover {
+        border-color: var(--border);
+    }
+    
+    select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.75rem center;
+        background-repeat: no-repeat;
+        background-size: 1.25em 1.25em;
+        padding-right: 2.5rem;
+        appearance: none;
+    }
+    
+    textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+    
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    
+    input[type="number"] {
+        -moz-appearance: textfield;
+    }
+    
+    /* Placeholder styling */
+    ::placeholder {
+        color: var(--muted-foreground);
+        opacity: 1;
+    }
+</style>
+{% endblock %}

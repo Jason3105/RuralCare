@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% block title %}My Symptom Logs{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <nav class="mb-4">
+                <a href="{% url 'patient_portal:overview' %}" class="text-primary hover:underline text-sm">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Portal
+                </a>
+            </nav>
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-foreground">My Symptom Logs</h1>
+                    <p class="text-muted-foreground mt-1">Track your symptoms to help your care team monitor your progress</p>
+                </div>
+                <a href="{% url 'patient_portal:symptom_log_create' %}" 
+                   class="mt-4 md:mt-0 inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                    <i class="fas fa-plus mr-2"></i>Log New Symptoms
+                </a>
+            </div>
+        </div>
+
+        <!-- Summary Stats -->
+        {% if logs %}
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-card border border-border/50 rounded-xl p-4 text-center">
+                <p class="text-2xl font-bold text-foreground">{{ logs|length }}</p>
+                <p class="text-sm text-muted-foreground">Total Logs</p>
+            </div>
+            <div class="bg-card border border-border/50 rounded-xl p-4 text-center">
+                <p class="text-2xl font-bold text-primary">{{ avg_wellness|floatformat:1 }}</p>
+                <p class="text-sm text-muted-foreground">Avg Wellness</p>
+            </div>
+            <div class="bg-card border border-border/50 rounded-xl p-4 text-center">
+                <p class="text-2xl font-bold text-foreground">{{ avg_pain|floatformat:1 }}</p>
+                <p class="text-sm text-muted-foreground">Avg Pain</p>
+            </div>
+            <div class="bg-card border border-border/50 rounded-xl p-4 text-center">
+                <p class="text-2xl font-bold text-foreground">{{ days_logged }}</p>
+                <p class="text-sm text-muted-foreground">Days Logged</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Filter -->
+        <div class="bg-card border border-border/50 rounded-xl p-4 mb-6">
+            <form method="get" class="flex flex-wrap items-center gap-4">
+                <div>
+                    <select name="period" class="px-4 py-2 bg-background border border-border rounded-lg text-foreground">
+                        <option value="">All Time</option>
+                        <option value="7" {% if request.GET.period == '7' %}selected{% endif %}>Last 7 Days</option>
+                        <option value="30" {% if request.GET.period == '30' %}selected{% endif %}>Last 30 Days</option>
+                        <option value="90" {% if request.GET.period == '90' %}selected{% endif %}>Last 90 Days</option>
+                    </select>
+                </div>
+                <button type="submit" class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                    <i class="fas fa-filter mr-2"></i>Filter
+                </button>
+            </form>
+        </div>
+
+        <!-- Logs List -->
+        <div class="space-y-4">
+            {% for log in logs %}
+            <div class="bg-card border border-border/50 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+                <div class="p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 rounded-full flex items-center justify-center
+                                {% if log.overall_wellness >= 4 %}bg-green-100 dark:bg-green-900/30
+                                {% elif log.overall_wellness >= 3 %}bg-amber-100 dark:bg-amber-900/30
+                                {% else %}bg-red-100 dark:bg-red-900/30{% endif %}">
+                                <span class="text-lg font-bold
+                                    {% if log.overall_wellbeing >= 4 %}text-green-600
+                                    {% elif log.overall_wellbeing >= 3 %}text-amber-600
+                                    {% else %}text-red-600{% endif %}">{{ log.overall_wellbeing|default:"N/A" }}</span>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-foreground">{{ log.log_date|date:"l, F d, Y" }}</p>
+                                <p class="text-sm text-muted-foreground">{{ log.submitted_at|time:"g:i A" }}</p>
+                            </div>
+                        </div>
+                        <a href="{% url 'patient_portal:symptom_log_detail' log.id %}" 
+                           class="text-primary hover:underline text-sm">
+                            View Details
+                        </a>
+                    </div>
+
+                    <!-- Symptom Summary -->
+                    <div class="grid grid-cols-5 gap-2 text-center text-xs">
+                        <div class="p-2 bg-accent/30 rounded">
+                            <p class="text-muted-foreground">Pain</p>
+                            <p class="font-bold {% if log.pain >= 4 %}text-red-600{% elif log.pain >= 3 %}text-amber-600{% else %}text-green-600{% endif %}">
+                                {{ log.pain|default:"N/A" }}/5
+                            </p>
+                        </div>
+                        <div class="p-2 bg-accent/30 rounded">
+                            <p class="text-muted-foreground">Fatigue</p>
+                            <p class="font-bold {% if log.fatigue >= 4 %}text-red-600{% elif log.fatigue >= 3 %}text-amber-600{% else %}text-green-600{% endif %}">
+                                {{ log.fatigue|default:"N/A" }}/5
+                            </p>
+                        </div>
+                        <div class="p-2 bg-accent/30 rounded">
+                            <p class="text-muted-foreground">Nausea</p>
+                            <p class="font-bold {% if log.nausea >= 4 %}text-red-600{% elif log.nausea >= 3 %}text-amber-600{% else %}text-green-600{% endif %}">
+                                {{ log.nausea|default:"N/A" }}/5
+                            </p>
+                        </div>
+                        <div class="p-2 bg-accent/30 rounded">
+                            <p class="text-muted-foreground">Sleep</p>
+                            <p class="font-bold {% if log.sleep_problems >= 4 %}text-red-600{% elif log.sleep_problems >= 3 %}text-amber-600{% else %}text-green-600{% endif %}">
+                                {{ log.sleep_problems|default:"N/A" }}/5
+                            </p>
+                        </div>
+                        <div class="p-2 bg-accent/30 rounded">
+                            <p class="text-muted-foreground">Anxiety</p>
+                            <p class="font-bold {% if log.anxiety >= 4 %}text-red-600{% elif log.anxiety >= 3 %}text-amber-600{% else %}text-green-600{% endif %}">
+                                {{ log.anxiety|default:"N/A" }}/5
+                            </p>
+                        </div>
+                    </div>
+
+                    {% if log.additional_symptoms %}
+                    <div class="mt-4 p-3 bg-accent/20 rounded-lg">
+                        <p class="text-sm text-muted-foreground">Notes: {{ log.additional_symptoms|truncatechars:100 }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="bg-card border border-border/50 rounded-xl p-12 text-center">
+                <i class="fas fa-clipboard-list text-4xl text-muted-foreground mb-4"></i>
+                <h3 class="text-lg font-medium text-foreground mb-2">No Symptom Logs Yet</h3>
+                <p class="text-muted-foreground mb-4">Start tracking your symptoms to help your care team monitor your progress</p>
+                <a href="{% url 'patient_portal:symptom_log_create' %}" 
+                   class="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
+                    <i class="fas fa-plus mr-2"></i>Log Your First Symptoms
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="mt-8 flex justify-center">
+            <nav class="flex items-center space-x-2">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-1 bg-accent rounded hover:bg-accent/80">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                {% endif %}
+                <span class="px-3 py-1 text-muted-foreground">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1 bg-accent rounded hover:bg-accent/80">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

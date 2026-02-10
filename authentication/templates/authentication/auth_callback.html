@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authenticating...</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --foreground: #0f172a;
+            --background: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --muted: #f1f5f9;
+            --muted-foreground: #64748b;
+            --primary: #3b82f6;
+            --accent: #f1f5f9;
+        }
+        
+        [data-theme="dark"] {
+            --foreground: #f8fafc;
+            --background: #0f172a;
+            --card: #1e293b;
+            --border: #334155;
+            --muted: #1e293b;
+            --muted-foreground: #94a3b8;
+            --primary: #60a5fa;
+        }
+        
+        body {
+            background-color: var(--background);
+            color: var(--foreground);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center px-4">
+    <div id="auth-content" class="text-center fade-in">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-6">
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-bold text-foreground mb-3">Authenticating...</h2>
+        <p class="text-muted-foreground text-base sm:text-lg">Please wait while we sign you in securely</p>
+    </div>
+
+    <!-- Error Display -->
+    <div id="error-content" class="hidden max-w-md mx-auto w-full fade-in">
+        <div class="bg-card border border-border rounded-2xl shadow-lg p-8 sm:p-10 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-red-500/10 rounded-full mb-6">
+                <i class="fas fa-exclamation-circle text-3xl text-red-600"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-foreground mb-3">Authentication Error</h3>
+            <p id="error-message" class="text-muted-foreground mb-8 text-base"></p>
+            <a id="redirect-link" href="/login/" class="inline-flex justify-center items-center px-6 py-3 bg-gradient-to-r from-primary to-primary/90 text-white font-bold rounded-xl hover:shadow-lg transition-all duration-200 hover:scale-105 gap-2">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to Login</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Function to display error in the portal
+        function showError(message, redirectUrl) {
+            document.getElementById('auth-content').classList.add('hidden');
+            document.getElementById('error-content').classList.remove('hidden');
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('redirect-link').href = redirectUrl;
+        }
+
+        // Extract tokens from URL hash fragment
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+        
+        // Get user type from query params or session storage
+        const urlParams = new URLSearchParams(window.location.search);
+        let userType = urlParams.get('user_type');
+        
+        // If not in URL, try to get from sessionStorage
+        if (!userType) {
+            userType = sessionStorage.getItem('user_type') || 'patient';
+        }
+
+        if (accessToken) {
+            // Send tokens to backend
+            fetch('/auth/callback/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    access_token: accessToken,
+                    refresh_token: refreshToken,
+                    user_type: userType
+                })
+            })
+            .then(response => {
+                return response.json().then(data => ({
+                    status: response.status,
+                    data: data
+                }));
+            })
+            .then(({status, data}) => {
+                if (status === 200 && data.success) {
+                    // Clear sessionStorage
+                    sessionStorage.removeItem('user_type');
+                    // Redirect to dashboard
+                    window.location.href = data.redirect_url;
+                } else if (status === 403) {
+                    // Role mismatch error - display in portal
+                    showError(data.error || 'Authentication failed', data.redirect_url || '/login/');
+                } else {
+                    throw new Error(data.error || 'Authentication failed');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError(error.message || 'Authentication failed. Please try again.', '/login/');
+            });
+        } else {
+            // No tokens found, redirect to login
+            showError('No access token received. Please try logging in again.', '/login/');
+        }
+    </script>
+</body>
+</html>

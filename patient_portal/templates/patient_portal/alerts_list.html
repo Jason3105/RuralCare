@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+{% block title %}Alerts & Reminders{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <nav class="mb-4">
+                <a href="{% url 'patient_portal:overview' %}" class="text-primary hover:underline text-sm">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Portal
+                </a>
+            </nav>
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-foreground">Alerts & Reminders</h1>
+                    <p class="text-muted-foreground mt-1">Stay informed about your treatment and appointments</p>
+                </div>
+                <a href="{% url 'patient_portal:notification_preferences' %}" 
+                   class="mt-4 md:mt-0 inline-flex items-center px-4 py-2 border border-border rounded-lg hover:bg-accent transition-colors">
+                    <i class="fas fa-cog mr-2"></i>Notification Settings
+                </a>
+            </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="flex space-x-2 mb-6 overflow-x-auto">
+            <a href="?type=all" 
+               class="px-4 py-2 rounded-lg whitespace-nowrap {% if not request.GET.type or request.GET.type == 'all' %}bg-primary text-primary-foreground{% else %}bg-accent hover:bg-accent/80{% endif %}">
+                All
+            </a>
+            <a href="?type=alert" 
+               class="px-4 py-2 rounded-lg whitespace-nowrap {% if request.GET.type == 'alert' %}bg-primary text-primary-foreground{% else %}bg-accent hover:bg-accent/80{% endif %}">
+                <i class="fas fa-exclamation-circle mr-1"></i>Alerts
+            </a>
+            <a href="?type=reminder" 
+               class="px-4 py-2 rounded-lg whitespace-nowrap {% if request.GET.type == 'reminder' %}bg-primary text-primary-foreground{% else %}bg-accent hover:bg-accent/80{% endif %}">
+                <i class="fas fa-bell mr-1"></i>Reminders
+            </a>
+            <a href="?type=info" 
+               class="px-4 py-2 rounded-lg whitespace-nowrap {% if request.GET.type == 'info' %}bg-primary text-primary-foreground{% else %}bg-accent hover:bg-accent/80{% endif %}">
+                <i class="fas fa-info-circle mr-1"></i>Info
+            </a>
+        </div>
+
+        <!-- Unread Count -->
+        {% if unread_count > 0 %}
+        <div class="bg-primary/10 border border-primary/30 rounded-xl p-4 mb-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <span class="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-envelope text-primary"></i>
+                    </span>
+                    <p class="text-foreground">You have <strong>{{ unread_count }}</strong> unread alert{{ unread_count|pluralize }}</p>
+                </div>
+                <form method="post" action="{% url 'patient_portal:mark_all_alerts_read' %}" data-offline-action="mark-all-read">
+                    {% csrf_token %}
+                    <button type="submit" class="text-primary hover:underline text-sm">Mark all as read</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Alerts List -->
+        <div class="space-y-4">
+            {% for alert in alerts %}
+            <div class="bg-card border rounded-xl overflow-hidden hover:shadow-md transition-shadow
+                {% if not alert.is_read %}border-primary/50{% else %}border-border/50{% endif %}">
+                <div class="flex items-start p-5">
+                    <!-- Icon -->
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center mr-4 flex-shrink-0
+                        {% if alert.alert_type == 'appointment' or alert.alert_type == 'medication' %}
+                            {% if alert.is_urgent %}bg-red-100 dark:bg-red-900/30
+                            {% else %}bg-amber-100 dark:bg-amber-900/30{% endif %}
+                        {% elif alert.alert_type == 'symptom_reminder' %}bg-purple-100 dark:bg-purple-900/30
+                        {% else %}bg-gray-100 dark:bg-gray-800{% endif %}">
+                        {% if alert.is_urgent %}
+                            <i class="fas fa-exclamation-circle text-red-600"></i>
+                        {% elif alert.alert_type == 'symptom_reminder' %}
+                            <i class="fas fa-bell text-purple-600"></i>
+                        {% else %}
+                            <i class="fas fa-info-circle text-gray-600"></i>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Content -->
+                    <div class="flex-1">
+                        <div class="flex items-start justify-between mb-2">
+                            <h3 class="font-semibold text-foreground {% if not alert.is_read %}text-primary{% endif %}">
+                                {{ alert.title }}
+                            </h3>
+                            <span class="text-xs text-muted-foreground whitespace-nowrap ml-4">
+                                {{ alert.created_at|timesince }} ago
+                            </span>
+                        </div>
+                        <p class="text-muted-foreground mb-3">{{ alert.message }}</p>
+                        
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <!-- Urgent Badge -->
+                                {% if alert.is_urgent %}
+                                <span class="px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                                    Urgent
+                                </span>
+                                {% endif %}
+                                <!-- Type Badge -->
+                                <span class="px-2 py-1 bg-accent rounded text-xs text-muted-foreground">
+                                    {{ alert.get_alert_type_display }}
+                                </span>
+                            </div>
+                            
+                            {% if not alert.is_read %}
+                            <form method="post" action="{% url 'patient_portal:mark_alert_read' alert.id %}" class="mark-read-form" data-alert-id="{{ alert.id }}" data-offline-action="mark-read">
+                                {% csrf_token %}
+                                <button type="submit" class="text-primary hover:underline text-sm">
+                                    Mark as read
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+
+                        <!-- Action Link -->
+                        {% if alert.action_url %}
+                        <a href="{{ alert.action_url }}" class="mt-3 inline-flex items-center text-primary hover:underline text-sm">
+                            {{ alert.action_text|default:"View Details" }} <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Scheduled Time (for reminders) -->
+                {% if alert.scheduled_at %}
+                <div class="px-5 py-3 bg-accent/30 border-t border-border">
+                    <div class="flex items-center space-x-2 text-sm">
+                        <i class="fas fa-calendar-alt text-muted-foreground"></i>
+                        <span class="text-foreground">Scheduled: {{ alert.scheduled_at|date:"M d, Y" }} at {{ alert.scheduled_at|time:"g:i A" }}</span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% empty %}
+            <div class="bg-card border border-border/50 rounded-xl p-12 text-center">
+                <i class="fas fa-bell-slash text-4xl text-muted-foreground mb-4"></i>
+                <h3 class="text-lg font-medium text-foreground mb-2">No Alerts Yet</h3>
+                <p class="text-muted-foreground">You're all caught up! Alerts and reminders will appear here.</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if alerts.has_other_pages %}
+        <div class="mt-8 flex justify-center">
+            <nav class="flex items-center space-x-2">
+                {% if alerts.has_previous %}
+                <a href="?page={{ alerts.previous_page_number }}" class="px-3 py-1 bg-accent rounded hover:bg-accent/80">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                {% endif %}
+                <span class="px-3 py-1 text-muted-foreground">
+                    Page {{ alerts.number }} of {{ alerts.paginator.num_pages }}
+                </span>
+                {% if alerts.has_next %}
+                <a href="?page={{ alerts.next_page_number }}" class="px-3 py-1 bg-accent rounded hover:bg-accent/80">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Handle mark as read with AJAX
+document.addEventListener('DOMContentLoaded', function() {
+    const forms = document.querySelectorAll('.mark-read-form');
+    forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const url = this.action;
+            
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove the form and update styling
+                    this.remove();
+                    const alertDiv = this.closest('.bg-card');
+                    alertDiv.classList.remove('border-primary/50');
+                    alertDiv.classList.add('border-border/50');
+                    
+                    // Update unread count
+                    const unreadCount = document.querySelector('.bg-primary\\/10');
+                    if (unreadCount) {
+                        location.reload();
+                    }
+                    
+                    // Update notification badge in navbar if exists
+                    if (typeof updateNotificationCount === 'function') {
+                        updateNotificationCount();
+                    }
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+    
+    // Handle mark all as read
+    const markAllForm = document.querySelector('form[action*="mark-all-read"]');
+    if (markAllForm) {
+        markAllForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                // Fallback to normal form submission
+                this.submit();
+            });
+        });
+    }
+});
+</script>
+{% endblock %}
