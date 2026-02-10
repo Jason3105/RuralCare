@@ -73,6 +73,9 @@ class SupabaseStorage(Storage):
         if not content_type:
             content_type = 'application/octet-stream'
         
+        # Ensure bucket exists before uploading
+        self._ensure_bucket_exists()
+        
         # Upload to Supabase Storage
         upload_url = f"{self.storage_url}/object/{self.bucket_name}/{file_path}"
         
@@ -88,53 +91,67 @@ class SupabaseStorage(Storage):
         )
         
         if response.status_code not in [200, 201]:
-            # If bucket not found, create it and retry
-            if 'Bucket not found' in response.text or response.status_code == 404:
-                self._ensure_bucket_exists()
-                # Reset file pointer if needed
-                if hasattr(content, 'seek'):
-                    content.seek(0)
-                    file_content = content.read()
-                response = requests.post(
-                    upload_url,
-                    headers=headers,
-                    data=file_content,
-                )
+            # Try upsert if file might already exist
+            if hasattr(content, 'seek'):
+                content.seek(0)
+                file_content = content.read()
+            response = requests.put(
+                upload_url,
+                headers=headers,
+                data=file_content,
+            )
             
             if response.status_code not in [200, 201]:
-                # Try upsert if file might exist
-                response = requests.put(
-                    upload_url,
-                    headers=headers,
-                    data=file_content,
-                )
-            
-                if response.status_code not in [200, 201]:
-                    raise Exception(f"Failed to upload file to Supabase: {response.status_code} - {response.text}")
+                print(f"[SupabaseStorage] Upload failed: {response.status_code} - {response.text}")
+                print(f"[SupabaseStorage] Bucket: {self.bucket_name}, URL: {self.supabase_url}")
+                raise Exception(f"Failed to upload file to Supabase: {response.status_code} - {response.text}")
         
         return file_path
     
     def _ensure_bucket_exists(self):
         """Create the storage bucket if it doesn't exist."""
+        if hasattr(self, '_bucket_verified') and self._bucket_verified:
+            return  # Already verified this instance
+        
         headers = {
             **self.headers,
             "Content-Type": "application/json",
         }
+        
         # Check if bucket exists
-        response = requests.get(f"{self.storage_url}/bucket/{self.bucket_name}", headers=headers)
-        if response.status_code == 404:
+        try:
+            response = requests.get(
+                f"{self.storage_url}/bucket/{self.bucket_name}", 
+                headers=headers,
+                timeout=10
+            )
+            print(f"[SupabaseStorage] Bucket check: {response.status_code} - {response.text[:200]}")
+            
+            if response.status_code == 200:
+                self._bucket_verified = True
+                return
+            
+            # Bucket doesn't exist — create it
             payload = {
                 "id": self.bucket_name,
                 "name": self.bucket_name,
                 "public": True,
                 "file_size_limit": 52428800,
-                "allowed_mime_types": [
-                    "image/jpeg", "image/png", "image/gif", "image/webp",
-                    "image/bmp", "image/tiff",
-                    "application/pdf", "application/octet-stream",
-                ]
             }
-            requests.post(f"{self.storage_url}/bucket", headers=headers, json=payload)
+            create_resp = requests.post(
+                f"{self.storage_url}/bucket", 
+                headers=headers, 
+                json=payload,
+                timeout=10
+            )
+            print(f"[SupabaseStorage] Bucket create: {create_resp.status_code} - {create_resp.text[:200]}")
+            
+            if create_resp.status_code in [200, 201]:
+                self._bucket_verified = True
+            else:
+                print(f"[SupabaseStorage] WARNING: Could not create bucket '{self.bucket_name}'")
+        except Exception as e:
+            print(f"[SupabaseStorage] Error ensuring bucket: {e}")
     
     def _open(self, name, mode='rb'):
         """
@@ -269,23 +286,17 @@ def ensure_bucket_exists():
     
     # Check if bucket exists
     response = requests.get(f"{storage_url}/bucket/{bucket_name}", headers=headers)
+    print(f"[ensure_bucket_exists] Bucket check response: {response.status_code} - {response.text[:300]}")
     
-    if response.status_code == 404:
-        # Create bucket
+    if response.status_code == 200:
+        print(f"Supabase storage bucket '{bucket_name}' already exists")
+    else:
+        # Bucket doesn't exist or check failed — try to create it
         payload = {
             "id": bucket_name,
             "name": bucket_name,
             "public": True,  # Make bucket public for serving files
             "file_size_limit": 52428800,  # 50MB limit
-            "allowed_mime_types": [
-                "image/jpeg",
-                "image/png",
-                "image/gif",
-                "image/webp",
-                "application/pdf",
-                "application/msword",
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            ]
         }
         
         create_response = requests.post(
@@ -294,11 +305,9 @@ def ensure_bucket_exists():
             json=payload
         )
         
+        print(f"[ensure_bucket_exists] Bucket create response: {create_response.status_code} - {create_response.text[:300]}")
+        
         if create_response.status_code in [200, 201]:
             print(f"Created Supabase storage bucket: {bucket_name}")
         else:
             print(f"Warning: Could not create bucket: {create_response.status_code} - {create_response.text}")
-    elif response.status_code == 200:
-        print(f"Supabase storage bucket '{bucket_name}' already exists")
-    else:
-        print(f"Warning: Could not check bucket: {response.status_code} - {response.text}")
