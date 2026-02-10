@@ -46,6 +46,7 @@ urlpatterns = [
     path('notifications/', views.notification_preferences, name='notification_preferences'),
     
     # Consultations
+    path('consultations/', consultation_views.consultation_hub, name='consultation_hub'),
     path('consultations/doctors/', consultation_views.available_doctors, name='available_doctors'),
     path('consultations/doctor/<uuid:doctor_id>/', consultation_views.doctor_profile_view, name='doctor_profile_view'),
     path('consultations/request/<uuid:doctor_id>/', consultation_views.request_consultation, name='request_consultation'),

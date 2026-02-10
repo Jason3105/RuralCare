@@ -586,3 +586,103 @@ RuralCare Team
         )
     except Exception as e:
         print(f"Error sending email: {str(e)}")
+
+
+@login_required
+@patient_required
+def consultation_hub(request):
+    """Combined view: Find a Doctor + My Consultations"""
+    # ---- Find a Doctor data (same as available_doctors) ----
+    doctors = User.objects.filter(
+        user_type='doctor',
+        is_active=True
+    ).select_related('doctor_profile').order_by('first_name', 'last_name')
+
+    registered_specializations = DoctorProfile.objects.filter(
+        user__user_type='doctor',
+        user__is_active=True
+    ).values_list('specialization', flat=True).distinct().order_by('specialization')
+
+    available_specializations = []
+    for spec_value in registered_specializations:
+        if spec_value:
+            display_name = dict(DoctorProfile.SPECIALIZATION_CHOICES).get(spec_value, spec_value)
+            available_specializations.append({'value': spec_value, 'display': display_name})
+
+    specialization = request.GET.get('specialization')
+    if specialization and specialization != 'all':
+        doctors = doctors.filter(doctor_profile__specialization=specialization)
+
+    search = request.GET.get('search', '').strip()
+    if search:
+        doctors = doctors.filter(
+            Q(first_name__icontains=search) |
+            Q(last_name__icontains=search) |
+            Q(username__icontains=search)
+        )
+
+    sort_by = request.GET.get('sort', 'name')
+    if sort_by == 'experience':
+        doctors = doctors.order_by('-doctor_profile__years_of_experience', 'first_name')
+    elif sort_by == 'name':
+        doctors = doctors.order_by('first_name', 'last_name')
+
+    doctors_with_availability = []
+    for doctor in doctors:
+        availability_count = DoctorAvailability.objects.filter(doctor=doctor, is_available=True).count()
+        doctors_with_availability.append({
+            'doctor': doctor,
+            'has_availability': availability_count > 0,
+            'profile': getattr(doctor, 'doctor_profile', None)
+        })
+
+    if sort_by == 'availability':
+        doctors_with_availability.sort(key=lambda x: x['has_availability'], reverse=True)
+
+    paginator = Paginator(doctors_with_availability, 12)
+    page = request.GET.get('page')
+    doctor_page = paginator.get_page(page)
+
+    # ---- My Consultations data (same as my_consultations) ----
+    consultations = Consultation.objects.filter(
+        patient=request.user
+    ).select_related('doctor').prefetch_related('consultation_token').order_by('-scheduled_datetime')
+
+    now = timezone.now()
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    upcoming = consultations.filter(scheduled_datetime__gte=today_start, status='scheduled')
+    past = consultations.filter(Q(scheduled_datetime__lt=today_start) | ~Q(status='scheduled'))
+
+    upcoming_with_flags = []
+    for consultation in upcoming[:5]:
+        scheduled_time = consultation.scheduled_datetime
+        call_window_start = scheduled_time
+        call_window_end = scheduled_time + timedelta(minutes=30)
+        consultation.can_start_call = call_window_start <= now <= call_window_end
+        consultation.time_until_call_minutes = max(0, int((call_window_start - now).total_seconds() / 60)) if now < call_window_start else 0
+        consultation.call_expired = now > call_window_end
+        try:
+            consultation.token = consultation.consultation_token
+        except ConsultationToken.DoesNotExist:
+            consultation.token = None
+        upcoming_with_flags.append(consultation)
+
+    past_with_tokens = []
+    for consultation in past[:10]:
+        try:
+            consultation.token = consultation.consultation_token
+        except ConsultationToken.DoesNotExist:
+            consultation.token = None
+        past_with_tokens.append(consultation)
+
+    context = {
+        'doctor_page': doctor_page,
+        'search_query': search or '',
+        'selected_specialization': specialization or '',
+        'available_specializations': available_specializations,
+        'sort_by': sort_by,
+        'upcoming_consultations': upcoming_with_flags,
+        'past_consultations': past_with_tokens,
+    }
+    return render(request, 'patient_portal/consultations/consultation_hub.html', context)

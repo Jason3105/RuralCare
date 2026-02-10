@@ -24,16 +24,6 @@
 
             <!-- Desktop Navigation Links -->
             <div class="hidden md:flex items-center space-x-2">
-                <a href="{% url 'patient_dashboard' %}"
-                    class="text-sm font-medium text-muted-foreground hover:text-foreground transition-all px-3 py-2 rounded-lg hover:bg-accent/50">
-                    Dashboard
-                </a>
-
-                <a href="{% url 'medical_records_list' %}"
-                    class="text-sm font-medium text-muted-foreground hover:text-foreground transition-all px-3 py-2 rounded-lg hover:bg-accent/50">
-                    Records
-                </a>
-
                 <a href="{% url 'nearby_clinics' %}"
                     class="text-sm font-medium text-muted-foreground hover:text-foreground transition-all px-3 py-2 rounded-lg hover:bg-accent/50">
                     Clinics
@@ -59,6 +49,12 @@
 
                     <div id="scansDropdown"
                         class="hidden absolute left-0 mt-2 w-52 bg-card border border-border/50 rounded-xl shadow-xl py-2 z-50 backdrop-blur-sm">
+                        <a href="{% url 'medical_records_list' %}"
+                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
+                            <i class="fas fa-file-medical text-primary text-xs"></i>
+                            <span>Medical Records</span>
+                        </a>
+                        <div class="border-t border-border/30 my-1"></div>
                         <a href="{% url 'cancer_detection:image_hub' %}"
                             class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
                             <i class="fas fa-cloud-upload-alt text-primary text-xs"></i>
@@ -115,21 +111,10 @@
                                 class="ml-auto px-1.5 py-0.5 text-[9px] font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full">AI</span>
                         </a>
                         <div class="border-t border-border/30 my-1"></div>
-                        <a href="{% url 'patient_portal:alerts_list' %}"
-                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
-                            <i class="fas fa-bell text-primary text-xs"></i>
-                            <span>Alerts & Reminders</span>
-                        </a>
-                        <div class="border-t border-border/30 my-1"></div>
-                        <a href="{% url 'patient_portal:available_doctors' %}"
+                        <a href="{% url 'patient_portal:consultation_hub' %}"
                             class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
                             <i class="fas fa-user-md text-primary text-xs"></i>
-                            <span>Book Consultation</span>
-                        </a>
-                        <a href="{% url 'patient_portal:my_consultations' %}"
-                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
-                            <i class="fas fa-calendar-check text-primary text-xs"></i>
-                            <span>My Consultations</span>
+                            <span>Consultations</span>
                         </a>
                     </div>
                 </div>
@@ -338,17 +323,9 @@
         <div id="mobileMenu"
             class="hidden md:hidden pb-4 border-t border-border/50 bg-gradient-to-b from-card to-card/80">
             <div class="space-y-2 pt-2">
-                <a href="{% url 'patient_dashboard' %}"
-                    class="block px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent/80 rounded-lg transition-all">
-                    <i class="fas fa-home mr-2"></i>Dashboard
-                </a>
                 <a href="{% url 'patient_profile_edit' %}"
                     class="block px-4 py-2.5 text-sm font-medium text-primary hover:bg-accent/80 rounded-lg transition-all border border-primary/30 bg-primary/5">
                     <i class="fas fa-user-edit mr-2"></i>Edit My Profile
-                </a>
-                <a href="{% url 'medical_records_list' %}"
-                    class="block px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent/80 rounded-lg transition-all">
-                    <i class="fas fa-file-medical mr-2"></i>Medical Records
                 </a>
                 <a href="{% url 'patient_portal:treatment_center' %}"
                     class="block px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent/80 rounded-lg transition-all">
@@ -368,6 +345,10 @@
                 </a>
                 <div class="border-t border-border/50 pt-2 mt-2">
                     <p class="px-4 py-1 text-xs font-semibold text-muted-foreground uppercase">Scans &amp; Reports</p>
+                    <a href="{% url 'medical_records_list' %}"
+                        class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 rounded-lg transition-all">
+                        <i class="fas fa-file-medical mr-2 text-primary"></i>Medical Records
+                    </a>
                     <a href="{% url 'cancer_detection:image_hub' %}"
                         class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 rounded-lg transition-all">
                         <i class="fas fa-cloud-upload-alt mr-2 text-primary"></i>Image Analysis

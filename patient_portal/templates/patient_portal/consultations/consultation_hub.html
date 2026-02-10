@@ -1,0 +1,406 @@
+{% extends 'base.html' %}
+{% block title %}Consultation Hub{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-8 sm:mb-10">
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-3">Consultation Hub</h1>
+            <p class="text-base sm:text-lg text-muted-foreground">Find doctors and manage your consultations</p>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex space-x-1 bg-muted/50 p-1 rounded-xl mb-8 w-fit">
+            <button onclick="switchConsultTab('doctors')" id="consultTab-doctors"
+                class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-card text-foreground shadow-sm">
+                <i class="fas fa-user-md mr-2"></i>Find a Doctor
+            </button>
+            <button onclick="switchConsultTab('mine')" id="consultTab-mine"
+                class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 text-muted-foreground hover:text-foreground">
+                <i class="fas fa-calendar-check mr-2"></i>My Consultations
+            </button>
+        </div>
+
+        <!-- Find a Doctor Tab -->
+        <div id="consultPanel-doctors">
+            <!-- Search & Filter -->
+            <div class="bg-card border border-border/50 rounded-xl p-6 mb-6">
+                <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <input type="hidden" name="tab" value="doctors">
+                    <div>
+                        <label class="block text-sm font-medium text-foreground mb-2">Search by Name</label>
+                        <input type="text" name="search" value="{{ search_query }}" 
+                               placeholder="Doctor's name..." 
+                               class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-foreground mb-2">Specialization</label>
+                        <select name="specialization" class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground">
+                            <option value="">All Specializations</option>
+                            {% for spec in available_specializations %}
+                            <option value="{{ spec.value }}" {% if selected_specialization == spec.value %}selected{% endif %}>
+                                {{ spec.display }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-foreground mb-2">Sort By</label>
+                        <select name="sort" class="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground">
+                            <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Name (A-Z)</option>
+                            <option value="experience" {% if sort_by == 'experience' %}selected{% endif %}>Most Experienced</option>
+                            <option value="availability" {% if sort_by == 'availability' %}selected{% endif %}>Availability</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" class="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                            <i class="fas fa-search mr-2"></i>Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Results Info -->
+            {% if search_query or selected_specialization %}
+            <div class="mb-4 flex items-center justify-between p-4 bg-primary/5 rounded-lg border border-primary/20">
+                <div class="text-sm text-foreground">
+                    <span class="font-medium">Found {{ doctor_page.paginator.count }} doctor{{ doctor_page.paginator.count|pluralize }}</span>
+                    {% if selected_specialization %}
+                        {% for spec in available_specializations %}
+                            {% if spec.value == selected_specialization %}
+                                <span class="mx-2">&bull;</span>
+                                <span class="text-primary font-medium">{{ spec.display }}</span>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                    {% if search_query %}
+                    <span class="mx-2">&bull;</span>
+                    <span class="text-primary">Search: "{{ search_query }}"</span>
+                    {% endif %}
+                </div>
+                <a href="{% url 'patient_portal:consultation_hub' %}" class="text-primary hover:underline text-sm flex items-center">
+                    <i class="fas fa-times-circle mr-1"></i>Clear filters
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Doctors Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for item in doctor_page %}
+                {% with doctor=item.doctor profile=item.profile %}
+                <div class="bg-card border border-border/50 rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
+                    <div class="p-6">
+                        <div class="flex items-start space-x-4 mb-4">
+                            {% if doctor.profile_picture %}
+                            <img src="{{ doctor.profile_picture }}" alt="{{ doctor.first_name }}" 
+                                 class="w-16 h-16 rounded-full object-cover">
+                            {% else %}
+                            <div class="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
+                                <span class="text-2xl font-bold text-primary">
+                                    {{ doctor.first_name.0 }}{{ doctor.last_name.0 }}
+                                </span>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-foreground">
+                                    Dr. {{ doctor.first_name }} {{ doctor.last_name }}
+                                </h3>
+                                {% if profile and profile.specialization %}
+                                <p class="text-sm text-primary font-medium">{{ profile.get_specialization_display }}</p>
+                                {% else %}
+                                <p class="text-sm text-muted-foreground">Specialist</p>
+                                {% endif %}
+                                {% if profile and profile.years_of_experience %}
+                                <p class="text-xs text-muted-foreground mt-1">
+                                    <i class="fas fa-certificate mr-1"></i>{{ profile.years_of_experience }} years experience
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if profile and profile.clinic_address %}
+                        <p class="text-xs text-muted-foreground mt-2">
+                            <i class="fas fa-map-marker-alt mr-1"></i>{{ profile.clinic_address|truncatewords:5 }}
+                        </p>
+                        {% endif %}
+
+                        <div class="mt-4 space-y-2">
+                            <a href="{% url 'patient_portal:doctor_profile_view' doctor.id %}" 
+                               class="block w-full text-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                                <i class="fas fa-user-md mr-2"></i>View Profile
+                            </a>
+                            <a href="{% url 'patient_portal:request_consultation' doctor.id %}" 
+                               class="block w-full text-center px-4 py-2 border border-border rounded-lg hover:bg-accent transition-colors text-foreground">
+                                <i class="fas fa-calendar-check mr-2"></i>Request Consultation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endwith %}
+                {% empty %}
+                <div class="col-span-full">
+                    <div class="bg-card border border-border/50 rounded-xl p-12 text-center">
+                        <i class="fas fa-user-md text-4xl text-muted-foreground mb-4"></i>
+                        <h3 class="text-lg font-medium text-foreground mb-2">No Doctors Found</h3>
+                        <p class="text-muted-foreground">Try adjusting your search criteria</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if doctor_page.has_other_pages %}
+            <div class="mt-8 flex justify-center">
+                <nav class="flex items-center space-x-2">
+                    {% if doctor_page.has_previous %}
+                    <a href="?page={{ doctor_page.previous_page_number }}&search={{ search_query }}&specialization={{ selected_specialization }}&sort={{ sort_by }}#doctors" 
+                       class="px-3 py-1 bg-accent rounded hover:bg-accent/80">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                    {% endif %}
+                    <span class="px-3 py-1 text-muted-foreground">
+                        Page {{ doctor_page.number }} of {{ doctor_page.paginator.num_pages }}
+                    </span>
+                    {% if doctor_page.has_next %}
+                    <a href="?page={{ doctor_page.next_page_number }}&search={{ search_query }}&specialization={{ selected_specialization }}&sort={{ sort_by }}#doctors" 
+                       class="px-3 py-1 bg-accent rounded hover:bg-accent/80">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    {% endif %}
+                </nav>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- My Consultations Tab -->
+        <div id="consultPanel-mine" class="hidden">
+            <div class="max-w-6xl">
+                <!-- Upcoming Consultations -->
+                <div class="mb-8">
+                    <h2 class="text-xl font-semibold text-foreground mb-4">Upcoming Consultations</h2>
+                    <div class="space-y-4">
+                        {% for consultation in upcoming_consultations %}
+                        <div class="bg-card border border-primary/50 rounded-xl p-6">
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-foreground">
+                                        Dr. {{ consultation.doctor.first_name }} {{ consultation.doctor.last_name }}
+                                    </h3>
+                                    <p class="text-sm text-primary font-medium mt-1">
+                                        <i class="fas fa-calendar mr-2"></i>{{ consultation.scheduled_datetime|date:"F d, Y" }}
+                                    </p>
+                                    <p class="text-sm text-primary font-medium">
+                                        <i class="fas fa-clock mr-2"></i>{{ consultation.scheduled_datetime|time:"g:i A" }}
+                                    </p>
+                                    <p class="text-sm text-muted-foreground mt-2">
+                                        <i class="fas fa-{{ consultation.mode }} mr-2"></i>{{ consultation.get_mode_display }}
+                                    </p>
+
+                                    <!-- In-Person Token -->
+                                    {% if consultation.mode == 'in_person' and consultation.token %}
+                                    <div class="mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <p class="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                                                    <i class="fas fa-ticket-alt mr-2"></i>Token #{{ consultation.token.token_number }}
+                                                </p>
+                                                {% if consultation.token.is_verified %}
+                                                <p class="text-xs text-green-600 dark:text-green-400 mt-1">
+                                                    <i class="fas fa-shield-alt mr-1"></i>Blockchain Verified
+                                                </p>
+                                                {% endif %}
+                                            </div>
+                                            <a href="{% url 'patient_portal:download_consultation_token' consultation.id %}"
+                                               class="inline-flex items-center px-3 py-1.5 bg-amber-600 text-white text-xs rounded-lg hover:bg-amber-700 transition">
+                                                <i class="fas fa-download mr-1"></i>Download Token
+                                            </a>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+
+                                    <div class="flex gap-2 mt-3">
+                                        {% if consultation.mode == 'video' %}
+                                            {% if consultation.can_start_call %}
+                                            <a href="{% url 'patient_portal:initiate_call' consultation.id %}" 
+                                               class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                                                <i class="fas fa-video mr-2"></i>Start Video Call
+                                            </a>
+                                            {% elif consultation.call_expired %}
+                                            <span class="inline-flex items-center px-4 py-2 bg-gray-400 text-white rounded-lg cursor-not-allowed">
+                                                <i class="fas fa-video mr-2"></i>Call Window Expired
+                                            </span>
+                                            {% elif consultation.time_until_call_minutes > 0 %}
+                                            <span class="inline-flex items-center px-4 py-2 bg-yellow-600 text-white rounded-lg cursor-not-allowed">
+                                                <i class="fas fa-clock mr-2"></i>Call available in {{ consultation.time_until_call_minutes }} min
+                                            </span>
+                                            {% else %}
+                                            <span class="inline-flex items-center px-4 py-2 bg-gray-400 text-white rounded-lg cursor-not-allowed">
+                                                <i class="fas fa-video mr-2"></i>Please wait...
+                                            </span>
+                                            {% endif %}
+                                        {% elif consultation.mode == 'phone' %}
+                                            {% if consultation.can_start_call %}
+                                            <a href="{% url 'patient_portal:initiate_call' consultation.id %}" 
+                                               class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                                                <i class="fas fa-phone mr-2"></i>Start Phone Call
+                                            </a>
+                                            {% elif consultation.call_expired %}
+                                            <span class="inline-flex items-center px-4 py-2 bg-gray-400 text-white rounded-lg cursor-not-allowed">
+                                                <i class="fas fa-phone mr-2"></i>Call Window Expired
+                                            </span>
+                                            {% elif consultation.time_until_call_minutes > 0 %}
+                                            <span class="inline-flex items-center px-4 py-2 bg-yellow-600 text-white rounded-lg cursor-not-allowed">
+                                                <i class="fas fa-clock mr-2"></i>Call available in {{ consultation.time_until_call_minutes }} min
+                                            </span>
+                                            {% else %}
+                                            <span class="inline-flex items-center px-4 py-2 bg-gray-400 text-white rounded-lg cursor-not-allowed">
+                                                <i class="fas fa-phone mr-2"></i>Please wait...
+                                            </span>
+                                            {% endif %}
+                                        {% elif consultation.meeting_link %}
+                                        <a href="{{ consultation.meeting_link }}" target="_blank" 
+                                           class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                                            <i class="fas fa-video mr-2"></i>Join Meeting
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <form method="post" action="{% url 'patient_portal:cancel_consultation' consultation.id %}" 
+                                      onsubmit="return confirm('Are you sure you want to cancel this consultation?')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="px-3 py-1 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded">
+                                        Cancel
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="bg-card border border-border/50 rounded-xl p-8 text-center">
+                            <p class="text-muted-foreground">No upcoming consultations</p>
+                            <button onclick="switchConsultTab('doctors')" class="mt-4 inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                                <i class="fas fa-user-md mr-2"></i>Find a Doctor
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Past Consultations -->
+                <div>
+                    <h2 class="text-xl font-semibold text-foreground mb-4">Past Consultations</h2>
+                    <div class="space-y-4">
+                        {% for consultation in past_consultations %}
+                        <div class="bg-card border border-border/50 rounded-xl p-6">
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-foreground">
+                                        Dr. {{ consultation.doctor.first_name }} {{ consultation.doctor.last_name }}
+                                    </h3>
+                                    <p class="text-sm text-muted-foreground mt-1">
+                                        {{ consultation.scheduled_datetime|date:"F d, Y" }} at {{ consultation.scheduled_datetime|time:"g:i A" }}
+                                    </p>
+                                    <p class="text-sm text-muted-foreground mt-1">
+                                        <i class="fas fa-{{ consultation.mode }} mr-2"></i>{{ consultation.get_mode_display }}
+                                    </p>
+                                    <span class="inline-flex items-center px-2 py-1 mt-2 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-xs rounded">
+                                        {{ consultation.get_status_display }}
+                                    </span>
+
+                                    <!-- In-Person Token (past consultations) -->
+                                    {% if consultation.mode == 'in_person' and consultation.token %}
+                                    <div class="mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <p class="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                                                    <i class="fas fa-ticket-alt mr-2"></i>Token #{{ consultation.token.token_number }}
+                                                </p>
+                                                {% if consultation.token.is_verified %}
+                                                <p class="text-xs text-green-600 dark:text-green-400 mt-1">
+                                                    <i class="fas fa-shield-alt mr-1"></i>Blockchain Verified
+                                                </p>
+                                                {% endif %}
+                                            </div>
+                                            <a href="{% url 'patient_portal:download_consultation_token' consultation.id %}"
+                                               class="inline-flex items-center px-3 py-1.5 bg-amber-600 text-white text-xs rounded-lg hover:bg-amber-700 transition">
+                                                <i class="fas fa-download mr-1"></i>Download Token
+                                            </a>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <!-- Prescription Downloads -->
+                                    {% if consultation.prescriptions.exists %}
+                                    <div class="mt-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                                        <p class="text-sm font-medium text-green-800 dark:text-green-300 mb-2">
+                                            <i class="fas fa-prescription mr-2"></i>Prescriptions Available ({{ consultation.prescriptions.count }})
+                                        </p>
+                                        <div class="space-y-2">
+                                            {% for prescription in consultation.prescriptions.all %}
+                                            <div class="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded border border-green-200 dark:border-green-700">
+                                                <div class="flex-1">
+                                                    <p class="text-xs text-gray-700 dark:text-gray-300">
+                                                        {{ prescription.created_at|date:"M d, Y g:i A" }}
+                                                        {% if prescription.is_verified %}
+                                                        <i class="fas fa-shield-check text-green-600 ml-1" title="Blockchain Verified"></i>
+                                                        {% endif %}
+                                                    </p>
+                                                </div>
+                                                <div class="flex gap-2">
+                                                    <a href="{% url 'patient_portal:view_prescription' prescription.id %}" 
+                                                       class="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition">
+                                                        <i class="fas fa-eye mr-1"></i>View
+                                                    </a>
+                                                    <a href="{% url 'patient_portal:download_prescription' prescription.id %}" 
+                                                       class="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition">
+                                                        <i class="fas fa-download mr-1"></i>PDF
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="bg-card border border-border/50 rounded-xl p-8 text-center">
+                            <p class="text-muted-foreground">No past consultations</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    function switchConsultTab(tab) {
+        document.querySelectorAll('[id^="consultTab-"]').forEach(btn => {
+            btn.classList.remove('bg-card', 'text-foreground', 'shadow-sm');
+            btn.classList.add('text-muted-foreground', 'hover:text-foreground');
+        });
+        const activeBtn = document.getElementById('consultTab-' + tab);
+        activeBtn.classList.add('bg-card', 'text-foreground', 'shadow-sm');
+        activeBtn.classList.remove('text-muted-foreground', 'hover:text-foreground');
+
+        document.querySelectorAll('[id^="consultPanel-"]').forEach(panel => {
+            panel.classList.add('hidden');
+        });
+        document.getElementById('consultPanel-' + tab).classList.remove('hidden');
+
+        window.location.hash = tab;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const hash = window.location.hash.substring(1);
+        if (hash === 'mine' || hash === 'doctors') {
+            switchConsultTab(hash);
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}
