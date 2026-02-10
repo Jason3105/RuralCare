@@ -10,11 +10,24 @@ from datetime import datetime
 import numpy as np
 from django.db.models import Q
 
-try:
-    from sentence_transformers import SentenceTransformer, util
-    SENTENCE_TRANSFORMERS_AVAILABLE = True
-except ImportError:
-    SENTENCE_TRANSFORMERS_AVAILABLE = False
+# Lazy-loaded at runtime to avoid heavy torch import at startup (causes OOM on Render)
+SentenceTransformer = None
+sentence_util = None
+SENTENCE_TRANSFORMERS_AVAILABLE = False
+
+
+def _load_sentence_transformers():
+    """Lazy-load sentence_transformers and torch only when actually needed."""
+    global SentenceTransformer, sentence_util, SENTENCE_TRANSFORMERS_AVAILABLE
+    if SentenceTransformer is not None:
+        return  # Already loaded
+    try:
+        from sentence_transformers import SentenceTransformer as _ST, util as _util
+        SentenceTransformer = _ST
+        sentence_util = _util
+        SENTENCE_TRANSFORMERS_AVAILABLE = True
+    except ImportError:
+        SENTENCE_TRANSFORMERS_AVAILABLE = False
 
 from .evidence_models import EvidenceSource
 
@@ -41,6 +54,7 @@ class EvidenceRetriever:
         self.model = None
         self.initialized = False
         
+        _load_sentence_transformers()
         if SENTENCE_TRANSFORMERS_AVAILABLE:
             try:
                 logger.info(f"Loading sentence-transformer model: {model_name}")
@@ -131,8 +145,8 @@ class EvidenceRetriever:
                 try:
                     source_embedding = np.array(source.embedding)
                     # Calculate cosine similarity
-                    similarity = util.pytorch_cos_sim(query_embedding, source_embedding)[0][0].item() \
-                               if hasattr(util, 'pytorch_cos_sim') else self._cosine_similarity(
+                    similarity = sentence_util.pytorch_cos_sim(query_embedding, source_embedding)[0][0].item() \
+                               if hasattr(sentence_util, 'pytorch_cos_sim') else self._cosine_similarity(
                                    query_embedding, source_embedding)
                     
                     results.append({

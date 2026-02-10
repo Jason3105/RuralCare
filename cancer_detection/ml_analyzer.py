@@ -13,19 +13,44 @@ import base64
 
 warnings.filterwarnings('ignore')
 
-try:
-    import torch
-    import torchvision
-    from torchvision import transforms
-    TORCH_AVAILABLE = True
-except ImportError:
-    TORCH_AVAILABLE = False
+# Lazy-loaded to avoid heavy torch import at startup (causes OOM on Render)
+TORCH_AVAILABLE = False
+YOLO_AVAILABLE = False
+_torch = None
+_torchvision = None
+_transforms = None
+_YOLO = None
 
-try:
-    from ultralytics import YOLO
-    YOLO_AVAILABLE = True
-except ImportError:
-    YOLO_AVAILABLE = False
+
+def _load_torch():
+    """Lazy-load torch and torchvision only when actually needed."""
+    global TORCH_AVAILABLE, _torch, _torchvision, _transforms
+    if _torch is not None:
+        return
+    try:
+        import torch
+        import torchvision
+        from torchvision import transforms
+        _torch = torch
+        _torchvision = torchvision
+        _transforms = transforms
+        TORCH_AVAILABLE = True
+    except ImportError:
+        TORCH_AVAILABLE = False
+
+
+def _load_yolo():
+    """Lazy-load ultralytics YOLO only when actually needed."""
+    global YOLO_AVAILABLE, _YOLO
+    if _YOLO is not None:
+        return
+    try:
+        from ultralytics import YOLO
+        _YOLO = YOLO
+        YOLO_AVAILABLE = True
+    except ImportError:
+        YOLO_AVAILABLE = False
+
 
 try:
     from PIL import Image
@@ -45,7 +70,9 @@ class MLCancerAnalyzer:
     
     def __init__(self):
         """Initialize the ML analyzer"""
-        self.device = 'cuda' if (TORCH_AVAILABLE and torch.cuda.is_available()) else 'cpu'
+        _load_torch()
+        _load_yolo()
+        self.device = 'cuda' if (TORCH_AVAILABLE and _torch.cuda.is_available()) else 'cpu'
         self.yolo_model = None
         self.min_confidence = 0.35
         self.initialize_models()
@@ -54,7 +81,7 @@ class MLCancerAnalyzer:
         """Initialize YOLO model for detection"""
         if YOLO_AVAILABLE:
             try:
-                self.yolo_model = YOLO('yolov8n.pt')
+                self.yolo_model = _YOLO('yolov8n.pt')
             except Exception as e:
                 self.yolo_model = None
     
