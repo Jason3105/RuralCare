@@ -18,17 +18,35 @@
             </div>
             <div class="flex gap-3">
                 {% if consultation.status == 'scheduled' %}
-                <a href="{% url 'patient_portal:initiate_call' consultation.id %}" 
-                   class="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-all inline-flex items-center gap-2">
-                    <i class="fas fa-video"></i>
-                    <span>Start Call</span>
-                </a>
+                    {% if consultation.mode == 'video' %}
+                    <a href="{% url 'patient_portal:initiate_call' consultation.id %}" 
+                       class="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-all inline-flex items-center gap-2">
+                        <i class="fas fa-video"></i>
+                        <span>Start Video Call</span>
+                    </a>
+                    {% elif consultation.mode == 'phone' %}
+                    <a href="{% url 'patient_portal:initiate_call' consultation.id %}" 
+                       class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-all inline-flex items-center gap-2">
+                        <i class="fas fa-phone"></i>
+                        <span>Start Phone Call</span>
+                    </a>
+                    {% elif consultation.mode == 'in_person' %}
+                    <span class="bg-amber-600 text-white px-6 py-2.5 rounded-lg font-semibold inline-flex items-center gap-2">
+                        <i class="fas fa-hospital"></i>
+                        <span>In-Person Visit</span>
+                    </span>
+                    {% elif consultation.mode == 'chat' %}
+                    <span class="bg-purple-600 text-white px-6 py-2.5 rounded-lg font-semibold inline-flex items-center gap-2">
+                        <i class="fas fa-comments"></i>
+                        <span>Chat Consultation</span>
+                    </span>
+                    {% endif %}
                 {% endif %}
             </div>
         </div>
 
-        <!-- Status Badge -->
-        <div class="mb-6">
+        <!-- Status Badge + Mode Badge -->
+        <div class="mb-6 flex flex-wrap gap-3">
             {% if consultation.status == 'scheduled' %}
             <span class="inline-flex items-center px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg font-semibold">
                 <i class="fas fa-clock mr-2"></i>Scheduled
@@ -40,6 +58,29 @@
             {% elif consultation.status == 'cancelled' %}
             <span class="inline-flex items-center px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg font-semibold">
                 <i class="fas fa-times-circle mr-2"></i>Cancelled
+            </span>
+            {% elif consultation.status == 'in_progress' %}
+            <span class="inline-flex items-center px-4 py-2 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-lg font-semibold">
+                <i class="fas fa-spinner fa-spin mr-2"></i>In Progress
+            </span>
+            {% endif %}
+
+            <!-- Mode badge -->
+            {% if consultation.mode == 'video' %}
+            <span class="inline-flex items-center px-4 py-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 rounded-lg font-semibold">
+                <i class="fas fa-video mr-2"></i>Video Call
+            </span>
+            {% elif consultation.mode == 'phone' %}
+            <span class="inline-flex items-center px-4 py-2 bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400 rounded-lg font-semibold">
+                <i class="fas fa-phone mr-2"></i>Phone Call
+            </span>
+            {% elif consultation.mode == 'in_person' %}
+            <span class="inline-flex items-center px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-lg font-semibold">
+                <i class="fas fa-hospital mr-2"></i>In-Person Visit
+            </span>
+            {% elif consultation.mode == 'chat' %}
+            <span class="inline-flex items-center px-4 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-lg font-semibold">
+                <i class="fas fa-comments mr-2"></i>Chat
             </span>
             {% endif %}
         </div>
@@ -98,10 +139,22 @@
                             <p class="text-sm text-muted-foreground mb-1">Consultation Type</p>
                             <p class="text-foreground font-semibold">
                                 {% if consultation.mode == 'video' %}
-                                <i class="fas fa-video text-blue-500 mr-1"></i>Video Call
+                                <i class="fas fa-video text-indigo-500 mr-1"></i>Video Call
+                                {% elif consultation.mode == 'phone' %}
+                                <i class="fas fa-phone text-sky-500 mr-1"></i>Phone Call
+                                {% elif consultation.mode == 'in_person' %}
+                                <i class="fas fa-hospital text-amber-500 mr-1"></i>In-Person Visit
+                                {% elif consultation.mode == 'chat' %}
+                                <i class="fas fa-comments text-purple-500 mr-1"></i>Chat
                                 {% else %}
-                                <i class="fas fa-phone text-green-500 mr-1"></i>Phone Call
+                                <i class="fas fa-stethoscope text-gray-500 mr-1"></i>{{ consultation.get_mode_display }}
                                 {% endif %}
+                            </p>
+                        </div>
+                        <div class="p-4 bg-accent/30 rounded-lg">
+                            <p class="text-sm text-muted-foreground mb-1">Duration</p>
+                            <p class="text-foreground font-semibold">
+                                <i class="fas fa-hourglass-half text-primary mr-1"></i>{{ consultation.duration_minutes }} minutes
                             </p>
                         </div>
                         {% if consultation.started_at %}
@@ -122,6 +175,38 @@
                         {% endif %}
                     </div>
                 </div>
+
+                <!-- In-Person Token Section -->
+                {% if consultation.mode == 'in_person' and consultation.token %}
+                <div class="bg-card border border-amber-200 dark:border-amber-800 rounded-xl p-6">
+                    <h2 class="text-xl font-semibold text-foreground mb-4 flex items-center">
+                        <i class="fas fa-ticket-alt text-amber-500 mr-2"></i>Consultation Token
+                    </h2>
+                    <div class="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                        <div>
+                            <p class="text-3xl font-bold text-amber-700 dark:text-amber-300">
+                                Token #{{ consultation.token.token_number }}
+                            </p>
+                            <p class="text-sm text-muted-foreground mt-1">
+                                Assigned to this in-person consultation
+                            </p>
+                            {% if consultation.token.is_verified %}
+                            <p class="text-sm text-green-600 dark:text-green-400 mt-1">
+                                <i class="fas fa-shield-alt mr-1"></i>Blockchain Verified
+                            </p>
+                            {% endif %}
+                            {% if consultation.token.blockchain_tx_hash %}
+                            <p class="text-xs text-muted-foreground mt-2 font-mono break-all">
+                                TX: {{ consultation.token.blockchain_tx_hash }}
+                            </p>
+                            {% endif %}
+                        </div>
+                        <div class="text-6xl text-amber-200 dark:text-amber-800">
+                            <i class="fas fa-ticket-alt"></i>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
 
                 <!-- Medical Notes Form -->
                 <form method="post" class="bg-card border border-border/50 rounded-xl p-6">
@@ -248,12 +333,39 @@
                     <h3 class="text-lg font-semibold text-foreground mb-4">Quick Actions</h3>
                     <div class="space-y-3">
                         {% if consultation.status == 'scheduled' %}
-                        <a href="{% url 'patient_portal:initiate_call' consultation.id %}" 
-                           class="w-full flex items-center justify-between p-3 bg-green-600/10 hover:bg-green-600/20 border border-green-600/20 rounded-lg transition-all group">
-                            <span class="text-green-700 dark:text-green-400 font-medium">Start Video Call</span>
-                            <i class="fas fa-video text-green-600 group-hover:translate-x-1 transition-transform"></i>
+                            {% if consultation.mode == 'video' %}
+                            <a href="{% url 'patient_portal:initiate_call' consultation.id %}" 
+                               class="w-full flex items-center justify-between p-3 bg-green-600/10 hover:bg-green-600/20 border border-green-600/20 rounded-lg transition-all group">
+                                <span class="text-green-700 dark:text-green-400 font-medium">Start Video Call</span>
+                                <i class="fas fa-video text-green-600 group-hover:translate-x-1 transition-transform"></i>
+                            </a>
+                            {% elif consultation.mode == 'phone' %}
+                            <a href="{% url 'patient_portal:initiate_call' consultation.id %}" 
+                               class="w-full flex items-center justify-between p-3 bg-blue-600/10 hover:bg-blue-600/20 border border-blue-600/20 rounded-lg transition-all group">
+                                <span class="text-blue-700 dark:text-blue-400 font-medium">Start Phone Call</span>
+                                <i class="fas fa-phone text-blue-600 group-hover:translate-x-1 transition-transform"></i>
+                            </a>
+                            {% elif consultation.mode == 'in_person' %}
+                            <div class="w-full flex items-center justify-between p-3 bg-amber-600/10 border border-amber-600/20 rounded-lg">
+                                <span class="text-amber-700 dark:text-amber-400 font-medium">In-Person Visit</span>
+                                <i class="fas fa-hospital text-amber-600"></i>
+                            </div>
+                            {% elif consultation.mode == 'chat' %}
+                            <div class="w-full flex items-center justify-between p-3 bg-purple-600/10 border border-purple-600/20 rounded-lg">
+                                <span class="text-purple-700 dark:text-purple-400 font-medium">Chat Consultation</span>
+                                <i class="fas fa-comments text-purple-600"></i>
+                            </div>
+                            {% endif %}
+                        {% endif %}
+
+                        {% if consultation.status == 'scheduled' or consultation.status == 'completed' %}
+                        <a href="{% url 'patient_portal:create_prescription' consultation.id %}" 
+                           class="w-full flex items-center justify-between p-3 bg-emerald-600/10 hover:bg-emerald-600/20 border border-emerald-600/20 rounded-lg transition-all group">
+                            <span class="text-emerald-700 dark:text-emerald-400 font-medium">Create Prescription</span>
+                            <i class="fas fa-file-prescription text-emerald-600 group-hover:translate-x-1 transition-transform"></i>
                         </a>
                         {% endif %}
+
                         <a href="{% url 'doctor_consultations' %}" 
                            class="w-full flex items-center justify-between p-3 bg-accent/30 hover:bg-accent/50 rounded-lg transition-all group">
                             <span class="text-foreground font-medium">All Consultations</span>

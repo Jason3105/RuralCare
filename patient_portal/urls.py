@@ -53,6 +53,7 @@ urlpatterns = [
     path('consultations/accept/<uuid:request_id>/', consultation_views.accept_suggested_time, name='accept_suggested_time'),
     path('consultations/my/', consultation_views.my_consultations, name='my_consultations'),
     path('consultations/cancel/<uuid:consultation_id>/', consultation_views.cancel_consultation, name='cancel_consultation'),
+    path('consultations/<uuid:consultation_id>/token/', consultation_views.download_consultation_token, name='download_consultation_token'),
     
     # Call functionality
     path('call/<uuid:consultation_id>/start/', call_views.initiate_call, name='initiate_call'),

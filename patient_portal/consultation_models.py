@@ -204,3 +204,43 @@ class Consultation(models.Model):
     def is_past(self):
         """Check if consultation is in the past"""
         return self.scheduled_datetime < timezone.now()
+
+
+class ConsultationToken(models.Model):
+    """
+    In-person consultation token with blockchain verification.
+    Token number is sequential per doctor, reflecting patient visit count.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    consultation = models.OneToOneField(Consultation, on_delete=models.CASCADE, related_name='consultation_token')
+    doctor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='issued_tokens')
+    patient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_tokens')
+    
+    # Sequential token number per doctor (reflects patient visit count)
+    token_number = models.IntegerField(help_text="Sequential token number for this doctor")
+    
+    # PDF and blockchain
+    pdf_file = models.FileField(upload_to='consultation_tokens/', blank=True, null=True)
+    pdf_hash = models.CharField(max_length=64, blank=True, help_text="SHA-256 hash of PDF")
+    blockchain_tx_hash = models.CharField(max_length=66, blank=True, help_text="Blockchain transaction hash")
+    is_verified = models.BooleanField(default=False, help_text="Whether hash is confirmed on blockchain")
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'consultation_tokens'
+        ordering = ['-created_at']
+        verbose_name = 'Consultation Token'
+        verbose_name_plural = 'Consultation Tokens'
+        unique_together = ['doctor', 'token_number']
+    
+    def __str__(self):
+        return f"Token #{self.token_number} - Dr. {self.doctor.last_name} for {self.patient.first_name}"
+    
+    @classmethod
+    def get_next_token_number(cls, doctor):
+        """Get the next sequential token number for a given doctor"""
+        last_token = cls.objects.filter(doctor=doctor).order_by('-token_number').first()
+        return (last_token.token_number + 1) if last_token else 1

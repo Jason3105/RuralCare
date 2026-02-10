@@ -4,7 +4,7 @@ Views for Patient-Doctor Consultation System
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator
 from django.utils import timezone
@@ -12,10 +12,13 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.db.models import Q
 from datetime import datetime, timedelta
+import logging
 
 from authentication.models import User, DoctorProfile
-from .consultation_models import DoctorAvailability, ConsultationRequest, Consultation
+from .consultation_models import DoctorAvailability, ConsultationRequest, Consultation, ConsultationToken
 from .models import PatientAlert
+
+logger = logging.getLogger(__name__)
 
 
 def patient_required(view_func):
@@ -335,7 +338,7 @@ def my_consultations(request):
     """List patient's consultations"""
     consultations = Consultation.objects.filter(
         patient=request.user
-    ).select_related('doctor').order_by('-scheduled_datetime')
+    ).select_related('doctor').prefetch_related('consultation_token').order_by('-scheduled_datetime')
     
     # Separate upcoming and past
     now = timezone.now()
@@ -363,13 +366,147 @@ def my_consultations(request):
         consultation.can_start_call = can_start_call
         consultation.time_until_call_minutes = max(0, int(time_until_call / 60))
         consultation.call_expired = call_expired
+        
+        # Attach token info for in-person consultations
+        try:
+            consultation.token = consultation.consultation_token
+        except ConsultationToken.DoesNotExist:
+            consultation.token = None
+        
         upcoming_with_flags.append(consultation)
+    
+    # Also attach token info to past consultations
+    past_with_tokens = []
+    for consultation in past[:10]:
+        try:
+            consultation.token = consultation.consultation_token
+        except ConsultationToken.DoesNotExist:
+            consultation.token = None
+        past_with_tokens.append(consultation)
     
     context = {
         'upcoming_consultations': upcoming_with_flags,
-        'past_consultations': past[:10],
+        'past_consultations': past_with_tokens,
     }
     return render(request, 'patient_portal/consultations/my_consultations.html', context)
+
+
+@login_required
+@patient_required
+def download_consultation_token(request, consultation_id):
+    """
+    Download the in-person consultation token PDF.
+    
+    Flow (two-transaction approach):
+    1. First blockchain TX: register token with a placeholder hash → get TX hash
+    2. Generate complete PDF with TX hash, Etherscan link, etc.
+    3. Hash the complete PDF
+    4. Second blockchain TX: store the actual complete PDF hash
+    5. Regenerate final PDF with the updated pdf_hash field
+    """
+    consultation = get_object_or_404(
+        Consultation,
+        id=consultation_id,
+        patient=request.user,
+        mode='in_person'
+    )
+    
+    try:
+        token = consultation.consultation_token
+    except ConsultationToken.DoesNotExist:
+        messages.error(request, 'No token found for this consultation.')
+        return redirect('patient_portal:my_consultations')
+    
+    from .consultation_token_pdf import generate_consultation_token_pdf
+    
+    # Step 1: If no blockchain TX yet, do a registration transaction first
+    if not token.blockchain_tx_hash:
+        try:
+            from blockchain.blockchain_service import store_consultation_token_hash
+            import hashlib
+            
+            # Use a deterministic registration hash (not the PDF hash yet)
+            registration_data = f"token:{token.id}:doctor:{token.doctor.id}:patient:{token.patient.id}:num:{token.token_number}"
+            registration_hash = hashlib.sha256(registration_data.encode()).hexdigest()
+            
+            result = store_consultation_token_hash(
+                token_number=token.token_number,
+                pdf_hash=registration_hash,
+                patient_id=str(token.patient.id),
+                doctor_id=str(token.doctor.id)
+            )
+            if result and result.get('success'):
+                token.blockchain_tx_hash = result.get('transaction_hash', '')
+                token.is_verified = result.get('confirmed', False)
+                token.save()
+                logger.info(f"Token #{token.token_number} registered on blockchain: {result.get('transaction_hash')}")
+        except Exception as e:
+            logger.error(f"Error registering token on blockchain: {str(e)}")
+            token.save()
+    
+    # Step 2: Generate the COMPLETE PDF with TX hash + all details
+    pdf_file, pdf_hash = generate_consultation_token_pdf(token)
+    
+    # Step 3: Store the actual complete PDF hash on blockchain (second TX)
+    if token.pdf_hash != pdf_hash and token.blockchain_tx_hash:
+        token.pdf_hash = pdf_hash
+        token.save()
+        
+        try:
+            from blockchain.blockchain_service import get_blockchain_service
+            service = get_blockchain_service()
+            if service and service.is_connected() and service.token_contract:
+                import hashlib as hl
+                # Store the complete PDF hash via a second transaction
+                pdf_hash_bytes32 = service.w3.to_bytes(hexstr=('0x' + pdf_hash))
+                doctor_hash = service._hash_identifier(str(token.doctor.id))
+                patient_hash = service._hash_identifier(str(token.patient.id))
+                
+                import json
+                metadata = json.dumps({
+                    'type': 'consultation_token_pdf_hash',
+                    'token_number': token.token_number,
+                    'is_final_pdf_hash': True,
+                })
+                
+                nonce = service.w3.eth.get_transaction_count(service.account.address)
+                gas_estimate = service.token_contract.functions.storeTokenHash(
+                    pdf_hash_bytes32, doctor_hash, patient_hash,
+                    token.token_number, metadata
+                ).estimate_gas({'from': service.account.address})
+                
+                base_gas_price = service.w3.eth.gas_price
+                transaction = service.token_contract.functions.storeTokenHash(
+                    pdf_hash_bytes32, doctor_hash, patient_hash,
+                    token.token_number, metadata
+                ).build_transaction({
+                    'chainId': service.w3.eth.chain_id,
+                    'from': service.account.address,
+                    'nonce': nonce,
+                    'gas': int(gas_estimate * 1.5),
+                    'gasPrice': int(base_gas_price * 2),
+                })
+                
+                signed_txn = service.w3.eth.account.sign_transaction(
+                    transaction, private_key=service.account.key
+                )
+                tx_hash = service.w3.eth.send_raw_transaction(signed_txn.raw_transaction)
+                tx_hex = tx_hash.hex() if tx_hash.hex().startswith('0x') else f"0x{tx_hash.hex()}"
+                logger.info(f"Complete PDF hash stored on blockchain: {tx_hex}")
+        except Exception as e:
+            # Non-fatal: the registration TX is already on chain
+            logger.warning(f"Could not store final PDF hash (registration TX already on chain): {str(e)}")
+    
+    # Step 4: Regenerate final PDF one more time with updated pdf_hash field
+    final_pdf, final_hash = generate_consultation_token_pdf(token)
+    token.pdf_file.save(f'consultation_token_{token.id}.pdf', final_pdf, save=True)
+    
+    # Serve the PDF
+    token.pdf_file.open('rb')
+    response = HttpResponse(token.pdf_file.read(), content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="consultation_token_{token.token_number}.pdf"'
+    token.pdf_file.close()
+    return response
 
 
 @login_required

@@ -138,10 +138,19 @@
                                     <p class="text-sm text-primary font-medium">
                                         <i class="fas fa-clock mr-1"></i>{{ consultation.scheduled_datetime|time:"g:i A" }}
                                     </p>
-                                    <p class="text-xs text-muted-foreground">{{ consultation.mode|title }} • {{ consultation.duration_minutes }} min</p>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <p class="text-xs text-muted-foreground">{{ consultation.mode|title }} • {{ consultation.duration_minutes }} min</p>
+                                        {% if consultation.status == 'completed' %}
+                                            <span class="px-2 py-0.5 text-xs bg-green-600/20 text-green-600 rounded-full">✓ Completed</span>
+                                        {% elif consultation.status == 'in_progress' %}
+                                            <span class="px-2 py-0.5 text-xs bg-blue-600/20 text-blue-600 rounded-full">● In Progress</span>
+                                        {% elif consultation.status == 'scheduled' %}
+                                            <span class="px-2 py-0.5 text-xs bg-yellow-600/20 text-yellow-600 rounded-full">○ Scheduled</span>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
-                            {% if consultation.meeting_link %}
+                            {% if consultation.meeting_link and consultation.status != 'completed' %}
                             <a href="{{ consultation.meeting_link }}" target="_blank"
                                class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm">
                                 <i class="fas fa-video mr-1"></i>Join

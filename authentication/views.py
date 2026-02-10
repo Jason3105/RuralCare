@@ -251,7 +251,7 @@ def doctor_dashboard(request):
     todays_consultations = Consultation.objects.filter(
         doctor=request.user,
         scheduled_datetime__date=today,
-        status__in=['scheduled', 'completed', 'active']
+        status__in=['scheduled', 'completed', 'in_progress']
     ).select_related('patient', 'patient__patient_profile').order_by('scheduled_datetime')
     
     # Count stats
@@ -265,7 +265,7 @@ def doctor_dashboard(request):
     # Active cases - consultations that are scheduled or in progress
     active_cases = Consultation.objects.filter(
         doctor=request.user,
-        status__in=['scheduled', 'active']
+        status__in=['scheduled', 'in_progress']
     ).count()
     
     context = {

@@ -28,6 +28,29 @@
                             <p class="text-sm text-muted-foreground mt-2">
                                 <i class="fas fa-{{ consultation.mode }} mr-2"></i>{{ consultation.get_mode_display }}
                             </p>
+
+                            <!-- In-Person Token -->
+                            {% if consultation.mode == 'in_person' and consultation.token %}
+                            <div class="mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                                            <i class="fas fa-ticket-alt mr-2"></i>Token #{{ consultation.token.token_number }}
+                                        </p>
+                                        {% if consultation.token.is_verified %}
+                                        <p class="text-xs text-green-600 dark:text-green-400 mt-1">
+                                            <i class="fas fa-shield-alt mr-1"></i>Blockchain Verified
+                                        </p>
+                                        {% endif %}
+                                    </div>
+                                    <a href="{% url 'patient_portal:download_consultation_token' consultation.id %}"
+                                       class="inline-flex items-center px-3 py-1.5 bg-amber-600 text-white text-xs rounded-lg hover:bg-amber-700 transition">
+                                        <i class="fas fa-download mr-1"></i>Download Token
+                                    </a>
+                                </div>
+                            </div>
+                            {% endif %}
+
                             <div class="flex gap-2 mt-3">
                                 {% if consultation.mode == 'video' %}
                                     {% if consultation.can_start_call %}
@@ -112,6 +135,28 @@
                             <span class="inline-flex items-center px-2 py-1 mt-2 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-xs rounded">
                                 {{ consultation.get_status_display }}
                             </span>
+
+                            <!-- In-Person Token (past consultations) -->
+                            {% if consultation.mode == 'in_person' and consultation.token %}
+                            <div class="mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                                            <i class="fas fa-ticket-alt mr-2"></i>Token #{{ consultation.token.token_number }}
+                                        </p>
+                                        {% if consultation.token.is_verified %}
+                                        <p class="text-xs text-green-600 dark:text-green-400 mt-1">
+                                            <i class="fas fa-shield-alt mr-1"></i>Blockchain Verified
+                                        </p>
+                                        {% endif %}
+                                    </div>
+                                    <a href="{% url 'patient_portal:download_consultation_token' consultation.id %}"
+                                       class="inline-flex items-center px-3 py-1.5 bg-amber-600 text-white text-xs rounded-lg hover:bg-amber-700 transition">
+                                        <i class="fas fa-download mr-1"></i>Download Token
+                                    </a>
+                                </div>
+                            </div>
+                            {% endif %}
                             
                             <!-- Prescription Downloads -->
                             {% if consultation.prescriptions.exists %}

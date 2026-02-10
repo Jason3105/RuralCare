@@ -79,6 +79,23 @@ class BlockchainService:
                 else:
                     logger.error(f"PrescriptionVerifier ABI not found at {abi_path}")
             
+            # Load consultation token verification contract (ConsultationTokenVerifier)
+            self.token_contract = None
+            token_contract_address = getattr(settings, 'CONSULTATION_TOKEN_CONTRACT_ADDRESS', None)
+            if token_contract_address:
+                abi_path = Path(__file__).parent / 'consultation_token_abi.json'
+                if abi_path.exists():
+                    with open(abi_path, 'r') as f:
+                        abi = json.load(f)
+                    
+                    self.token_contract = self.w3.eth.contract(
+                        address=Web3.to_checksum_address(token_contract_address),
+                        abi=abi
+                    )
+                    logger.info(f"✓ ConsultationTokenVerifier contract loaded: {token_contract_address}")
+                else:
+                    logger.warning(f"ConsultationTokenVerifier ABI not found at {abi_path}")
+            
             self.connected = True
             logger.info(f"✓ Blockchain service initialized")
             
@@ -509,6 +526,142 @@ class BlockchainService:
             logger.error(f"Error verifying prescription hash: {str(e)}")
             return None
 
+    def store_token_hash(self, token_number, pdf_hash, patient_id, doctor_id):
+        """
+        Store consultation token PDF hash on blockchain for verification
+        
+        Args:
+            token_number: Sequential token number for the doctor
+            pdf_hash: SHA-256 hash of PDF file (hex string)
+            patient_id: Patient's user ID
+            doctor_id: Doctor's user ID
+            
+        Returns:
+            dict with transaction details or None if failed
+        """
+        if not self.is_connected() or not self.token_contract:
+            logger.warning("Token contract not connected - token hash not stored")
+            return None
+        
+        try:
+            # Convert PDF hash from hex string to bytes32
+            if isinstance(pdf_hash, str):
+                pdf_hash_bytes32 = self.w3.to_bytes(hexstr=('0x' + pdf_hash) if not pdf_hash.startswith('0x') else pdf_hash)
+            else:
+                pdf_hash_bytes32 = pdf_hash
+            
+            # Hash identifiers for privacy
+            doctor_hash = self._hash_identifier(doctor_id)
+            patient_hash = self._hash_identifier(patient_id)
+            
+            # Create metadata
+            metadata = json.dumps({
+                'type': 'consultation_token',
+                'token_number': token_number,
+            })
+            
+            # Build transaction
+            nonce = self.w3.eth.get_transaction_count(self.account.address)
+            
+            # Estimate gas
+            gas_estimate = self.token_contract.functions.storeTokenHash(
+                pdf_hash_bytes32,
+                doctor_hash,
+                patient_hash,
+                token_number,
+                metadata
+            ).estimate_gas({'from': self.account.address})
+            
+            # Build transaction with boosted gas
+            base_gas_price = self.w3.eth.gas_price
+            boosted_gas_price = int(base_gas_price * 2)
+            
+            transaction = self.token_contract.functions.storeTokenHash(
+                pdf_hash_bytes32,
+                doctor_hash,
+                patient_hash,
+                token_number,
+                metadata
+            ).build_transaction({
+                'chainId': self.w3.eth.chain_id,
+                'from': self.account.address,
+                'nonce': nonce,
+                'gas': int(gas_estimate * 1.5),
+                'gasPrice': boosted_gas_price,
+            })
+            
+            # Sign transaction
+            signed_txn = self.w3.eth.account.sign_transaction(
+                transaction, 
+                private_key=self.account.key
+            )
+            
+            # Send transaction
+            tx_hash = self.w3.eth.send_raw_transaction(signed_txn.raw_transaction)
+            tx_hash_hex = tx_hash.hex() if tx_hash.hex().startswith('0x') else f"0x{tx_hash.hex()}"
+            logger.info(f"✓ Token #{token_number} hash storage transaction sent - TX: {tx_hash_hex}")
+            
+            result = {
+                'success': True,
+                'transaction_hash': tx_hash_hex,
+                'pending': True,
+                'explorer_url': f"https://sepolia.etherscan.io/tx/{tx_hash_hex}"
+            }
+            
+            # Try to get receipt
+            try:
+                tx_receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash, timeout=5)
+                result.update({
+                    'pending': False,
+                    'block_number': tx_receipt.blockNumber,
+                    'gas_used': tx_receipt.gasUsed,
+                    'confirmed': True
+                })
+                logger.info(f"✓ Token transaction confirmed in block {tx_receipt.blockNumber}")
+            except Exception as e:
+                logger.info(f"Token transaction pending confirmation: {tx_hash_hex}")
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error storing token hash on blockchain: {str(e)}")
+            return {
+                'success': False,
+                'error': str(e)
+            }
+    
+    def verify_token_hash(self, pdf_hash):
+        """
+        Verify if a consultation token PDF hash exists on blockchain
+        """
+        if not self.is_connected() or not self.token_contract:
+            logger.warning("Token contract not connected")
+            return None
+        
+        try:
+            if isinstance(pdf_hash, str):
+                pdf_hash_bytes32 = self.w3.to_bytes(hexstr=('0x' + pdf_hash) if not pdf_hash.startswith('0x') else pdf_hash)
+            else:
+                pdf_hash_bytes32 = pdf_hash
+            
+            record = self.token_contract.functions.getTokenRecord(pdf_hash_bytes32).call()
+            
+            if record[5]:  # exists flag
+                return {
+                    'exists': True,
+                    'token_number': record[4],
+                    'timestamp': record[3],
+                    'doctor_hash': record[1].hex(),
+                    'patient_hash': record[2].hex(),
+                    'metadata': record[6] if len(record) > 6 else ''
+                }
+            else:
+                return {'exists': False}
+                
+        except Exception as e:
+            logger.error(f"Error verifying token hash: {str(e)}")
+            return None
+
 
 # Singleton instance
 _blockchain_service = None
@@ -525,3 +678,9 @@ def store_prescription_hash(prescription_id, pdf_hash, patient_id, doctor_id):
     """Convenience function to store prescription hash"""
     service = get_blockchain_service()
     return service.store_prescription_hash(prescription_id, pdf_hash, patient_id, doctor_id)
+
+
+def store_consultation_token_hash(token_number, pdf_hash, patient_id, doctor_id):
+    """Convenience function to store consultation token hash"""
+    service = get_blockchain_service()
+    return service.store_token_hash(token_number, pdf_hash, patient_id, doctor_id)

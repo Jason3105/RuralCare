@@ -179,6 +179,7 @@ BLOCKCHAIN_PRIVATE_KEY = os.getenv('BLOCKCHAIN_PRIVATE_KEY', '290493c95dfbcd3896
 BLOCKCHAIN_CONTRACT_ADDRESS = os.getenv('BLOCKCHAIN_CONTRACT_ADDRESS', '')  # MedicalAccessLogger (QR logging)
 PRESCRIPTION_CONTRACT_ADDRESS = os.getenv('PRESCRIPTION_CONTRACT_ADDRESS', '')  # PrescriptionVerifier
 BLOCKCHAIN_ENABLED = os.getenv('BLOCKCHAIN_ENABLED', 'True').lower() == 'true'
+CONSULTATION_TOKEN_CONTRACT_ADDRESS = os.getenv('CONSULTATION_TOKEN_CONTRACT_ADDRESS', '')  # ConsultationTokenVerifier
 
 # Email Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

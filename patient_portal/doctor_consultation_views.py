@@ -10,7 +10,7 @@ from django.utils import timezone
 from django.http import JsonResponse
 from datetime import datetime, timedelta
 
-from .consultation_models import DoctorAvailability, ConsultationRequest, Consultation
+from .consultation_models import DoctorAvailability, ConsultationRequest, Consultation, ConsultationToken
 from .models import PatientAlert
 from patient_portal.consultation_views import doctor_required
 
@@ -32,14 +32,13 @@ def doctor_consultation_dashboard(request):
         scheduled_datetime__gte=timezone.now()
     ).select_related('patient').order_by('scheduled_datetime')[:5]
     
-    # Get today's consultations (only upcoming)
+    # Get ALL today's consultations (scheduled, in_progress, and completed)
     today = timezone.now().date()
-    now = timezone.now()
     today_consultations = Consultation.objects.filter(
         doctor=request.user,
-        scheduled_datetime__date=today,
-        scheduled_datetime__gte=now,
-        status='scheduled'
+        scheduled_datetime__date=today
+    ).exclude(
+        status__in=['cancelled', 'no_show']
     ).select_related('patient').order_by('scheduled_datetime')
     
     context = {
@@ -192,6 +191,19 @@ def respond_to_request(request, request_id):
                 doctor_notes=doctor_notes,
                 status='scheduled'
             )
+            
+            # Auto-create token for in-person consultations
+            if mode == 'in_person':
+                try:
+                    token_number = ConsultationToken.get_next_token_number(request.user)
+                    ConsultationToken.objects.create(
+                        consultation=consultation,
+                        doctor=request.user,
+                        patient=consultation_request.patient,
+                        token_number=token_number,
+                    )
+                except Exception as e:
+                    print(f"Error creating consultation token: {e}")
             
             # Send email notification to patient
             from django.core.mail import send_mail
@@ -422,7 +434,7 @@ def doctor_consultations(request):
     """View all consultations"""
     consultations = Consultation.objects.filter(
         doctor=request.user
-    ).select_related('patient').order_by('-scheduled_datetime')
+    ).select_related('patient').prefetch_related('consultation_token').order_by('-scheduled_datetime')
     
     # Filter by status
     status = request.GET.get('status')
@@ -431,8 +443,15 @@ def doctor_consultations(request):
     
     # Separate upcoming and past
     now = timezone.now()
-    upcoming = consultations.filter(scheduled_datetime__gte=now, status='scheduled')
-    past = consultations.filter(Q(scheduled_datetime__lt=now) | ~Q(status='scheduled'))
+    upcoming = list(consultations.filter(scheduled_datetime__gte=now, status='scheduled'))
+    past = list(consultations.filter(Q(scheduled_datetime__lt=now) | ~Q(status='scheduled')))
+    
+    # Attach token to each consultation for template access
+    for c in upcoming + past:
+        try:
+            c.token = c.consultation_token
+        except Exception:
+            c.token = None
     
     context = {
         'upcoming_consultations': upcoming,
@@ -447,10 +466,16 @@ def doctor_consultations(request):
 def consultation_detail(request, consultation_id):
     """View consultation details"""
     consultation = get_object_or_404(
-        Consultation,
+        Consultation.objects.prefetch_related('consultation_token'),
         id=consultation_id,
         doctor=request.user
     )
+    
+    # Attach token for template access
+    try:
+        consultation.token = consultation.consultation_token
+    except Exception:
+        consultation.token = None
     
     if request.method == 'POST':
         # Update consultation notes

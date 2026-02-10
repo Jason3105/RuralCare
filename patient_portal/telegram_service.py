@@ -116,7 +116,7 @@ class TelegramBotService:
             message += f"👉 <a href='{link}'>Go to Dashboard</a>"
         
         # Add footer
-        message += f"\n\n<i>Cancer Treatment Planning System</i>"
+        message += f"\n\n<i>RuralCare</i>"
         
         return message
     
@@ -220,7 +220,7 @@ class TelegramBotService:
             link = f"{self.web_app_url}{reverse('patient_portal:my_consultations')}"
             full_message = f"<b>{emoji} {title}</b>\n\n{message}"
             full_message += f"👉 <a href='{link}'>View Consultation Details</a>\n\n"
-            full_message += f"<i>Cancer Treatment Planning System</i>"
+            full_message += f"<i>RuralCare</i>"
             
             return self.send_message(patient_profile.telegram_chat_id, full_message)
             
@@ -259,7 +259,7 @@ class TelegramBotService:
             # Add link
             link = f"{self.web_app_url}{reverse('patient_portal:view_prescription', args=[prescription.id])}"
             message += f"👉 <a href='{link}'>View Prescription Details</a>\n\n"
-            message += f"<i>Cancer Treatment Planning System</i>"
+            message += f"<i>RuralCare</i>"
             
             return self.send_message(patient_profile.telegram_chat_id, message)
             

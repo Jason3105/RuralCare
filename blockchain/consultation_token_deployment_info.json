@@ -1,0 +1,11 @@
+{
+  "contract_name": "ConsultationTokenVerifier",
+  "contract_address": "0x7DEf1DDbD847ae7714a9a366Ce75019c00Be9d7D",
+  "transaction_hash": "0x5740accfe9016fa9ca014af3abed46fd87a5868de999a4318c9a978eea168b4a",
+  "block_number": 10230192,
+  "deployer": "0xceB0045BFD429eC942aDEc9e84B1F0f2c52C29AD",
+  "network": "sepolia",
+  "chain_id": 11155111,
+  "gas_used": 1382743,
+  "etherscan_url": "https://sepolia.etherscan.io/address/0x7DEf1DDbD847ae7714a9a366Ce75019c00Be9d7D"
+}
