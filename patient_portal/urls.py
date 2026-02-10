@@ -12,6 +12,12 @@ urlpatterns = [
     # Overview/Dashboard
     path('', views.patient_overview, name='overview'),
     
+    # Health Hub - Combined Overview + Symptoms + Side Effects
+    path('health-hub/', views.health_hub, name='health_hub'),
+    
+    # Treatment Center - Combined Plans + Confidence + Explained
+    path('treatment-center/', views.treatment_center, name='treatment_center'),
+    
     # Confidence View (Simplified)
     path('confidence/', views.patient_confidence_view, name='confidence_view'),
     

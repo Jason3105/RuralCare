@@ -1,0 +1,677 @@
+{% extends 'base.html' %}
+{% block title %}My Health Hub{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Welcome Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-foreground">Welcome, {{ user.username }}</h1>
+            <p class="text-muted-foreground mt-1">Your personal health hub &mdash; track symptoms, view side effects, and stay on top of your treatment</p>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="mb-8 border-b border-border/50">
+            <nav class="flex space-x-1 -mb-px" id="hubTabs">
+                <button onclick="switchHubTab('overview')" id="tab-overview"
+                    class="hub-tab px-5 py-3 text-sm font-semibold rounded-t-lg transition-all border-b-2 border-primary text-primary bg-primary/5">
+                    <i class="fas fa-th-large mr-2"></i>Overview
+                </button>
+                <button onclick="switchHubTab('symptoms')" id="tab-symptoms"
+                    class="hub-tab px-5 py-3 text-sm font-semibold rounded-t-lg transition-all border-b-2 border-transparent text-muted-foreground hover:text-foreground hover:border-border">
+                    <i class="fas fa-clipboard-list mr-2"></i>Log Symptoms
+                </button>
+                <button onclick="switchHubTab('sideeffects')" id="tab-sideeffects"
+                    class="hub-tab px-5 py-3 text-sm font-semibold rounded-t-lg transition-all border-b-2 border-transparent text-muted-foreground hover:text-foreground hover:border-border">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>Side Effects
+                </button>
+            </nav>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- TAB 1: OVERVIEW (from overview.html)                         -->
+        <!-- ============================================================ -->
+        <div id="panel-overview" class="hub-panel">
+
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-card border border-border/50 rounded-xl p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                            <i class="fas fa-file-medical text-blue-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-bold text-foreground">{{ active_plans_count }}</p>
+                            <p class="text-sm text-muted-foreground">Active Plans</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-card border border-border/50 rounded-xl p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                            <i class="fas fa-clipboard-list text-green-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-bold text-foreground">{{ symptom_logs_count }}</p>
+                            <p class="text-sm text-muted-foreground">Symptoms Logged</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-card border border-border/50 rounded-xl p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center">
+                            <i class="fas fa-bell text-amber-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-bold text-foreground">{{ unread_alerts_count }}</p>
+                            <p class="text-sm text-muted-foreground">Unread Alerts</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-card border border-border/50 rounded-xl p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
+                            <i class="fas fa-calendar-check text-purple-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-bold text-foreground">{{ upcoming_reminders_count }}</p>
+                            <p class="text-sm text-muted-foreground">Upcoming</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <button onclick="switchHubTab('symptoms')"
+                   class="bg-primary text-primary-foreground rounded-xl p-6 hover:bg-primary/90 transition-colors text-center cursor-pointer">
+                    <i class="fas fa-plus-circle text-3xl mb-3"></i>
+                    <h3 class="font-semibold">Log Symptoms</h3>
+                    <p class="text-sm opacity-80 mt-1">Record how you're feeling today</p>
+                </button>
+                <a href="{% url 'patient_portal:confidence_view' %}"
+                   class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-md transition-all text-center">
+                    <i class="fas fa-chart-pie text-3xl mb-3 text-primary"></i>
+                    <h3 class="font-semibold text-foreground">Treatment Confidence</h3>
+                    <p class="text-sm text-muted-foreground mt-1">Understand your plan's confidence</p>
+                </a>
+                <button onclick="switchHubTab('sideeffects')"
+                   class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-md transition-all text-center cursor-pointer">
+                    <i class="fas fa-exclamation-triangle text-3xl mb-3 text-amber-500"></i>
+                    <h3 class="font-semibold text-foreground">Side Effects</h3>
+                    <p class="text-sm text-muted-foreground mt-1">What to expect & manage</p>
+                </button>
+                <a href="{% url 'patient_portal:alerts_list' %}"
+                   class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-md transition-all text-center">
+                    <i class="fas fa-bell text-3xl mb-3 text-blue-500"></i>
+                    <h3 class="font-semibold text-foreground">Alerts & Reminders</h3>
+                    <p class="text-sm text-muted-foreground mt-1">Stay on track</p>
+                </a>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Recent Symptoms -->
+                <div class="lg:col-span-2 bg-card border border-border/50 rounded-xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-semibold text-foreground">Recent Symptom Logs</h2>
+                        <a href="{% url 'patient_portal:symptom_log_list' %}" class="text-primary hover:underline text-sm">View All</a>
+                    </div>
+                    <div class="space-y-4">
+                        {% for log in recent_logs %}
+                        <div class="border border-border rounded-lg p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-sm text-muted-foreground">{{ log.submitted_at|date:"M d, Y H:i" }}</span>
+                                <span class="text-sm font-medium
+                                    {% if log.overall_wellbeing <= 2 %}text-red-600
+                                    {% elif log.overall_wellbeing <= 3 %}text-amber-600
+                                    {% else %}text-green-600{% endif %}">
+                                    Wellness: {{ log.overall_wellbeing|default:"N/A" }}/5
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-4 gap-2 text-center text-xs">
+                                <div class="p-2 bg-accent/30 rounded">
+                                    <p class="text-muted-foreground">Pain</p>
+                                    <p class="font-bold">{{ log.pain|default:"0" }}/5</p>
+                                </div>
+                                <div class="p-2 bg-accent/30 rounded">
+                                    <p class="text-muted-foreground">Fatigue</p>
+                                    <p class="font-bold">{{ log.fatigue|default:"0" }}/5</p>
+                                </div>
+                                <div class="p-2 bg-accent/30 rounded">
+                                    <p class="text-muted-foreground">Nausea</p>
+                                    <p class="font-bold">{{ log.nausea|default:"0" }}/5</p>
+                                </div>
+                                <div class="p-2 bg-accent/30 rounded">
+                                    <p class="text-muted-foreground">Sleep</p>
+                                    <p class="font-bold">{{ log.sleep_problems|default:"0" }}/5</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-8">
+                            <i class="fas fa-clipboard-list text-4xl text-muted-foreground mb-3"></i>
+                            <p class="text-muted-foreground mb-4">No symptom logs yet</p>
+                            <button onclick="switchHubTab('symptoms')"
+                               class="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
+                                <i class="fas fa-plus mr-2"></i>Log Your First Symptoms
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Alerts & Reminders -->
+                <div class="bg-card border border-border/50 rounded-xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-semibold text-foreground">Alerts</h2>
+                        <a href="{% url 'patient_portal:alerts_list' %}" class="text-primary hover:underline text-sm">View All</a>
+                    </div>
+                    <div class="space-y-3">
+                        {% for alert in recent_alerts %}
+                        <div class="border-l-4 p-3 rounded-r-lg
+                            {% if alert.is_urgent %}border-red-500 bg-red-50 dark:bg-red-900/10
+                            {% else %}border-blue-500 bg-blue-50 dark:bg-blue-900/10{% endif %}">
+                            <p class="font-medium text-foreground text-sm">{{ alert.title }}</p>
+                            <p class="text-xs text-muted-foreground mt-1">{{ alert.created_at|date:"M d, Y" }}</p>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-6">
+                            <i class="fas fa-check-circle text-3xl text-green-500 mb-2"></i>
+                            <p class="text-muted-foreground text-sm">No pending alerts</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    {% if upcoming_reminders %}
+                    <div class="mt-6 pt-6 border-t border-border">
+                        <h3 class="font-semibold text-foreground mb-3">Upcoming</h3>
+                        <div class="space-y-2">
+                            {% for reminder in upcoming_reminders %}
+                            <div class="flex items-center space-x-3 text-sm">
+                                <i class="fas fa-calendar text-muted-foreground"></i>
+                                <div>
+                                    <p class="text-foreground">{{ reminder.title }}</p>
+                                    <p class="text-xs text-muted-foreground">{{ reminder.scheduled_for|date:"M d, Y H:i" }}</p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Treatment Explanations -->
+            {% if treatment_explanations %}
+            <div class="mt-6 bg-card border border-border/50 rounded-xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold text-foreground">Your Treatment Explained</h2>
+                    <a href="{% url 'patient_portal:treatment_explanation_list' %}" class="text-primary hover:underline text-sm">View All</a>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for explanation in treatment_explanations %}
+                    <a href="{% url 'patient_portal:treatment_explanation_detail' explanation.id %}"
+                       class="border border-border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <h3 class="font-semibold text-foreground mb-2">{{ explanation.treatment_plan.cancer_type }} Treatment</h3>
+                        <p class="text-sm text-muted-foreground line-clamp-2">{{ explanation.simple_summary|truncatechars:100 }}</p>
+                        <p class="text-primary text-sm mt-2">Read more <i class="fas fa-arrow-right ml-1"></i></p>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+        </div><!-- end panel-overview -->
+
+
+        <!-- ============================================================ -->
+        <!-- TAB 2: LOG SYMPTOMS (from symptom_log_create.html)           -->
+        <!-- ============================================================ -->
+        <div id="panel-symptoms" class="hub-panel hidden">
+
+            {% if logged_today %}
+            <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-6 text-center">
+                <i class="fas fa-check-circle text-4xl text-amber-500 mb-3"></i>
+                <h2 class="text-lg font-semibold text-foreground mb-2">Already Logged Today</h2>
+                <p class="text-muted-foreground mb-4">You've already submitted your symptom log for today. Come back tomorrow!</p>
+                <a href="{% url 'patient_portal:symptom_log_list' %}"
+                   class="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
+                    <i class="fas fa-list mr-2"></i>View Past Logs
+                </a>
+            </div>
+            {% else %}
+
+            <div class="max-w-3xl mx-auto">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-foreground">How Are You Feeling?</h2>
+                    <p class="text-muted-foreground mt-1">Take a moment to record how you're doing today</p>
+                </div>
+
+                <form method="post" action="{% url 'patient_portal:symptom_log_create' %}" class="space-y-6" id="symptom-log-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="redirect_to" value="health_hub_symptoms">
+                    
+                    <!-- Overall Wellness -->
+                    <div class="bg-card border border-border/50 rounded-xl p-6">
+                        <h2 class="text-lg font-semibold text-foreground mb-4">Overall Wellness</h2>
+                        <p class="text-muted-foreground mb-4">How would you rate your overall feeling today?</p>
+                        <div class="flex justify-between gap-2">
+                            {% for i in "12345" %}
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" name="overall_wellness" value="{{ i }}" class="peer sr-only" {% if i == "3" %}checked{% endif %}>
+                                <div class="p-4 border-2 border-border rounded-xl text-center peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+                                    <span class="text-3xl mb-2 block">
+                                        {% if i == "1" %}😫{% elif i == "2" %}😔{% elif i == "3" %}😐{% elif i == "4" %}🙂{% else %}😄{% endif %}
+                                    </span>
+                                    <span class="text-sm font-medium text-foreground">{{ i }}</span>
+                                </div>
+                            </label>
+                            {% endfor %}
+                        </div>
+                        <div class="flex justify-between text-xs text-muted-foreground mt-2">
+                            <span>Very Poor</span>
+                            <span>Excellent</span>
+                        </div>
+                    </div>
+
+                    <!-- Pain Level -->
+                    <div class="bg-card border border-border/50 rounded-xl p-6">
+                        <h2 class="text-lg font-semibold text-foreground mb-4">Pain Level</h2>
+                        <p class="text-muted-foreground mb-4">Rate your pain on a scale of 0-10</p>
+                        <div class="space-y-4">
+                            <input type="range" name="pain_level" id="pain_level" min="0" max="10" value="0"
+                                   class="w-full h-2 bg-accent rounded-lg appearance-none cursor-pointer slider-thumb"
+                                   oninput="document.getElementById('pain_value').textContent = this.value">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-muted-foreground">No Pain</span>
+                                <span id="pain_value" class="text-2xl font-bold text-primary">0</span>
+                                <span class="text-sm text-muted-foreground">Worst Pain</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="pain_location" class="block text-sm font-medium text-foreground mt-4 mb-2">Where is the pain? (optional)</label>
+                            <input type="text" id="pain_location" name="pain_location"
+                                   class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground"
+                                   placeholder="e.g., lower back, head, stomach">
+                        </div>
+                    </div>
+
+                    <!-- Common Symptoms Grid -->
+                    <div class="bg-card border border-border/50 rounded-xl p-6">
+                        <h2 class="text-lg font-semibold text-foreground mb-4">Common Symptoms</h2>
+                        <p class="text-muted-foreground mb-4">Rate each symptom (1 = None, 5 = Severe)</p>
+                        
+                        <div class="space-y-6">
+                            <!-- Fatigue -->
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <label class="font-medium text-foreground"><i class="fas fa-battery-quarter text-amber-500 mr-2"></i>Fatigue/Tiredness</label>
+                                </div>
+                                <div class="flex gap-2">
+                                    {% for i in "12345" %}
+                                    <label class="flex-1 cursor-pointer">
+                                        <input type="radio" name="fatigue" value="{{ i }}" class="peer sr-only" {% if i == "1" %}checked{% endif %}>
+                                        <div class="py-2 border border-border rounded text-center peer-checked:border-primary peer-checked:bg-primary/10 transition-all">
+                                            <span class="font-medium">{{ i }}</span>
+                                        </div>
+                                    </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Nausea -->
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <label class="font-medium text-foreground"><i class="fas fa-dizzy text-green-500 mr-2"></i>Nausea</label>
+                                </div>
+                                <div class="flex gap-2">
+                                    {% for i in "12345" %}
+                                    <label class="flex-1 cursor-pointer">
+                                        <input type="radio" name="nausea" value="{{ i }}" class="peer sr-only" {% if i == "1" %}checked{% endif %}>
+                                        <div class="py-2 border border-border rounded text-center peer-checked:border-primary peer-checked:bg-primary/10 transition-all">
+                                            <span class="font-medium">{{ i }}</span>
+                                        </div>
+                                    </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Vomiting -->
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <label class="font-medium text-foreground"><i class="fas fa-head-side-cough text-red-500 mr-2"></i>Vomiting</label>
+                                </div>
+                                <div class="flex gap-2">
+                                    {% for i in "12345" %}
+                                    <label class="flex-1 cursor-pointer">
+                                        <input type="radio" name="vomiting" value="{{ i }}" class="peer sr-only" {% if i == "1" %}checked{% endif %}>
+                                        <div class="py-2 border border-border rounded text-center peer-checked:border-primary peer-checked:bg-primary/10 transition-all">
+                                            <span class="font-medium">{{ i }}</span>
+                                        </div>
+                                    </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Appetite -->
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <label class="font-medium text-foreground"><i class="fas fa-utensils text-orange-500 mr-2"></i>Appetite Loss</label>
+                                </div>
+                                <div class="flex gap-2">
+                                    {% for i in "12345" %}
+                                    <label class="flex-1 cursor-pointer">
+                                        <input type="radio" name="appetite_loss" value="{{ i }}" class="peer sr-only" {% if i == "1" %}checked{% endif %}>
+                                        <div class="py-2 border border-border rounded text-center peer-checked:border-primary peer-checked:bg-primary/10 transition-all">
+                                            <span class="font-medium">{{ i }}</span>
+                                        </div>
+                                    </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Breathing -->
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <label class="font-medium text-foreground"><i class="fas fa-lungs text-blue-500 mr-2"></i>Breathing Difficulty</label>
+                                </div>
+                                <div class="flex gap-2">
+                                    {% for i in "12345" %}
+                                    <label class="flex-1 cursor-pointer">
+                                        <input type="radio" name="breathing_difficulty" value="{{ i }}" class="peer sr-only" {% if i == "1" %}checked{% endif %}>
+                                        <div class="py-2 border border-border rounded text-center peer-checked:border-primary peer-checked:bg-primary/10 transition-all">
+                                            <span class="font-medium">{{ i }}</span>
+                                        </div>
+                                    </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Symptoms -->
+                    <div class="bg-card border border-border/50 rounded-xl p-6">
+                        <h2 class="text-lg font-semibold text-foreground mb-4">Other Symptoms</h2>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">Sleep Quality (1-5)</label>
+                                <select name="sleep_quality" class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground">
+                                    <option value="5">5 - Excellent</option>
+                                    <option value="4">4 - Good</option>
+                                    <option value="3" selected>3 - Fair</option>
+                                    <option value="2">2 - Poor</option>
+                                    <option value="1">1 - Very Poor</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">Mood (1-5)</label>
+                                <select name="mood" class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground">
+                                    <option value="5">5 - Very Good</option>
+                                    <option value="4">4 - Good</option>
+                                    <option value="3" selected>3 - Neutral</option>
+                                    <option value="2">2 - Low</option>
+                                    <option value="1">1 - Very Low</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <label class="flex items-center space-x-2 cursor-pointer p-2 hover:bg-accent/30 rounded">
+                                <input type="checkbox" name="has_fever" class="rounded border-border">
+                                <span class="text-foreground">Fever</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer p-2 hover:bg-accent/30 rounded">
+                                <input type="checkbox" name="has_diarrhea" class="rounded border-border">
+                                <span class="text-foreground">Diarrhea</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer p-2 hover:bg-accent/30 rounded">
+                                <input type="checkbox" name="has_constipation" class="rounded border-border">
+                                <span class="text-foreground">Constipation</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer p-2 hover:bg-accent/30 rounded">
+                                <input type="checkbox" name="has_mouth_sores" class="rounded border-border">
+                                <span class="text-foreground">Mouth Sores</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer p-2 hover:bg-accent/30 rounded">
+                                <input type="checkbox" name="has_skin_issues" class="rounded border-border">
+                                <span class="text-foreground">Skin Changes</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer p-2 hover:bg-accent/30 rounded">
+                                <input type="checkbox" name="has_numbness" class="rounded border-border">
+                                <span class="text-foreground">Numbness/Tingling</span>
+                            </label>
+                        </div>
+
+                        <div>
+                            <label for="additional_symptoms" class="block text-sm font-medium text-foreground mb-2">Additional Notes</label>
+                            <textarea id="additional_symptoms" name="additional_symptoms" rows="3"
+                                      class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground"
+                                      placeholder="Anything else you want to share about how you're feeling..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Medications -->
+                    <div class="bg-card border border-border/50 rounded-xl p-6">
+                        <h2 class="text-lg font-semibold text-foreground mb-4">Medications Today</h2>
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" name="medications_taken" checked class="rounded border-border w-5 h-5">
+                            <span class="text-foreground">I took all my prescribed medications today</span>
+                        </label>
+                        <div class="mt-4">
+                            <label for="missed_medications" class="block text-sm font-medium text-foreground mb-2">If any missed, which ones?</label>
+                            <input type="text" id="missed_medications" name="missed_medications"
+                                   class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground"
+                                   placeholder="Leave blank if none missed">
+                        </div>
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="flex justify-end space-x-4">
+                        <button type="button" onclick="switchHubTab('overview')"
+                           class="px-6 py-3 border border-border rounded-lg hover:bg-accent transition-colors">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                            <i class="fas fa-save mr-2"></i>Save Log
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {% endif %}
+
+        </div><!-- end panel-symptoms -->
+
+
+        <!-- ============================================================ -->
+        <!-- TAB 3: SIDE EFFECTS (from side_effects_list.html)            -->
+        <!-- ============================================================ -->
+        <div id="panel-sideeffects" class="hub-panel hidden">
+
+            <!-- Risk Level Legend -->
+            <div class="bg-card border border-border/50 rounded-xl p-4 mb-6">
+                <p class="text-sm text-muted-foreground mb-3">Risk levels are shown as:</p>
+                <div class="flex flex-wrap gap-4">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-3 h-3 bg-green-500 rounded-full"></span>
+                        <span class="text-sm text-foreground">Low - Manageable at home</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="w-3 h-3 bg-amber-500 rounded-full"></span>
+                        <span class="text-sm text-foreground">Moderate - May need medication</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="w-3 h-3 bg-red-500 rounded-full"></span>
+                        <span class="text-sm text-foreground">High - Contact your doctor</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Side Effects by Treatment Plan -->
+            <div class="space-y-6">
+                {% for item in side_effects_data %}
+                <div class="bg-card border border-border/50 rounded-xl overflow-hidden">
+                    <div class="bg-accent/30 px-6 py-4 border-b border-border/50">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-lg font-semibold text-foreground">{{ item.plan.cancer_type }} Treatment</h2>
+                                <p class="text-sm text-muted-foreground">Stage {{ item.plan.cancer_stage }} | {{ item.plan.get_status_display }}</p>
+                            </div>
+                            <a href="{% url 'patient_portal:side_effects_detail' item.plan.id %}"
+                               class="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm hover:bg-primary/90 transition-colors">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6">
+                        {% if item.side_effects %}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {% for effect in item.side_effects|slice:":6" %}
+                            <div class="flex items-start space-x-3 p-3 bg-accent/30 rounded-lg">
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
+                                    {% if effect.severity == 'high' or effect.severity == 'severe' %}bg-red-100 dark:bg-red-900/30
+                                    {% elif effect.severity == 'moderate' or effect.severity == 'medium' %}bg-amber-100 dark:bg-amber-900/30
+                                    {% else %}bg-green-100 dark:bg-green-900/30{% endif %}">
+                                    <i class="fas fa-exclamation-circle
+                                        {% if effect.severity == 'high' or effect.severity == 'severe' %}text-red-600
+                                        {% elif effect.severity == 'moderate' or effect.severity == 'medium' %}text-amber-600
+                                        {% else %}text-green-600{% endif %} text-sm"></i>
+                                </div>
+                                <div>
+                                    {% if effect.effect %}
+                                    <p class="font-medium text-foreground">{{ effect.effect }}</p>
+                                    {% if effect.management %}
+                                    <p class="text-xs text-muted-foreground mt-1">{{ effect.management|truncatechars:60 }}</p>
+                                    {% endif %}
+                                    {% else %}
+                                    <p class="font-medium text-foreground">{{ effect }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% if item.side_effects|length > 6 %}
+                        <p class="text-sm text-muted-foreground mt-4 text-center">
+                            + {{ item.side_effects|length|add:"-6" }} more side effects.
+                            <a href="{% url 'patient_portal:side_effects_detail' item.plan.id %}" class="text-primary hover:underline">View all</a>
+                        </p>
+                        {% endif %}
+                        {% else %}
+                        <div class="text-center py-8">
+                            <i class="fas fa-info-circle text-2xl text-muted-foreground mb-2"></i>
+                            <p class="text-muted-foreground">Click "View Details" to generate AI-powered side effect information</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="bg-card border border-border/50 rounded-xl p-12 text-center">
+                    <i class="fas fa-shield-alt text-4xl text-green-500 mb-4"></i>
+                    <h3 class="text-lg font-medium text-foreground mb-2">No Treatment Plans Yet</h3>
+                    <p class="text-muted-foreground mb-4">Side effect information will appear here once you have an active treatment plan</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- General Tips Section -->
+            <div class="mt-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+                <h2 class="text-lg font-semibold text-blue-800 dark:text-blue-400 mb-4">
+                    <i class="fas fa-info-circle mr-2"></i>General Tips for Managing Side Effects
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 bg-blue-100 dark:bg-blue-800/50 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-clock text-blue-600 text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-blue-800 dark:text-blue-400">Track Your Symptoms</p>
+                            <p class="text-sm text-blue-700 dark:text-blue-300">Log symptoms daily to help your doctor adjust treatment</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 bg-blue-100 dark:bg-blue-800/50 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-tint text-blue-600 text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-blue-800 dark:text-blue-400">Stay Hydrated</p>
+                            <p class="text-sm text-blue-700 dark:text-blue-300">Drink plenty of fluids unless directed otherwise</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 bg-blue-100 dark:bg-blue-800/50 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-bed text-blue-600 text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-blue-800 dark:text-blue-400">Rest When Needed</p>
+                            <p class="text-sm text-blue-700 dark:text-blue-300">Listen to your body and don't push too hard</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 bg-blue-100 dark:bg-blue-800/50 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-phone text-blue-600 text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-blue-800 dark:text-blue-400">Don't Wait to Call</p>
+                            <p class="text-sm text-blue-700 dark:text-blue-300">Contact your team if something doesn't feel right</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- end panel-sideeffects -->
+
+    </div>
+</div>
+
+<style>
+    input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: hsl(var(--primary));
+        cursor: pointer;
+    }
+    input[type="range"]::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: hsl(var(--primary));
+        cursor: pointer;
+        border: none;
+    }
+</style>
+
+<script>
+    function switchHubTab(tab) {
+        // Reset all tabs
+        document.querySelectorAll('.hub-tab').forEach(t => {
+            t.className = 'hub-tab px-5 py-3 text-sm font-semibold rounded-t-lg transition-all border-b-2 border-transparent text-muted-foreground hover:text-foreground hover:border-border';
+        });
+        // Activate selected tab
+        const activeTab = document.getElementById('tab-' + tab);
+        activeTab.className = 'hub-tab px-5 py-3 text-sm font-semibold rounded-t-lg transition-all border-b-2 border-primary text-primary bg-primary/5';
+
+        // Hide all panels, show selected
+        document.querySelectorAll('.hub-panel').forEach(p => p.classList.add('hidden'));
+        document.getElementById('panel-' + tab).classList.remove('hidden');
+
+        // Update URL hash for bookmarking
+        history.replaceState(null, '', '#' + tab);
+
+        // Scroll to top of content
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // On page load, check hash to open correct tab
+    document.addEventListener('DOMContentLoaded', function() {
+        const hash = window.location.hash.replace('#', '');
+        if (['overview', 'symptoms', 'sideeffects'].includes(hash)) {
+            switchHubTab(hash);
+        }
+    });
+</script>
+{% endblock %}

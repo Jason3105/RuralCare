@@ -34,9 +34,9 @@
                     Records
                 </a>
 
-                <a href="{% url 'cancer_detection:treatment_plans_list' %}"
+                <a href="{% url 'patient_portal:treatment_center' %}"
                     class="text-sm font-medium text-muted-foreground hover:text-foreground transition-all px-3 py-2 rounded-lg hover:bg-accent/50">
-                    Plans
+                    Treatment
                 </a>
 
                 <a href="{% url 'nearby_clinics' %}"
@@ -145,31 +145,16 @@
                             <span>Edit My Profile</span>
                         </a>
                         <div class="border-t border-border/30 my-1"></div>
-                        <a href="{% url 'patient_portal:overview' %}"
+                        <a href="{% url 'patient_portal:health_hub' %}"
                             class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
                             <i class="fas fa-th-large text-primary text-xs"></i>
-                            <span>Health Portal</span>
-                        </a>
-                        <a href="{% url 'patient_portal:symptom_log_create' %}"
-                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
-                            <i class="fas fa-plus-circle text-primary text-xs"></i>
-                            <span>Log Symptoms</span>
+                            <span>Health Hub</span>
                         </a>
                         <div class="border-t border-border/30 my-1"></div>
-                        <a href="{% url 'patient_portal:confidence_view' %}"
+                        <a href="{% url 'patient_portal:treatment_center' %}"
                             class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
-                            <i class="fas fa-chart-pie text-primary text-xs"></i>
-                            <span>Treatment Confidence</span>
-                        </a>
-                        <a href="{% url 'patient_portal:treatment_explanation_list' %}"
-                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
-                            <i class="fas fa-book-open text-primary text-xs"></i>
-                            <span>Treatment Explained</span>
-                        </a>
-                        <a href="{% url 'patient_portal:side_effects_list' %}"
-                            class="block px-4 py-2.5 text-sm text-foreground hover:bg-accent/80 transition-all flex items-center space-x-2">
-                            <i class="fas fa-pills text-primary text-xs"></i>
-                            <span>Side Effects</span>
+                            <i class="fas fa-clipboard-list text-primary text-xs"></i>
+                            <span>Treatment</span>
                         </a>
                         <div class="border-t border-border/30 my-1"></div>
                         <div class="px-4 py-2 text-xs text-muted-foreground font-semibold uppercase tracking-wide">AI
@@ -429,9 +414,13 @@
                     class="block px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent/80 rounded-lg transition-all">
                     <i class="fas fa-file-medical mr-2"></i>Medical Records
                 </a>
-                <a href="{% url 'cancer_detection:treatment_plans_list' %}"
+                <a href="{% url 'patient_portal:treatment_center' %}"
                     class="block px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent/80 rounded-lg transition-all">
-                    <i class="fas fa-clipboard-list mr-2"></i>Treatment Plans
+                    <i class="fas fa-clipboard-list mr-2"></i>Treatment
+                </a>
+                <a href="{% url 'patient_portal:health_hub' %}"
+                    class="block px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent/80 rounded-lg transition-all">
+                    <i class="fas fa-heartbeat mr-2 text-primary"></i>Health Hub
                 </a>
                 <a href="/evidence/search/"
                     class="block px-4 py-2.5 text-sm font-medium text-foreground hover:bg-accent/80 rounded-lg transition-all">

@@ -1,0 +1,487 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Treatment Center{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-foreground">Treatment Center</h1>
+                    <p class="text-muted-foreground mt-1">Your treatment plans, confidence scores, and explanations &mdash; all in one place</p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <a href="{% url 'cancer_detection:create_comprehensive_plan' %}"
+                       class="inline-flex items-center justify-center px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all hover:scale-105 text-sm">
+                        <i class="fas fa-project-diagram mr-2"></i>Comprehensive Plan
+                    </a>
+                    <a href="{% url 'cancer_detection:analysis_list' %}"
+                       class="inline-flex items-center justify-center px-5 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-all hover:scale-105 text-sm">
+                        <i class="fas fa-plus mr-2"></i>Generate Plan
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="mb-8 border-b border-border/50">
+            <nav class="flex space-x-1 -mb-px" id="treatmentTabs">
+                <button onclick="switchTreatmentTab('plans')" id="ttab-plans"
+                    class="tt-tab px-5 py-3 text-sm font-semibold rounded-t-lg transition-all border-b-2 border-primary text-primary bg-primary/5">
+                    <i class="fas fa-clipboard-list mr-2"></i>Plans
+                </button>
+                <button onclick="switchTreatmentTab('confidence')" id="ttab-confidence"
+                    class="tt-tab px-5 py-3 text-sm font-semibold rounded-t-lg transition-all border-b-2 border-transparent text-muted-foreground hover:text-foreground hover:border-border">
+                    <i class="fas fa-chart-pie mr-2"></i>Confidence
+                </button>
+                <button onclick="switchTreatmentTab('explained')" id="ttab-explained"
+                    class="tt-tab px-5 py-3 text-sm font-semibold rounded-t-lg transition-all border-b-2 border-transparent text-muted-foreground hover:text-foreground hover:border-border">
+                    <i class="fas fa-book-open mr-2"></i>Explained
+                </button>
+            </nav>
+        </div>
+
+
+        <!-- ============================================================ -->
+        <!-- TAB 1: TREATMENT PLANS                                       -->
+        <!-- ============================================================ -->
+        <div id="tpanel-plans" class="tt-panel">
+
+            <!-- Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-lg transition-shadow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-muted-foreground mb-1">Total Plans</p>
+                            <p class="text-3xl font-bold text-foreground">{{ total_plans|default:0 }}</p>
+                        </div>
+                        <div class="bg-primary/10 p-3 rounded-lg">
+                            <i class="fas fa-clipboard-list text-primary text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-lg transition-shadow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-muted-foreground mb-1">Active Plans</p>
+                            <p class="text-3xl font-bold text-green-600">{{ active_plans|default:0 }}</p>
+                        </div>
+                        <div class="bg-green-600/10 p-3 rounded-lg">
+                            <i class="fas fa-heartbeat text-green-600 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-lg transition-shadow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-muted-foreground mb-1">Pending Review</p>
+                            <p class="text-3xl font-bold text-blue-600">{{ pending_review|default:0 }}</p>
+                        </div>
+                        <div class="bg-blue-600/10 p-3 rounded-lg">
+                            <i class="fas fa-hourglass-half text-blue-600 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Treatment Plans List -->
+            {% if page_obj %}
+            <div class="space-y-4">
+                {% for plan in page_obj %}
+                <div class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-lg transition-all">
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div class="flex-1">
+                            <div class="flex items-center flex-wrap gap-3 mb-3">
+                                <h3 class="text-xl font-semibold text-foreground">{{ plan.plan_name }}</h3>
+                                {% if plan.status == 'draft' %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400">
+                                    <i class="fas fa-file-alt mr-1"></i>Draft
+                                </span>
+                                {% elif plan.status == 'pending_review' %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
+                                    <i class="fas fa-clock mr-1"></i>Pending Review
+                                </span>
+                                {% elif plan.status == 'approved' %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
+                                    <i class="fas fa-check-circle mr-1"></i>Approved
+                                </span>
+                                {% elif plan.status == 'active' %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
+                                    <i class="fas fa-play-circle mr-1"></i>Active
+                                </span>
+                                {% elif plan.status == 'completed' %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-400">
+                                    <i class="fas fa-check-double mr-1"></i>Completed
+                                </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                                <div class="p-3 bg-accent/30 rounded-lg">
+                                    <p class="text-xs text-muted-foreground uppercase tracking-wide mb-1">Cancer Type</p>
+                                    <p class="text-sm font-semibold text-foreground">{{ plan.cancer_type|title }}</p>
+                                </div>
+                                <div class="p-3 bg-accent/30 rounded-lg">
+                                    <p class="text-xs text-muted-foreground uppercase tracking-wide mb-1">Stage</p>
+                                    <p class="text-sm font-semibold text-foreground">Stage {{ plan.cancer_stage }}</p>
+                                </div>
+                                {% if plan.predicted_5yr_survival %}
+                                <div class="p-3 bg-accent/30 rounded-lg">
+                                    <p class="text-xs text-muted-foreground uppercase tracking-wide mb-1">5-Yr Survival</p>
+                                    <p class="text-sm font-semibold text-green-600">{{ plan.predicted_5yr_survival|floatformat:1 }}%</p>
+                                </div>
+                                {% endif %}
+                                {% if plan.remission_probability %}
+                                <div class="p-3 bg-accent/30 rounded-lg">
+                                    <p class="text-xs text-muted-foreground uppercase tracking-wide mb-1">Remission Rate</p>
+                                    <p class="text-sm font-semibold text-blue-600">{{ plan.remission_probability|floatformat:1 }}%</p>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="flex items-center text-sm text-muted-foreground">
+                                <i class="fas fa-calendar-alt mr-2"></i>
+                                Created {{ plan.created_at|date:"M d, Y" }}
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-2 lg:min-w-[200px]">
+                            <a href="{% url 'cancer_detection:treatment_plan_detail' plan.id %}"
+                               class="inline-flex items-center justify-center px-6 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-all hover:scale-105">
+                                <i class="fas fa-eye mr-2"></i>View Details
+                            </a>
+                            {% if plan.status == 'draft' %}
+                            <a href="{% url 'cancer_detection:treatment_plan_detail' plan.id %}"
+                               class="inline-flex items-center justify-center px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all hover:scale-105">
+                                <i class="fas fa-edit mr-2"></i>Edit Plan
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <div class="mt-8 flex flex-wrap items-center justify-center gap-2">
+                {% if page_obj.has_previous %}
+                <a href="?page=1" class="px-4 py-2 rounded-lg bg-card border border-border/50 hover:bg-accent transition-all text-foreground font-medium">
+                    <i class="fas fa-angle-double-left mr-1"></i>First
+                </a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-2 rounded-lg bg-card border border-border/50 hover:bg-accent transition-all text-foreground font-medium">
+                    <i class="fas fa-angle-left mr-1"></i>Previous
+                </a>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <span class="px-4 py-2 rounded-lg bg-primary text-primary-foreground font-semibold">{{ num }}</span>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a href="?page={{ num }}" class="px-4 py-2 rounded-lg bg-card border border-border/50 hover:bg-accent transition-all text-foreground font-medium">{{ num }}</a>
+                {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-2 rounded-lg bg-card border border-border/50 hover:bg-accent transition-all text-foreground font-medium">
+                    Next<i class="fas fa-angle-right ml-1"></i>
+                </a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="px-4 py-2 rounded-lg bg-card border border-border/50 hover:bg-accent transition-all text-foreground font-medium">
+                    Last<i class="fas fa-angle-double-right ml-1"></i>
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% else %}
+            <!-- Empty State -->
+            <div class="bg-card border border-border/50 rounded-xl p-12 text-center">
+                <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-clipboard-list text-primary text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-foreground mb-2">No Treatment Plans Yet</h3>
+                <p class="text-muted-foreground mb-8 max-w-md mx-auto">Start by analyzing a cancer image to generate your first personalized treatment plan.</p>
+                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                    <a href="{% url 'cancer_detection:analysis_list' %}"
+                       class="inline-flex items-center justify-center px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-all hover:scale-105">
+                        <i class="fas fa-microscope mr-2"></i>View Analyses
+                    </a>
+                    <a href="{% url 'cancer_detection:upload_image' %}"
+                       class="inline-flex items-center justify-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all hover:scale-105">
+                        <i class="fas fa-upload mr-2"></i>Upload New Scan
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+        </div><!-- end tpanel-plans -->
+
+
+        <!-- ============================================================ -->
+        <!-- TAB 2: TREATMENT CONFIDENCE                                  -->
+        <!-- ============================================================ -->
+        <div id="tpanel-confidence" class="tt-panel hidden">
+
+            {% if confidence_records %}
+            {% for item in confidence_records %}
+            <div class="bg-card border border-border/50 rounded-xl p-6 mb-6">
+                <!-- Plan Info -->
+                <div class="mb-6">
+                    <h2 class="text-xl font-semibold text-foreground">{{ item.analysis_type }}</h2>
+                    <p class="text-muted-foreground">{{ item.created_at|date:"M d, Y" }}</p>
+                </div>
+
+                <!-- Confidence Score - Visual -->
+                <div class="mb-8">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-lg font-medium text-foreground">Confidence Level</span>
+                        <span class="text-2xl font-bold
+                            {% if item.confidence_level == 'high' %}text-green-600
+                            {% elif item.confidence_level == 'medium' %}text-amber-600
+                            {% else %}text-blue-600{% endif %}">
+                            {{ item.confidence_label }}
+                        </span>
+                    </div>
+                    <div class="h-4 bg-accent/30 rounded-full overflow-hidden">
+                        <div class="h-full rounded-full transition-all duration-1000
+                            {% if item.confidence_level == 'high' %}bg-green-500{% elif item.confidence_level == 'medium' %}bg-amber-500{% else %}bg-blue-500{% endif %}"
+                             style="width: {% if item.confidence_level == 'high' %}90{% elif item.confidence_level == 'medium' %}65{% else %}40{% endif %}%"></div>
+                    </div>
+                </div>
+
+                <!-- What This Means -->
+                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-5 mb-6">
+                    <h3 class="font-semibold text-blue-800 dark:text-blue-400 mb-3">
+                        <i class="fas fa-info-circle mr-2"></i>What This Means For You
+                    </h3>
+                    <p class="text-blue-700 dark:text-blue-300">
+                        {% if item.patient_explanation %}
+                        {{ item.patient_explanation }}
+                        {% elif item.confidence_level == 'high' %}
+                        Your treatment plan is based on strong evidence and your doctor team is very confident it's the right approach for you. The recommendations align well with established medical guidelines and your specific health profile.
+                        {% elif item.confidence_level == 'medium' %}
+                        Your treatment plan is well-supported, though your doctors may want to monitor your response closely. Some aspects of your case are less common, which is normal - your team has accounted for this in your plan.
+                        {% else %}
+                        Your case may have unique aspects that require personalized attention. Your doctors are working with the best available information and will adjust the plan as they learn more about how you respond to treatment.
+                        {% endif %}
+                    </p>
+                </div>
+
+                <!-- Confidence Level Indicator -->
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div class="text-center p-4 rounded-lg
+                        {% if item.confidence_level == 'high' %}bg-green-100 dark:bg-green-900/30 border-2 border-green-500
+                        {% else %}bg-accent/30 border border-border{% endif %}">
+                        <i class="fas fa-thumbs-up text-2xl {% if item.confidence_level == 'high' %}text-green-600{% else %}text-muted-foreground{% endif %} mb-2"></i>
+                        <p class="font-semibold {% if item.confidence_level == 'high' %}text-green-700 dark:text-green-400{% else %}text-muted-foreground{% endif %}">High</p>
+                        <p class="text-xs {% if item.confidence_level == 'high' %}text-green-600{% else %}text-muted-foreground{% endif %}">Strong Evidence</p>
+                    </div>
+                    <div class="text-center p-4 rounded-lg
+                        {% if item.confidence_level == 'medium' %}bg-amber-100 dark:bg-amber-900/30 border-2 border-amber-500
+                        {% else %}bg-accent/30 border border-border{% endif %}">
+                        <i class="fas fa-balance-scale text-2xl {% if item.confidence_level == 'medium' %}text-amber-600{% else %}text-muted-foreground{% endif %} mb-2"></i>
+                        <p class="font-semibold {% if item.confidence_level == 'medium' %}text-amber-700 dark:text-amber-400{% else %}text-muted-foreground{% endif %}">Moderate</p>
+                        <p class="text-xs {% if item.confidence_level == 'medium' %}text-amber-600{% else %}text-muted-foreground{% endif %}">Good Support</p>
+                    </div>
+                    <div class="text-center p-4 rounded-lg
+                        {% if item.confidence_level == 'low' %}bg-blue-100 dark:bg-blue-900/30 border-2 border-blue-500
+                        {% else %}bg-accent/30 border border-border{% endif %}">
+                        <i class="fas fa-search text-2xl {% if item.confidence_level == 'low' %}text-blue-600{% else %}text-muted-foreground{% endif %} mb-2"></i>
+                        <p class="font-semibold {% if item.confidence_level == 'low' %}text-blue-700 dark:text-blue-400{% else %}text-muted-foreground{% endif %}">Developing</p>
+                        <p class="text-xs {% if item.confidence_level == 'low' %}text-blue-600{% else %}text-muted-foreground{% endif %}">Personalized</p>
+                    </div>
+                </div>
+
+                <!-- Simple Breakdown -->
+                <div class="border border-border rounded-xl p-5">
+                    <h3 class="font-semibold text-foreground mb-4">What Supports Your Plan</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-microscope text-green-600 text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-foreground">Imaging & Lab Results</p>
+                                <p class="text-sm text-muted-foreground">Your scans and test results help doctors understand your specific situation</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-book-medical text-blue-600 text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-foreground">Medical Guidelines</p>
+                                <p class="text-sm text-muted-foreground">Your treatment follows proven approaches used successfully for similar cases</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-user-md text-purple-600 text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-foreground">Expert Review</p>
+                                <p class="text-sm text-muted-foreground">Specialists have reviewed and customized this plan for you</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Questions to Ask -->
+                <div class="mt-6 bg-accent/30 rounded-xl p-5">
+                    <h3 class="font-semibold text-foreground mb-3">
+                        <i class="fas fa-question-circle text-primary mr-2"></i>Questions You Can Ask Your Doctor
+                    </h3>
+                    <ul class="space-y-2 text-sm text-muted-foreground">
+                        <li class="flex items-start space-x-2">
+                            <i class="fas fa-chevron-right text-primary mt-1 text-xs"></i>
+                            <span>"What makes you confident this treatment is right for me?"</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fas fa-chevron-right text-primary mt-1 text-xs"></i>
+                            <span>"How will we know if the treatment is working?"</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fas fa-chevron-right text-primary mt-1 text-xs"></i>
+                            <span>"What alternatives exist if we need to change the plan?"</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="bg-card border border-border/50 rounded-xl p-12 text-center">
+                <i class="fas fa-chart-pie text-4xl text-muted-foreground mb-4"></i>
+                <h3 class="text-lg font-medium text-foreground mb-2">No Treatment Plans Available</h3>
+                <p class="text-muted-foreground">Confidence information will appear once your doctor creates a treatment plan for you</p>
+            </div>
+            {% endif %}
+
+        </div><!-- end tpanel-confidence -->
+
+
+        <!-- ============================================================ -->
+        <!-- TAB 3: TREATMENT EXPLAINED                                   -->
+        <!-- ============================================================ -->
+        <div id="tpanel-explained" class="tt-panel hidden">
+
+            <div class="space-y-6">
+                {% for item in explanations %}
+                <div class="bg-card border border-border/50 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+                    <div class="p-6">
+                        <div class="flex items-start justify-between mb-4">
+                            <div>
+                                <h2 class="text-xl font-semibold text-foreground">{{ item.plan.cancer_type }} Treatment</h2>
+                                <p class="text-muted-foreground text-sm">
+                                    Stage {{ item.plan.cancer_stage }} |
+                                    Created {{ item.plan.created_at|date:"M d, Y" }}
+                                </p>
+                            </div>
+                            <span class="px-3 py-1 {% if item.plan.status == 'active' %}bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400{% else %}bg-primary/10 text-primary{% endif %} rounded-full text-sm font-medium">
+                                {{ item.plan.get_status_display }}
+                            </span>
+                        </div>
+
+                        <!-- Treatment Overview -->
+                        <div class="bg-accent/30 rounded-lg p-4 mb-4">
+                            {% if item.has_stored and item.explanation.plain_language_explanation %}
+                            <p class="text-foreground">{{ item.explanation.plain_language_explanation|truncatechars:200 }}</p>
+                            {% else %}
+                            <p class="text-foreground">
+                                <strong>Primary Treatments:</strong>
+                                {% for treatment in item.explanation.treatments %}
+                                    {{ treatment }}{% if not forloop.last %}, {% endif %}
+                                {% empty %}
+                                    Information available in details
+                                {% endfor %}
+                            </p>
+                            {% if item.explanation.targeted %}
+                            <p class="text-foreground mt-2">
+                                <strong>Targeted Therapies:</strong>
+                                {% for t in item.explanation.targeted %}
+                                    {{ t }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            </p>
+                            {% endif %}
+                            {% endif %}
+                        </div>
+
+                        <!-- Plan Metrics -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                            {% if item.plan.predicted_5yr_survival %}
+                            <div class="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                                <p class="text-lg font-bold text-green-600">{{ item.plan.predicted_5yr_survival|floatformat:0 }}%</p>
+                                <p class="text-xs text-muted-foreground">5-Year Survival</p>
+                            </div>
+                            {% endif %}
+                            {% if item.plan.remission_probability %}
+                            <div class="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                                <p class="text-lg font-bold text-blue-600">{{ item.plan.remission_probability|floatformat:0 }}%</p>
+                                <p class="text-xs text-muted-foreground">Remission Rate</p>
+                            </div>
+                            {% endif %}
+                            {% if item.plan.quality_of_life_score %}
+                            <div class="text-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                                <p class="text-lg font-bold text-purple-600">{{ item.plan.quality_of_life_score }}/100</p>
+                                <p class="text-xs text-muted-foreground">Quality of Life</p>
+                            </div>
+                            {% endif %}
+                            <div class="text-center p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                                <i class="fas fa-calendar-check text-amber-600 text-lg"></i>
+                                <p class="text-xs text-muted-foreground mt-1">{{ item.plan.status|title }}</p>
+                            </div>
+                        </div>
+
+                        <a href="{% url 'patient_portal:treatment_explanation_detail' item.plan.id %}"
+                           class="inline-flex items-center text-primary hover:underline font-medium">
+                            Read Full Explanation <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="bg-card border border-border/50 rounded-xl p-12 text-center">
+                    <i class="fas fa-book-reader text-4xl text-muted-foreground mb-4"></i>
+                    <h3 class="text-lg font-medium text-foreground mb-2">No Treatment Plans Yet</h3>
+                    <p class="text-muted-foreground">Treatment plans will appear here once your doctor creates them for you.</p>
+                    <p class="text-muted-foreground text-sm mt-2">Your healthcare team will explain everything in simple terms.</p>
+                </div>
+                {% endfor %}
+            </div>
+
+        </div><!-- end tpanel-explained -->
+
+    </div>
+</div>
+
+<script>
+    function switchTreatmentTab(tab) {
+        // Reset all tabs
+        document.querySelectorAll('.tt-tab').forEach(t => {
+            t.className = 'tt-tab px-5 py-3 text-sm font-semibold rounded-t-lg transition-all border-b-2 border-transparent text-muted-foreground hover:text-foreground hover:border-border';
+        });
+        // Activate selected tab
+        const activeTab = document.getElementById('ttab-' + tab);
+        activeTab.className = 'tt-tab px-5 py-3 text-sm font-semibold rounded-t-lg transition-all border-b-2 border-primary text-primary bg-primary/5';
+
+        // Hide all panels, show selected
+        document.querySelectorAll('.tt-panel').forEach(p => p.classList.add('hidden'));
+        document.getElementById('tpanel-' + tab).classList.remove('hidden');
+
+        // Update URL hash
+        history.replaceState(null, '', '#' + tab);
+
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // On page load, check hash to open correct tab
+    document.addEventListener('DOMContentLoaded', function() {
+        const hash = window.location.hash.replace('#', '');
+        if (['plans', 'confidence', 'explained'].includes(hash)) {
+            switchTreatmentTab(hash);
+        }
+    });
+</script>
+{% endblock %}

@@ -573,6 +573,10 @@ def symptom_log_create(request):
             request.session['newly_earned_badges'] = newly_earned_badges
             request.session['level_up'] = level_info if level_info.get('leveled_up') else None
         
+        # Redirect back to health hub if submitted from there
+        redirect_to = request.POST.get('redirect_to', '')
+        if redirect_to == 'health_hub_symptoms':
+            return redirect('patient_portal:health_hub')
         return redirect('patient_portal:symptom_log_list')
     
     context = {
@@ -847,6 +851,230 @@ def notification_preferences(request):
         'telegram_linked': patient_profile.telegram_chat_id if patient_profile else False,
     }
     return render(request, 'patient_portal/notification_preferences.html', context)
+
+
+# ============================================================================
+# Health Hub - Combined Overview + Symptom Log + Side Effects
+# ============================================================================
+
+@login_required
+@patient_required
+def health_hub(request):
+    """Combined health hub: overview + symptom logging + side effects"""
+    # --- Overview data ---
+    active_plans_count = PersonalizedTreatmentPlan.objects.filter(
+        patient=request.user, status='active'
+    ).count()
+
+    symptom_logs_count = PatientSymptomLog.objects.filter(
+        patient=request.user
+    ).count()
+
+    unread_alerts_count = PatientAlert.objects.filter(
+        patient=request.user
+    ).exclude(status='read').count()
+
+    from datetime import timedelta as td
+    upcoming_cutoff = timezone.now() + td(days=7)
+    upcoming_reminders = PatientAlert.objects.filter(
+        patient=request.user,
+        scheduled_for__gte=timezone.now(),
+        scheduled_for__lte=upcoming_cutoff,
+        status='pending'
+    ).order_by('scheduled_for')[:5]
+    upcoming_reminders_count = upcoming_reminders.count()
+
+    recent_logs = PatientSymptomLog.objects.filter(
+        patient=request.user
+    ).order_by('-log_date')[:7]
+
+    recent_alerts = PatientAlert.objects.filter(
+        patient=request.user
+    ).exclude(status='read').order_by('-created_at')[:5]
+
+    plans_for_explanations = PersonalizedTreatmentPlan.objects.filter(
+        patient=request.user, status='active'
+    ).order_by('-created_at')[:4]
+
+    treatment_explanations = []
+    for plan in plans_for_explanations:
+        stored_exp = PatientTreatmentExplanation.objects.filter(
+            treatment_plan=plan
+        ).first()
+        if stored_exp:
+            treatment_explanations.append(stored_exp)
+        else:
+            class SimpleExplanation:
+                def __init__(self, p):
+                    self.id = p.id
+                    self.treatment_plan = p
+                    treatments = p.primary_treatments or []
+                    treatment_names = [t.get('name', str(t)) if isinstance(t, dict) else str(t) for t in treatments[:2]]
+                    self.simple_summary = f"Your personalized treatment plan includes {', '.join(treatment_names) if treatment_names else 'comprehensive care'}. Click to learn more about your treatment in simple terms."
+            treatment_explanations.append(SimpleExplanation(plan))
+
+    today = date.today()
+    logged_today = PatientSymptomLog.objects.filter(
+        patient=request.user, log_date=today
+    ).exists()
+
+    # --- Side effects data ---
+    all_plans = PersonalizedTreatmentPlan.objects.filter(
+        patient=request.user
+    ).order_by('-created_at')
+
+    existing_info = PatientSideEffectInfo.objects.filter(
+        patient=request.user
+    ).select_related('treatment_plan')
+    info_map = {info.treatment_plan_id: info for info in existing_info}
+
+    side_effects_data = []
+    for plan in all_plans:
+        plan_side_effects = plan.side_effects or []
+        entry = {
+            'plan': plan,
+            'side_effects': plan_side_effects,
+            'has_stored': plan.id in info_map,
+        }
+        if plan.id in info_map:
+            entry['info'] = info_map[plan.id]
+        side_effects_data.append(entry)
+
+    # --- Symptom form data ---
+    severity_choices = PatientSymptomLog.SEVERITY_CHOICES
+
+    context = {
+        # overview
+        'active_plans_count': active_plans_count,
+        'symptom_logs_count': symptom_logs_count,
+        'unread_alerts_count': unread_alerts_count,
+        'upcoming_reminders_count': upcoming_reminders_count,
+        'recent_logs': recent_logs,
+        'recent_alerts': recent_alerts,
+        'upcoming_reminders': upcoming_reminders,
+        'treatment_explanations': treatment_explanations,
+        'logged_today': logged_today,
+        # side effects
+        'side_effects_data': side_effects_data,
+        # symptom form
+        'today': today,
+        'severity_choices': severity_choices,
+    }
+    return render(request, 'patient_portal/health_hub.html', context)
+
+
+# ============================================================================
+# Treatment Center (combined: Plans + Confidence + Explained)
+# ============================================================================
+
+@login_required
+@patient_required
+def treatment_center(request):
+    """Combined treatment page: plans list + confidence + explanations"""
+
+    # --- Plans data (from cancer_detection treatment_plans_list) ---
+    plans_qs = PersonalizedTreatmentPlan.objects.filter(
+        patient=request.user
+    ).order_by('-created_at')
+
+    paginator = Paginator(plans_qs, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    total_plans = plans_qs.count()
+    active_plans = plans_qs.filter(status='active').count()
+    pending_review = plans_qs.filter(status='pending_review').count()
+
+    # --- Confidence data (from patient_confidence_view) ---
+    confidence_db = AIConfidenceMetadata.objects.filter(
+        patient=request.user
+    ).order_by('-created_at')
+
+    confidence_records = []
+    if confidence_db.exists():
+        for record in confidence_db:
+            confidence_records.append({
+                'id': record.id,
+                'analysis_type': record.get_analysis_type_display(),
+                'confidence_level': record.confidence_level,
+                'confidence_label': dict(AIConfidenceMetadata.CONFIDENCE_LEVEL_CHOICES).get(
+                    record.confidence_level, 'Unknown'
+                ),
+                'patient_explanation': record.patient_explanation,
+                'created_at': record.created_at,
+            })
+    else:
+        for plan in plans_qs:
+            survival = plan.predicted_5yr_survival or 0
+            remission = plan.remission_probability or 0
+            if survival >= 70 or remission >= 70:
+                conf_level, conf_label = 'high', 'High Confidence'
+            elif survival >= 50 or remission >= 50:
+                conf_level, conf_label = 'medium', 'Moderate Confidence'
+            else:
+                conf_level, conf_label = 'low', 'Needs Discussion'
+
+            confidence_records.append({
+                'id': plan.id,
+                'analysis_type': f'{plan.cancer_type} Treatment Plan',
+                'confidence_level': conf_level,
+                'confidence_label': conf_label,
+                'patient_explanation': (
+                    f'Your treatment plan for {plan.cancer_type} Stage {plan.cancer_stage} has been analyzed. '
+                    f'Based on your profile, the predicted outcomes are: 5-year survival estimate of {survival:.0f}% '
+                    f'and remission probability of {remission:.0f}%. Your medical team is here to support you every step of the way.'
+                ),
+                'created_at': plan.created_at,
+                'plan': plan,
+            })
+
+    # --- Explanations data (from treatment_explanation_list) ---
+    existing_explanations = PatientTreatmentExplanation.objects.filter(
+        patient=request.user
+    ).select_related('treatment_plan')
+    explanation_map = {exp.treatment_plan_id: exp for exp in existing_explanations}
+
+    explanations = []
+    for plan in plans_qs:
+        if plan.id in explanation_map:
+            explanations.append({
+                'plan': plan,
+                'explanation': explanation_map[plan.id],
+                'has_stored': True,
+            })
+        else:
+            treatments = plan.primary_treatments or []
+            targeted = plan.targeted_therapies or []
+            treatment_names = [
+                t.get('name', str(t)) if isinstance(t, dict) else str(t)
+                for t in treatments
+            ]
+            explanations.append({
+                'plan': plan,
+                'explanation': {
+                    'overview': f"Your treatment plan for {plan.cancer_type} Stage {plan.cancer_stage}",
+                    'treatments': treatment_names,
+                    'targeted': [
+                        t.get('drug', str(t)) if isinstance(t, dict) else str(t)
+                        for t in targeted
+                    ],
+                },
+                'has_stored': False,
+            })
+
+    context = {
+        # plans tab
+        'page_obj': page_obj,
+        'total_plans': total_plans,
+        'active_plans': active_plans,
+        'pending_review': pending_review,
+        # confidence tab
+        'confidence_records': confidence_records,
+        # explanations tab
+        'explanations': explanations,
+        'plans': plans_qs,
+    }
+    return render(request, 'patient_portal/treatment_center.html', context)
 
 
 # ============================================================================
