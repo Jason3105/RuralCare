@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+{% block title %}Doctor Contributions - Tumor Board{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background py-8 fade-in">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <nav class="mb-4">
+                <a href="{% url 'clinical_decision_support:tumor_board_list' %}" class="text-primary hover:underline text-sm">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Sessions
+                </a>
+            </nav>
+            <h1 class="text-3xl font-bold text-foreground">Doctor Contributions Dashboard</h1>
+            <p class="text-muted-foreground mt-1">Track participation and decisions across all Tumor Board sessions</p>
+        </div>
+
+        <!-- Global Statistics Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
+            <div class="bg-card border border-border/50 rounded-xl p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-2xl font-bold text-foreground">{{ total_sessions }}</p>
+                        <p class="text-xs text-muted-foreground">Total Sessions</p>
+                    </div>
+                    <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                        <i class="fas fa-users-medical text-primary"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-card border border-border/50 rounded-xl p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-2xl font-bold text-foreground">{{ total_doctors }}</p>
+                        <p class="text-xs text-muted-foreground">Active Doctors</p>
+                    </div>
+                    <div class="w-10 h-10 bg-blue-500/10 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user-md text-blue-500"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-card border border-border/50 rounded-xl p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-2xl font-bold text-green-600">{{ total_approved }}</p>
+                        <p class="text-xs text-muted-foreground">Approvals</p>
+                    </div>
+                    <div class="w-10 h-10 bg-green-500/10 rounded-full flex items-center justify-center">
+                        <i class="fas fa-check text-green-500"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-card border border-border/50 rounded-xl p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-2xl font-bold text-red-600">{{ total_rejected }}</p>
+                        <p class="text-xs text-muted-foreground">Rejections</p>
+                    </div>
+                    <div class="w-10 h-10 bg-red-500/10 rounded-full flex items-center justify-center">
+                        <i class="fas fa-times text-red-500"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-card border border-border/50 rounded-xl p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-2xl font-bold text-amber-600">{{ total_modifications }}</p>
+                        <p class="text-xs text-muted-foreground">Modifications</p>
+                    </div>
+                    <div class="w-10 h-10 bg-amber-500/10 rounded-full flex items-center justify-center">
+                        <i class="fas fa-edit text-amber-500"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-card border border-border/50 rounded-xl p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-2xl font-bold {% if global_approval_rate >= 70 %}text-green-600{% elif global_approval_rate >= 50 %}text-amber-600{% else %}text-red-600{% endif %}">
+                            {{ global_approval_rate }}%
+                        </p>
+                        <p class="text-xs text-muted-foreground">Approval Rate</p>
+                    </div>
+                    <div class="w-10 h-10 bg-purple-500/10 rounded-full flex items-center justify-center">
+                        <i class="fas fa-chart-line text-purple-500"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Consensus Stats -->
+        <div class="bg-card border border-border/50 rounded-xl p-6 mb-8">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                <div>
+                    <h2 class="text-xl font-semibold text-foreground mb-2">Consensus Achievement</h2>
+                    <p class="text-muted-foreground">{{ consensus_sessions }} of {{ total_sessions }} sessions reached consensus</p>
+                </div>
+                <div class="mt-4 md:mt-0">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-48 h-4 bg-accent/30 rounded-full overflow-hidden">
+                            <div class="h-full bg-green-500 rounded-full" style="width: {{ consensus_rate }}%"></div>
+                        </div>
+                        <span class="text-2xl font-bold {% if consensus_rate >= 70 %}text-green-600{% elif consensus_rate >= 50 %}text-amber-600{% else %}text-red-600{% endif %}">
+                            {{ consensus_rate }}%
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Doctor Leaderboard (2 columns) -->
+            <div class="lg:col-span-2">
+                <div class="bg-card border border-border/50 rounded-xl p-6">
+                    <h2 class="text-xl font-semibold text-foreground mb-4">Doctor Statistics</h2>
+                    
+                    {% if doctor_stats %}
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-border">
+                                    <th class="text-left py-3 px-2 text-muted-foreground font-medium">Doctor</th>
+                                    <th class="text-center py-3 px-2 text-muted-foreground font-medium">Reviews</th>
+                                    <th class="text-center py-3 px-2 text-muted-foreground font-medium">
+                                        <span class="text-green-600"><i class="fas fa-check"></i></span>
+                                    </th>
+                                    <th class="text-center py-3 px-2 text-muted-foreground font-medium">
+                                        <span class="text-red-600"><i class="fas fa-times"></i></span>
+                                    </th>
+                                    <th class="text-center py-3 px-2 text-muted-foreground font-medium">
+                                        <span class="text-amber-600"><i class="fas fa-edit"></i></span>
+                                    </th>
+                                    <th class="text-center py-3 px-2 text-muted-foreground font-medium">Approval</th>
+                                    <th class="text-center py-3 px-2 text-muted-foreground font-medium hidden md:table-cell">Top Role</th>
+                                    <th class="text-center py-3 px-2 text-muted-foreground font-medium hidden lg:table-cell">Avg Response</th>
+                                    <th class="text-center py-3 px-2 text-muted-foreground font-medium">Created</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for stat in doctor_stats %}
+                                <tr class="border-b border-border/50 hover:bg-accent/20 transition-colors">
+                                    <td class="py-3 px-2">
+                                        <div class="flex items-center space-x-2">
+                                            <div class="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                                                <i class="fas fa-user-md text-primary text-sm"></i>
+                                            </div>
+                                            <span class="font-medium text-foreground">Dr. {{ stat.doctor.username }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-center py-3 px-2 text-foreground font-semibold">{{ stat.total_reviews }}</td>
+                                    <td class="text-center py-3 px-2 text-green-600">{{ stat.approved }}</td>
+                                    <td class="text-center py-3 px-2 text-red-600">{{ stat.rejected }}</td>
+                                    <td class="text-center py-3 px-2 text-amber-600">{{ stat.modifications }}</td>
+                                    <td class="text-center py-3 px-2">
+                                        <span class="px-2 py-1 rounded text-xs font-medium
+                                            {% if stat.approval_rate >= 80 %}bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400
+                                            {% elif stat.approval_rate >= 60 %}bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400
+                                            {% elif stat.approval_rate >= 40 %}bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400
+                                            {% else %}bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400{% endif %}">
+                                            {{ stat.approval_rate }}%
+                                        </span>
+                                    </td>
+                                    <td class="text-center py-3 px-2 text-muted-foreground hidden md:table-cell">{{ stat.top_role }}</td>
+                                    <td class="text-center py-3 px-2 text-muted-foreground hidden lg:table-cell">
+                                        {% if stat.avg_response_hours %}{{ stat.avg_response_hours }}h{% else %}-{% endif %}
+                                    </td>
+                                    <td class="text-center py-3 px-2 text-foreground">{{ stat.created_count }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-8">
+                        <i class="fas fa-users text-4xl text-muted-foreground mb-4"></i>
+                        <p class="text-muted-foreground">No doctor participation data yet</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="lg:col-span-1">
+                <div class="bg-card border border-border/50 rounded-xl p-6">
+                    <h2 class="text-xl font-semibold text-foreground mb-4">Recent Decisions</h2>
+                    
+                    {% if recent_decisions %}
+                    <div class="space-y-4 max-h-[500px] overflow-y-auto">
+                        {% for decision in recent_decisions %}
+                        <div class="border-b border-border/50 pb-4 last:border-0">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
+                                        {% if decision.decision == 'approved' %}bg-green-100 dark:bg-green-900/30
+                                        {% elif decision.decision == 'rejected' %}bg-red-100 dark:bg-red-900/30
+                                        {% else %}bg-amber-100 dark:bg-amber-900/30{% endif %}">
+                                        {% if decision.decision == 'approved' %}
+                                        <i class="fas fa-check text-green-600 text-sm"></i>
+                                        {% elif decision.decision == 'rejected' %}
+                                        <i class="fas fa-times text-red-600 text-sm"></i>
+                                        {% else %}
+                                        <i class="fas fa-edit text-amber-600 text-sm"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-foreground text-sm">Dr. {{ decision.doctor.username }}</p>
+                                        <p class="text-xs text-muted-foreground">{{ decision.get_decision_display }}</p>
+                                    </div>
+                                </div>
+                                <span class="text-xs text-muted-foreground">{{ decision.decision_date|timesince }} ago</span>
+                            </div>
+                            <a href="{% url 'clinical_decision_support:tumor_board_detail' decision.session.id %}" 
+                               class="block mt-2 text-sm text-primary hover:underline truncate">
+                                {{ decision.session.title }}
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-8">
+                        <i class="fas fa-history text-4xl text-muted-foreground mb-4"></i>
+                        <p class="text-muted-foreground">No recent decisions yet</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="mt-6 bg-accent/20 rounded-lg p-4">
+            <div class="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                <span class="font-medium text-foreground">Legend:</span>
+                <div class="flex items-center space-x-1">
+                    <i class="fas fa-check text-green-600"></i>
+                    <span>Approved</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <i class="fas fa-times text-red-600"></i>
+                    <span>Rejected</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <i class="fas fa-edit text-amber-600"></i>
+                    <span>Modification Requested</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <span class="font-medium">Reviews:</span>
+                    <span>Total times invited to a session</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <span class="font-medium">Created:</span>
+                    <span>Sessions initiated by doctor</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="min-h-screen bg-background py-8 fade-in">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="mb-8">
             <nav class="mb-4">
@@ -12,14 +12,19 @@
                 </a>
             </nav>
             <h1 class="text-3xl font-bold text-foreground">Generate Toxicity Prediction</h1>
-            <p class="text-muted-foreground mt-1">Predict potential drug toxicities and adverse events</p>
+            <p class="text-muted-foreground mt-1">Predict potential drug toxicities and adverse events based on patient data</p>
         </div>
 
         <!-- Form -->
         <form method="post" class="space-y-6">
             {% csrf_token %}
             
+            <!-- Patient & Drug Selection -->
             <div class="bg-card border border-border/50 rounded-xl p-6 space-y-6">
+                <h2 class="text-lg font-semibold text-foreground flex items-center">
+                    <i class="fas fa-user-md text-primary mr-2"></i>Patient & Drug Information
+                </h2>
+                
                 <!-- Patient Selection -->
                 <div>
                     <label for="patient_id" class="block text-sm font-medium text-foreground mb-2">Select Patient *</label>
@@ -34,126 +39,194 @@
                     </select>
                 </div>
 
+                <!-- Treatment Plan (Optional) -->
+                <div>
+                    <label for="plan_id" class="block text-sm font-medium text-foreground mb-2">Treatment Plan (Optional)</label>
+                    <select id="plan_id" name="plan_id"
+                            class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary focus:border-primary">
+                        <option value="">No linked treatment plan</option>
+                        {% for plan in plans %}
+                        <option value="{{ plan.id }}">
+                            {{ plan.patient.username }} - {{ plan.cancer_type }} Stage {{ plan.cancer_stage }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
                 <!-- Drug Selection -->
                 <div>
                     <label for="drug_name" class="block text-sm font-medium text-foreground mb-2">Drug Name *</label>
                     <select id="drug_name" name="drug_name" required
                             class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary focus:border-primary">
                         <option value="">Select drug...</option>
-                        <optgroup label="Chemotherapy">
+                        <optgroup label="Platinum Agents">
                             <option value="Cisplatin">Cisplatin</option>
                             <option value="Carboplatin">Carboplatin</option>
-                            <option value="Paclitaxel">Paclitaxel</option>
-                            <option value="Docetaxel">Docetaxel</option>
-                            <option value="Doxorubicin">Doxorubicin</option>
-                            <option value="Cyclophosphamide">Cyclophosphamide</option>
-                            <option value="5-Fluorouracil">5-Fluorouracil</option>
-                            <option value="Gemcitabine">Gemcitabine</option>
-                            <option value="Irinotecan">Irinotecan</option>
                             <option value="Oxaliplatin">Oxaliplatin</option>
                         </optgroup>
-                        <optgroup label="Targeted Therapy">
-                            <option value="Trastuzumab">Trastuzumab (Herceptin)</option>
-                            <option value="Bevacizumab">Bevacizumab (Avastin)</option>
-                            <option value="Imatinib">Imatinib (Gleevec)</option>
-                            <option value="Erlotinib">Erlotinib (Tarceva)</option>
+                        <optgroup label="Taxanes">
+                            <option value="Paclitaxel">Paclitaxel</option>
+                            <option value="Docetaxel">Docetaxel</option>
+                        </optgroup>
+                        <optgroup label="Anthracyclines">
+                            <option value="Doxorubicin">Doxorubicin</option>
+                        </optgroup>
+                        <optgroup label="Alkylating Agents">
+                            <option value="Cyclophosphamide">Cyclophosphamide</option>
+                        </optgroup>
+                        <optgroup label="Antimetabolites">
+                            <option value="Gemcitabine">Gemcitabine</option>
+                            <option value="5-Fluorouracil">5-Fluorouracil</option>
                         </optgroup>
                         <optgroup label="Immunotherapy">
                             <option value="Pembrolizumab">Pembrolizumab (Keytruda)</option>
                             <option value="Nivolumab">Nivolumab (Opdivo)</option>
-                            <option value="Ipilimumab">Ipilimumab (Yervoy)</option>
+                        </optgroup>
+                        <optgroup label="Targeted Therapy - TKIs">
+                            <option value="Erlotinib">Erlotinib (Tarceva)</option>
+                            <option value="Osimertinib">Osimertinib (Tagrisso)</option>
+                        </optgroup>
+                        <optgroup label="Hormonal Therapy">
+                            <option value="Tamoxifen">Tamoxifen</option>
+                            <option value="Letrozole">Letrozole</option>
                         </optgroup>
                     </select>
                 </div>
+            </div>
 
-                <!-- Dosage -->
-                <div class="grid grid-cols-2 gap-4">
+            <!-- Lab Values -->
+            <div class="bg-card border border-border/50 rounded-xl p-6 space-y-6">
+                <h2 class="text-lg font-semibold text-foreground flex items-center">
+                    <i class="fas fa-vial text-primary mr-2"></i>Current Lab Values
+                </h2>
+                <p class="text-sm text-muted-foreground -mt-4">Provide recent lab values for more accurate toxicity predictions</p>
+                
+                <!-- Renal Function -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="dose_amount" class="block text-sm font-medium text-foreground mb-2">Dose Amount *</label>
-                        <input type="number" id="dose_amount" name="dose_amount" step="0.1" required
+                        <label for="creatinine" class="block text-sm font-medium text-foreground mb-2">Creatinine (mg/dL)</label>
+                        <input type="number" id="creatinine" name="creatinine" step="0.1"
                                class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary"
-                               placeholder="e.g., 75">
+                               placeholder="Normal: 0.7-1.2">
                     </div>
                     <div>
-                        <label for="dose_unit" class="block text-sm font-medium text-foreground mb-2">Unit *</label>
-                        <select id="dose_unit" name="dose_unit" required
-                                class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary">
-                            <option value="mg/m2">mg/m² (per BSA)</option>
-                            <option value="mg/kg">mg/kg (per weight)</option>
-                            <option value="mg">mg (flat dose)</option>
-                            <option value="AUC">AUC</option>
-                        </select>
+                        <label for="egfr" class="block text-sm font-medium text-foreground mb-2">eGFR (mL/min/1.73m²)</label>
+                        <input type="number" id="egfr" name="egfr" step="1"
+                               class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary"
+                               placeholder="Normal: >90">
+                    </div>
+                </div>
+
+                <!-- Hepatic Function -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="bilirubin" class="block text-sm font-medium text-foreground mb-2">Bilirubin (mg/dL)</label>
+                        <input type="number" id="bilirubin" name="bilirubin" step="0.1"
+                               class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary"
+                               placeholder="Normal: 0.1-1.2">
+                    </div>
+                    <div>
+                        <label for="alt" class="block text-sm font-medium text-foreground mb-2">ALT (U/L)</label>
+                        <input type="number" id="alt" name="alt" step="1"
+                               class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary"
+                               placeholder="Normal: 7-40">
+                    </div>
+                    <div>
+                        <label for="ast" class="block text-sm font-medium text-foreground mb-2">AST (U/L)</label>
+                        <input type="number" id="ast" name="ast" step="1"
+                               class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary"
+                               placeholder="Normal: 8-40">
+                    </div>
+                </div>
+
+                <!-- Hematologic -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="neutrophils" class="block text-sm font-medium text-foreground mb-2">Neutrophils (cells/µL)</label>
+                        <input type="number" id="neutrophils" name="neutrophils" step="100"
+                               class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary"
+                               placeholder="Normal: 2000-7000">
+                    </div>
+                    <div>
+                        <label for="platelets" class="block text-sm font-medium text-foreground mb-2">Platelets (cells/µL)</label>
+                        <input type="number" id="platelets" name="platelets" step="1000"
+                               class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary"
+                               placeholder="Normal: 150,000-400,000">
+                    </div>
+                    <div>
+                        <label for="hemoglobin" class="block text-sm font-medium text-foreground mb-2">Hemoglobin (g/dL)</label>
+                        <input type="number" id="hemoglobin" name="hemoglobin" step="0.1"
+                               class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary"
+                               placeholder="Normal: 12-17">
+                    </div>
+                </div>
+
+                <!-- Cardiac -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="lvef" class="block text-sm font-medium text-foreground mb-2">LVEF (%) - Left Ventricular Ejection Fraction</label>
+                        <input type="number" id="lvef" name="lvef" step="1" min="0" max="100"
+                               class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary"
+                               placeholder="Normal: >55%">
                     </div>
                 </div>
             </div>
 
             <!-- Patient Factors -->
             <div class="bg-card border border-border/50 rounded-xl p-6 space-y-6">
-                <h2 class="text-lg font-semibold text-foreground">Patient Risk Factors (Optional)</h2>
+                <h2 class="text-lg font-semibold text-foreground flex items-center">
+                    <i class="fas fa-user text-primary mr-2"></i>Patient Risk Factors
+                </h2>
                 
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label for="age" class="block text-sm font-medium text-foreground mb-2">Age</label>
-                        <input type="number" id="age" name="age"
-                               class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground"
-                               placeholder="e.g., 65">
-                    </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label for="performance_status" class="block text-sm font-medium text-foreground mb-2">ECOG Performance Status</label>
                         <select id="performance_status" name="performance_status"
-                                class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground">
-                            <option value="">Select...</option>
-                            <option value="0">0 - Fully active</option>
+                                class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary">
+                            <option value="0">0 - Fully active, no restrictions</option>
                             <option value="1">1 - Restricted but ambulatory</option>
-                            <option value="2">2 - Ambulatory, self-care only</option>
-                            <option value="3">3 - Limited self-care</option>
-                            <option value="4">4 - Completely disabled</option>
+                            <option value="2">2 - Ambulatory, self-care capable</option>
+                            <option value="3">3 - Limited self-care, >50% in bed</option>
+                            <option value="4">4 - Completely disabled, bedridden</option>
                         </select>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label for="renal_function" class="block text-sm font-medium text-foreground mb-2">Creatinine Clearance (mL/min)</label>
-                        <input type="number" id="renal_function" name="renal_function"
-                               class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground"
-                               placeholder="e.g., 90">
-                    </div>
-                    <div>
-                        <label for="hepatic_function" class="block text-sm font-medium text-foreground mb-2">Bilirubin (mg/dL)</label>
-                        <input type="number" id="hepatic_function" name="hepatic_function" step="0.1"
-                               class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground"
-                               placeholder="e.g., 1.0">
                     </div>
                 </div>
 
                 <!-- Comorbidities -->
                 <div>
-                    <label class="block text-sm font-medium text-foreground mb-2">Comorbidities</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <label class="flex items-center space-x-2 cursor-pointer">
-                            <input type="checkbox" name="comorbidities" value="diabetes" class="rounded border-border">
+                    <label class="block text-sm font-medium text-foreground mb-3">Comorbidities</label>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <label class="flex items-center space-x-2 cursor-pointer p-2 rounded-lg hover:bg-accent/30 transition-colors">
+                            <input type="checkbox" name="comorbidities" value="diabetes" class="rounded border-border text-primary focus:ring-primary">
                             <span class="text-sm text-foreground">Diabetes</span>
                         </label>
-                        <label class="flex items-center space-x-2 cursor-pointer">
-                            <input type="checkbox" name="comorbidities" value="hypertension" class="rounded border-border">
+                        <label class="flex items-center space-x-2 cursor-pointer p-2 rounded-lg hover:bg-accent/30 transition-colors">
+                            <input type="checkbox" name="comorbidities" value="hypertension" class="rounded border-border text-primary focus:ring-primary">
                             <span class="text-sm text-foreground">Hypertension</span>
                         </label>
-                        <label class="flex items-center space-x-2 cursor-pointer">
-                            <input type="checkbox" name="comorbidities" value="cardiac" class="rounded border-border">
+                        <label class="flex items-center space-x-2 cursor-pointer p-2 rounded-lg hover:bg-accent/30 transition-colors">
+                            <input type="checkbox" name="comorbidities" value="cardiac_disease" class="rounded border-border text-primary focus:ring-primary">
                             <span class="text-sm text-foreground">Cardiac Disease</span>
                         </label>
-                        <label class="flex items-center space-x-2 cursor-pointer">
-                            <input type="checkbox" name="comorbidities" value="pulmonary" class="rounded border-border">
+                        <label class="flex items-center space-x-2 cursor-pointer p-2 rounded-lg hover:bg-accent/30 transition-colors">
+                            <input type="checkbox" name="comorbidities" value="pulmonary_disease" class="rounded border-border text-primary focus:ring-primary">
                             <span class="text-sm text-foreground">Pulmonary Disease</span>
                         </label>
-                        <label class="flex items-center space-x-2 cursor-pointer">
-                            <input type="checkbox" name="comorbidities" value="renal" class="rounded border-border">
+                        <label class="flex items-center space-x-2 cursor-pointer p-2 rounded-lg hover:bg-accent/30 transition-colors">
+                            <input type="checkbox" name="comorbidities" value="renal_impairment" class="rounded border-border text-primary focus:ring-primary">
                             <span class="text-sm text-foreground">Renal Impairment</span>
                         </label>
-                        <label class="flex items-center space-x-2 cursor-pointer">
-                            <input type="checkbox" name="comorbidities" value="neuropathy" class="rounded border-border">
+                        <label class="flex items-center space-x-2 cursor-pointer p-2 rounded-lg hover:bg-accent/30 transition-colors">
+                            <input type="checkbox" name="comorbidities" value="hepatic_impairment" class="rounded border-border text-primary focus:ring-primary">
+                            <span class="text-sm text-foreground">Hepatic Impairment</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer p-2 rounded-lg hover:bg-accent/30 transition-colors">
+                            <input type="checkbox" name="comorbidities" value="neuropathy" class="rounded border-border text-primary focus:ring-primary">
                             <span class="text-sm text-foreground">Pre-existing Neuropathy</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer p-2 rounded-lg hover:bg-accent/30 transition-colors">
+                            <input type="checkbox" name="comorbidities" value="hearing_loss" class="rounded border-border text-primary focus:ring-primary">
+                            <span class="text-sm text-foreground">Hearing Loss</span>
                         </label>
                     </div>
                 </div>
@@ -167,9 +240,9 @@
                         <p class="font-medium">Prediction Based On:</p>
                         <ul class="mt-2 space-y-1 list-disc list-inside">
                             <li>Known drug toxicity profiles from clinical trials</li>
-                            <li>Patient-specific risk factors</li>
+                            <li>Patient-specific lab values and risk factors</li>
                             <li>CTCAE v5.0 grading criteria</li>
-                            <li>Pharmacogenomic considerations (if available)</li>
+                            <li>Organ function-based dose adjustment guidelines</li>
                         </ul>
                     </div>
                 </div>

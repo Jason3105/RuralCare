@@ -11,10 +11,75 @@
                     <h1 class="text-3xl font-bold text-foreground">Multidisciplinary Tumor Board</h1>
                     <p class="text-muted-foreground mt-1">Collaborative treatment planning with specialist consensus</p>
                 </div>
-                <a href="{% url 'clinical_decision_support:tumor_board_create' %}" 
-                   class="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
-                    <i class="fas fa-plus mr-2"></i>Create Session
-                </a>
+                <div class="flex items-center gap-3">
+                    <a href="{% url 'clinical_decision_support:tumor_board_contributions' %}" 
+                       class="inline-flex items-center px-4 py-2 border border-border text-foreground rounded-lg hover:bg-accent transition-colors">
+                        <i class="fas fa-chart-bar mr-2"></i>Contributions
+                    </a>
+                    <a href="{% url 'clinical_decision_support:tumor_board_create' %}" 
+                       class="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                        <i class="fas fa-plus mr-2"></i>Create Session
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-card border border-border/50 rounded-xl p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-users-medical text-blue-600"></i>
+                    </div>
+                    <span class="text-2xl font-bold text-foreground">{{ total_sessions }}</span>
+                </div>
+                <p class="text-sm text-muted-foreground">Total Sessions</p>
+            </div>
+            <div class="bg-card border border-border/50 rounded-xl p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-check-double text-green-600"></i>
+                    </div>
+                    <span class="text-2xl font-bold text-green-600">{{ consensus_achieved }}</span>
+                </div>
+                <p class="text-sm text-muted-foreground">Consensus Reached</p>
+            </div>
+            <div class="bg-card border border-border/50 rounded-xl p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-hourglass-half text-amber-600"></i>
+                    </div>
+                    <span class="text-2xl font-bold text-amber-600">{{ in_review }}</span>
+                </div>
+                <p class="text-sm text-muted-foreground">In Review</p>
+            </div>
+            <div class="bg-card border border-border/50 rounded-xl p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-percentage text-purple-600"></i>
+                    </div>
+                    <span class="text-2xl font-bold text-purple-600">{{ approval_rate }}%</span>
+                </div>
+                <p class="text-sm text-muted-foreground">Approval Rate</p>
+            </div>
+        </div>
+
+        <!-- My Quick Stats -->
+        <div class="bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 rounded-xl p-4 mb-6">
+            <div class="flex flex-wrap items-center gap-6">
+                <h3 class="text-sm font-semibold text-foreground"><i class="fas fa-user-md mr-2 text-primary"></i>Your Activity</h3>
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-muted-foreground">Created:</span>
+                    <span class="font-semibold text-foreground">{{ my_created }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-muted-foreground">Reviewed:</span>
+                    <span class="font-semibold text-foreground">{{ my_total_reviews }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-muted-foreground">Pending:</span>
+                    <span class="font-semibold text-amber-600">{{ my_pending }}</span>
+                </div>
             </div>
         </div>
 
@@ -48,36 +113,43 @@
                     <div class="flex-1">
                         <div class="flex items-center space-x-3 mb-2">
                             <div class="w-10 h-10 rounded-lg flex items-center justify-center
-                                {% if session.status == 'consensus_achieved' %}bg-green-100 dark:bg-green-900/30
+                                {% if session.status == 'consensus_achieved' or session.status == 'closed' %}bg-green-100 dark:bg-green-900/30
                                 {% elif session.status == 'in_review' %}bg-amber-100 dark:bg-amber-900/30
                                 {% else %}bg-blue-100 dark:bg-blue-900/30{% endif %}">
-                                <i class="fas fa-users-medical 
-                                    {% if session.status == 'consensus_achieved' %}text-green-600
+                                <i class="fas fa-users-cog 
+                                    {% if session.status == 'consensus_achieved' or session.status == 'closed' %}text-green-600
                                     {% elif session.status == 'in_review' %}text-amber-600
                                     {% else %}text-blue-600{% endif %}"></i>
                             </div>
                             <div>
                                 <h3 class="text-lg font-semibold text-foreground">{{ session.title }}</h3>
-                                <p class="text-sm text-muted-foreground">Patient: {{ session.patient.username }}</p>
+                                <p class="text-sm text-muted-foreground">Patient: {{ session.patient.first_name }} {{ session.patient.last_name|default:session.patient.username }}</p>
                             </div>
                         </div>
 
+                        {% if session.description %}
                         <p class="text-sm text-muted-foreground mt-2">{{ session.description|truncatewords:30 }}</p>
+                        {% endif %}
 
                         <div class="flex flex-wrap items-center gap-4 mt-4">
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
-                                {% if session.status == 'consensus_achieved' %}bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400
+                                {% if session.status == 'consensus_achieved' or session.status == 'closed' %}bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400
                                 {% elif session.status == 'in_review' %}bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400
                                 {% elif session.status == 'draft' %}bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400
                                 {% else %}bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400{% endif %}">
                                 {{ session.get_status_display }}
                             </span>
                             <span class="text-sm text-muted-foreground">
-                                <i class="fas fa-user-md mr-1"></i>{{ session.members.count }} members
+                                <i class="fas fa-user-md mr-1"></i>{{ session.members.count }} member{{ session.members.count|pluralize }}
                             </span>
                             <span class="text-sm text-muted-foreground">
-                                <i class="fas fa-user mr-1"></i>Created by: Dr. {{ session.created_by.username }}
+                                <i class="fas fa-user mr-1"></i>Dr. {{ session.created_by.username }}
                             </span>
+                            {% if session.members.count > 0 %}
+                            <span class="text-sm font-medium {% if session.current_consensus_percentage >= 100 %}text-green-600{% elif session.current_consensus_percentage > 0 %}text-amber-600{% else %}text-muted-foreground{% endif %}">
+                                <i class="fas fa-chart-pie mr-1"></i>{{ session.current_consensus_percentage|floatformat:0 }}% consensus
+                            </span>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -88,6 +160,14 @@
                             <i class="fas fa-calendar mr-1"></i>{{ session.scheduled_at|date:"M d, Y H:i" }}
                         </p>
                         {% endif %}
+                        <!-- Mini decision indicators -->
+                        {% if session.members.count > 0 %}
+                        <div class="flex items-center gap-1">
+                            {% for m in session.members.all %}
+                            <div class="w-3 h-3 rounded-full {% if m.decision == 'approved' %}bg-green-500{% elif m.decision == 'rejected' %}bg-red-500{% elif m.decision == 'suggested_modification' %}bg-amber-500{% else %}bg-gray-300 dark:bg-gray-600{% endif %}" title="Dr. {{ m.doctor.username }}: {{ m.get_decision_display }}"></div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                         <a href="{% url 'clinical_decision_support:tumor_board_detail' session.id %}" 
                            class="px-4 py-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors text-sm font-medium">
                             View Session <i class="fas fa-arrow-right ml-2"></i>
@@ -97,7 +177,7 @@
             </div>
             {% empty %}
             <div class="bg-card border border-border/50 rounded-xl p-12 text-center">
-                <i class="fas fa-users-medical text-4xl text-muted-foreground/50 mb-4"></i>
+                <i class="fas fa-users-cog text-4xl text-muted-foreground/50 mb-4"></i>
                 <h3 class="text-lg font-semibold text-foreground mb-2">No Tumor Board Sessions</h3>
                 <p class="text-muted-foreground mb-4">Create a tumor board session to collaborate with other specialists.</p>
                 <a href="{% url 'clinical_decision_support:tumor_board_create' %}" 
@@ -113,7 +193,7 @@
         <div class="mt-6 flex justify-center">
             <nav class="flex items-center space-x-2">
                 {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 border border-border rounded-lg hover:bg-accent transition-colors">
+                <a href="?page={{ page_obj.previous_page_number }}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if my_sessions %}&my_sessions=on{% endif %}" class="px-3 py-2 border border-border rounded-lg hover:bg-accent transition-colors">
                     <i class="fas fa-chevron-left"></i>
                 </a>
                 {% endif %}
@@ -121,7 +201,7 @@
                     Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
                 </span>
                 {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 border border-border rounded-lg hover:bg-accent transition-colors">
+                <a href="?page={{ page_obj.next_page_number }}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if my_sessions %}&my_sessions=on{% endif %}" class="px-3 py-2 border border-border rounded-lg hover:bg-accent transition-colors">
                     <i class="fas fa-chevron-right"></i>
                 </a>
                 {% endif %}

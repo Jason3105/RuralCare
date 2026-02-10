@@ -164,7 +164,7 @@ class ToxicityPredictor:
         for toxicity, data in adjusted_profile.items():
             tox_entry = {
                 'toxicity': toxicity.replace('_', ' ').title(),
-                'probability': round(data['probability'], 2),
+                'probability': round(data['probability'] * 100, 1),  # Convert to percentage
                 'ctcae_grade': data['ctcae_grade'],
                 'onset_days': data['onset_days']
             }
@@ -434,7 +434,8 @@ class ToxicityPredictor:
         risk_level: str
     ) -> str:
         """Generate patient-friendly summary"""
-        common_effects = [t['toxicity'] for t in toxicities if t['probability'] >= 0.3][:3]
+        # Probability is now in percentage (0-100)
+        common_effects = [t['toxicity'] for t in toxicities if t['probability'] >= 30][:3]
         
         if risk_level == 'high':
             intro = f"Your treatment with {drug_name} may have some significant side effects."

@@ -99,7 +99,7 @@
                     <div>
                         <h3 class="text-lg font-semibold text-foreground">{{ prediction.patient.username }}</h3>
                         <p class="text-sm text-muted-foreground">
-                            {{ prediction.drug_name }} | {{ prediction.predicted_at|date:"M d, Y H:i" }}
+                            {{ prediction.drug_name }} {% if prediction.drug_class %}({{ prediction.drug_class }}){% endif %} | {{ prediction.created_at|date:"M d, Y H:i" }}
                         </p>
                     </div>
                     <div class="flex items-center space-x-2">
@@ -107,8 +107,13 @@
                             {% if prediction.overall_risk_level == 'low' %}bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400
                             {% elif prediction.overall_risk_level == 'moderate' %}bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400
                             {% else %}bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400{% endif %}">
-                            {{ prediction.get_overall_risk_level_display }} Risk
+                            {{ prediction.get_overall_risk_level_display }}
                         </span>
+                        {% if prediction.prediction_confidence %}
+                        <span class="px-2 py-1 text-xs rounded bg-accent text-muted-foreground">
+                            {{ prediction.prediction_confidence|floatformat:0 }}% confidence
+                        </span>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -116,32 +121,37 @@
                 <div class="mb-4">
                     <p class="text-sm text-muted-foreground mb-2">Predicted Toxicities:</p>
                     <div class="flex flex-wrap gap-2">
-                        {% for toxicity in prediction.toxicity_predictions|slice:":4" %}
+                        {% for toxicity in prediction.predicted_toxicities|slice:":4" %}
                         <span class="px-2 py-1 text-xs rounded-full
-                            {% if toxicity.risk_level == 'high' %}bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400
-                            {% elif toxicity.risk_level == 'moderate' %}bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400
+                            {% if toxicity.ctcae_grade >= 3 %}bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400
+                            {% elif toxicity.ctcae_grade >= 2 %}bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400
                             {% else %}bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400{% endif %}">
-                            {{ toxicity.name }} (Grade {{ toxicity.ctcae_grade }})
+                            {{ toxicity.toxicity }} (Grade {{ toxicity.ctcae_grade }})
                         </span>
                         {% empty %}
                         <span class="text-sm text-muted-foreground">No specific toxicities predicted</span>
                         {% endfor %}
-                        {% if prediction.toxicity_predictions|length > 4 %}
+                        {% if prediction.predicted_toxicities|length > 4 %}
                         <span class="px-2 py-1 text-xs bg-accent rounded-full text-muted-foreground">
-                            +{{ prediction.toxicity_predictions|length|add:"-4" }} more
+                            +{{ prediction.predicted_toxicities|length|add:"-4" }} more
                         </span>
                         {% endif %}
                     </div>
                 </div>
 
                 <!-- Dose Adjustment -->
-                {% if prediction.recommended_dose_adjustment %}
+                {% if prediction.dose_adjustments %}
                 <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 mb-4">
                     <div class="flex items-start space-x-2">
                         <i class="fas fa-prescription text-amber-500 mt-0.5"></i>
                         <div class="text-sm">
                             <p class="font-medium text-amber-700 dark:text-amber-400">Dose Adjustment Recommended</p>
-                            <p class="text-amber-600 dark:text-amber-300">{{ prediction.recommended_dose_adjustment }}</p>
+                            {% for adj in prediction.dose_adjustments|slice:":1" %}
+                            <p class="text-amber-600 dark:text-amber-300">
+                                {% if adj.recommended_dose %}{{ adj.current_dose }} → {{ adj.recommended_dose }}{% endif %}
+                                {% if adj.reason %}: {{ adj.reason }}{% endif %}
+                            </p>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
@@ -173,7 +183,8 @@
         <div class="mt-8 flex justify-center">
             <nav class="flex items-center space-x-2">
                 {% if predictions.has_previous %}
-                <a href="?page={{ predictions.previous_page_number }}" class="px-3 py-1 bg-accent rounded hover:bg-accent/80">
+                <a href="?page={{ predictions.previous_page_number }}{% if request.GET.patient %}&patient={{ request.GET.patient }}{% endif %}{% if request.GET.risk_level %}&risk_level={{ request.GET.risk_level }}{% endif %}{% if request.GET.drug %}&drug={{ request.GET.drug }}{% endif %}" 
+                   class="px-3 py-1 bg-accent rounded hover:bg-accent/80">
                     <i class="fas fa-chevron-left"></i>
                 </a>
                 {% endif %}
@@ -181,7 +192,8 @@
                     Page {{ predictions.number }} of {{ predictions.paginator.num_pages }}
                 </span>
                 {% if predictions.has_next %}
-                <a href="?page={{ predictions.next_page_number }}" class="px-3 py-1 bg-accent rounded hover:bg-accent/80">
+                <a href="?page={{ predictions.next_page_number }}{% if request.GET.patient %}&patient={{ request.GET.patient }}{% endif %}{% if request.GET.risk_level %}&risk_level={{ request.GET.risk_level }}{% endif %}{% if request.GET.drug %}&drug={{ request.GET.drug }}{% endif %}" 
+                   class="px-3 py-1 bg-accent rounded hover:bg-accent/80">
                     <i class="fas fa-chevron-right"></i>
                 </a>
                 {% endif %}

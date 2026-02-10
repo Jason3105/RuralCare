@@ -269,7 +269,7 @@ def generate_xai_for_plan(request, plan_id):
 @login_required
 @doctor_required
 def tumor_board_list(request):
-    """List all tumor board sessions"""
+    """List all tumor board sessions with statistics"""
     sessions = TumorBoardSession.objects.select_related(
         'patient', 'treatment_plan', 'created_by'
     ).prefetch_related('members')
@@ -289,6 +289,24 @@ def tumor_board_list(request):
     
     sessions = sessions.order_by('-created_at')
     
+    # Statistics for the dashboard
+    all_sessions = TumorBoardSession.objects.all()
+    total_sessions = all_sessions.count()
+    consensus_achieved = all_sessions.filter(status='consensus_achieved').count()
+    in_review = all_sessions.filter(status='in_review').count()
+    plans_activated = all_sessions.filter(status='closed').count()
+    
+    # Current doctor stats
+    my_memberships = TumorBoardMember.objects.filter(doctor=request.user)
+    my_total_reviews = my_memberships.exclude(decision='pending').count()
+    my_pending = my_memberships.filter(decision='pending').count()
+    my_created = all_sessions.filter(created_by=request.user).count()
+    
+    # Approval rate across all sessions
+    total_decisions = TumorBoardMember.objects.exclude(decision='pending').count()
+    total_approved = TumorBoardMember.objects.filter(decision='approved').count()
+    approval_rate = round((total_approved / total_decisions * 100), 1) if total_decisions > 0 else 0
+    
     paginator = Paginator(sessions, 10)
     page = request.GET.get('page')
     page_obj = paginator.get_page(page)
@@ -298,6 +316,16 @@ def tumor_board_list(request):
         'status_choices': TumorBoardSession.SESSION_STATUS_CHOICES,
         'selected_status': status,
         'my_sessions': my_sessions,
+        # Global stats
+        'total_sessions': total_sessions,
+        'consensus_achieved': consensus_achieved,
+        'in_review': in_review,
+        'plans_activated': plans_activated,
+        'approval_rate': approval_rate,
+        # Doctor's own stats
+        'my_total_reviews': my_total_reviews,
+        'my_pending': my_pending,
+        'my_created': my_created,
     }
     return render(request, 'clinical_decision_support/tumor_board_list.html', context)
 
@@ -352,7 +380,7 @@ def tumor_board_create(request):
 @login_required
 @doctor_required
 def tumor_board_detail(request, session_id):
-    """View tumor board session details"""
+    """View tumor board session details with full stats"""
     session = get_object_or_404(
         TumorBoardSession.objects.select_related('patient', 'treatment_plan', 'created_by'),
         id=session_id
@@ -369,6 +397,17 @@ def tumor_board_detail(request, session_id):
         analysis_type='treatment_plan'
     ).first()
     
+    # Decision statistics
+    decisions_approved = members.filter(decision='approved').count()
+    decisions_rejected = members.filter(decision='rejected').count()
+    decisions_modify = members.filter(decision='suggested_modification').count()
+    decisions_pending = members.filter(decision='pending').count()
+    
+    # Check current user membership
+    current_member = members.filter(doctor=request.user).first()
+    is_creator = session.created_by == request.user
+    is_lead = is_creator
+    
     context = {
         'session': session,
         'members': members,
@@ -376,7 +415,13 @@ def tumor_board_detail(request, session_id):
         'xai': xai,
         'confidence': confidence,
         'role_choices': TumorBoardMember.ROLE_CHOICES,
-        'is_creator': session.created_by == request.user,
+        'is_creator': is_creator,
+        'is_lead': is_lead,
+        'current_member': current_member,
+        'decisions_approved': decisions_approved,
+        'decisions_rejected': decisions_rejected,
+        'decisions_modify': decisions_modify,
+        'decisions_pending': decisions_pending,
     }
     return render(request, 'clinical_decision_support/tumor_board_detail.html', context)
 
@@ -385,7 +430,7 @@ def tumor_board_detail(request, session_id):
 @doctor_required
 @require_POST
 def tumor_board_invite_member(request, session_id):
-    """Invite a doctor to tumor board session"""
+    """Invite a doctor to tumor board session (POST handler)"""
     session = get_object_or_404(TumorBoardSession, id=session_id)
     
     if session.created_by != request.user:
@@ -393,13 +438,13 @@ def tumor_board_invite_member(request, session_id):
         return redirect('clinical_decision_support:tumor_board_detail', session_id=session_id)
     
     doctor_id = request.POST.get('doctor_id')
-    role = request.POST.get('role')
+    role = request.POST.get('role') or request.POST.get('specialization', 'other')
     
     doctor = get_object_or_404(User, id=doctor_id, user_type='doctor')
     
     if TumorBoardMember.objects.filter(session=session, doctor=doctor).exists():
         messages.warning(request, 'This doctor is already invited.')
-        return redirect('clinical_decision_support:tumor_board_detail', session_id=session_id)
+        return redirect('clinical_decision_support:tumor_board_invite' , session_id=session_id)
     
     member = TumorBoardMember.objects.create(
         session=session,
@@ -417,7 +462,33 @@ def tumor_board_invite_member(request, session_id):
     )
     
     messages.success(request, f'Dr. {doctor.username} has been invited.')
-    return redirect('clinical_decision_support:tumor_board_detail', session_id=session_id)
+    return redirect('clinical_decision_support:tumor_board_invite', session_id=session_id)
+
+
+@login_required
+@doctor_required
+def tumor_board_invite_page(request, session_id):
+    """Display page for inviting members to tumor board session"""
+    session = get_object_or_404(TumorBoardSession, id=session_id)
+    
+    if session.created_by != request.user:
+        messages.error(request, 'Only the session creator can invite members.')
+        return redirect('clinical_decision_support:tumor_board_detail', session_id=session_id)
+    
+    current_members = session.members.select_related('doctor').order_by('invited_at')
+    existing_doctor_ids = list(current_members.values_list('doctor_id', flat=True))
+    existing_doctor_ids.append(request.user.id)
+    
+    available_doctors = User.objects.filter(
+        user_type='doctor'
+    ).exclude(id__in=existing_doctor_ids).order_by('username')
+    
+    context = {
+        'session': session,
+        'current_members': current_members,
+        'available_doctors': available_doctors,
+    }
+    return render(request, 'clinical_decision_support/tumor_board_invite.html', context)
 
 
 @login_required
@@ -486,9 +557,24 @@ def tumor_board_submit_decision(request, session_id):
 @doctor_required
 @require_POST
 def tumor_board_activate_plan(request, session_id):
-    """Activate treatment plan after consensus"""
+    """Activate treatment plan after consensus, or start a draft session"""
     session = get_object_or_404(TumorBoardSession, id=session_id)
     
+    # Handle starting a draft session (changing to in_review)
+    if session.status == 'draft' and session.created_by == request.user:
+        session.status = 'in_review'
+        session.save()
+        TumorBoardAuditLog.objects.create(
+            session=session,
+            action='status_changed',
+            actor=request.user,
+            details={'new_status': 'in_review', 'previous_status': 'draft'},
+            ip_address=request.META.get('REMOTE_ADDR')
+        )
+        messages.success(request, 'Session is now active and open for review.')
+        return redirect('clinical_decision_support:tumor_board_detail', session_id=session_id)
+    
+    # Handle activating the plan after consensus
     if not session.can_activate_plan():
         messages.error(request, 'Cannot activate plan without consensus.')
         return redirect('clinical_decision_support:tumor_board_detail', session_id=session_id)
@@ -516,6 +602,104 @@ def tumor_board_activate_plan(request, session_id):
     return redirect('clinical_decision_support:tumor_board_detail', session_id=session_id)
 
 
+@login_required
+@doctor_required
+def tumor_board_contributions(request):
+    """Doctor contributions dashboard showing all doctors' stats and participation"""
+    
+    # Get all doctors who have participated in tumor boards
+    all_members = TumorBoardMember.objects.select_related('doctor', 'session')
+    
+    # Build per-doctor statistics
+    doctor_stats = []
+    doctor_ids = all_members.values_list('doctor_id', flat=True).distinct()
+    
+    for doctor in User.objects.filter(id__in=doctor_ids, user_type='doctor').order_by('username'):
+        memberships = all_members.filter(doctor=doctor)
+        total = memberships.count()
+        approved = memberships.filter(decision='approved').count()
+        rejected = memberships.filter(decision='rejected').count()
+        modifications = memberships.filter(decision='suggested_modification').count()
+        pending = memberships.filter(decision='pending').count()
+        decided = total - pending
+        
+        # Sessions created by this doctor
+        created_count = TumorBoardSession.objects.filter(created_by=doctor).count()
+        
+        # Roles breakdown
+        roles = list(memberships.values_list('role', flat=True))
+        role_counts = {}
+        for r in roles:
+            display = dict(TumorBoardMember.ROLE_CHOICES).get(r, r)
+            role_counts[display] = role_counts.get(display, 0) + 1
+        top_role = max(role_counts, key=role_counts.get) if role_counts else 'N/A'
+        
+        # Average response time (from invited_at to decision_date)
+        responded = memberships.exclude(decision='pending').exclude(decision_date__isnull=True)
+        avg_response_hours = None
+        if responded.exists():
+            total_hours = 0
+            count = 0
+            for m in responded:
+                if m.decision_date and m.invited_at:
+                    delta = m.decision_date - m.invited_at
+                    total_hours += delta.total_seconds() / 3600
+                    count += 1
+            if count > 0:
+                avg_response_hours = round(total_hours / count, 1)
+        
+        approval_rate = round((approved / decided * 100), 1) if decided > 0 else 0
+        
+        doctor_stats.append({
+            'doctor': doctor,
+            'total_reviews': total,
+            'approved': approved,
+            'rejected': rejected,
+            'modifications': modifications,
+            'pending': pending,
+            'decided': decided,
+            'created_count': created_count,
+            'approval_rate': approval_rate,
+            'top_role': top_role,
+            'avg_response_hours': avg_response_hours,
+        })
+    
+    # Sort by total reviews descending
+    doctor_stats.sort(key=lambda x: x['total_reviews'], reverse=True)
+    
+    # Global statistics
+    total_sessions = TumorBoardSession.objects.count()
+    total_decisions = all_members.exclude(decision='pending').count()
+    total_approved = all_members.filter(decision='approved').count()
+    total_rejected = all_members.filter(decision='rejected').count()
+    total_modifications = all_members.filter(decision='suggested_modification').count()
+    global_approval_rate = round((total_approved / total_decisions * 100), 1) if total_decisions > 0 else 0
+    consensus_sessions = TumorBoardSession.objects.filter(
+        status__in=['consensus_achieved', 'closed']
+    ).count()
+    consensus_rate = round((consensus_sessions / total_sessions * 100), 1) if total_sessions > 0 else 0
+    
+    # Recent activity
+    recent_decisions = TumorBoardMember.objects.exclude(
+        decision='pending'
+    ).select_related('doctor', 'session').order_by('-decision_date')[:10]
+    
+    context = {
+        'doctor_stats': doctor_stats,
+        'total_sessions': total_sessions,
+        'total_decisions': total_decisions,
+        'total_approved': total_approved,
+        'total_rejected': total_rejected,
+        'total_modifications': total_modifications,
+        'global_approval_rate': global_approval_rate,
+        'consensus_rate': consensus_rate,
+        'consensus_sessions': consensus_sessions,
+        'recent_decisions': recent_decisions,
+        'total_doctors': len(doctor_stats),
+    }
+    return render(request, 'clinical_decision_support/tumor_board_contributions.html', context)
+
+
 # ============================================================================
 # Toxicity Prediction Views
 # ============================================================================
@@ -523,33 +707,49 @@ def tumor_board_activate_plan(request, session_id):
 @login_required
 @doctor_required
 def toxicity_dashboard(request):
-    """Toxicity prediction dashboard"""
-    predictions = ToxicityPrediction.objects.select_related(
+    """Toxicity prediction dashboard with stats and filtering"""
+    all_predictions = ToxicityPrediction.objects.select_related(
         'patient', 'treatment_plan'
-    ).order_by('-created_at')
+    )
     
-    # Filter by patient
-    patient_id = request.GET.get('patient')
-    if patient_id:
-        predictions = predictions.filter(patient_id=patient_id)
+    # Calculate stats
+    stats = {
+        'total': all_predictions.count(),
+        'low': all_predictions.filter(overall_risk_level='low').count(),
+        'moderate': all_predictions.filter(overall_risk_level='moderate').count(),
+        'high': all_predictions.filter(overall_risk_level='high').count(),
+    }
+    
+    # Get unique drugs for filter
+    drugs = list(all_predictions.values_list('drug_name', flat=True).distinct().order_by('drug_name'))
+    
+    # Apply filters
+    predictions = all_predictions.order_by('-created_at')
+    
+    # Filter by patient name search
+    patient_search = request.GET.get('patient', '').strip()
+    if patient_search:
+        predictions = predictions.filter(patient__username__icontains=patient_search)
     
     # Filter by risk level
-    risk_level = request.GET.get('risk')
+    risk_level = request.GET.get('risk_level')
     if risk_level:
         predictions = predictions.filter(overall_risk_level=risk_level)
     
+    # Filter by drug
+    drug_filter = request.GET.get('drug')
+    if drug_filter:
+        predictions = predictions.filter(drug_name=drug_filter)
+    
+    # Paginate
     paginator = Paginator(predictions, 10)
     page = request.GET.get('page')
-    page_obj = paginator.get_page(page)
-    
-    patients = User.objects.filter(user_type='patient').order_by('username')
+    predictions = paginator.get_page(page)
     
     context = {
-        'page_obj': page_obj,
-        'patients': patients,
-        'risk_levels': ToxicityPrediction.RISK_LEVEL_CHOICES,
-        'selected_patient': patient_id,
-        'selected_risk': risk_level,
+        'predictions': predictions,
+        'stats': stats,
+        'drugs': drugs,
     }
     return render(request, 'clinical_decision_support/toxicity_dashboard.html', context)
 

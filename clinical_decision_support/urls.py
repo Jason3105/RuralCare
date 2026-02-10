@@ -17,8 +17,10 @@ urlpatterns = [
     # Tumor Board
     path('tumor-board/', views.tumor_board_list, name='tumor_board_list'),
     path('tumor-board/create/', views.tumor_board_create, name='tumor_board_create'),
+    path('tumor-board/contributions/', views.tumor_board_contributions, name='tumor_board_contributions'),
     path('tumor-board/<uuid:session_id>/', views.tumor_board_detail, name='tumor_board_detail'),
-    path('tumor-board/<uuid:session_id>/invite/', views.tumor_board_invite_member, name='tumor_board_invite'),
+    path('tumor-board/<uuid:session_id>/invite/', views.tumor_board_invite_page, name='tumor_board_invite'),
+    path('tumor-board/<uuid:session_id>/invite/add/', views.tumor_board_invite_member, name='tumor_board_invite_add'),
     path('tumor-board/<uuid:session_id>/decision/', views.tumor_board_submit_decision, name='tumor_board_decision'),
     path('tumor-board/<uuid:session_id>/activate/', views.tumor_board_activate_plan, name='tumor_board_activate'),
     
