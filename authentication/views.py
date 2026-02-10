@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
@@ -951,9 +952,20 @@ from django.http import JsonResponse
 from .models import DoctorKYC
 from utils.location import haversine
 
+@login_required
 def nearby_clinics(request):
-    user_lat = float(request.GET.get("lat"))
-    user_lng = float(request.GET.get("lng"))
+    """API endpoint returning nearby clinics as JSON"""
+    try:
+        user_lat = request.GET.get("lat")
+        user_lng = request.GET.get("lng")
+        
+        if not user_lat or not user_lng:
+            return JsonResponse({"clinics": [], "error": "Missing lat/lng parameters"}, status=400)
+        
+        user_lat = float(user_lat)
+        user_lng = float(user_lng)
+    except (TypeError, ValueError):
+        return JsonResponse({"clinics": [], "error": "Invalid lat/lng values"}, status=400)
 
     clinics = []
 
@@ -965,18 +977,22 @@ def nearby_clinics(request):
             clinic.clinic_latitude, clinic.clinic_longitude
         )
 
-        if distance <= 2:  # 2 km radius
+        if distance <= 50:  # 50 km radius — generous to always show partner clinics
             clinics.append({
                 "name": clinic.full_name,
-                #"address": clinic.clinic_address,
-                "phone": clinic.mobile_number,
+                "address": clinic.clinic_address or "Address not available",
+                "phone": clinic.mobile_number or "",
                 "lat": clinic.clinic_latitude,
                 "lng": clinic.clinic_longitude,
                 "distance": round(distance, 2)
             })
+    
+    # Sort by distance
+    clinics.sort(key=lambda c: c["distance"])
 
     return JsonResponse({"clinics": clinics})
 
+@login_required
 def nearby_clinics_page(request):
     """
     Renders the map page where users can see nearby clinics.

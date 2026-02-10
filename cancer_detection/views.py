@@ -501,98 +501,104 @@ def submit_treatment_plan_review(request, plan_id):
 def upload_histopathology_report(request):
     """View for uploading histopathology reports"""
     if request.method == 'POST':
-        if 'report_file' not in request.FILES:
-            messages.error(request, 'Please select a report file.')
-            return redirect('cancer_detection:upload_histopathology')
+        report_text_input = request.POST.get('report_text', '').strip()
+        has_file = 'report_file' in request.FILES
         
-        report_file = request.FILES['report_file']
+        if not has_file and not report_text_input:
+            messages.error(request, 'Please either paste report text or upload a report file.')
+            return redirect('cancer_detection:histopathology_hub')
+        
+        report_file = request.FILES.get('report_file') if has_file else None
         report_type = request.POST.get('report_type', 'biopsy')
         
-        # Validate file type
-        allowed_extensions = ['.pdf', '.jpg', '.jpeg', '.png', '.docx', '.txt']
-        file_ext = os.path.splitext(report_file.name)[1].lower()
-        
-        if file_ext not in allowed_extensions:
-            messages.error(request, f'Invalid file type. Allowed types: {", ".join(allowed_extensions)}')
-            return redirect('cancer_detection:upload_histopathology')
+        if has_file:
+            # Validate file type
+            allowed_extensions = ['.pdf', '.jpg', '.jpeg', '.png', '.docx', '.txt']
+            file_ext = os.path.splitext(report_file.name)[1].lower()
+            
+            if file_ext not in allowed_extensions:
+                messages.error(request, f'Invalid file type. Allowed types: {", ".join(allowed_extensions)}')
+                return redirect('cancer_detection:histopathology_hub')
         
         # Create histopathology report record
-        report = HistopathologyReport.objects.create(
-            patient=request.user,
-            report_file=report_file,
-        )
+        create_kwargs = {'patient': request.user}
+        if report_file:
+            create_kwargs['report_file'] = report_file
+        report = HistopathologyReport.objects.create(**create_kwargs)
         
-        # Extract text from file based on type
+        # Extract text from file or use pasted text
         try:
-            report_text = ""
+            report_text = report_text_input or ""
             
-            # Handle both local and cloud storage
-            try:
-                file_path = report.report_file.path
-            except NotImplementedError:
-                # Cloud storage - download to temporary file
-                with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as tmp_file:
-                    report.report_file.seek(0)
-                    tmp_file.write(report.report_file.read())
-                    file_path = tmp_file.name
-            
-            if file_ext == '.txt':
-                # Simple text file - fastest
-                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                    report_text = f.read()
-            elif file_ext == '.pdf':
-                # Try pdfplumber first (faster), then PyPDF2
+            # Extract text from file if uploaded and no text was pasted
+            if has_file and not report_text_input:
+                # Handle both local and cloud storage
                 try:
-                    import pdfplumber
-                    with pdfplumber.open(file_path) as pdf:
-                        pages_text = []
-                        for page in pdf.pages[:5]:  # Limit for speed
-                            text = page.extract_text()
-                            if text:
-                                pages_text.append(text)
-                        report_text = "\n".join(pages_text)
-                except ImportError:
+                    file_path = report.report_file.path
+                except NotImplementedError:
+                    # Cloud storage - download to temporary file
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as tmp_file:
+                        report.report_file.seek(0)
+                        tmp_file.write(report.report_file.read())
+                        file_path = tmp_file.name
+                
+                if file_ext == '.txt':
+                    # Simple text file - fastest
+                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                        report_text = f.read()
+                elif file_ext == '.pdf':
+                    # Try pdfplumber first (faster), then PyPDF2
                     try:
-                        import PyPDF2
-                        with open(file_path, 'rb') as f:
-                            reader = PyPDF2.PdfReader(f)
-                            for page in reader.pages[:5]:
-                                report_text += page.extract_text() or ""
+                        import pdfplumber
+                        with pdfplumber.open(file_path) as pdf:
+                            pages_text = []
+                            for page in pdf.pages[:5]:  # Limit for speed
+                                text = page.extract_text()
+                                if text:
+                                    pages_text.append(text)
+                            report_text = "\n".join(pages_text)
                     except ImportError:
-                        report_text = "PDF file uploaded - install pdfplumber for text extraction"
+                        try:
+                            import PyPDF2
+                            with open(file_path, 'rb') as f:
+                                reader = PyPDF2.PdfReader(f)
+                                for page in reader.pages[:5]:
+                                    report_text += page.extract_text() or ""
+                        except ImportError:
+                            report_text = "PDF file uploaded - install pdfplumber for text extraction"
+                        except Exception:
+                            report_text = "PDF file uploaded - text extraction failed"
                     except Exception:
                         report_text = "PDF file uploaded - text extraction failed"
-                except Exception:
-                    report_text = "PDF file uploaded - text extraction failed"
-            elif file_ext == '.docx':
-                # Extract text from DOCX
-                try:
-                    from docx import Document
-                    doc = Document(file_path)
-                    paragraphs = [para.text for para in doc.paragraphs if para.text.strip()]
-                    report_text = "\n".join(paragraphs[:100])  # Limit for speed
-                except ImportError:
-                    report_text = "DOCX file uploaded - install python-docx for text extraction"
-                except Exception:
-                    report_text = "DOCX file uploaded - text extraction failed"
-            elif file_ext in ['.jpg', '.jpeg', '.png']:
-                # Image files - try OCR with pytesseract
-                try:
-                    import pytesseract
-                    from PIL import Image
-                    img = Image.open(file_path)
-                    report_text = pytesseract.image_to_string(img)
-                except ImportError:
-                    report_text = "Image file uploaded - install pytesseract for OCR"
-                except Exception:
-                    report_text = "Image file uploaded - OCR extraction failed"
-            
-            # Clean up temp file if created (from cloud storage)
-            if file_path.startswith(tempfile.gettempdir()):
-                try:
-                    os.unlink(file_path)
-                except:
-                    pass
+                elif file_ext == '.docx':
+                    # Extract text from DOCX
+                    try:
+                        from docx import Document
+                        doc = Document(file_path)
+                        paragraphs = [para.text for para in doc.paragraphs if para.text.strip()]
+                        report_text = "\n".join(paragraphs[:100])  # Limit for speed
+                    except ImportError:
+                        report_text = "DOCX file uploaded - install python-docx for text extraction"
+                    except Exception:
+                        report_text = "DOCX file uploaded - text extraction failed"
+                elif file_ext in ['.jpg', '.jpeg', '.png']:
+                    # Image files - try OCR with pytesseract
+                    try:
+                        import pytesseract
+                        from PIL import Image
+                        img = Image.open(file_path)
+                        report_text = pytesseract.image_to_string(img)
+                    except ImportError:
+                        report_text = "Image file uploaded - install pytesseract for OCR"
+                    except Exception:
+                        report_text = "Image file uploaded - OCR extraction failed"
+                
+                # Clean up temp file if created (from cloud storage)
+                if file_path.startswith(tempfile.gettempdir()):
+                    try:
+                        os.unlink(file_path)
+                    except:
+                        pass
             
             # Store extracted text
             report.report_text = report_text
@@ -683,11 +689,9 @@ def upload_histopathology_report(request):
         except Exception as e:
             messages.error(request, f'Error analyzing report: {str(e)}')
             report.delete()
-            return redirect('cancer_detection:upload_histopathology')
+            return redirect('cancer_detection:histopathology_hub')
     
-    return render(request, 'cancer_detection/upload_histopathology.html', {
-        'report_types': HistopathologyReport.REPORT_STATUS_CHOICES
-    })
+    return redirect('cancer_detection:histopathology_hub')
 
 
 @login_required
@@ -1271,6 +1275,25 @@ def pathology_hub(request):
         'page_obj': page_obj,
     }
     return render(request, 'cancer_detection/pathology_hub.html', context)
+
+
+@login_required
+def histopathology_hub(request):
+    """Combined view for histopathology report upload and reports list with tabs"""
+    # Upload form context
+    report_types = HistopathologyReport.REPORT_STATUS_CHOICES
+    
+    # Reports list with pagination
+    reports = HistopathologyReport.objects.filter(patient=request.user).order_by('-created_at')
+    paginator = Paginator(reports, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'report_types': report_types,
+        'page_obj': page_obj,
+    }
+    return render(request, 'cancer_detection/histopathology_hub.html', context)
 
 
 @login_required

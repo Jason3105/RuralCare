@@ -116,7 +116,7 @@
             </div>
             <div>
                 <p class="text-xs text-slate-400">Search Radius</p>
-                <p class="text-sm font-semibold text-white">3.0 Kilometers</p>
+                <p class="text-sm font-semibold text-white">5.0 Kilometers</p>
             </div>
         </div>
     </div>
@@ -186,11 +186,28 @@
     };
 
     // --- INITIALIZATION ---
-    navigator.geolocation.getCurrentPosition(initApp, 
-        () => {
-            alert("Location access needed for this app. Please enable it.");
-        }
-    );
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(initApp, handleGeoError, {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 60000
+        });
+    } else {
+        handleGeoError({ code: 0, message: "Geolocation not supported" });
+    }
+    
+    function handleGeoError(err) {
+        console.warn("Geolocation error:", err);
+        // Default to Mumbai, India as fallback
+        initApp({ coords: { latitude: 19.0760, longitude: 72.8777 } });
+        
+        // Show a warning banner
+        const sidebar = document.getElementById('sidebar');
+        const banner = document.createElement('div');
+        banner.className = 'mx-4 mt-3 p-3 rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2';
+        banner.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Location unavailable. Showing default area. Enable location for accurate results.';
+        sidebar.querySelector('.p-6').appendChild(banner);
+    }
 
     function initApp(pos) {
         userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
@@ -209,7 +226,10 @@
     // --- FUNCTIONALITY 1: BACKEND API ---
     function fetchPartnerClinics() {
         fetch(`/api/nearby-clinics/?lat=${userPos.lat}&lng=${userPos.lng}`)
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return res.json();
+            })
             .then(data => {
                 if (!data.clinics || data.clinics.length === 0) {
                     clinics.partner = [];
@@ -232,7 +252,14 @@
             })
             .catch(err => {
                 console.error("Partner fetch failed:", err);
-                document.getElementById('list-partner').innerHTML = `<div class="text-red-400 text-center text-xs mt-4">Failed to load network data.</div>`;
+                document.getElementById('list-partner').innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-10 text-slate-500 gap-3">
+                        <i class="fa-solid fa-circle-exclamation text-2xl text-red-400"></i>
+                        <span class="text-xs font-medium text-red-400">Failed to load network clinics</span>
+                        <button onclick="fetchPartnerClinics()" class="mt-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs rounded-lg border border-white/10 transition">
+                            <i class="fa-solid fa-rotate-right mr-1"></i> Retry
+                        </button>
+                    </div>`;
             });
     }
 
@@ -241,42 +268,133 @@
         const query = `
             [out:json][timeout:25];
             (
-              node["amenity"="clinic"](around:3000,${userPos.lat},${userPos.lng});
-              node["amenity"="hospital"](around:3000,${userPos.lat},${userPos.lng});
-              way["amenity"="clinic"](around:3000,${userPos.lat},${userPos.lng});
-              way["amenity"="hospital"](around:3000,${userPos.lat},${userPos.lng});
+              node["amenity"="clinic"](around:5000,${userPos.lat},${userPos.lng});
+              node["amenity"="hospital"](around:5000,${userPos.lat},${userPos.lng});
+              node["amenity"="doctors"](around:5000,${userPos.lat},${userPos.lng});
+              node["healthcare"](around:5000,${userPos.lat},${userPos.lng});
+              way["amenity"="clinic"](around:5000,${userPos.lat},${userPos.lng});
+              way["amenity"="hospital"](around:5000,${userPos.lat},${userPos.lng});
+              way["amenity"="doctors"](around:5000,${userPos.lat},${userPos.lng});
+              way["healthcare"](around:5000,${userPos.lat},${userPos.lng});
             );
             out center;
         `;
         
-        const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+        // Try multiple Overpass endpoints for reliability
+        const endpoints = [
+            'https://overpass-api.de/api/interpreter',
+            'https://overpass.kumi.systems/api/interpreter'
+        ];
+        
+        let fetchAttempt = 0;
+        
+        function tryFetch() {
+            if (fetchAttempt >= endpoints.length) {
+                // All Overpass endpoints failed — try Nominatim as last resort
+                fetchNominatimFallback();
+                return;
+            }
+            
+            const url = `${endpoints[fetchAttempt]}?data=${encodeURIComponent(query)}`;
+            fetchAttempt++;
+            
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
+            
+            fetch(url, { signal: controller.signal })
+                .then(res => {
+                    clearTimeout(timeoutId);
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    return res.json();
+                })
+                .then(data => {
+                    if (!data.elements || data.elements.length === 0) {
+                        // No results from Overpass, try Nominatim fallback
+                        fetchNominatimFallback();
+                        return;
+                    }
+                    
+                    const results = data.elements.map(el => {
+                        const lat = el.lat || (el.center && el.center.lat);
+                        const lng = el.lon || (el.center && el.center.lon);
+                        
+                        if (!lat || !lng) return null;
+                        
+                        return {
+                            name: el.tags.name || (el.tags.amenity === 'hospital' ? 'Hospital' : 'Health Facility'),
+                            address: el.tags['addr:street'] 
+                                ? `${el.tags['addr:street']}${el.tags['addr:city'] ? ', ' + el.tags['addr:city'] : ''}`
+                                : "Public Listing",
+                            phone: el.tags['phone'] || el.tags['contact:phone'] || "",
+                            lat: lat,
+                            lng: lng,
+                            distance: parseFloat(haversineDistance(userPos.lat, userPos.lng, lat, lng).toFixed(2)),
+                            source: 'public',
+                            type: el.tags.amenity || el.tags.healthcare || 'clinic'
+                        };
+                    }).filter(Boolean);
 
-        fetch(url)
+                    results.sort((a, b) => a.distance - b.distance);
+                    clinics.public = results;
+                    document.getElementById('public-status').style.display = 'none';
+                    renderList('public');
+                    results.forEach(c => createMarker(c, 'public'));
+                })
+                .catch(err => {
+                    clearTimeout(timeoutId);
+                    console.warn(`Overpass attempt ${fetchAttempt} failed:`, err.message);
+                    tryFetch(); // try next endpoint
+                });
+        }
+        
+        tryFetch();
+    }
+    
+    // Nominatim fallback when Overpass fails
+    function fetchNominatimFallback() {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=hospital+OR+clinic+near&viewbox=${userPos.lng-0.05},${userPos.lat+0.05},${userPos.lng+0.05},${userPos.lat-0.05}&bounded=1&limit=20&addressdetails=1`;
+        
+        fetch(url, { headers: { 'Accept': 'application/json' } })
             .then(res => res.json())
             .then(data => {
-                const results = data.elements.map(el => {
-                    const lat = el.lat || el.center.lat;
-                    const lng = el.lon || el.center.lon;
-                    
+                if (!data || data.length === 0) {
+                    document.getElementById('public-status').innerHTML = `
+                        <i class="fa-solid fa-map-location-dot text-2xl text-slate-600 mb-2"></i>
+                        <span class="text-xs font-medium text-slate-500">No public clinics found in this area</span>
+                    `;
+                    return;
+                }
+                
+                const results = data.map(place => {
+                    const lat = parseFloat(place.lat);
+                    const lng = parseFloat(place.lon);
                     return {
-                        name: el.tags.name || "Public Health Facility",
-                        address: el.tags['addr:street'] || "Public Listing",
-                        phone: el.tags['phone'] || "No phone",
+                        name: place.display_name.split(',')[0],
+                        address: place.display_name.split(',').slice(1, 3).join(',').trim() || 'Public Listing',
+                        phone: "",
                         lat: lat,
                         lng: lng,
-                        distance: (haversineDistance(userPos.lat, userPos.lng, lat, lng)).toFixed(2),
-                        source: 'public'
+                        distance: parseFloat(haversineDistance(userPos.lat, userPos.lng, lat, lng).toFixed(2)),
+                        source: 'public',
+                        type: place.type || 'clinic'
                     };
                 });
-
+                
+                results.sort((a, b) => a.distance - b.distance);
                 clinics.public = results;
                 document.getElementById('public-status').style.display = 'none';
                 renderList('public');
-                
                 results.forEach(c => createMarker(c, 'public'));
             })
             .catch(err => {
-                document.getElementById('public-status').innerHTML = "<span class='text-red-400 text-xs'>Public data unavailable</span>";
+                console.error("Nominatim fallback also failed:", err);
+                document.getElementById('public-status').innerHTML = `
+                    <i class="fa-solid fa-circle-exclamation text-2xl text-red-400 mb-2"></i>
+                    <span class="text-xs font-medium text-red-400">Unable to load public data. Check your connection.</span>
+                    <button onclick="fetchPublicData()" class="mt-3 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs rounded-lg border border-white/10 transition">
+                        <i class="fa-solid fa-rotate-right mr-1"></i> Retry
+                    </button>
+                `;
             });
     }
 
@@ -337,9 +455,21 @@
         const data = clinics[type];
         
         if(data.length === 0) {
-             container.innerHTML = `<div class="text-slate-500 text-center text-sm mt-10">No ${type} clinics found nearby.</div>`;
+             const emptyIcon = type === 'partner' ? 'fa-network-wired' : 'fa-earth-americas';
+             container.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-10 text-slate-500 gap-3">
+                    <i class="fa-solid ${emptyIcon} text-3xl text-slate-600"></i>
+                    <span class="text-sm font-medium">No ${type === 'partner' ? 'network' : 'public'} clinics found nearby</span>
+                    <span class="text-xs text-slate-600">Try expanding your search area or moving the map</span>
+                </div>`;
              return;
         }
+
+        // Show count header
+        const header = document.createElement('div');
+        header.className = 'text-xs text-slate-500 font-medium px-1 mb-2 flex items-center justify-between';
+        header.innerHTML = `<span>${data.length} ${type === 'partner' ? 'network partners' : 'public facilities'} found</span><span class="text-slate-600">Sorted by distance</span>`;
+        container.appendChild(header);
 
         data.forEach(c => {
             const card = document.createElement('div');
@@ -348,16 +478,23 @@
             const bgHover = type === 'partner' ? 'group-hover:bg-blue-500/10' : 'group-hover:bg-amber-500/10';
 
             card.className = `list-card bg-slate-800/50 backdrop-blur p-4 rounded-xl border border-white/5 ${glowClass} cursor-pointer group`;
+            
+            let phoneHtml = '';
+            if (c.phone) {
+                phoneHtml = `<p class="text-xs text-slate-400 mt-1 flex items-center gap-1"><i class="fa-solid fa-phone text-[10px]"></i> ${c.phone}</p>`;
+            }
+            
             card.innerHTML = `
                 <div class="flex justify-between items-start gap-3">
                     <div class="mt-1 ${iconClass}">
                         <i class="fa-solid ${type === 'partner' ? 'fa-star' : 'fa-building'}"></i>
                     </div>
-                    <div class="flex-1">
+                    <div class="flex-1 min-w-0">
                         <h4 class="font-semibold text-sm text-slate-200 group-hover:text-white transition-colors">${c.name}</h4>
                         <p class="text-xs text-slate-500 mt-1 truncate">${c.address}</p>
+                        ${phoneHtml}
                     </div>
-                    <div class="flex flex-col items-end gap-1">
+                    <div class="flex flex-col items-end gap-1 flex-shrink-0">
                         <span class="${bgHover} ${iconClass} transition-colors text-[10px] font-bold px-2 py-1 rounded-md font-mono">${c.distance}km</span>
                     </div>
                 </div>

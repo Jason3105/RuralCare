@@ -3,118 +3,768 @@
 {% block title %}Medicine &amp; AI Hub{% endblock %}
 
 {% block extra_head %}
+<!-- Marked.js for Markdown rendering -->
+<script src="https://cdn.jsdelivr.net/npm/marked@11.0.0/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+
 <style>
-    /* Chat styles scoped to the hub panel */
-    #mhpanel-assistant .chat-box {
+    /* ==== AI ASSISTANT TAB STYLES ==== */
+    /* Top Controls Bar */
+    #mhpanel-assistant .assistant-controls {
         display: flex;
-        flex-direction: column;
-        height: 70vh;
-        background: #f7fafc;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        padding: 1.25rem 1.5rem;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    #mhpanel-assistant .assistant-controls .control-buttons {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+    
+    #mhpanel-assistant .session-selector {
+        flex: 1;
+        min-width: 200px;
+    }
+    
+    #mhpanel-assistant .session-selector label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--muted-foreground);
+        margin-bottom: 0.375rem;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+    
+    #mhpanel-assistant .session-selector select {
+        width: 100%;
+        padding: 0.625rem 2.5rem 0.625rem 1rem;
+        background: var(--background);
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        color: var(--foreground);
+        font-size: 0.875rem;
+        cursor: pointer;
+        outline: none;
+        transition: all 0.2s;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+        background-position: right 0.5rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+    }
+    
+    #mhpanel-assistant .session-selector select:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    #mhpanel-assistant .new-chat-btn,
+    #mhpanel-assistant .manage-sessions-btn {
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        color: #fff;
+        border: none;
+        padding: 0.625rem 1.25rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+    }
+    
+    #mhpanel-assistant .manage-sessions-btn {
+        background: var(--card);
+        color: var(--foreground);
+        border: 1px solid var(--border);
+    }
+    
+    #mhpanel-assistant .manage-sessions-btn:hover {
+        background: var(--accent);
+        border-color: #3b82f6;
+        color: #3b82f6;
+    }
+    
+    #mhpanel-assistant .new-chat-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+    
+    /* Medical Context Badge */
+    #hubContextIndicator {
+        padding: 0.75rem 1rem;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        border-radius: 0.75rem;
+        color: var(--foreground);
+        font-size: 0.8125rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    #hubContextIndicator i {
+        color: #3b82f6;
+        font-size: 0.875rem;
+    }
+    
+    #hubContextIndicator .context-text {
+        font-weight: 600;
+    }
+    
+    #hubContextIndicator .context-badge {
+        background: rgba(16, 185, 129, 0.15);
+        color: #059669;
+        padding: 0.25rem 0.625rem;
+        border-radius: 1rem;
+        font-weight: 600;
+        font-size: 0.6875rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        margin-left: 0.5rem;
+    }
+    
+    #hubContextIndicator .context-badge i {
+        color: #10b981;
+        font-size: 0.75rem;
+    }
+    
+    /* Chat container - enhanced borders and shadows */
+    #mhpanel-assistant .chat-container {
+        background: var(--card);
+        border: 2px solid var(--border);
         border-radius: 1rem;
         overflow: hidden;
-        border: 1px solid var(--border, #e2e8f0);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
     }
-    .dark #mhpanel-assistant .chat-box {
-        background: #1a202c;
+    
+    #mhpanel-assistant .chat-header {
+        padding: 1rem 1.5rem;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05));
+        border-bottom: 2px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
     }
+    
+    #mhpanel-assistant .chat-header-title {
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--foreground);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    #mhpanel-assistant .chat-header-title i {
+        color: #3b82f6;
+    }
+    
+    #mhpanel-assistant .chat-header-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    #mhpanel-assistant .clear-chat-btn {
+        padding: 0.5rem 0.875rem;
+        background: var(--card);
+        border: 1.5px solid var(--border);
+        border-radius: 0.5rem;
+        color: var(--muted-foreground);
+        font-size: 0.8125rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+    
+    #mhpanel-assistant .clear-chat-btn:hover {
+        background: #fee2e2;
+        color: #dc2626;
+        border-color: #dc2626;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(220, 38, 38, 0.15);
+    }
+    
+    /* Messages container with custom scrollbar */
     #mhpanel-assistant .chat-messages {
-        flex: 1;
+        min-height: 60vh;
+        max-height: 60vh;
         overflow-y: auto;
-        padding: 1.5rem;
+        padding: 2rem 1.5rem;
         scroll-behavior: smooth;
+        background: var(--background);
     }
+    
+    #mhpanel-assistant .chat-messages::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    #mhpanel-assistant .chat-messages::-webkit-scrollbar-track {
+        background: var(--background);
+    }
+    
+    #mhpanel-assistant .chat-messages::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 4px;
+    }
+    
+    #mhpanel-assistant .chat-messages::-webkit-scrollbar-thumb:hover {
+        background: var(--muted-foreground);
+    }
+    
     #mhpanel-assistant .chat-msg {
         display: flex;
-        margin-bottom: 1.25rem;
-        animation: chatFadeIn .3s ease-in;
+        margin-bottom: 1.5rem;
+        animation: chatFadeIn 0.4s ease-out;
     }
+    
     @keyframes chatFadeIn {
-        from { opacity:0; transform:translateY(8px); }
-        to   { opacity:1; transform:translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
-    #mhpanel-assistant .chat-msg.user { justify-content: flex-end; }
+    
+    #mhpanel-assistant .chat-msg.user {
+        justify-content: flex-end;
+    }
+    
     #mhpanel-assistant .chat-bubble {
-        max-width: 70%;
-        padding: 14px 18px;
+        max-width: 75%;
+        padding: 1rem 1.25rem;
         border-radius: 1rem;
-        line-height: 1.6;
-        white-space: pre-wrap;
+        line-height: 1.65;
         word-wrap: break-word;
     }
+    
     #mhpanel-assistant .chat-msg.user .chat-bubble {
-        background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
         color: #fff;
-        border-bottom-right-radius: 4px;
+        border-bottom-right-radius: 0.375rem;
+        box-shadow: 0 3px 12px rgba(59, 130, 246, 0.35);
+        border: 2px solid rgba(255, 255, 255, 0.2);
     }
+    
     #mhpanel-assistant .chat-msg.assistant .chat-bubble {
-        background: white;
-        color: #2d3748;
-        border: 1px solid #e2e8f0;
-        border-bottom-left-radius: 4px;
-        box-shadow: 0 2px 8px rgba(0,0,0,.05);
+        background: var(--card);
+        color: var(--foreground);
+        border: 2px solid var(--border);
+        border-bottom-left-radius: 0.375rem;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
     }
-    .dark #mhpanel-assistant .chat-msg.assistant .chat-bubble {
-        background: #2d3748;
-        color: #e2e8f0;
-        border-color: #4a5568;
+    
+    /* Markdown formatting in assistant messages */
+    #mhpanel-assistant .chat-msg.assistant .chat-bubble h1,
+    #mhpanel-assistant .chat-msg.assistant .chat-bubble h2,
+    #mhpanel-assistant .chat-msg.assistant .chat-bubble h3 {
+        font-weight: 700;
+        margin: 1em 0 0.5em 0;
+        color: var(--foreground);
     }
-    #mhpanel-assistant .chat-avatar {
-        width: 36px; height: 36px; border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        font-weight: 700; margin: 0 10px; flex-shrink: 0; font-size: 13px;
+    
+    #mhpanel-assistant .chat-msg.assistant .chat-bubble h1 {
+        font-size: 1.4em;
     }
-    #mhpanel-assistant .chat-msg.user .chat-avatar {
-        background: linear-gradient(135deg,#667eea,#764ba2); color:#fff;
+    #mhpanel-assistant .chat-msg.assistant .chat-bubble h2 {
+        font-size: 1.25em;
     }
-    #mhpanel-assistant .chat-msg.assistant .chat-avatar {
-        background: linear-gradient(135deg,#48bb78,#38a169); color:#fff;
+    #mhpanel-assistant .chat-msg.assistant .chat-bubble h3 {
+        font-size: 1.1em;
     }
-    #mhpanel-assistant .chat-time { font-size: 11px; opacity: .6; margin-top: 6px; }
-    #mhpanel-assistant .typing-dots { display:flex; gap:5px; padding:12px; }
-    #mhpanel-assistant .typing-dots span {
-        width:8px; height:8px; background:#cbd5e0; border-radius:50%;
-        animation: tdot 1.4s infinite;
+    #mhpanel-assistant .chat-msg.assistant .chat-bubble h1:first-child,
+    #mhpanel-assistant .chat-msg.assistant .chat-bubble h2:first-child,
+    #mhpanel-assistant .chat-msg.assistant .chat-bubble h3:first-child {
+        margin-top: 0;
     }
-    #mhpanel-assistant .typing-dots span:nth-child(2){animation-delay:.2s}
-    #mhpanel-assistant .typing-dots span:nth-child(3){animation-delay:.4s}
-    @keyframes tdot { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-8px)} }
-    #mhpanel-assistant .chat-input-bar {
-        display:flex; gap:10px; padding:14px 18px;
-        border-top:2px solid var(--border, #e2e8f0); background:white;
+    
+    #mhpanel-assistant .chat-msg.assistant .chat-bubble p {
+        margin: 0.75em 0;
     }
-    .dark #mhpanel-assistant .chat-input-bar { background:#2d3748; }
-    #mhpanel-assistant .chat-input-bar textarea {
-        flex:1; border:none; background:transparent; font-size:15px;
-        outline:none; resize:none; max-height:100px; font-family:inherit;
+    #mhpanel-assistant .chat-msg.assistant .chat-bubble p:first-child {
+        margin-top: 0;
+    }
+    #mhpanel-assistant .chat-msg.assistant .chat-bubble p:last-child {
+        margin-bottom: 0;
+    }
+    
+    #mhpanel-assistant .chat-msg.assistant .chat-bubble ul,
+    #mhpanel-assistant .chat-msg.assistant .chat-bubble ol {
+        margin: 0.75em 0;
+        padding-left: 1.5em;
+    }
+    #mhpanel-assistant .chat-msg.assistant .chat-bubble li {
+        margin: 0.4em 0;
+    }
+    #mhpanel-assistant .chat-msg.assistant .chat-bubble strong {
+        font-weight: 700;
+        color: var(--foreground);
+    }
+    #mhpanel-assistant .chat-msg.assistant .chat-bubble em {
+        font-style: italic;
+    }
+    #mhpanel-assistant .chat-msg.assistant .chat-bubble code {
+        background: var(--accent);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.9em;
+        font-family: 'Courier New', monospace;
+        color: #e11d48;
+    }
+    #mhpanel-assistant .chat-msg.assistant .chat-bubble pre {
+        background: var(--accent);
+        padding: 12px;
+        border-radius: 8px;
+        overflow-x: auto;
+        margin: 1em 0;
+        border-left: 4px solid #3b82f6;
+    }
+    #mhpanel-assistant .chat-msg.assistant .chat-bubble pre code {
+        background: transparent;
+        padding: 0;
         color: inherit;
     }
+    #mhpanel-assistant .chat-msg.assistant .chat-bubble blockquote {
+        border-left: 4px solid #3b82f6;
+        padding-left: 16px;
+        margin: 1em 0;
+        color: var(--muted-foreground);
+        font-style: italic;
+    }
+    #mhpanel-assistant .chat-msg.assistant .chat-bubble a {
+        color: #3b82f6;
+        text-decoration: underline;
+    }
+    
+    #mhpanel-assistant .chat-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        margin: 0 0.75rem;
+        flex-shrink: 0;
+        font-size: 0.875rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    #mhpanel-assistant .chat-msg.user .chat-avatar {
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        color: #fff;
+    }
+    
+    #mhpanel-assistant .chat-msg.assistant .chat-avatar {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: #fff;
+    }
+    
+    #mhpanel-assistant .chat-time {
+        font-size: 0.75rem;
+        opacity: 0.65;
+        margin-top: 0.5rem;
+        font-weight: 500;
+    }
+    
+    #mhpanel-assistant .typing-dots {
+        display: flex;
+        gap: 5px;
+        padding: 12px;
+    }
+    #mhpanel-assistant .typing-dots span {
+        width: 9px;
+        height: 9px;
+        background: #94a3b8;
+        border-radius: 50%;
+        animation: tdot 1.4s infinite;
+    }
+    #mhpanel-assistant .typing-dots span:nth-child(2) {
+        animation-delay: .2s;
+    }
+    #mhpanel-assistant .typing-dots span:nth-child(3) {
+        animation-delay: .4s;
+    }
+    @keyframes tdot {
+        0%, 60%, 100% {
+            transform: translateY(0);
+        }
+        30% {
+            transform: translateY(-10px);
+        }
+    }
+    
+    /* Input bar */
+    #mhpanel-assistant .chat-input-bar {
+        display: flex;
+        gap: 0.75rem;
+        padding: 1.25rem 1.5rem;
+        border-top: 1px solid var(--border);
+        background: var(--card);
+    }
+    
+    #mhpanel-assistant .chat-input-bar textarea {
+        flex: 1;
+        border: 1px solid var(--border);
+        background: var(--background);
+        font-size: 0.9375rem;
+        outline: none;
+        resize: none;
+        max-height: 120px;
+        font-family: inherit;
+        color: var(--foreground);
+        padding: 0.875rem 1rem;
+        border-radius: 0.75rem;
+        transition: all 0.3s;
+    }
+    
+    #mhpanel-assistant .chat-input-bar textarea:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
     #mhpanel-assistant .chat-input-bar button {
-        padding:10px 22px; border:none; border-radius:8px; cursor:pointer;
-        font-weight:600; background:linear-gradient(135deg,#667eea,#764ba2);
-        color:#fff; transition:all .3s;
+        padding: 0.875rem 1.5rem;
+        border: none;
+        border-radius: 0.75rem;
+        cursor: pointer;
+        font-weight: 600;
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        color: #fff;
+        transition: all 0.3s;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 60px;
     }
-    #mhpanel-assistant .chat-input-bar button:hover:not(:disabled){
-        transform:translateY(-1px); box-shadow:0 4px 12px rgba(102,126,234,.4);
+    
+    #mhpanel-assistant .chat-input-bar button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
     }
-    #mhpanel-assistant .chat-input-bar button:disabled{opacity:.5;cursor:not-allowed}
-
-    /* Session sidebar within tab */
-    #mhpanel-assistant .chat-sessions {
-        border-right: 1px solid var(--border, #e2e8f0);
+    
+    #mhpanel-assistant .chat-input-bar button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    /* Welcome suggestion buttons */
+    #mhpanel-assistant .suggestion-btn {
+        background: var(--card);
+        border: 1px solid var(--border);
+        padding: 1rem 1.25rem;
+        border-radius: 0.75rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: left;
+        color: var(--foreground);
+        font-weight: 500;
+        font-size: 0.875rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    #mhpanel-assistant .suggestion-btn:hover {
+        border-color: #3b82f6;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05));
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    }
+    
+    #mhpanel-assistant .suggestion-btn i {
+        color: #3b82f6;
+        font-size: 1.25rem;
+        width: 24px;
+        text-align: center;
+    }
+    
+    /* Session Management Modal */
+    #sessionManagementModal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        padding: 1rem;
+        animation: fadeIn 0.2s ease-out;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    #sessionManagementModal.active {
+        display: flex;
+    }
+    
+    .session-modal-content {
+        background: var(--card, #ffffff);
+        border-radius: 1.25rem;
+        max-width: 650px;
+        width: 100%;
+        max-height: 85vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5), 0 10px 30px rgba(0, 0, 0, 0.4);
+        border: 1px solid var(--border);
+        animation: slideUp 0.3s ease-out;
+        overflow: hidden;
+    }
+    
+    .session-modal-header {
+        padding: 1.5rem 1.75rem;
+        border-bottom: 2px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.06), rgba(139, 92, 246, 0.06));
+    }
+    
+    .session-modal-header h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--foreground);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .session-modal-header h3 i {
+        color: #3b82f6;
+    }
+    
+    .session-modal-close {
+        background: transparent;
+        border: none;
+        font-size: 1.5rem;
+        color: var(--muted-foreground);
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+    }
+    
+    .session-modal-close:hover {
+        color: #ef4444;
+        background: rgba(239, 68, 68, 0.1);
+    }
+    
+    .session-modal-body {
+        padding: 1.25rem;
         overflow-y: auto;
-        background: #2d3748;
-        border-radius: 1rem 0 0 1rem;
-        min-width: 220px;
+        flex: 1;
     }
-    .dark #mhpanel-assistant .chat-sessions { background: #111827; }
-    #mhpanel-assistant .session-btn {
-        display:block; width:100%; text-align:left; padding:10px 14px;
-        background:transparent; border:none; color:#cbd5e0;
-        cursor:pointer; border-left:3px solid transparent;
-        transition:all .2s; font-size:13px;
+    
+    .session-modal-body::-webkit-scrollbar {
+        width: 8px;
     }
-    #mhpanel-assistant .session-btn:hover { background:rgba(255,255,255,.08); border-left-color:#667eea; }
-    #mhpanel-assistant .session-btn.active { background:rgba(102,126,234,.25); border-left-color:#667eea; }
+    
+    .session-modal-body::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    
+    .session-modal-body::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 4px;
+    }
+    
+    .session-modal-body::-webkit-scrollbar-thumb:hover {
+        background: var(--muted-foreground);
+    }
+    
+    .session-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.125rem 1rem;
+        background: var(--background);
+        border: 2px solid var(--border);
+        border-radius: 0.75rem;
+        margin-bottom: 0.875rem;
+        transition: all 0.2s;
+        cursor: pointer;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .session-item:hover {
+        background: var(--accent);
+        border-color: #3b82f6;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        transform: translateY(-1px);
+    }
+    
+    .session-item.active {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.10));
+        border-color: #3b82f6;
+        box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25), inset 0 0 0 1px rgba(59, 130, 246, 0.1);
+    }
+    
+    .session-item-info {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .session-item-title {
+        font-weight: 600;
+        font-size: 0.9375rem;
+        color: var(--foreground);
+        margin-bottom: 0.25rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .session-item.active .session-item-title {
+        color: #3b82f6;
+    }
+    
+    .session-item-meta {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.75rem;
+        color: var(--muted-foreground);
+    }
+    
+    .session-item-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-left: 1rem;
+        flex-shrink: 0;
+    }
+    
+    .session-delete-btn {
+        padding: 0.5rem 0.875rem;
+        background: var(--card);
+        border: 1.5px solid var(--border);
+        border-radius: 0.5rem;
+        color: var(--muted-foreground);
+        font-size: 0.8125rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        white-space: nowrap;
+    }
+    
+    .session-delete-btn:hover {
+        background: #fee2e2;
+        color: #dc2626;
+        border-color: #dc2626;
+        transform: scale(1.05);
+        box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
+    }
+    
+    .session-delete-btn i {
+        font-size: 0.875rem;
+    }
+    
+    /* Empty state in modal */
+    .session-modal-body .text-center {
+        padding: 3rem 2rem;
+    }
+    
+    .session-modal-body .text-center i {
+        display: block;
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+        color: var(--muted-foreground);
+        opacity: 0.3;
+    }
+    
+    .session-modal-body .text-center p {
+        color: var(--muted-foreground);
+        font-size: 0.9375rem;
+    }
+    
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+        #mhpanel-assistant .assistant-controls {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        #mhpanel-assistant .session-selector {
+            min-width: 100%;
+        }
+        #mhpanel-assistant .control-buttons {
+            width: 100%;
+            justify-content: stretch;
+        }
+        #mhpanel-assistant .new-chat-btn,
+        #mhpanel-assistant .manage-sessions-btn {
+            flex: 1;
+            justify-content: center;
+        }
+        #mhpanel-assistant .chat-messages {
+            min-height: 50vh;
+            max-height: 50vh;
+        }
+        .session-item-meta {
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .session-modal-content {
+            max-height: 90vh;
+        }
+        .session-item {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .session-item-actions {
+            margin-left: 0;
+            margin-top: 0.75rem;
+            justify-content: flex-end;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -432,96 +1082,182 @@
         <!-- ============================================================ -->
         <div id="mhpanel-assistant" class="mh-panel hidden">
 
-            <div class="flex rounded-xl overflow-hidden border border-border/50 shadow-xl" style="height:75vh">
-                <!-- Session Sidebar -->
-                <div class="chat-sessions hidden md:block">
-                    <div class="p-4 border-b border-gray-600">
-                        <h3 class="text-white text-sm font-semibold mb-3 flex items-center gap-2"><span>💬</span> Sessions</h3>
-                        <button onclick="hubCreateNewSession()" class="w-full py-2 px-3 text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 transition-all">
-                            <i class="fas fa-plus mr-1"></i> New Chat
-                        </button>
+            <div class="max-w-6xl mx-auto">
+                <!-- Top Controls -->
+                <div class="assistant-controls">
+                    <div class="session-selector">
+                        <label><i class="fas fa-history mr-1"></i>Current Session</label>
+                        <select onchange="hubSwitchSession(this.value)" id="sessionSelect">
+                            {% for session in chat_sessions %}
+                            <option value="{{ session.id }}" {% if session.id == active_chat_session.id %}selected{% endif %}>
+                                {{ session.title }} - {{ session.updated_at|date:"M d, Y" }}
+                            </option>
+                            {% endfor %}
+                        </select>
                     </div>
-                    <div class="p-2" id="hubSessionsList">
-                        {% for session in chat_sessions %}
-                        <button class="session-btn {% if session.id == active_chat_session.id %}active{% endif %}" onclick="hubSwitchSession('{{ session.id }}')">
-                            <div class="truncate font-medium">{{ session.title }}</div>
-                            <div class="text-[11px] opacity-60 mt-1">{{ session.updated_at|date:"M d, Y" }}</div>
+                    <div class="control-buttons">
+                        <button onclick="openSessionManagement()" class="manage-sessions-btn">
+                            <i class="fas fa-list"></i>
+                            <span>Manage</span>
                         </button>
-                        {% endfor %}
+                        <button onclick="hubCreateNewSession()" class="new-chat-btn">
+                            <i class="fas fa-plus"></i>
+                            <span>New Chat</span>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Chat Area -->
-                <div class="flex-1 flex flex-col bg-accent/10">
-                    <!-- Chat Header -->
-                    <div class="px-6 py-4 bg-card border-b border-border/50">
-                        <h2 class="text-lg font-bold text-foreground flex items-center gap-2">
-                            <span>🏥</span> Medical AI Assistant
-                        </h2>
-                        <p class="text-sm text-muted-foreground">Ask about your medical history, treatments, medications, and health records</p>
-                    </div>
+                <!-- Medical Context Badge -->
+                <div id="hubContextIndicator">
+                    <i class="fas fa-database"></i>
+                    <span class="context-text">Medical AI with Full Access to Your Records</span>
+                    <span class="context-badge">
+                        <i class="fas fa-check-circle"></i>
+                        Connected
+                    </span>
+                </div>
 
-                    <!-- Messages -->
-                    <div class="chat-messages flex-1" id="hubMessagesContainer">
-                        {% if chat_messages %}
-                        {% for msg in chat_messages %}
-                        <div class="chat-msg {{ msg.role }}">
-                            {% if msg.role == 'assistant' %}
-                            <div class="chat-avatar">AI</div>
-                            {% endif %}
-                            <div class="chat-bubble">
-                                <div>{{ msg.content }}</div>
-                                <div class="chat-time">{{ msg.created_at|date:"h:i A" }}</div>
+                <!-- Chat Container -->
+                <div class="chat-container">
+                    <!-- Chat Header -->
+                    <div class="chat-header">
+                        <div class="chat-header-title">
+                            <i class="fas fa-comments"></i>
+                            <span id="currentSessionTitle">{{ active_chat_session.title }}</span>
+                        </div>
+                        <div class="chat-header-actions">
+                            <button onclick="clearCurrentChat()" class="clear-chat-btn" title="Clear this conversation">
+                                <i class="fas fa-trash-alt mr-1"></i>Clear Chat
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="hubMessagesContainer" class="chat-messages">
+                        {% if not chat_messages %}
+                        <div id="hubEmptyState" class="flex flex-col items-center justify-center h-full text-center px-6 py-8">
+                            <div class="mb-6 w-24 h-24 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 flex items-center justify-center">
+                                <i class="fas fa-robot text-5xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"></i>
                             </div>
-                            {% if msg.role == 'user' %}
+                            <h3 class="text-2xl font-bold mb-3 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                🏥 Your Medical AI Assistant
+                            </h3>
+                            <p class="text-muted-foreground max-w-md mb-6 text-sm leading-relaxed">
+                                I have complete access to your medical records including diagnoses, treatments, medications, symptoms, lab results, and consultation history. Ask me anything about your health journey!
+                            </p>
+                            
+                            <!-- Enhanced suggestion buttons -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl w-full mt-4">
+                                <button onclick="hubSendSuggestion('What is my current diagnosis and treatment status?')" class="suggestion-btn">
+                                    <i class="fas fa-stethoscope"></i>
+                                    <span>Current Diagnosis & Treatment</span>
+                                </button>
+                                <button onclick="hubSendSuggestion('What medications am I currently taking and what are they for?')" class="suggestion-btn">
+                                    <i class="fas fa-pills"></i>
+                                    <span>My Medications</span>
+                                </button>
+                                <button onclick="hubSendSuggestion('What symptoms have I logged recently?')" class="suggestion-btn">
+                                    <i class="fas fa-heartbeat"></i>
+                                    <span>Recent Symptoms</span>
+                                </button>
+                                <button onclick="hubSendSuggestion('Explain my treatment plan in simple terms')" class="suggestion-btn">
+                                    <i class="fas fa-clipboard-list"></i>
+                                    <span>Treatment Plan</span>
+                                </button>
+                                <button onclick="hubSendSuggestion('What were the results of my recent lab tests?')" class="suggestion-btn">
+                                    <i class="fas fa-vial"></i>
+                                    <span>Lab Results</span>
+                                </button>
+                                <button onclick="hubSendSuggestion('Summarize my recent consultations with doctors')" class="suggestion-btn">
+                                    <i class="fas fa-user-md"></i>
+                                    <span>Doctor Consultations</span>
+                                </button>
+                            </div>
+                            
+                            <p class="mt-8 text-xs text-muted-foreground max-w-lg">
+                                <i class="fas fa-shield-alt mr-1 text-blue-500"></i>
+                                Your medical data is secure and only used to provide personalized health insights.
+                            </p>
+                        </div>
+                        {% else %}
+                        {% for message in chat_messages %}
+                        <div class="chat-msg {{ message.role }}">
+                            {% if message.role == 'assistant' %}
+                            <div class="chat-avatar">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="chat-bubble">
+                                <div class="message-content">{{ message.content }}</div>
+                                <div class="chat-time">{{ message.created_at|date:"g:i A" }}</div>
+                            </div>
+                            {% else %}
+                            <div class="chat-bubble">
+                                <div class="message-content">{{ message.content }}</div>
+                                <div class="chat-time">{{ message.created_at|date:"g:i A" }}</div>
+                            </div>
                             <div class="chat-avatar">{{ request.user.first_name.0|default:"U" }}</div>
                             {% endif %}
                         </div>
                         {% endfor %}
-                        {% else %}
-                        <div class="flex flex-col items-center justify-center h-full text-center px-8" id="hubEmptyState">
-                            <div class="text-5xl mb-4 opacity-50">🤖</div>
-                            <h2 class="text-xl font-bold text-foreground mb-2">Welcome to Your Medical AI Assistant</h2>
-                            <p class="text-muted-foreground mb-6 max-w-lg">I have access to your complete medical records. Ask me anything!</p>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl">
-                                <button onclick="hubSendSuggestion('What is my current diagnosis?')" class="text-left p-4 bg-card border border-border/50 rounded-xl hover:border-primary hover:shadow-md transition-all">
-                                    <strong class="text-foreground block mb-1">📋 Current Diagnosis</strong>
-                                    <span class="text-sm text-muted-foreground">Learn about your conditions</span>
-                                </button>
-                                <button onclick="hubSendSuggestion('What medications am I taking?')" class="text-left p-4 bg-card border border-border/50 rounded-xl hover:border-primary hover:shadow-md transition-all">
-                                    <strong class="text-foreground block mb-1">💊 Medications</strong>
-                                    <span class="text-sm text-muted-foreground">Review current medications</span>
-                                </button>
-                                <button onclick="hubSendSuggestion('What were my recent symptoms?')" class="text-left p-4 bg-card border border-border/50 rounded-xl hover:border-primary hover:shadow-md transition-all">
-                                    <strong class="text-foreground block mb-1">🩺 Symptoms</strong>
-                                    <span class="text-sm text-muted-foreground">Check symptom history</span>
-                                </button>
-                                <button onclick="hubSendSuggestion('Tell me about my treatment plan')" class="text-left p-4 bg-card border border-border/50 rounded-xl hover:border-primary hover:shadow-md transition-all">
-                                    <strong class="text-foreground block mb-1">🏥 Treatment Plan</strong>
-                                    <span class="text-sm text-muted-foreground">Understand your treatment</span>
-                                </button>
-                            </div>
-                        </div>
                         {% endif %}
 
-                        <!-- Typing indicator (always present, shown/hidden) -->
-                        <div class="chat-msg assistant" id="hubTypingRow" style="display:none">
-                            <div class="chat-avatar">AI</div>
+                        <div id="hubTypingRow" class="chat-msg assistant" style="display:none">
+                            <div class="chat-avatar">
+                                <i class="fas fa-robot"></i>
+                            </div>
                             <div class="chat-bubble">
                                 <div class="typing-dots"><span></span><span></span><span></span></div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Input Bar -->
                     <div class="chat-input-bar">
-                        <textarea id="hubChatInput" placeholder="Ask about your medical history, symptoms, treatments..." rows="1" onkeypress="hubHandleKey(event)"></textarea>
-                        <button id="hubSendBtn" onclick="hubSendMessage()"><i class="fas fa-paper-plane mr-1"></i> Send</button>
+                        <textarea id="hubChatInput" placeholder="Ask about your health, diagnosis, treatments, medications, symptoms..." onkeydown="hubHandleKey(event)" rows="1"></textarea>
+                        <button id="hubSendBtn" onclick="hubSendMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
                     </div>
                 </div>
             </div>
 
         </div><!-- end mhpanel-assistant -->
+        
+        <!-- Session Management Modal -->
+        <div id="sessionManagementModal">
+            <div class="session-modal-content">
+                <div class="session-modal-header">
+                    <h3><i class="fas fa-history mr-2"></i>Chat History</h3>
+                    <button onclick="closeSessionManagement()" class="session-modal-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="session-modal-body">
+                    <div id="sessionListContainer">
+                        {% for session in chat_sessions %}
+                        <div class="session-item {% if session.id == active_chat_session.id %}active{% endif %}" data-session-id="{{ session.id }}" onclick="selectSessionFromModal('{{ session.id }}')">
+                            <div class="session-item-info">
+                                <div class="session-item-title">{{ session.title }}</div>
+                                <div class="session-item-meta">
+                                    <span><i class="fas fa-clock mr-1"></i>{{ session.updated_at|date:"M d, Y g:i A" }}</span>
+                                    <span><i class="fas fa-comment mr-1"></i>{{ session.messages.count }} messages</span>
+                                </div>
+                            </div>
+                            <div class="session-item-actions">
+                                <button onclick="event.stopPropagation(); deleteSession('{{ session.id }}')" class="session-delete-btn" title="Delete this session">
+                                    <i class="fas fa-trash"></i>
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center text-muted-foreground py-8">
+                            <i class="fas fa-comments text-4xl mb-3 opacity-50"></i>
+                            <p>No chat sessions yet. Start a conversation!</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </div>
 </div>
@@ -572,9 +1308,37 @@ document.addEventListener('DOMContentLoaded', function() {
 /* ========== CHAT (AI Assistant tab) ========== */
 let hubSessionId = '{{ active_chat_session.id }}';
 
+// Configure marked.js for better rendering
+if (typeof marked !== 'undefined') {
+    marked.setOptions({
+        breaks: true,
+        gfm: true,
+        headerIds: false,
+        mangle: false
+    });
+}
+
 function hubHandleKey(e){ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();hubSendMessage();} }
 function hubSendSuggestion(t){ document.getElementById('hubChatInput').value=t; hubSendMessage(); }
-function hubScrollBottom(){ const c=document.getElementById('hubMessagesContainer'); c.scrollTop=c.scrollHeight; }
+function hubScrollBottom(){ const c=document.getElementById('hubMessagesContainer'); if(c) c.scrollTop=c.scrollHeight; }
+
+// Helper function to render markdown safely
+function renderMarkdown(text) {
+    if (typeof marked === 'undefined' || typeof DOMPurify === 'undefined') {
+        // Fallback: preserve line breaks
+        return text.replace(/\n/g, '<br>');
+    }
+    try {
+        const rawHtml = marked.parse(text);
+        return DOMPurify.sanitize(rawHtml, {
+            ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'code', 'pre', 'blockquote', 'a'],
+            ALLOWED_ATTR: ['href', 'title', 'target']
+        });
+    } catch(e) {
+        console.error('Markdown rendering error:', e);
+        return text.replace(/\n/g, '<br>');
+    }
+}
 
 async function hubSendMessage(){
     const inp = document.getElementById('hubChatInput');
@@ -584,6 +1348,7 @@ async function hubSendMessage(){
     btn.disabled = true;
     hubAddMsg('user', msg);
     inp.value = '';
+    inp.style.height = 'auto';
     document.getElementById('hubTypingRow').style.display = '';
     hubScrollBottom();
     try {
@@ -597,14 +1362,29 @@ async function hubSendMessage(){
         if(data.success){
             hubAddMsg('assistant', data.assistant_message.content);
             if(data.session_id) hubSessionId = data.session_id;
+            if(data.session_title && data.session_title !== 'New Conversation') {
+                // Update session title in header
+                const headerTitle = document.getElementById('currentSessionTitle');
+                if(headerTitle) {
+                    headerTitle.textContent = data.session_title;
+                }
+                // Update in dropdown
+                const activeOption = document.querySelector(`#sessionSelect option[value="${hubSessionId}"]`);
+                if(activeOption) {
+                    const dateStr = activeOption.textContent.split(' - ')[1];
+                    activeOption.textContent = data.session_title + (dateStr ? ' - ' + dateStr : '');
+                }
+            }
         } else {
-            hubAddMsg('assistant', 'Sorry, an error occurred: ' + (data.error||'Unknown'));
+            hubAddMsg('assistant', '❌ **Error**: ' + (data.error||'An unknown error occurred. Please try again.'));
         }
     } catch(err){
+        console.error('Chat error:', err);
         document.getElementById('hubTypingRow').style.display = 'none';
-        hubAddMsg('assistant', 'Failed to send message. Please try again.');
+        hubAddMsg('assistant', '❌ **Connection Error**: Failed to send message. Please check your internet connection and try again.');
     }
     btn.disabled = false;
+    inp.focus();
 }
 
 function hubAddMsg(role, content){
@@ -615,10 +1395,26 @@ function hubAddMsg(role, content){
     d.className = 'chat-msg ' + role;
     const now = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
     const initial = '{{ request.user.first_name.0|default:"U" }}';
+    
     if(role==='assistant'){
-        d.innerHTML = `<div class="chat-avatar">AI</div><div class="chat-bubble"><div>${content}</div><div class="chat-time">${now}</div></div>`;
+        const renderedContent = renderMarkdown(content);
+        d.innerHTML = `
+            <div class="chat-avatar"><i class="fas fa-robot"></i></div>
+            <div class="chat-bubble">
+                <div class="message-content">${renderedContent}</div>
+                <div class="chat-time">${now}</div>
+            </div>
+        `;
     } else {
-        d.innerHTML = `<div class="chat-bubble"><div>${content}</div><div class="chat-time">${now}</div></div><div class="chat-avatar">${initial}</div>`;
+        // User messages - escape HTML but preserve line breaks
+        const escapedContent = content.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+        d.innerHTML = `
+            <div class="chat-bubble">
+                <div class="message-content">${escapedContent}</div>
+                <div class="chat-time">${now}</div>
+            </div>
+            <div class="chat-avatar">${initial}</div>
+        `;
     }
     const tr = document.getElementById('hubTypingRow');
     c.insertBefore(d, tr);
@@ -629,23 +1425,153 @@ async function hubCreateNewSession(){
     try {
         const res = await fetch('{% url "medical_chatbot:new_session" %}',{method:'POST',headers:{'X-CSRFToken':'{{ csrf_token }}'}});
         const data = await res.json();
-        if(data.success) window.location.href = window.location.pathname + '#assistant';
-        window.location.reload();
-    } catch(e){ console.error(e); }
+        if(data.success) {
+            window.location.href = window.location.pathname + '#assistant';
+            window.location.reload();
+        }
+    } catch(e){ 
+        console.error('New session error:', e);
+        alert('Failed to create new session. Please try again.');
+    }
 }
+
 async function hubSwitchSession(sid){
     try {
         const res = await fetch('/chatbot/switch-session/'+sid+'/',{method:'POST',headers:{'X-CSRFToken':'{{ csrf_token }}'}});
         const data = await res.json();
-        if(data.success){ window.location.href = window.location.pathname + '#assistant'; window.location.reload(); }
-    } catch(e){ console.error(e); }
+        if(data.success){ 
+            window.location.href = window.location.pathname + '#assistant';
+            window.location.reload();
+        }
+    } catch(e){ 
+        console.error('Switch session error:', e);
+        alert('Failed to switch session. Please try again.');
+    }
 }
 
 // Auto-resize chat input
 const ta = document.getElementById('hubChatInput');
-if(ta) ta.addEventListener('input', function(){ this.style.height='auto'; this.style.height=Math.min(this.scrollHeight,100)+'px'; });
+if(ta) {
+    ta.addEventListener('input', function(){ 
+        this.style.height='auto'; 
+        this.style.height=Math.min(this.scrollHeight, 120)+'px'; 
+    });
+    ta.addEventListener('focus', function() { hubScrollBottom(); });
+}
+
+// Render existing messages with markdown on load
+document.addEventListener('DOMContentLoaded', function() {
+    const existingMessages = document.querySelectorAll('#mhpanel-assistant .chat-msg.assistant .message-content');
+    existingMessages.forEach(msgEl => {
+        const originalText = msgEl.textContent.trim();
+        if(originalText) {
+            msgEl.innerHTML = renderMarkdown(originalText);
+        }
+    });
+    
+    // Scroll to bottom if on assistant tab
+    if(window.location.hash==='#assistant') {
+        setTimeout(hubScrollBottom, 100);
+    }
+});
 
 // Scroll on load if on assistant tab
-window.addEventListener('load', () => { if(window.location.hash==='#assistant') hubScrollBottom(); });
+window.addEventListener('load', () => { 
+    if(window.location.hash==='#assistant') {
+        setTimeout(hubScrollBottom, 100);
+    }
+});
+
+// Session Management Functions
+function openSessionManagement() {
+    const modal = document.getElementById('sessionManagementModal');
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeSessionManagement() {
+    const modal = document.getElementById('sessionManagementModal');
+    modal.classList.remove('active');
+    document.body.style.overflow = 'auto';
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('sessionManagementModal');
+    if(e.target === modal) {
+        closeSessionManagement();
+    }
+});
+
+// Close modal on Escape key
+document.addEventListener('keydown', function(e) {
+    if(e.key === 'Escape') {
+        closeSessionManagement();
+    }
+});
+
+function selectSessionFromModal(sessionId) {
+    closeSessionManagement();
+    hubSwitchSession(sessionId);
+}
+
+async function deleteSession(sessionId) {
+    if(!confirm('Are you sure you want to delete this chat session? This action cannot be undone.')) {
+        return;
+    }
+    
+    try {
+        const res = await fetch(`/chatbot/delete-session/${sessionId}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await res.json();
+        
+        if(data.success) {
+            // Remove session from modal list
+            const sessionItem = document.querySelector(`.session-item[data-session-id="${sessionId}"]`);
+            if(sessionItem) {
+                sessionItem.remove();
+            }
+            
+            // Remove from dropdown
+            const selectOption = document.querySelector(`#sessionSelect option[value="${sessionId}"]`);
+            if(selectOption) {
+                selectOption.remove();
+            }
+            
+            // If we deleted the active session, reload to create a new one
+            if(sessionId === hubSessionId) {
+                window.location.href = window.location.pathname + '#assistant';
+                window.location.reload();
+            } else {
+                // Just close the modal
+                const remaining = document.querySelectorAll('.session-item').length;
+                if(remaining === 0) {
+                    closeSessionManagement();
+                    window.location.reload();
+                }
+            }
+        } else {
+            alert('Failed to delete session: ' + (data.error || 'Unknown error'));
+        }
+    } catch(err) {
+        console.error('Delete session error:', err);
+        alert('Failed to delete session. Please try again.');
+    }
+}
+
+async function clearCurrentChat() {
+    if(!confirm('Are you sure you want to clear this conversation? This will delete all messages in this session.')) {
+        return;
+    }
+    
+    await deleteSession(hubSessionId);
+}
+
 </script>
 {% endblock %}

@@ -33,6 +33,7 @@ urlpatterns = [
     path('image-hub/', views.image_hub, name='image_hub'),
     path('pathology-hub/', views.pathology_hub, name='pathology_hub'),
     path('genomics-hub/', views.genomics_hub, name='genomics_hub'),
+    path('histopathology-hub/', views.histopathology_hub, name='histopathology_hub'),
     
     # Comprehensive Treatment Planning
     path('comprehensive-plan/', views.create_comprehensive_plan, name='create_comprehensive_plan'),
