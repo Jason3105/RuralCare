@@ -41,7 +41,7 @@
         </div>
 
         <!-- Invite Form -->
-        <form method="post" class="space-y-6">
+        <form method="post" action="{% url 'clinical_decision_support:tumor_board_invite_add' session.id %}" class="space-y-6">
             {% csrf_token %}
             
             <div class="bg-card border border-border/50 rounded-xl p-6 space-y-6">

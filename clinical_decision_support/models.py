@@ -214,6 +214,40 @@ class TumorBoardSession(models.Model):
     def can_activate_plan(self):
         """Check if treatment plan can be activated"""
         return self.consensus_reached and self.status == 'consensus_achieved'
+    
+    @property
+    def required_consensus_percentage(self):
+        return 100
+    
+    @property
+    def current_consensus_percentage(self):
+        """Calculate current consensus percentage based on member decisions"""
+        members = self.members.all()
+        total = members.count()
+        if total == 0:
+            return 0
+        approved = members.filter(decision='approved').count()
+        return round((approved / total) * 100, 1)
+    
+    @property
+    def decisions_approved(self):
+        return self.members.filter(decision='approved').count()
+    
+    @property
+    def decisions_rejected(self):
+        return self.members.filter(decision='rejected').count()
+    
+    @property
+    def decisions_modify(self):
+        return self.members.filter(decision='suggested_modification').count()
+    
+    @property
+    def decisions_pending(self):
+        return self.members.filter(decision='pending').count()
+    
+    @property
+    def total_members(self):
+        return self.members.count()
 
 
 class TumorBoardMember(models.Model):
@@ -267,6 +301,16 @@ class TumorBoardMember(models.Model):
     
     def __str__(self):
         return f"{self.doctor.username} - {self.role} - {self.session.title}"
+    
+    @property
+    def specialization(self):
+        """Return the display name for the role"""
+        return self.get_role_display()
+    
+    @property
+    def is_lead(self):
+        """Check if this member is the session creator"""
+        return self.doctor == self.session.created_by
 
 
 class TumorBoardAuditLog(models.Model):
@@ -312,6 +356,22 @@ class TumorBoardAuditLog(models.Model):
     
     def __str__(self):
         return f"{self.action} - {self.session.title} - {self.timestamp}"
+    
+    @property
+    def action_description(self):
+        """Human-readable description of the audit action"""
+        actor_name = f"Dr. {self.actor.username}" if self.actor else "System"
+        descriptions = {
+            'session_created': f"{actor_name} created the session",
+            'member_invited': f"{actor_name} invited {self.details.get('doctor', 'a doctor')} as {self.details.get('role', 'specialist')}",
+            'member_accepted': f"{actor_name} accepted the invitation",
+            'comment_added': f"{actor_name} added a comment",
+            'decision_made': f"{actor_name} submitted decision: {self.details.get('decision', 'unknown')}",
+            'status_changed': f"Session status changed to {self.details.get('new_status', 'unknown')}",
+            'consensus_reached': f"Consensus achieved - {self.details.get('consensus', '')}",
+            'plan_activated': f"{actor_name} activated the treatment plan",
+        }
+        return descriptions.get(self.action, f"{actor_name} performed {self.get_action_display()}")
 
 
 class ToxicityPrediction(models.Model):

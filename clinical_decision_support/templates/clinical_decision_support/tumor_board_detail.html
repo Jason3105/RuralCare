@@ -23,14 +23,15 @@
                     <!-- Status Badge -->
                     <span class="px-3 py-1 rounded-full text-sm font-medium
                         {% if session.status == 'draft' %}bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300
-                        {% elif session.status == 'active' %}bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400
-                        {% elif session.status == 'consensus_reached' %}bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400
-                        {% elif session.status == 'activated' %}bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400
+                        {% elif session.status == 'in_review' %}bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400
+                        {% elif session.status == 'scheduled' %}bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400
+                        {% elif session.status == 'consensus_achieved' %}bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400
+                        {% elif session.status == 'closed' %}bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400
                         {% else %}bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400{% endif %}">
                         {{ session.get_status_display }}
                     </span>
                     
-                    {% if session.status == 'consensus_reached' and is_lead %}
+                    {% if session.status == 'consensus_achieved' and is_lead %}
                     <form method="post" action="{% url 'clinical_decision_support:tumor_board_activate' session.id %}">
                         {% csrf_token %}
                         <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
@@ -128,7 +129,7 @@
                                     </div>
                                 </div>
                                 <div>
-                                    {% if member.decision %}
+                                    {% if member.decision != 'pending' %}
                                     <span class="px-2 py-1 rounded text-xs font-medium
                                         {% if member.decision == 'approved' %}bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400
                                         {% elif member.decision == 'rejected' %}bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400
@@ -149,6 +150,19 @@
                                 </p>
                             </div>
                             {% endif %}
+                            {% if member.suggested_modifications %}
+                            <div class="mt-3 pl-13">
+                                <p class="text-xs font-medium text-amber-600 mb-2">Suggested Modifications:</p>
+                                <ul class="text-sm text-muted-foreground bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3 space-y-1">
+                                    {% for mod in member.suggested_modifications %}
+                                    <li class="flex items-start space-x-2">
+                                        <i class="fas fa-arrow-right text-amber-500 text-xs mt-1.5"></i>
+                                        <span>{{ mod }}</span>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
                         </div>
                         {% empty %}
                         <p class="text-muted-foreground text-center py-4">No members yet. Invite specialists to join.</p>
@@ -157,30 +171,30 @@
                 </div>
 
                 <!-- My Decision Form -->
-                {% if current_member and not current_member.decision and session.status == 'active' %}
+                {% if current_member and current_member.decision == 'pending' and session.status == 'in_review' %}
                 <div class="bg-card border border-border/50 rounded-xl p-6">
                     <h2 class="text-xl font-semibold text-foreground mb-4">Submit Your Decision</h2>
-                    <form method="post" action="{% url 'clinical_decision_support:tumor_board_decision' session.id %}" class="space-y-4">
+                    <form method="post" action="{% url 'clinical_decision_support:tumor_board_decision' session.id %}" class="space-y-4" id="decisionForm">
                         {% csrf_token %}
                         <div>
                             <label class="block text-sm font-medium text-foreground mb-2">Your Decision *</label>
                             <div class="grid grid-cols-3 gap-3">
                                 <label class="relative cursor-pointer">
-                                    <input type="radio" name="decision" value="approved" class="peer sr-only" required>
+                                    <input type="radio" name="decision" value="approved" class="peer sr-only decision-radio" required>
                                     <div class="p-4 border-2 border-border rounded-lg text-center peer-checked:border-green-500 peer-checked:bg-green-50 dark:peer-checked:bg-green-900/20 transition-all">
                                         <i class="fas fa-check text-green-500 text-xl mb-2"></i>
                                         <p class="font-medium">Approve</p>
                                     </div>
                                 </label>
                                 <label class="relative cursor-pointer">
-                                    <input type="radio" name="decision" value="rejected" class="peer sr-only">
+                                    <input type="radio" name="decision" value="rejected" class="peer sr-only decision-radio">
                                     <div class="p-4 border-2 border-border rounded-lg text-center peer-checked:border-red-500 peer-checked:bg-red-50 dark:peer-checked:bg-red-900/20 transition-all">
                                         <i class="fas fa-times text-red-500 text-xl mb-2"></i>
                                         <p class="font-medium">Reject</p>
                                     </div>
                                 </label>
                                 <label class="relative cursor-pointer">
-                                    <input type="radio" name="decision" value="request_modification" class="peer sr-only">
+                                    <input type="radio" name="decision" value="suggested_modification" class="peer sr-only decision-radio">
                                     <div class="p-4 border-2 border-border rounded-lg text-center peer-checked:border-amber-500 peer-checked:bg-amber-50 dark:peer-checked:bg-amber-900/20 transition-all">
                                         <i class="fas fa-edit text-amber-500 text-xl mb-2"></i>
                                         <p class="font-medium">Modify</p>
@@ -194,11 +208,30 @@
                                       class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary"
                                       placeholder="Provide your clinical reasoning..."></textarea>
                         </div>
+                        <div id="modificationsSection" class="hidden">
+                            <label for="modifications" class="block text-sm font-medium text-foreground mb-2">Suggested Modifications</label>
+                            <textarea id="modifications" name="modifications" rows="4"
+                                      class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary"
+                                      placeholder="Enter each modification on a new line..."></textarea>
+                            <p class="text-xs text-muted-foreground mt-1">Enter each suggested modification on a separate line</p>
+                        </div>
                         <button type="submit" class="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
                             Submit Decision
                         </button>
                     </form>
                 </div>
+                <script>
+                    document.querySelectorAll('.decision-radio').forEach(radio => {
+                        radio.addEventListener('change', function() {
+                            const modSection = document.getElementById('modificationsSection');
+                            if (this.value === 'suggested_modification') {
+                                modSection.classList.remove('hidden');
+                            } else {
+                                modSection.classList.add('hidden');
+                            }
+                        });
+                    });
+                </script>
                 {% endif %}
             </div>
 
