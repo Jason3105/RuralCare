@@ -88,17 +88,53 @@ class SupabaseStorage(Storage):
         )
         
         if response.status_code not in [200, 201]:
-            # Try upsert if file might exist
-            response = requests.put(
-                upload_url,
-                headers=headers,
-                data=file_content,
-            )
+            # If bucket not found, create it and retry
+            if 'Bucket not found' in response.text or response.status_code == 404:
+                self._ensure_bucket_exists()
+                # Reset file pointer if needed
+                if hasattr(content, 'seek'):
+                    content.seek(0)
+                    file_content = content.read()
+                response = requests.post(
+                    upload_url,
+                    headers=headers,
+                    data=file_content,
+                )
             
             if response.status_code not in [200, 201]:
-                raise Exception(f"Failed to upload file to Supabase: {response.status_code} - {response.text}")
+                # Try upsert if file might exist
+                response = requests.put(
+                    upload_url,
+                    headers=headers,
+                    data=file_content,
+                )
+            
+                if response.status_code not in [200, 201]:
+                    raise Exception(f"Failed to upload file to Supabase: {response.status_code} - {response.text}")
         
         return file_path
+    
+    def _ensure_bucket_exists(self):
+        """Create the storage bucket if it doesn't exist."""
+        headers = {
+            **self.headers,
+            "Content-Type": "application/json",
+        }
+        # Check if bucket exists
+        response = requests.get(f"{self.storage_url}/bucket/{self.bucket_name}", headers=headers)
+        if response.status_code == 404:
+            payload = {
+                "id": self.bucket_name,
+                "name": self.bucket_name,
+                "public": True,
+                "file_size_limit": 52428800,
+                "allowed_mime_types": [
+                    "image/jpeg", "image/png", "image/gif", "image/webp",
+                    "image/bmp", "image/tiff",
+                    "application/pdf", "application/octet-stream",
+                ]
+            }
+            requests.post(f"{self.storage_url}/bucket", headers=headers, json=payload)
     
     def _open(self, name, mode='rb'):
         """
