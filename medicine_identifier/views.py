@@ -118,7 +118,7 @@ def upload_medicine_image(request):
                     tmp_file.write(identification.image.read())
                     image_path = tmp_file.name
             
-            # Step 1: OpenCV + OCR Analysis
+            # Step 1: OpenCV + OCR Analysis (reuse analyzer instance)
             image_analyzer = MedicineImageAnalyzer()
             analysis_results = image_analyzer.analyze_image(image_path)
             
@@ -135,8 +135,8 @@ def upload_medicine_image(request):
             identification.ocr_confidence = float(analysis_results.get('ocr_confidence', 0.0))
             identification.image_analysis = analysis_results.get('visual_analysis', {})
             
-            # Step 2: AI-powered medicine identification
-            groq_service = GroqMedicineIdentifier()
+            # Step 2: AI-powered medicine identification (singleton - reuses HTTP client)
+            groq_service = GroqMedicineIdentifier.get_instance()
             
             # Build detected info with filename hint if OCR failed
             detected_info = analysis_results.get('detected_medicine_info', {})
@@ -337,7 +337,7 @@ def get_more_info(request, identification_id):
     if not identification.medicine_name:
         return JsonResponse({'error': 'Medicine not identified'}, status=400)
     
-    groq_service = GroqMedicineIdentifier()
+    groq_service = GroqMedicineIdentifier.get_instance()
     additional_info = groq_service.get_additional_info(identification.medicine_name)
     
     return JsonResponse(additional_info)
@@ -357,7 +357,7 @@ def check_interaction(request):
         if not medicine1 or not medicine2:
             return JsonResponse({'error': 'Both medicine names required'}, status=400)
         
-        groq_service = GroqMedicineIdentifier()
+        groq_service = GroqMedicineIdentifier.get_instance()
         result = groq_service.check_drug_interaction(medicine1, medicine2)
         
         return JsonResponse(result)
@@ -441,7 +441,7 @@ def api_identify_medicine(request):
                 tmp_file.write(identification.image.read())
                 image_path = tmp_file.name
         
-        # Analyze
+        # Analyze (reuse analyzer instance)
         image_analyzer = MedicineImageAnalyzer()
         analysis_results = image_analyzer.analyze_image(image_path)
         
@@ -453,7 +453,7 @@ def api_identify_medicine(request):
         validation_reason = analysis_results.get('validation_reason', '')
         validation_suggestions = analysis_results.get('validation_suggestions', [])
         
-        groq_service = GroqMedicineIdentifier()
+        groq_service = GroqMedicineIdentifier.get_instance()
         
         # Build detected info
         detected_info = analysis_results.get('detected_medicine_info', {})

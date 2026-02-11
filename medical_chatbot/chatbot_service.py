@@ -10,6 +10,14 @@ import json
 
 class MedicalChatbot:
     """AI-powered medical chatbot with patient context"""
+    _instance = None
+    
+    @classmethod
+    def get_instance(cls):
+        """Get or create singleton instance"""
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance
     
     def __init__(self):
         self.client = Groq(api_key=os.getenv('GROQ_API_KEY'))

@@ -176,26 +176,30 @@ def patient_dashboard(request):
         return redirect('patient_login')
     
     from cancer_detection.models import CancerImageAnalysis, PersonalizedTreatmentPlan
+    from django.db.models import Count, Q
     
-    # Fetch patient data
+    # Fetch patient data - use single annotated query for counts
     patient_profile = PatientProfile.objects.filter(user=request.user).first()
+    
+    # Get analyses with aggregated counts in ONE query instead of 3 separate queries
     cancer_analyses = CancerImageAnalysis.objects.filter(user=request.user).order_by('-created_at')
+    analysis_stats = cancer_analyses.aggregate(
+        total=Count('id'),
+        with_tumors=Count('id', filter=Q(tumor_detected=True))
+    )
+    
     treatment_plans = PersonalizedTreatmentPlan.objects.filter(patient=request.user).order_by('-created_at')
+    plan_stats = treatment_plans.aggregate(
+        total=Count('id'),
+        active=Count('id', filter=Q(status__in=['active', 'pending_review']))
+    )
+    
     medical_records = MedicalRecord.objects.filter(patient=request.user).order_by('-created_at')
+    total_medical_records = medical_records.count()
     
-    # Calculate statistics
-    total_analyses = cancer_analyses.count()
-    analyses_with_tumors = cancer_analyses.filter(tumor_detected=True).count()
-    total_treatment_plans = treatment_plans.count()
-    active_treatment_plans = treatment_plans.filter(status__in=['active', 'pending_review']).count()
-    
-    # Get latest 3 analyses
+    # Get latest 3 of each (Django querysets are lazy - slicing doesn't hit DB until evaluated)
     recent_analyses = cancer_analyses[:3]
-    
-    # Get latest 3 treatment plans
     recent_treatment_plans = treatment_plans[:3]
-    
-    # Get latest 3 medical records
     recent_medical_records = medical_records[:3]
     
     # Profile completion percentage
@@ -210,17 +214,17 @@ def patient_dashboard(request):
     
     context = {
         'patient_profile': patient_profile,
-        'total_analyses': total_analyses,
-        'analyses_with_tumors': analyses_with_tumors,
-        'total_treatment_plans': total_treatment_plans,
-        'active_treatment_plans': active_treatment_plans,
+        'total_analyses': analysis_stats['total'],
+        'analyses_with_tumors': analysis_stats['with_tumors'],
+        'total_treatment_plans': plan_stats['total'],
+        'active_treatment_plans': plan_stats['active'],
         'recent_analyses': recent_analyses,
         'recent_treatment_plans': recent_treatment_plans,
         'recent_medical_records': recent_medical_records,
         'all_analyses': cancer_analyses,
         'all_treatment_plans': treatment_plans,
         'profile_completion': int(profile_completion),
-        'total_medical_records': medical_records.count(),
+        'total_medical_records': total_medical_records,
     }
     
     return render(request, 'authentication/patient_dashboard.html', context)
@@ -240,6 +244,7 @@ def doctor_dashboard(request):
     # Get recent consultation requests (last 10)
     from patient_portal.consultation_models import ConsultationRequest, Consultation
     from django.utils import timezone
+    from django.db.models import Count, Q
     from datetime import datetime
     
     recent_requests = ConsultationRequest.objects.filter(
@@ -248,22 +253,23 @@ def doctor_dashboard(request):
     
     # Get ALL today's scheduled consultations (both past and upcoming)
     today = timezone.now().date()
-    now = timezone.now()
     todays_consultations = Consultation.objects.filter(
         doctor=request.user,
         scheduled_datetime__date=today,
         status__in=['scheduled', 'completed', 'in_progress']
     ).select_related('patient', 'patient__patient_profile').order_by('scheduled_datetime')
     
-    # Count stats
-    total_requests = ConsultationRequest.objects.filter(doctor=request.user).count()
-    pending_requests = ConsultationRequest.objects.filter(
-        doctor=request.user,
-        status='pending'
-    ).count()
+    # Aggregate stats in ONE query instead of 3 separate queries
+    request_stats = ConsultationRequest.objects.filter(
+        doctor=request.user
+    ).aggregate(
+        total=Count('id'),
+        pending=Count('id', filter=Q(status='pending'))
+    )
+    
     todays_count = todays_consultations.count()
     
-    # Active cases - consultations that are scheduled or in progress
+    # Active cases
     active_cases = Consultation.objects.filter(
         doctor=request.user,
         status__in=['scheduled', 'in_progress']
@@ -274,8 +280,8 @@ def doctor_dashboard(request):
         'doctor_profile': doctor_profile,
         'recent_requests': recent_requests,
         'todays_consultations': todays_consultations,
-        'total_requests': total_requests,
-        'pending_requests': pending_requests,
+        'total_requests': request_stats['total'],
+        'pending_requests': request_stats['pending'],
         'todays_count': todays_count,
         'active_cases': active_cases,
     }
@@ -951,10 +957,11 @@ def extract_medical_data(text):
 from django.http import JsonResponse
 from .models import DoctorKYC
 from utils.location import haversine
+from django.core.cache import cache
 
 @login_required
 def nearby_clinics(request):
-    """API endpoint returning nearby clinics as JSON"""
+    """API endpoint returning nearby clinics as JSON (with bounding-box pre-filter)"""
     try:
         user_lat = request.GET.get("lat")
         user_lng = request.GET.get("lng")
@@ -967,17 +974,25 @@ def nearby_clinics(request):
     except (TypeError, ValueError):
         return JsonResponse({"clinics": [], "error": "Invalid lat/lng values"}, status=400)
 
+    # Pre-filter with a generous bounding box (~50km ≈ 0.5° lat/lng) to avoid iterating ALL clinics
+    lat_delta = 0.5
+    lng_delta = 0.5
+    
     clinics = []
-
     for clinic in DoctorKYC.objects.exclude(
         clinic_latitude=None, clinic_longitude=None
-    ):
+    ).filter(
+        clinic_latitude__gte=user_lat - lat_delta,
+        clinic_latitude__lte=user_lat + lat_delta,
+        clinic_longitude__gte=user_lng - lng_delta,
+        clinic_longitude__lte=user_lng + lng_delta,
+    ).only('full_name', 'clinic_address', 'mobile_number', 'clinic_latitude', 'clinic_longitude'):
         distance = haversine(
             user_lat, user_lng,
             clinic.clinic_latitude, clinic.clinic_longitude
         )
 
-        if distance <= 50:  # 50 km radius — generous to always show partner clinics
+        if distance <= 50:
             clinics.append({
                 "name": clinic.full_name,
                 "address": clinic.clinic_address or "Address not available",
@@ -987,7 +1002,6 @@ def nearby_clinics(request):
                 "distance": round(distance, 2)
             })
     
-    # Sort by distance
     clinics.sort(key=lambda c: c["distance"])
 
     return JsonResponse({"clinics": clinics})

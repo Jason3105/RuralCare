@@ -53,7 +53,7 @@ def upload_image(request):
         
         # Perform analysis
         try:
-            analyzer = CancerImageAnalyzer()
+            analyzer = CancerImageAnalyzer()  # Uses lazy-loaded models
             # Ensure the file is saved before accessing
             if not analysis.image:
                 raise ValueError("Image file not saved properly")
@@ -272,8 +272,8 @@ def generate_treatment_plan(request, analysis_id):
                     'pd_l1_expression': request.POST.get('pd_l1_status', 'unknown'),
                 })
             
-            # Initialize Groq planner
-            planner = GroqTreatmentPlanner()
+            # Initialize Groq planner (singleton - reuses HTTP client)
+            planner = GroqTreatmentPlanner.get_instance()
             
             # Generate comprehensive treatment plan using Groq AI
             comprehensive_plan = planner.create_comprehensive_treatment_plan(
@@ -609,7 +609,7 @@ def upload_histopathology_report(request):
                 
                 # Try Groq API first (much faster - typically <1 second)
                 try:
-                    groq_analyzer = GroqAnalyzer()
+                    groq_analyzer = GroqAnalyzer.get_instance()
                     if groq_analyzer.is_available():
                         results = groq_analyzer.analyze_histopathology_report(report_text)
                         if results and results.get('confidence', 0) > 0:
@@ -818,7 +818,7 @@ def upload_genomic_profile(request):
             
             # Try Groq API first (much faster)
             try:
-                groq_analyzer = GroqAnalyzer()
+                groq_analyzer = GroqAnalyzer.get_instance()
                 if groq_analyzer.is_available():
                     results = groq_analyzer.analyze_genomic_profile(genetic_data)
                     if results and results.get('confidence', 0) > 0:
@@ -966,8 +966,8 @@ def create_comprehensive_plan(request):
                     'pd_l1_expression': profile.pd_l1_status,
                 })
             
-            # Initialize Groq planner
-            planner = GroqTreatmentPlanner()
+            # Initialize Groq planner (singleton - reuses HTTP client)
+            planner = GroqTreatmentPlanner.get_instance()
             
             # Generate comprehensive treatment plan
             comprehensive_plan = planner.create_comprehensive_treatment_plan(

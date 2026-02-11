@@ -80,8 +80,8 @@ def send_message(request):
             for msg in history
         ]
         
-        # Get AI response
-        chatbot = MedicalChatbot()
+        # Get AI response (singleton - reuses Groq HTTP client)
+        chatbot = MedicalChatbot.get_instance()
         ai_response = chatbot.get_response(
             patient=request.user,
             user_message=user_message,

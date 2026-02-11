@@ -61,6 +61,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.middleware.gzip.GZipMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -120,13 +121,12 @@ else:
             'PASSWORD': os.getenv('DB_PASSWORD'),
             'HOST': os.getenv('DB_HOST'),
             'PORT': os.getenv('DB_PORT', '5432'),
-            'CONN_MAX_AGE': 0,  # Close connection after each request to avoid cursor issues
+            'CONN_MAX_AGE': 600,  # Reuse DB connections for 10 minutes (major perf boost)
             'OPTIONS': {
                 'sslmode': 'require',
                 'connect_timeout': 10,
             },
-            # Connection pool settings
-            'ATOMIC_REQUESTS': False,  # Don't wrap each request in a transaction
+            'ATOMIC_REQUESTS': False,
         }
     }
 
@@ -202,7 +202,19 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'kexf yjjqsvpk ewxc')
 
 # Session settings
 SESSION_COOKIE_AGE = 86400  # 24 hours
-SESSION_SAVE_EVERY_REQUEST = True
+SESSION_SAVE_EVERY_REQUEST = False  # Only save session when modified (avoids DB write per request)
+
+# Caching - in-memory cache for faster repeated lookups
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'ruralcare-cache',
+        'TIMEOUT': 300,  # 5 minutes default
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000,
+        }
+    }
+}
 
 # Custom user model
 AUTH_USER_MODEL = 'authentication.User'

@@ -14,6 +14,14 @@ class GroqMedicineIdentifier:
     AI-powered medicine identification using Groq API
     Provides comprehensive medicine information based on extracted text and visual features
     """
+    _instance = None
+    
+    @classmethod
+    def get_instance(cls):
+        """Get or create singleton instance"""
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance
     
     def __init__(self):
         """Initialize the Groq medicine identifier"""

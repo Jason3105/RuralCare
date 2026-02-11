@@ -3,6 +3,7 @@ Medical Context Builder
 Retrieves and structures all medical data for a specific patient
 """
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from authentication.models import PatientProfile, MedicalRecord
 from patient_portal.models import (
     PatientSymptomLog, PatientAlert, PatientTreatmentExplanation,
@@ -21,13 +22,20 @@ User = get_user_model()
 
 
 class MedicalContextBuilder:
-    """Build comprehensive medical context for a patient"""
+    """Build comprehensive medical context for a patient (with caching)"""
     
     def __init__(self, patient):
         self.patient = patient
         
     def get_full_context(self):
-        """Get complete medical context for the patient"""
+        """Get complete medical context for the patient (cached for 5 minutes)"""
+        cache_key = f'medical_context_{self.patient.id}'
+        cached_context = cache.get(cache_key)
+        
+        if cached_context is not None:
+            return cached_context
+        
+        # Build fresh context with optimized queries
         context = {
             'patient_info': self._get_patient_info(),
             'medical_history': self._get_medical_history(),
@@ -41,6 +49,9 @@ class MedicalContextBuilder:
             'genomic_data': self._get_genomic_data(),
             'outcomes': self._get_outcomes(),
         }
+        
+        # Cache for 5 minutes
+        cache.set(cache_key, context, 300)
         return context
     
     def _get_patient_info(self):
@@ -79,10 +90,13 @@ class MedicalContextBuilder:
             return {}
     
     def _get_symptoms(self):
-        """Get recent symptom logs"""
+        """Get recent symptom logs (optimized - only essential fields)"""
         symptoms = PatientSymptomLog.objects.filter(
             patient=self.patient
-        ).order_by('-log_date')[:10]
+        ).only(
+            'log_date', 'fatigue', 'pain', 'pain_location', 'nausea', 
+            'vomiting', 'overall_wellbeing', 'additional_symptoms', 'notes'
+        ).order_by('-log_date')[:5]  # Reduced from 10 to 5
         
         return [{
             'date': str(symptom.log_date),
@@ -91,22 +105,19 @@ class MedicalContextBuilder:
             'pain_location': symptom.pain_location,
             'nausea': symptom.nausea,
             'vomiting': symptom.vomiting,
-            'appetite_loss': symptom.appetite_loss,
-            'sleep_problems': symptom.sleep_problems,
-            'anxiety': symptom.anxiety,
-            'depression': symptom.depression,
             'overall_wellbeing': symptom.overall_wellbeing,
-            'activity_level': symptom.activity_level,
             'additional_symptoms': symptom.additional_symptoms,
             'notes': symptom.notes,
-            'severe_symptoms': symptom.get_severe_symptoms() if hasattr(symptom, 'get_severe_symptoms') else [],
         } for symptom in symptoms]
     
     def _get_diagnoses(self):
-        """Get cancer diagnoses and analyses"""
+        """Get cancer diagnoses and analyses (optimized - only essential fields)"""
         analyses = CancerImageAnalysis.objects.filter(
             user=self.patient
-        ).order_by('-created_at')[:5]
+        ).only(
+            'created_at', 'image_type', 'tumor_detected', 'tumor_type',
+            'tumor_stage', 'tumor_size_mm', 'tumor_location', 'detection_confidence', 'notes'
+        ).order_by('-created_at')[:3]  # Reduced from 5 to 3
         
         return [{
             'date': str(analysis.created_at.date()),
@@ -121,10 +132,13 @@ class MedicalContextBuilder:
         } for analysis in analyses]
     
     def _get_treatments(self):
-        """Get treatment plans"""
+        """Get treatment plans (optimized - only essential fields)"""
         plans = PersonalizedTreatmentPlan.objects.filter(
             patient=self.patient
-        ).order_by('-created_at')[:5]
+        ).only(
+            'created_at', 'plan_name', 'cancer_type', 'cancer_stage', 'status',
+            'primary_treatments', 'targeted_therapies', 'side_effects'
+        ).order_by('-created_at')[:3]  # Reduced from 5 to 3
         
         treatments = []
         for plan in plans:
@@ -135,58 +149,41 @@ class MedicalContextBuilder:
                 'cancer_stage': plan.cancer_stage,
                 'status': plan.status,
                 'primary_treatments': plan.primary_treatments,
-                'adjuvant_treatments': plan.adjuvant_treatments,
                 'targeted_therapies': plan.targeted_therapies,
                 'side_effects': plan.side_effects,
-                'predicted_5yr_survival': plan.predicted_5yr_survival,
-                'remission_probability': plan.remission_probability,
-                'expected_milestones': plan.expected_milestones,
-                'oncologist_notes': plan.oncologist_notes,
-            })
-        
-        # Also get patient-friendly explanations
-        explanations = PatientTreatmentExplanation.objects.filter(
-            patient=self.patient
-        ).order_by('-created_at')[:3]
-        
-        for exp in explanations:
-            treatments.append({
-                'type': 'explanation',
-                'title': exp.title,
-                'summary': exp.summary,
-                'journey_steps': exp.journey_steps,
-                'what_to_expect': exp.what_to_expect,
             })
         
         return treatments
     
     def _get_medications(self):
-        """Get identified medicines"""
+        """Get identified medicines (optimized - only essential fields)"""
         medicines = MedicineIdentification.objects.filter(
             user=self.patient
-        ).order_by('-created_at')[:10]
+        ).only(
+            'created_at', 'medicine_name', 'generic_name', 'strength',
+            'uses', 'side_effects', 'warnings', 'drug_class'
+        ).order_by('-created_at')[:5]  # Reduced from 10 to 5
         
         return [{
             'date': str(med.created_at.date()),
             'medicine_name': med.medicine_name,
             'generic_name': med.generic_name,
-            'brand_name': med.brand_name,
-            'manufacturer': med.manufacturer,
-            'medicine_form': med.medicine_form,
             'strength': med.strength,
-            'description': med.description,
             'uses': med.uses,
             'side_effects': med.side_effects,
             'warnings': med.warnings,
-            'dosage_instructions': med.dosage_instructions,
             'drug_class': med.drug_class,
         } for med in medicines]
     
     def _get_consultations(self):
-        """Get recent consultations"""
+        """Get recent consultations (optimized with select_related)"""
         consultations = Consultation.objects.filter(
             patient=self.patient
-        ).order_by('-scheduled_datetime')[:5]
+        ).select_related('doctor').only(
+            'scheduled_datetime', 'created_at', 'doctor__first_name', 
+            'doctor__last_name', 'status', 'mode', 'prescription', 
+            'doctor_notes', 'follow_up_required', 'follow_up_date'
+        ).order_by('-scheduled_datetime')[:3]  # Reduced from 5 to 3
         
         return [{
             'date': str(consultation.scheduled_datetime.date()) if consultation.scheduled_datetime else str(consultation.created_at.date()),

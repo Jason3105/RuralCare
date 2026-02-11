@@ -15,6 +15,14 @@ class GroqTreatmentPlanner:
     Advanced treatment planning engine powered by Groq API.
     Provides intelligent, evidence-based treatment recommendations.
     """
+    _instance = None
+    
+    @classmethod
+    def get_instance(cls):
+        """Get or create singleton instance"""
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance
     
     def __init__(self):
         """Initialize Groq client"""

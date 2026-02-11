@@ -3,7 +3,7 @@ services:
     name: ruralcare
     runtime: python
     buildCommand: "bash build.sh"
-    startCommand: "gunicorn cancer_treatment_system.wsgi:application --bind 0.0.0.0:$PORT --workers 1 --timeout 180 --log-level info"
+    startCommand: "gunicorn cancer_treatment_system.wsgi:application --bind 0.0.0.0:$PORT --workers 4 --threads 2 --timeout 180 --worker-class gthread --preload --max-requests 1000 --max-requests-jitter 50 --log-level info"
     envVars:
       - key: DJANGO_SECRET_KEY
         generateValue: true
