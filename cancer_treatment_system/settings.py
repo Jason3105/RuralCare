@@ -122,6 +122,7 @@ else:
             'HOST': os.getenv('DB_HOST'),
             'PORT': os.getenv('DB_PORT', '5432'),
             'CONN_MAX_AGE': 600,  # Reuse DB connections for 10 minutes (major perf boost)
+            'DISABLE_SERVER_SIDE_CURSORS': True,  # Required for Supabase PgBouncer
             'OPTIONS': {
                 'sslmode': 'require',
                 'connect_timeout': 10,

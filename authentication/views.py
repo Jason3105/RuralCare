@@ -100,17 +100,30 @@ def auth_callback(request):
             supabase_user = user_response.user
             
             # Get or create Django user
-            user, created = User.objects.get_or_create(
-                supabase_user_id=supabase_user.id,
-                defaults={
-                    'username': supabase_user.email.split('@')[0] + '_' + user_type,
-                    'email': supabase_user.email,
-                    'user_type': user_type,
-                    'first_name': supabase_user.user_metadata.get('full_name', '').split()[0] if supabase_user.user_metadata.get('full_name') else '',
-                    'last_name': ' '.join(supabase_user.user_metadata.get('full_name', '').split()[1:]) if supabase_user.user_metadata.get('full_name') else '',
-                    'profile_picture': supabase_user.user_metadata.get('avatar_url', ''),
-                }
-            )
+            # First try to find by supabase_user_id
+            try:
+                user = User.objects.get(supabase_user_id=supabase_user.id)
+                created = False
+            except User.DoesNotExist:
+                # Try to find by email (handles migration from old Supabase project)
+                try:
+                    user = User.objects.get(email=supabase_user.email)
+                    # Update the supabase_user_id to the new one
+                    user.supabase_user_id = supabase_user.id
+                    user.save()
+                    created = False
+                except User.DoesNotExist:
+                    # Create new user
+                    user = User.objects.create(
+                        supabase_user_id=supabase_user.id,
+                        username=supabase_user.email.split('@')[0] + '_' + user_type,
+                        email=supabase_user.email,
+                        user_type=user_type,
+                        first_name=supabase_user.user_metadata.get('full_name', '').split()[0] if supabase_user.user_metadata.get('full_name') else '',
+                        last_name=' '.join(supabase_user.user_metadata.get('full_name', '').split()[1:]) if supabase_user.user_metadata.get('full_name') else '',
+                        profile_picture=supabase_user.user_metadata.get('avatar_url', ''),
+                    )
+                    created = True
             
             # If user already exists with a different role, prevent login
             if not created and user.user_type != user_type:
