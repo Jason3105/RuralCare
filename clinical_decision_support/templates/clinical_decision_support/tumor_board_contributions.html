@@ -17,7 +17,7 @@
 
         <!-- Global Statistics Cards -->
         <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
-            <div class="bg-card border border-border/50 rounded-xl p-4">
+            <div class="bento-card p-4">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-2xl font-bold text-foreground">{{ total_sessions }}</p>
@@ -28,7 +28,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-card border border-border/50 rounded-xl p-4">
+            <div class="bento-card p-4">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-2xl font-bold text-foreground">{{ total_doctors }}</p>
@@ -39,7 +39,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-card border border-border/50 rounded-xl p-4">
+            <div class="bento-card p-4">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-2xl font-bold text-green-600">{{ total_approved }}</p>
@@ -50,7 +50,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-card border border-border/50 rounded-xl p-4">
+            <div class="bento-card p-4">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-2xl font-bold text-red-600">{{ total_rejected }}</p>
@@ -61,7 +61,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-card border border-border/50 rounded-xl p-4">
+            <div class="bento-card p-4">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-2xl font-bold text-amber-600">{{ total_modifications }}</p>
@@ -72,7 +72,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-card border border-border/50 rounded-xl p-4">
+            <div class="bento-card p-4">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-2xl font-bold {% if global_approval_rate >= 70 %}text-green-600{% elif global_approval_rate >= 50 %}text-amber-600{% else %}text-red-600{% endif %}">
@@ -88,7 +88,7 @@
         </div>
 
         <!-- Consensus Stats -->
-        <div class="bg-card border border-border/50 rounded-xl p-6 mb-8">
+        <div class="bento-card p-6 mb-8">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between">
                 <div>
                     <h2 class="text-xl font-semibold text-foreground mb-2">Consensus Achievement</h2>
@@ -110,7 +110,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Doctor Leaderboard (2 columns) -->
             <div class="lg:col-span-2">
-                <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="bento-card p-6">
                     <h2 class="text-xl font-semibold text-foreground mb-4">Doctor Statistics</h2>
                     
                     {% if doctor_stats %}
@@ -180,7 +180,7 @@
 
             <!-- Recent Activity -->
             <div class="lg:col-span-1">
-                <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="bento-card p-6">
                     <h2 class="text-xl font-semibold text-foreground mb-4">Recent Decisions</h2>
                     
                     {% if recent_decisions %}

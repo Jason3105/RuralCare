@@ -7,8 +7,8 @@
 <div class="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-4xl mx-auto">
         <!-- Header Card -->
-        <div class="bg-card border border-border rounded-lg overflow-hidden mb-6 fade-in transition-colors">
-            <div class="bg-gradient-to-r from-primary to-primary/80 px-4 sm:px-6 py-4 sm:py-6">
+        <div class="bento-card overflow-hidden mb-6 fade-in transition-colors">
+            <div class="bento-accent-orange px-4 sm:px-6 py-4 sm:py-6">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div class="flex items-center">
                         <i class="fas fa-user-edit text-2xl sm:text-3xl text-primary-foreground"></i>
@@ -51,7 +51,7 @@
         {% endif %}
 
         <!-- Form Card -->
-        <div class="bg-card border border-border rounded-lg overflow-hidden fade-in transition-colors">
+        <div class="bento-card overflow-hidden fade-in transition-colors">
             <form method="POST" id="profileForm" class="p-4 sm:p-8">
                 {% csrf_token %}
                 

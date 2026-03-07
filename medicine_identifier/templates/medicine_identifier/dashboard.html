@@ -4,11 +4,11 @@
 {% block title %}Medicine Identifier Dashboard{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8">
+<div class="min-h-screen py-8">
     <div class="container mx-auto px-4 max-w-6xl">
         <!-- Header -->
         <div class="text-center mb-10 fade-in">
-            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 mb-4 shadow-lg">
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-blue-600 mb-4 shadow-lg">
                 <i class="fas fa-pills text-4xl text-white"></i>
             </div>
             <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2">Medicine Identifier</h1>
@@ -17,7 +17,7 @@
 
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8 fade-in">
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+            <div class="bento-card p-6">
                 <div class="flex items-center">
                     <div class="w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
                         <i class="fas fa-camera text-xl text-blue-600 dark:text-blue-400"></i>
@@ -29,7 +29,7 @@
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+            <div class="bento-card p-6">
                 <div class="flex items-center">
                     <div class="w-12 h-12 rounded-lg bg-green-100 dark:bg-green-900 flex items-center justify-center">
                         <i class="fas fa-check-circle text-xl text-green-600 dark:text-green-400"></i>
@@ -41,7 +41,7 @@
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+            <div class="bento-card p-6">
                 <div class="flex items-center">
                     <div class="w-12 h-12 rounded-lg bg-red-100 dark:bg-red-900 flex items-center justify-center">
                         <i class="fas fa-times-circle text-xl text-red-600 dark:text-red-400"></i>
@@ -53,7 +53,7 @@
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+            <div class="bento-card p-6">
                 <div class="flex items-center">
                     <div class="w-12 h-12 rounded-lg bg-orange-100 dark:bg-orange-900 flex items-center justify-center">
                         <i class="fas fa-image text-xl text-orange-600 dark:text-orange-400"></i>
@@ -65,7 +65,7 @@
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+            <div class="bento-card p-6">
                 <div class="flex items-center">
                     <div class="w-12 h-12 rounded-lg bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
                         <i class="fas fa-prescription-bottle text-xl text-purple-600 dark:text-purple-400"></i>
@@ -82,14 +82,14 @@
             <!-- Upload Section -->
             <div class="lg:col-span-2 space-y-6">
                 <!-- Quick Upload Card -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden fade-in">
+                <div class="bento-card fade-in">
                     <div class="p-8">
                         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">
                             <i class="fas fa-upload mr-2 text-blue-500"></i>Identify a Medicine
                         </h2>
                         <a href="{% url 'medicine_identifier:upload' %}" class="block">
-                            <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-10 text-center hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all cursor-pointer">
-                                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                            <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-bento p-10 text-center hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all cursor-pointer">
+                                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-600 flex items-center justify-center">
                                     <i class="fas fa-camera text-2xl text-white"></i>
                                 </div>
                                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Upload Medicine Image</h3>
@@ -100,7 +100,7 @@
                 </div>
 
                 <!-- Recent Identifications -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden fade-in">
+                <div class="bento-card fade-in">
                     <div class="p-6 border-b border-gray-200 dark:border-gray-700">
                         <div class="flex justify-between items-center">
                             <h2 class="text-xl font-bold text-gray-900 dark:text-white">
@@ -163,7 +163,7 @@
             <!-- Right Sidebar -->
             <div class="space-y-6">
                 <!-- Features Card -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden fade-in">
+                <div class="bento-card fade-in">
                     <div class="p-6">
                         <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
                             <i class="fas fa-magic mr-2 text-purple-500"></i>Features
@@ -194,7 +194,7 @@
                 </div>
 
                 <!-- Tips Card -->
-                <div class="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-xl overflow-hidden fade-in">
+                <div class="bg-blue-600 rounded-bento-lg shadow-xl overflow-hidden fade-in">
                     <div class="p-6 text-white">
                         <h2 class="text-lg font-bold mb-4">
                             <i class="fas fa-lightbulb mr-2"></i>Tips for Best Results
@@ -222,7 +222,7 @@
 
                 <!-- Recently Identified Medicines -->
                 {% if stats.recent_medicines %}
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden fade-in">
+                <div class="bento-card fade-in">
                     <div class="p-6">
                         <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
                             <i class="fas fa-prescription-bottle mr-2 text-cyan-500"></i>Your Medicines

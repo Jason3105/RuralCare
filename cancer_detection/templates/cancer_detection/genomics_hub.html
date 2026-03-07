@@ -10,9 +10,9 @@
     </div>
 
     <!-- Tabs -->
-    <div class="flex space-x-1 bg-muted/50 p-1 rounded-xl mb-8 w-fit">
+    <div class="flex space-x-1 bg-muted/50 p-1 rounded-bento mb-8 w-fit">
         <button onclick="switchGenomicTab('upload')" id="genomicTab-upload"
-            class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-card text-foreground shadow-sm">
+            class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-card text-foreground ">
             <i class="fas fa-dna mr-2"></i>Upload Profile
         </button>
         <button onclick="switchGenomicTab('profiles')" id="genomicTab-profiles"
@@ -24,7 +24,7 @@
     <!-- Upload Tab -->
     <div id="genomicPanel-upload">
         <div class="max-w-5xl">
-            <div class="bg-card border border-border/50 rounded-2xl p-6 sm:p-10 transition-all">
+            <div class="bento-card p-6 sm:p-10 transition-all">
                 <form method="post" action="{% url 'cancer_detection:upload_genomic' %}" class="space-y-8">
                     {% csrf_token %}
                     
@@ -209,7 +209,7 @@
 
                     <!-- Submit Button -->
                     <div class="flex flex-col sm:flex-row gap-4 pt-4">
-                        <button type="submit" class="flex-1 bg-gradient-to-r from-primary to-primary/90 hover:shadow-xl text-primary-foreground font-bold py-3 sm:py-4 px-6 rounded-lg transition-all duration-300 flex items-center justify-center hover:scale-105">
+                        <button type="submit" class="flex-1 bg-orange-600 hover:shadow-lg text-primary-foreground font-bold py-3 sm:py-4 px-6 rounded-lg transition-all duration-300 flex items-center justify-center">
                             <i class="fas fa-dna mr-2"></i>
                             Analyze Genomic Profile
                         </button>
@@ -218,7 +218,7 @@
             </div>
 
             <!-- Information Box -->
-            <div class="mt-8 bg-gradient-to-br from-purple-50 to-purple-50/50 dark:from-purple-900/20 dark:to-purple-900/10 border border-purple-200 dark:border-purple-800/50 rounded-xl p-6 sm:p-8">
+            <div class="mt-8 bg-gradient-to-br from-purple-50 to-purple-50/50 dark:from-purple-900/20 dark:to-purple-900/10 border border-purple-200 dark:border-purple-800/50 rounded-bento p-6 sm:p-8">
                 <h3 class="text-lg sm:text-xl font-bold text-purple-900 dark:text-purple-300 mb-4 flex items-center">
                     <i class="fas fa-info-circle mr-2"></i>Genomic Analysis Benefits
                 </h3>
@@ -249,7 +249,7 @@
         {% if page_obj %}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for profile in page_obj %}
-            <div class="bg-card border border-border/50 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 card-hover">
+            <div class="bento-card p-6 hover:shadow-lg transition-all duration-300 card-hover">
                 <div class="flex items-start justify-between mb-4">
                     <div class="flex items-center space-x-3">
                         <div class="h-12 w-12 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
@@ -321,7 +321,7 @@
             <nav class="flex space-x-2">
                 {% if page_obj.has_previous %}
                 <a href="?page={{ page_obj.previous_page_number }}#profiles" 
-                   class="px-4 py-2 bg-card border border-border rounded-lg hover:bg-accent transition-all">
+                   class="px-4 py-2 bento-card hover:bg-accent transition-all">
                     <i class="fas fa-chevron-left"></i>
                 </a>
                 {% endif %}
@@ -332,7 +332,7 @@
                 
                 {% if page_obj.has_next %}
                 <a href="?page={{ page_obj.next_page_number }}#profiles" 
-                   class="px-4 py-2 bg-card border border-border rounded-lg hover:bg-accent transition-all">
+                   class="px-4 py-2 bento-card hover:bg-accent transition-all">
                     <i class="fas fa-chevron-right"></i>
                 </a>
                 {% endif %}
@@ -341,12 +341,12 @@
         {% endif %}
 
         {% else %}
-        <div class="bg-card border border-border/50 rounded-2xl p-12 text-center">
+        <div class="bento-card p-12 text-center">
             <i class="fas fa-dna text-6xl text-muted-foreground/30 mb-4"></i>
             <h3 class="text-xl font-bold text-foreground mb-2">No Genomic Profiles Yet</h3>
             <p class="text-muted-foreground mb-6">Upload your first genomic test results to get started</p>
             <button onclick="switchGenomicTab('upload')" 
-               class="inline-flex items-center bg-gradient-to-r from-primary to-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg hover:shadow-lg transition-all">
+               class="inline-flex items-center bg-orange-600 text-primary-foreground font-bold py-3 px-6 rounded-lg hover:shadow-lg transition-all">
                 <i class="fas fa-plus mr-2"></i>
                 Upload Profile
             </button>
@@ -360,11 +360,11 @@
     function switchGenomicTab(tab) {
         // Update tab buttons
         document.querySelectorAll('[id^="genomicTab-"]').forEach(btn => {
-            btn.classList.remove('bg-card', 'text-foreground', 'shadow-sm');
+            btn.classList.remove('bg-card', 'text-foreground', '');
             btn.classList.add('text-muted-foreground', 'hover:text-foreground');
         });
         const activeBtn = document.getElementById('genomicTab-' + tab);
-        activeBtn.classList.add('bg-card', 'text-foreground', 'shadow-sm');
+        activeBtn.classList.add('bg-card', 'text-foreground', '');
         activeBtn.classList.remove('text-muted-foreground', 'hover:text-foreground');
 
         // Update panels

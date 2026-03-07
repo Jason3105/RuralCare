@@ -45,7 +45,7 @@
 
         <!-- Unread Count -->
         {% if unread_count > 0 %}
-        <div class="bg-primary/10 border border-primary/30 rounded-xl p-4 mb-6">
+        <div class="bg-primary/10 border border-primary/30 rounded-bento p-4 mb-6">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                     <span class="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
@@ -64,7 +64,7 @@
         <!-- Alerts List -->
         <div class="space-y-4">
             {% for alert in alerts %}
-            <div class="bg-card border rounded-xl overflow-hidden hover:shadow-md transition-shadow
+            <div class="bento-card overflow-hidden transition-all
                 {% if not alert.is_read %}border-primary/50{% else %}border-border/50{% endif %}">
                 <div class="flex items-start p-5">
                     <!-- Icon -->
@@ -139,7 +139,7 @@
                 {% endif %}
             </div>
             {% empty %}
-            <div class="bg-card border border-border/50 rounded-xl p-12 text-center">
+            <div class="bento-card p-12 text-center">
                 <i class="fas fa-bell-slash text-4xl text-muted-foreground mb-4"></i>
                 <h3 class="text-lg font-medium text-foreground mb-2">No Alerts Yet</h3>
                 <p class="text-muted-foreground">You're all caught up! Alerts and reminders will appear here.</p>

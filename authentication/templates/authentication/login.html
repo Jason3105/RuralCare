@@ -3,70 +3,66 @@
 {% block title %}Login - Select User Type{% endblock %}
 
 {% block content %}
-<div class="fade-in min-h-screen py-12 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
-    <div class="max-w-5xl w-full">
-        <div class="text-center mb-12 sm:mb-16">
-            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-4">Welcome Back</h1>
-            <p class="text-lg sm:text-xl text-muted-foreground">Please select your account type to continue</p>
-        </div>
+<div class="fade-in py-12 sm:py-20">
+    <div class="text-center mb-12">
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-foreground tracking-tight mb-4">Welcome Back</h1>
+        <p class="text-lg sm:text-xl text-muted-foreground">Select your account type to continue</p>
+    </div>
 
-        <div class="grid md:grid-cols-2 gap-8 sm:gap-10">
-            <!-- Patient Login Card -->
-            <a href="{% url 'patient_login' %}" class="group">
-                <div class="bg-card border border-border/50 p-8 sm:p-10 rounded-2xl hover:shadow-2xl hover:border-primary/50 transition-all duration-300 transform hover:scale-105 cursor-pointer h-full flex flex-col">
-                    <div class="text-center mb-6">
-                        <div class="inline-flex items-center justify-center w-20 h-20 bg-blue-500/10 rounded-2xl mb-6 group-hover:bg-blue-500/20 transition-colors">
-                            <i class="fas fa-user-injured text-5xl text-blue-600"></i>
-                        </div>
-                        <h2 class="text-2xl sm:text-3xl font-bold text-foreground mb-3">Patient Login</h2>
-                        <p class="text-muted-foreground text-base sm:text-lg mb-8">Access your personalized treatment plans and medical records</p>
-                    </div>
-                    <div class="mt-auto">
-                        <div class="inline-block w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:shadow-lg text-white px-6 py-3 rounded-xl font-bold group-hover:scale-105 transition-all duration-200 text-center flex items-center justify-center gap-2">
-                            <span>Continue as Patient</span>
-                            <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                        </div>
+    <div class="bento-grid max-w-5xl mx-auto">
+        <!-- Patient Login — Accent Card -->
+        <a href="{% url 'patient_login' %}" class="group">
+            <div class="bento-card bento-accent-blue p-8 sm:p-10 h-full flex flex-col">
+                <div class="bento-icon" style="background: rgba(255,255,255,0.2);">
+                    <i class="fas fa-user-injured"></i>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-extrabold mb-3">Patient Portal</h2>
+                <p class="text-white/80 text-base mb-8 leading-relaxed">Access your personalized treatment plans, medical records, and AI-powered health insights.</p>
+                <div class="mt-auto">
+                    <div class="inline-flex items-center px-6 py-3 bg-white/20 rounded-xl font-bold text-sm group-hover:bg-white/30 transition-all">
+                        Continue as Patient <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
                     </div>
                 </div>
-            </a>
+            </div>
+        </a>
 
-            <!-- Doctor Login Card -->
-            <a href="{% url 'doctor_login' %}" class="group">
-                <div class="bg-card border border-border/50 p-8 sm:p-10 rounded-2xl hover:shadow-2xl hover:border-green-500/50 transition-all duration-300 transform hover:scale-105 cursor-pointer h-full flex flex-col">
-                    <div class="text-center mb-6">
-                        <div class="inline-flex items-center justify-center w-20 h-20 bg-green-500/10 rounded-2xl mb-6 group-hover:bg-green-500/20 transition-colors">
-                            <i class="fas fa-user-md text-5xl text-green-600"></i>
-                        </div>
-                        <h2 class="text-2xl sm:text-3xl font-bold text-foreground mb-3">Doctor Login</h2>
-                        <p class="text-muted-foreground text-base sm:text-lg mb-8">Manage patient care and design treatment plans</p>
-                    </div>
-                    <div class="mt-auto">
-                        <div class="inline-block w-full bg-gradient-to-r from-green-600 to-green-500 hover:shadow-lg text-white px-6 py-3 rounded-xl font-bold group-hover:scale-105 transition-all duration-200 text-center flex items-center justify-center gap-2">
-                            <span>Continue as Doctor</span>
-                            <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                        </div>
+        <!-- Doctor Login — Accent Card -->
+        <a href="{% url 'doctor_login' %}" class="group">
+            <div class="bento-card bento-accent-green p-8 sm:p-10 h-full flex flex-col">
+                <div class="bento-icon" style="background: rgba(255,255,255,0.2);">
+                    <i class="fas fa-user-md"></i>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-extrabold mb-3">Doctor Portal</h2>
+                <p class="text-white/80 text-base mb-8 leading-relaxed">Manage patient care, review analyses, and design evidence-based treatment strategies.</p>
+                <div class="mt-auto">
+                    <div class="inline-flex items-center px-6 py-3 bg-white/20 rounded-xl font-bold text-sm group-hover:bg-white/30 transition-all">
+                        Continue as Doctor <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
                     </div>
                 </div>
-            </a>
-        </div>
+            </div>
+        </a>
 
-        <!-- Info Section -->
-        <div class="mt-16 sm:mt-20 grid md:grid-cols-3 gap-6">
-            <div class="text-center p-6 bg-primary/5 border border-primary/20 rounded-xl">
-                <i class="fas fa-shield-alt text-3xl text-primary mb-3 block"></i>
-                <h3 class="font-bold text-foreground mb-2">Secure Access</h3>
-                <p class="text-sm text-muted-foreground">OAuth 2.0 authentication protects your data</p>
+        <!-- Info Cards Row -->
+        <div class="bento-card p-6 text-center">
+            <div class="bento-icon bento-icon-orange mx-auto">
+                <i class="fas fa-shield-alt"></i>
             </div>
-            <div class="text-center p-6 bg-primary/5 border border-primary/20 rounded-xl">
-                <i class="fas fa-lock text-3xl text-primary mb-3 block"></i>
-                <h3 class="font-bold text-foreground mb-2">Privacy First</h3>
-                <p class="text-sm text-muted-foreground">Your health information remains confidential</p>
+            <h3 class="font-bold text-foreground mb-1">Secure Access</h3>
+            <p class="text-sm text-muted-foreground">OAuth 2.0 authentication</p>
+        </div>
+        <div class="bento-card p-6 text-center">
+            <div class="bento-icon bento-icon-purple mx-auto">
+                <i class="fas fa-lock"></i>
             </div>
-            <div class="text-center p-6 bg-primary/5 border border-primary/20 rounded-xl">
-                <i class="fas fa-zap text-3xl text-primary mb-3 block"></i>
-                <h3 class="font-bold text-foreground mb-2">Lightning Fast</h3>
-                <p class="text-sm text-muted-foreground">Powered by modern cloud infrastructure</p>
+            <h3 class="font-bold text-foreground mb-1">Privacy First</h3>
+            <p class="text-sm text-muted-foreground">Confidential health data</p>
+        </div>
+        <div class="bento-card p-6 text-center">
+            <div class="bento-icon bento-icon-cyan mx-auto">
+                <i class="fas fa-bolt"></i>
             </div>
+            <h3 class="font-bold text-foreground mb-1">Lightning Fast</h3>
+            <p class="text-sm text-muted-foreground">Modern cloud infrastructure</p>
         </div>
     </div>
 </div>

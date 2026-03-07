@@ -17,7 +17,7 @@
 
         {% if records %}
         {% for item in records %}
-        <div class="bg-card border border-border/50 rounded-xl p-6 mb-6">
+        <div class="bento-card p-6 mb-6">
             <!-- Plan Info -->
             <div class="mb-6">
                 <h2 class="text-xl font-semibold text-foreground">{{ item.analysis_type }}</h2>
@@ -43,7 +43,7 @@
             </div>
 
             <!-- What This Means -->
-            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-5 mb-6">
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-bento p-5 mb-6">
                 <h3 class="font-semibold text-blue-800 dark:text-blue-400 mb-3">
                     <i class="fas fa-info-circle mr-2"></i>What This Means For You
                 </h3>
@@ -86,7 +86,7 @@
             </div>
 
             <!-- Simple Breakdown -->
-            <div class="border border-border rounded-xl p-5">
+            <div class="border border-border rounded-bento p-5">
                 <h3 class="font-semibold text-foreground mb-4">What Supports Your Plan</h3>
                 <div class="space-y-4">
                     <div class="flex items-start space-x-3">
@@ -120,7 +120,7 @@
             </div>
 
             <!-- Questions to Ask -->
-            <div class="mt-6 bg-accent/30 rounded-xl p-5">
+            <div class="mt-6 bg-accent/30 rounded-bento p-5">
                 <h3 class="font-semibold text-foreground mb-3">
                     <i class="fas fa-question-circle text-primary mr-2"></i>Questions You Can Ask Your Doctor
                 </h3>
@@ -142,7 +142,7 @@
         </div>
         {% endfor %}
         {% else %}
-        <div class="bg-card border border-border/50 rounded-xl p-12 text-center">
+        <div class="bento-card p-12 text-center">
             <i class="fas fa-chart-pie text-4xl text-muted-foreground mb-4"></i>
             <h3 class="text-lg font-medium text-foreground mb-2">No Treatment Plans Available</h3>
             <p class="text-muted-foreground">Confidence information will appear once your doctor creates a treatment plan for you</p>

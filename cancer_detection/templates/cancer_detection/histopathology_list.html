@@ -10,7 +10,7 @@
             <p class="text-base sm:text-lg text-muted-foreground">View and manage your pathology reports</p>
         </div>
         <a href="{% url 'cancer_detection:upload_histopathology' %}" 
-           class="mt-4 sm:mt-0 bg-gradient-to-r from-primary to-primary/90 hover:shadow-xl text-primary-foreground font-bold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center hover:scale-105">
+           class="mt-4 sm:mt-0 bg-orange-600 hover:shadow-lg text-primary-foreground font-bold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center">
             <i class="fas fa-plus mr-2"></i>
             Upload New Report
         </a>
@@ -19,10 +19,10 @@
     {% if page_obj %}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for report in page_obj %}
-        <div class="bg-card border border-border/50 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 card-hover">
+        <div class="bento-card p-6 hover:shadow-lg transition-all duration-300 card-hover">
             <div class="flex items-start justify-between mb-4">
                 <div class="flex items-center space-x-3">
-                    <div class="h-12 w-12 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
+                    <div class="h-12 w-12 rounded-lg bento-accent-orange flex items-center justify-center">
                         <i class="fas fa-microscope text-primary-foreground text-xl"></i>
                     </div>
                     <div>
@@ -91,7 +91,7 @@
         <nav class="flex space-x-2">
             {% if page_obj.has_previous %}
             <a href="?page={{ page_obj.previous_page_number }}" 
-               class="px-4 py-2 bg-card border border-border rounded-lg hover:bg-accent transition-all">
+               class="px-4 py-2 bento-card hover:bg-accent transition-all">
                 <i class="fas fa-chevron-left"></i>
             </a>
             {% endif %}
@@ -102,7 +102,7 @@
             
             {% if page_obj.has_next %}
             <a href="?page={{ page_obj.next_page_number }}" 
-               class="px-4 py-2 bg-card border border-border rounded-lg hover:bg-accent transition-all">
+               class="px-4 py-2 bento-card hover:bg-accent transition-all">
                 <i class="fas fa-chevron-right"></i>
             </a>
             {% endif %}
@@ -111,12 +111,12 @@
     {% endif %}
 
     {% else %}
-    <div class="bg-card border border-border/50 rounded-2xl p-12 text-center">
+    <div class="bento-card p-12 text-center">
         <i class="fas fa-microscope text-6xl text-muted-foreground/30 mb-4"></i>
         <h3 class="text-xl font-bold text-foreground mb-2">No Reports Yet</h3>
         <p class="text-muted-foreground mb-6">Upload your first histopathology report to get started</p>
         <a href="{% url 'cancer_detection:upload_histopathology' %}" 
-           class="inline-flex items-center bg-gradient-to-r from-primary to-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg hover:shadow-lg transition-all">
+           class="inline-flex items-center bg-orange-600 text-primary-foreground font-bold py-3 px-6 rounded-lg hover:shadow-lg transition-all">
             <i class="fas fa-plus mr-2"></i>
             Upload Report
         </a>

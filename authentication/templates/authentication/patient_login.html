@@ -3,29 +3,35 @@
 {% block title %}Patient Login{% endblock %}
 
 {% block content %}
-<div class="fade-in max-w-2xl mx-auto">
-    <div class="text-center mb-10">
-        <h2 class="text-4xl sm:text-5xl font-bold text-foreground mb-3">Patient Login</h2>
-        <p class="text-lg text-muted-foreground">Sign in to access your personalized treatment plans and medical records</p>
-    </div>
-
-    <div class="bg-card border border-border/50 rounded-2xl p-8 sm:p-12 shadow-sm">
-        <div id="loading" class="hidden text-center py-8">
-            <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-primary border-t-transparent"></div>
-            <p class="text-muted-foreground mt-4 text-lg">Signing you in...</p>
+<div class="fade-in py-12 sm:py-20">
+    <div class="max-w-xl mx-auto">
+        <div class="text-center mb-10">
+            <h2 class="text-4xl sm:text-5xl font-extrabold text-foreground tracking-tight mb-3">Patient Login</h2>
+            <p class="text-lg text-muted-foreground">Sign in to access your personalized treatment plans and medical records</p>
         </div>
 
-        <div id="login-button-container">
-            <button id="google-login-btn" class="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:shadow-xl text-white font-bold py-4 px-6 border-0 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-105">
-                <i class="fab fa-google mr-3 text-lg"></i>
-                <span>Sign in with Google</span>
-            </button>
-        </div>
+        <div class="bento-card p-8 sm:p-12">
+            <div class="bento-icon bento-icon-blue mx-auto mb-6">
+                <i class="fas fa-user-injured"></i>
+            </div>
 
-        <div class="mt-8 text-center">
-            <a href="{% url 'login' %}" class="text-muted-foreground hover:text-foreground transition-colors font-medium">
-                <i class="fas fa-arrow-left mr-2"></i>Back to login selection
-            </a>
+            <div id="loading" class="hidden text-center py-8">
+                <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-blue-500 border-t-transparent"></div>
+                <p class="text-muted-foreground mt-4 text-lg">Signing you in...</p>
+            </div>
+
+            <div id="login-button-container">
+                <button id="google-login-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 border-0 rounded-xl flex items-center justify-center transition-all duration-300 hover:shadow-lg">
+                    <i class="fab fa-google mr-3 text-lg"></i>
+                    <span>Sign in with Google</span>
+                </button>
+            </div>
+
+            <div class="mt-8 text-center">
+                <a href="{% url 'login' %}" class="text-muted-foreground hover:text-foreground transition-colors font-medium">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to login selection
+                </a>
+            </div>
         </div>
     </div>
 </div>

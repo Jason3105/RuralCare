@@ -51,7 +51,7 @@
         {% if messages %}
         <div class="mb-6">
             {% for message in messages %}
-            <div class="bg-{{ message.tags|default:'blue' }}-50 border border-{{ message.tags|default:'blue' }}-200 rounded-2xl p-4 text-{{ message.tags|default:'blue' }}-800">
+            <div class="bg-{{ message.tags|default:'blue' }}-50 border border-{{ message.tags|default:'blue' }}-200 rounded-bento-lg p-4 text-{{ message.tags|default:'blue' }}-800">
                 {{ message }}
             </div>
             {% endfor %}
@@ -60,7 +60,7 @@
 
         <!-- Quick Stats -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+            <div class="bento-card p-6 ">
                 <div class="text-sm text-slate-600 mb-2">5-Year Survival Rate</div>
                 <div class="text-3xl font-bold text-primary">
                     {% if plan.predicted_5yr_survival %}
@@ -71,7 +71,7 @@
                 </div>
             </div>
 
-            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+            <div class="bento-card p-6 ">
                 <div class="text-sm text-slate-600 mb-2">Remission Probability</div>
                 <div class="text-3xl font-bold text-primary">
                     {% if plan.remission_probability %}
@@ -82,7 +82,7 @@
                 </div>
             </div>
 
-            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+            <div class="bento-card p-6 ">
                 <div class="text-sm text-slate-600 mb-2">Quality of Life Score</div>
                 <div class="text-3xl font-bold text-primary">
                     {% if plan.quality_of_life_score %}
@@ -93,7 +93,7 @@
                 </div>
             </div>
 
-            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+            <div class="bento-card p-6 ">
                 <div class="text-sm text-slate-600 mb-2">Treatment Phases</div>
                 <div class="text-3xl font-bold text-primary">
                     {% if plan.treatment_pathway %}
@@ -109,7 +109,7 @@
             <!-- Main Content -->
             <div class="lg:col-span-2 space-y-8">
                 <!-- Patient Profile Section -->
-                <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+                <div class="bento-card p-8 ">
                     <h2 class="text-2xl font-bold text-slate-900 mb-6">Patient Profile</h2>
                     {% if patient_profile %}
                     <div class="grid grid-cols-2 gap-6">
@@ -151,30 +151,30 @@
                 </div>
 
                 <!-- Tumor Analysis Section -->
-                <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+                <div class="bento-card p-8 ">
                     <h2 class="text-2xl font-bold text-slate-900 mb-6">Tumor Analysis</h2>
                     {% if tumor_analysis %}
                     <div class="space-y-4">
                         <div class="grid grid-cols-2 gap-4">
-                            <div class="p-4 bg-slate-50 rounded-xl border border-border/30">
+                            <div class="p-4 bg-slate-50 rounded-bento border border-border/30">
                                 <p class="text-sm text-slate-600">Cancer Type</p>
                                 <p class="text-lg font-semibold text-slate-900 mt-1">{{ tumor_analysis.cancer_type|title }}</p>
                             </div>
-                            <div class="p-4 bg-slate-50 rounded-xl border border-border/30">
+                            <div class="p-4 bg-slate-50 rounded-bento border border-border/30">
                                 <p class="text-sm text-slate-600">Stage</p>
                                 <p class="text-lg font-semibold text-slate-900 mt-1">Stage {{ tumor_analysis.stage }}</p>
                             </div>
-                            <div class="p-4 bg-slate-50 rounded-xl border border-border/30">
+                            <div class="p-4 bg-slate-50 rounded-bento border border-border/30">
                                 <p class="text-sm text-slate-600">Size</p>
                                 <p class="text-lg font-semibold text-slate-900 mt-1">{{ tumor_analysis.size_mm|default:"—" }} mm</p>
                             </div>
-                            <div class="p-4 bg-slate-50 rounded-xl border border-border/30">
+                            <div class="p-4 bg-slate-50 rounded-bento border border-border/30">
                                 <p class="text-sm text-slate-600">Location</p>
                                 <p class="text-lg font-semibold text-slate-900 mt-1">{{ tumor_analysis.location|title|default:"—" }}</p>
                             </div>
                         </div>
                         {% if tumor_analysis.metastasis %}
-                        <div class="p-4 bg-red-50 border border-red-200 rounded-xl">
+                        <div class="p-4 bg-red-50 border border-red-200 rounded-bento">
                             <p class="text-sm font-semibold text-red-800">⚠️ Distant Metastasis Present</p>
                             {% if tumor_analysis.metastasis_sites %}
                             <p class="text-sm text-red-700 mt-1">Affected sites: {{ tumor_analysis.metastasis_sites|join:", "|title }}</p>
@@ -186,7 +186,7 @@
                 </div>
 
                 <!-- Treatment Recommendations -->
-                <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+                <div class="bento-card p-8 ">
                     <h2 class="text-2xl font-bold text-slate-900 mb-6">Treatment Recommendations</h2>
                     
                     <!-- Primary Treatment -->
@@ -198,7 +198,7 @@
                         </h3>
                         <div class="space-y-3">
                             {% for treatment in plan.primary_treatments %}
-                            <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                            <div class="p-4 bg-blue-50 border border-blue-200 rounded-bento">
                                 <p class="font-semibold text-slate-900">{{ treatment }}</p>
                             </div>
                             {% endfor %}
@@ -215,7 +215,7 @@
                         </h3>
                         <div class="space-y-3">
                             {% for treatment in plan.adjuvant_treatments %}
-                            <div class="p-4 bg-green-50 border border-green-200 rounded-xl">
+                            <div class="p-4 bg-green-50 border border-green-200 rounded-bento">
                                 <p class="font-semibold text-slate-900">{{ treatment }}</p>
                             </div>
                             {% endfor %}
@@ -232,7 +232,7 @@
                         </h3>
                         <div class="space-y-3">
                             {% for therapy in plan.targeted_therapies %}
-                            <div class="p-4 bg-purple-50 border border-purple-200 rounded-xl">
+                            <div class="p-4 bg-purple-50 border border-purple-200 rounded-bento">
                                 <p class="font-semibold text-slate-900">{{ therapy }}</p>
                             </div>
                             {% endfor %}
@@ -243,7 +243,7 @@
 
                 <!-- Side Effects -->
                 {% if plan.side_effects %}
-                <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+                <div class="bento-card p-8 ">
                     <h2 class="text-2xl font-bold text-slate-900 mb-6">Expected Side Effects</h2>
                     <div class="overflow-x-auto">
                         <table class="w-full">
@@ -290,7 +290,7 @@
             <div class="space-y-6">
                 <!-- Genetic Profile Card -->
                 {% if genetic_profile %}
-                <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+                <div class="bento-card p-6 ">
                     <h3 class="text-lg font-bold text-slate-900 mb-4">Genetic Profile</h3>
                     
                     {% if genetic_profile.mutations %}
@@ -319,12 +319,12 @@
                 <!-- Action Buttons -->
                 <div class="flex flex-col sm:flex-row gap-4 mb-6">
                     <a href="{% url 'cancer_detection:visualize_pathway' plan_id=plan.id %}" 
-                       class="flex-1 bg-gradient-to-r from-primary to-primary/90 hover:shadow-xl text-primary-foreground font-bold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center hover:scale-105">
+                       class="flex-1 bg-orange-600 hover:shadow-lg text-primary-foreground font-bold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center">
                         <i class="fas fa-route mr-2"></i>
                         Visualize Pathway
                     </a>
                     <a href="{% url 'cancer_detection:decision_support' plan_id=plan.id %}" 
-                       class="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:shadow-xl text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center hover:scale-105">
+                       class="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center">
                         <i class="fas fa-handshake mr-2"></i>
                         Decision Support
                     </a>
@@ -332,7 +332,7 @@
                     <form method="post" action="{% url 'cancer_detection:submit_treatment_plan_review' plan_id=plan.id %}" class="flex-1">
                         {% csrf_token %}
                         <button type="submit" 
-                            class="w-full bg-card border-2 border-primary hover:bg-primary hover:text-primary-foreground text-primary font-bold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center">
+                            class="w-full bento-card bento-accent-orange hover:bg-primary hover:text-primary-foreground text-primary font-bold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center">
                             <i class="fas fa-paper-plane mr-2"></i>
                             Submit for Review
                         </button>
@@ -344,7 +344,7 @@
                 {% if plan.status == 'draft' %}
                 <form method="POST" action="{% url 'cancer_detection:submit_treatment_plan_review' plan.id %}">
                     {% csrf_token %}
-                    <button type="submit" class="w-full bg-gradient-to-r from-primary to-primary/90 hover:shadow-lg text-white font-semibold py-3 px-4 rounded-xl transition duration-200">
+                    <button type="submit" class="w-full bg-orange-600 hover:shadow-lg text-white font-semibold py-3 px-4 rounded-bento transition duration-200">
                         <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
@@ -353,13 +353,13 @@
                 </form>
                 {% endif %}
 
-                <a href="{% url 'cancer_detection:treatment_plans_list' %}" class="block w-full bg-muted hover:bg-slate-200 text-slate-900 font-semibold py-3 px-4 rounded-xl transition duration-200 text-center">
+                <a href="{% url 'cancer_detection:treatment_plans_list' %}" class="block w-full bg-muted hover:bg-slate-200 text-slate-900 font-semibold py-3 px-4 rounded-bento transition duration-200 text-center">
                     Back to Plans
                 </a>
 
                 <!-- Monitoring Plan -->
                 {% if plan.monitoring_plan %}
-                <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+                <div class="bento-card p-6 ">
                     <h3 class="text-lg font-bold text-slate-900 mb-4">Monitoring Plan</h3>
                     <div class="space-y-3 text-sm">
                         {% for key, value in plan.monitoring_plan.items %}
@@ -374,7 +374,7 @@
 
                 <!-- Contraindications -->
                 {% if plan.contraindications %}
-                <div class="bg-red-50 border border-red-200 rounded-2xl p-6">
+                <div class="bg-red-50 border border-red-200 rounded-bento-lg p-6">
                     <h3 class="text-lg font-bold text-red-800 mb-4">⚠️ Contraindications</h3>
                     <ul class="space-y-2 text-sm text-red-700">
                         {% for contraindication in plan.contraindications %}
@@ -391,7 +391,7 @@
 
         <!-- Treatment Pathway Timeline -->
         {% if plan.treatment_pathway %}
-        <div class="mt-8 bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+        <div class="mt-8 bento-card p-8 ">
             <h2 class="text-2xl font-bold text-slate-900 mb-8">Treatment Pathway Timeline</h2>
             
             <div class="space-y-6">
@@ -437,11 +437,11 @@
 
         <!-- Clinical Trials -->
         {% if plan.clinical_trials %}
-        <div class="mt-8 bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+        <div class="mt-8 bento-card p-8 ">
             <h2 class="text-2xl font-bold text-slate-900 mb-6">Relevant Clinical Trials</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {% for trial in plan.clinical_trials %}
-                <div class="p-6 border border-border/50 rounded-xl hover:shadow-md transition">
+                <div class="p-6 border border-border/50 rounded-bento hover:shadow-md transition">
                     <h3 class="font-semibold text-slate-900 mb-2">{{ trial.name|default:"Clinical Trial" }}</h3>
                     {% if trial.phase %}
                     <p class="text-sm text-slate-600 mb-3">Phase {{ trial.phase }}</p>

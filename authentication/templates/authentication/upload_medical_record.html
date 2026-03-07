@@ -11,7 +11,7 @@
                 <h1 class="text-3xl sm:text-4xl font-bold text-foreground mb-2">Upload Medical Record</h1>
                 <p class="text-sm sm:text-base text-muted-foreground">Upload your medical reports for AI-powered analysis and secure storage</p>
             </div>
-            <a href="{% url 'medical_records_list' %}" class="inline-flex items-center px-6 py-3 bg-muted hover:bg-muted/80 text-foreground font-bold rounded-xl transition-all duration-200 text-sm sm:text-base">
+            <a href="{% url 'medical_records_list' %}" class="inline-flex items-center px-6 py-3 bg-muted hover:bg-muted/80 text-foreground font-bold rounded-bento transition-all duration-200 text-sm sm:text-base">
                 <i class="fas fa-arrow-left mr-2"></i>
                 Back to Records
             </a>
@@ -19,7 +19,7 @@
     </div>
 
     <!-- Upload Form -->
-    <div class="bg-card border border-border/50 rounded-2xl p-8 sm:p-12 shadow-sm">
+    <div class="bento-card p-8 sm:p-12 ">
         <form method="post" enctype="multipart/form-data" id="uploadForm">
             {% csrf_token %}
             
@@ -67,7 +67,7 @@
                         <i class="fas fa-file-upload mr-2 text-primary"></i>Upload File <span class="text-red-600 dark:text-red-400">*</span>
                     </label>
                     
-                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed border-border rounded-xl hover:border-primary transition-colors bg-accent/50 cursor-pointer" id="dropZone">
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed border-border rounded-bento hover:border-primary transition-colors bg-accent/50 cursor-pointer" id="dropZone">
                         <div class="space-y-1 text-center">
                             <i class="fas fa-cloud-upload-alt text-4xl sm:text-5xl text-muted-foreground mx-auto block mb-3" id="uploadIcon"></i>
                             <div id="uploadText">
@@ -81,7 +81,7 @@
                                 <p class="text-xs text-muted-foreground mt-2">PDF, JPG, JPEG, PNG up to 10MB</p>
                             </div>
                             <div id="fileInfo" class="hidden mt-4">
-                                <div class="bg-primary/10 dark:bg-primary/20 rounded-xl p-4 inline-block border border-primary/20">
+                                <div class="bg-primary/10 dark:bg-primary/20 rounded-bento p-4 inline-block border border-primary/20">
                                     <i class="fas fa-file-pdf text-2xl text-primary mb-2"></i>
                                     <p class="text-sm font-medium text-foreground" id="fileName"></p>
                                     <p class="text-xs text-muted-foreground" id="fileSize"></p>
@@ -98,7 +98,7 @@
                 </div>
 
                 <!-- Info Box -->
-                <div class="bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/30 p-4 rounded-xl">
+                <div class="bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/30 p-4 rounded-bento">
                     <div class="flex items-start">
                         <i class="fas fa-info-circle text-blue-600 dark:text-blue-400 mr-3 mt-1 flex-shrink-0"></i>
                         <div>
@@ -112,11 +112,11 @@
 
                 <!-- Submit Buttons -->
                 <div class="flex flex-col sm:flex-row gap-4 pt-4">
-                    <button type="submit" class="flex-1 bg-gradient-to-r from-primary to-primary/90 hover:shadow-xl text-primary-foreground font-bold py-3 px-6 rounded-xl transition-all duration-200 hover:scale-105 flex items-center justify-center">
+                    <button type="submit" class="flex-1 bg-orange-600 hover:shadow-lg text-primary-foreground font-bold py-3 px-6 rounded-bento transition-all duration-200 flex items-center justify-center">
                         <i class="fas fa-upload mr-2"></i>
                         Upload & Process
                     </button>
-                    <a href="{% url 'medical_records_list' %}" class="flex-1 bg-muted hover:bg-muted/80 text-foreground font-bold py-3 px-6 rounded-xl transition-all duration-200 flex items-center justify-center">
+                    <a href="{% url 'medical_records_list' %}" class="flex-1 bg-muted hover:bg-muted/80 text-foreground font-bold py-3 px-6 rounded-bento transition-all duration-200 flex items-center justify-center">
                         <i class="fas fa-times mr-2"></i>
                         Cancel
                     </a>

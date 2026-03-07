@@ -1,31 +1,9 @@
 {% extends 'base.html' %}
 
-{% block title %}SurakshaCare - Insurance & Government Schemes Platform{% endblock %}
+{% block title %}ArogyaX — Insurance & Government Schemes{% endblock %}
 
 {% block main_content %}
 <style>
-    /* Insurance Platform Custom Styles */
-    :root {
-        --insurance-navy: #1e3a8a;
-        --insurance-blue: #3b82f6;
-        --insurance-green: #10b981;
-        --insurance-light: #f0f9ff;
-    }
-    
-    .hero-gradient {
-        background: linear-gradient(135deg, var(--insurance-navy) 0%, var(--insurance-blue) 100%);
-    }
-    
-    .card-insurance {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border: 1px solid hsl(var(--border));
-    }
-    
-    .card-insurance:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 20px 40px rgba(30, 58, 138, 0.15);
-    }
-    
     .tab-button {
         position: relative;
         padding: 0.75rem 1.5rem;
@@ -33,12 +11,11 @@
         transition: all 0.3s;
         white-space: nowrap;
         font-size: 0.9375rem;
+        color: hsl(var(--muted-foreground));
     }
-    
     .tab-button.active {
-        color: var(--insurance-blue);
+        color: hsl(var(--primary));
     }
-    
     .tab-button.active::after {
         content: '';
         position: absolute;
@@ -46,12 +23,11 @@
         left: 0;
         right: 0;
         height: 3px;
-        background: var(--insurance-blue);
+        background: hsl(var(--primary));
         border-radius: 3px 3px 0 0;
     }
-    
     .scheme-badge {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        background: #10b981;
         color: white;
         padding: 0.25rem 0.75rem;
         border-radius: 9999px;
@@ -59,155 +35,104 @@
         font-weight: 600;
         flex-shrink: 0;
     }
-    
-    .trust-stat {
-        font-size: 2rem;
-        font-weight: 700;
-        color: var(--insurance-blue);
-    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
 
-    .tab-content {
-        display: none;
-    }
-    
-    .tab-content.active {
-        display: block;
-    }
-
-    /* Responsive tab buttons */
     @media (max-width: 640px) {
         .tab-button {
             padding: 0.625rem 1rem;
             font-size: 0.8125rem;
         }
-        .trust-stat {
-            font-size: 1.5rem;
-        }
     }
 </style>
 
-<!-- Hero Section -->
-<section class="hero-gradient px-4 sm:px-6 lg:px-8 py-16 md:py-20 lg:py-24">
-    <div class="max-w-7xl mx-auto">
-        <div class="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
-            <!-- Left Content -->
-            <div class="text-white space-y-6 fade-in">
-                <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-                    Apply for Government Schemes & Get Insured in <span class="text-emerald-300">Minutes</span>
-                </h1>
-                <p class="text-base sm:text-lg md:text-xl text-blue-100">
-                    A single platform to explore government insurance schemes, check eligibility, and apply easily — plus compare our trusted insurance plans.
-                </p>
-                
-                <!-- Key Highlights -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-4">
-                    <div class="flex items-start space-x-3">
-                        <i class="fas fa-check-circle text-emerald-300 text-xl mt-0.5 flex-shrink-0"></i>
-                        <span class="text-blue-50">Check eligibility instantly</span>
-                    </div>
-                    <div class="flex items-start space-x-3">
-                        <i class="fas fa-file-alt text-emerald-300 text-xl mt-0.5 flex-shrink-0"></i>
-                        <span class="text-blue-50">Paperless application support</span>
-                    </div>
-                    <div class="flex items-start space-x-3">
-                        <i class="fas fa-shield-alt text-emerald-300 text-xl mt-0.5 flex-shrink-0"></i>
-                        <span class="text-blue-50">Secure document upload</span>
-                    </div>
-                    <div class="flex items-start space-x-3">
-                        <i class="fas fa-chart-line text-emerald-300 text-xl mt-0.5 flex-shrink-0"></i>
-                        <span class="text-blue-50">Track your status anytime</span>
-                    </div>
-                </div>
-                
-                <!-- CTA Buttons -->
-                <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-6">
-                    <a href="#government-schemes" class="bg-white text-blue-900 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 text-center">
-                        <i class="fas fa-landmark mr-2"></i>
-                        Explore Government Schemes
-                    </a>
-                    <a href="#our-policies" class="bg-emerald-500 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 text-center">
-                        <i class="fas fa-shield-alt mr-2"></i>
-                        View Our Policies
-                    </a>
-                </div>
-                
-                <p class="text-sm text-blue-200">
-                    <i class="fas fa-headset mr-2"></i>
-                    Need help? <a href="#support" class="underline hover:text-white">Talk to support</a>
-                </p>
+<!-- Hero Section — Bento Grid -->
+<div class="py-12 sm:py-20 fade-in">
+    <div class="bento-grid max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Hero Main Card (spans 2 columns) -->
+        <div class="bento-card span-2 bento-accent-orange p-8 sm:p-12">
+            <div class="bento-icon" style="background: rgba(255,255,255,0.2);">
+                <i class="fas fa-shield-alt"></i>
             </div>
-            
-            <!-- Right Visual -->
-            <div class="hidden md:block relative">
-                <div class="bg-white/10 backdrop-blur-lg rounded-3xl p-6 lg:p-8 border border-white/20">
-                    <div class="space-y-6">
-                        <div class="flex items-center space-x-4">
-                            <div class="bg-emerald-500 p-3 lg:p-4 rounded-2xl flex-shrink-0">
-                                <i class="fas fa-users text-white text-2xl lg:text-3xl"></i>
-                            </div>
-                            <div>
-                                <p class="text-white font-semibold text-base lg:text-lg">Family Protected</p>
-                                <p class="text-blue-200 text-sm">Comprehensive Coverage</p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-center space-x-4">
-                            <div class="bg-blue-500 p-3 lg:p-4 rounded-2xl flex-shrink-0">
-                                <i class="fas fa-file-contract text-white text-2xl lg:text-3xl"></i>
-                            </div>
-                            <div>
-                                <p class="text-white font-semibold text-base lg:text-lg">Easy Application</p>
-                                <p class="text-blue-200 text-sm">Digital & Paperless</p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-center space-x-4">
-                            <div class="bg-purple-500 p-3 lg:p-4 rounded-2xl flex-shrink-0">
-                                <i class="fas fa-landmark text-white text-2xl lg:text-3xl"></i>
-                            </div>
-                            <div>
-                                <p class="text-white font-semibold text-base lg:text-lg">Government Verified</p>
-                                <p class="text-blue-200 text-sm">Official Schemes</p>
-                            </div>
-                        </div>
-                    </div>
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-4 tracking-tight">
+                Apply for Government Schemes & Get Insured in Minutes
+            </h1>
+            <p class="text-base sm:text-lg text-white/85 max-w-xl leading-relaxed mb-8">
+                A single platform to explore government insurance schemes, check eligibility, and apply easily — plus compare our trusted insurance plans.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <a href="#government-schemes" class="inline-flex items-center justify-center px-7 py-3 bg-white text-orange-600 font-bold rounded-xl hover:shadow-lg transition-all text-sm">
+                    <i class="fas fa-landmark mr-2"></i> Explore Schemes
+                    <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                </a>
+                <a href="#our-policies" class="inline-flex items-center justify-center px-7 py-3 bg-white/15 border-2 border-white/30 text-white font-bold rounded-xl hover:bg-white/25 transition-all text-sm">
+                    <i class="fas fa-file-contract mr-2"></i> View Policies
+                </a>
+            </div>
+        </div>
+
+        <!-- Highlights Card -->
+        <div class="bento-card flex flex-col justify-between">
+            <div>
+                <div class="bento-icon bento-icon-green">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3 class="text-lg font-bold text-foreground mb-1">Why Choose Us</h3>
+                <p class="text-sm text-muted-foreground">Trusted by 1,00,000+ users</p>
+            </div>
+            <div class="mt-6 space-y-3">
+                <div class="flex items-center gap-3 bg-green-50 dark:bg-green-900/20 rounded-xl p-3">
+                    <i class="fas fa-check-circle text-green-600 flex-shrink-0"></i>
+                    <span class="text-sm font-medium">Instant eligibility check</span>
+                </div>
+                <div class="flex items-center gap-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3">
+                    <i class="fas fa-file-alt text-blue-600 flex-shrink-0"></i>
+                    <span class="text-sm font-medium">Paperless applications</span>
+                </div>
+                <div class="flex items-center gap-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl p-3">
+                    <i class="fas fa-lock text-purple-600 flex-shrink-0"></i>
+                    <span class="text-sm font-medium">Secure document upload</span>
+                </div>
+                <div class="flex items-center gap-3 bg-orange-50 dark:bg-orange-900/20 rounded-xl p-3">
+                    <i class="fas fa-chart-line text-orange-600 flex-shrink-0"></i>
+                    <span class="text-sm font-medium">Real-time status tracking</span>
                 </div>
             </div>
         </div>
     </div>
-</section>
+</div>
 
 <!-- Quick Actions -->
 <section class="py-10 sm:py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            <a href="{% url 'insurance:check_eligibility' %}" class="card-insurance bg-card p-4 sm:p-6 rounded-2xl text-center group">
-                <div class="bg-blue-100 dark:bg-blue-900/30 w-12 h-12 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform">
-                    <i class="fas fa-clipboard-check text-blue-600 dark:text-blue-400 text-xl sm:text-2xl"></i>
+            <a href="{% url 'insurance:check_eligibility' %}" class="bento-card p-4 sm:p-6 text-center group">
+                <div class="bento-icon bento-icon-blue w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-clipboard-check text-lg sm:text-xl"></i>
                 </div>
                 <h3 class="font-bold text-sm sm:text-lg mb-1 sm:mb-2">Check Eligibility</h3>
                 <p class="text-xs sm:text-sm text-muted-foreground hidden sm:block">See which schemes you qualify for</p>
             </a>
             
-            <a href="{% url 'insurance:government_schemes' %}" class="card-insurance bg-card p-4 sm:p-6 rounded-2xl text-center group">
-                <div class="bg-emerald-100 dark:bg-emerald-900/30 w-12 h-12 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform">
-                    <i class="fas fa-file-signature text-emerald-600 dark:text-emerald-400 text-xl sm:text-2xl"></i>
+            <a href="{% url 'insurance:government_schemes' %}" class="bento-card p-4 sm:p-6 text-center group">
+                <div class="bento-icon bento-icon-green w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-file-signature text-lg sm:text-xl"></i>
                 </div>
                 <h3 class="font-bold text-sm sm:text-lg mb-1 sm:mb-2">Apply for Scheme</h3>
                 <p class="text-xs sm:text-sm text-muted-foreground hidden sm:block">Quick & easy application process</p>
             </a>
             
-            <a href="{% url 'insurance:insurance_policies' %}" class="card-insurance bg-card p-4 sm:p-6 rounded-2xl text-center group">
-                <div class="bg-purple-100 dark:bg-purple-900/30 w-12 h-12 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform">
-                    <i class="fas fa-balance-scale text-purple-600 dark:text-purple-400 text-xl sm:text-2xl"></i>
+            <a href="{% url 'insurance:insurance_policies' %}" class="bento-card p-4 sm:p-6 text-center group">
+                <div class="bento-icon bento-icon-purple w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-balance-scale text-lg sm:text-xl"></i>
                 </div>
                 <h3 class="font-bold text-sm sm:text-lg mb-1 sm:mb-2">Compare Policies</h3>
                 <p class="text-xs sm:text-sm text-muted-foreground hidden sm:block">Find the best insurance plan</p>
             </a>
             
-            <a href="{% url 'insurance:track_applications' %}" class="card-insurance bg-card p-4 sm:p-6 rounded-2xl text-center group">
-                <div class="bg-orange-100 dark:bg-orange-900/30 w-12 h-12 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform">
-                    <i class="fas fa-search-location text-orange-600 dark:text-orange-400 text-xl sm:text-2xl"></i>
+            <a href="{% url 'insurance:track_applications' %}" class="bento-card p-4 sm:p-6 text-center group">
+                <div class="bento-icon bento-icon-orange w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-search-location text-lg sm:text-xl"></i>
                 </div>
                 <h3 class="font-bold text-sm sm:text-lg mb-1 sm:mb-2">Track Application</h3>
                 <p class="text-xs sm:text-sm text-muted-foreground hidden sm:block">Monitor your application status</p>
@@ -220,7 +145,7 @@
 <section class="py-12 sm:py-16 px-4 sm:px-6 lg:px-8" id="main-content">
     <div class="max-w-7xl mx-auto">
         <!-- Tab Buttons -->
-        <div class="flex justify-center mb-8 sm:mb-12 border-b border-border overflow-x-auto">
+        <div class="flex justify-center mb-8 sm:mb-12 border-b-2 border-border overflow-x-auto">
             {% if user.is_authenticated and my_applications %}
             <button class="tab-button active" data-tab="my-insurance">
                 <i class="fas fa-briefcase mr-2"></i>My Insurance
@@ -238,13 +163,13 @@
         <!-- My Insurance Tab -->
         <div id="my-insurance" class="tab-content active">
             <div class="text-center mb-8 sm:mb-12">
-                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">My Insurance Policies</h2>
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-3 sm:mb-4">My Insurance Policies</h2>
                 <p class="text-base sm:text-lg text-muted-foreground">Track and manage your active insurance applications</p>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {% for app in my_applications %}
-                <div class="card-insurance bg-card rounded-2xl p-5 sm:p-6 space-y-4">
+                <div class="bento-card p-5 sm:p-6 space-y-4">
                     <div class="flex items-start justify-between gap-3">
                         <div class="flex-1 min-w-0">
                             <h3 class="font-bold text-lg sm:text-xl mb-2 truncate">
@@ -263,10 +188,10 @@
                     </div>
                     
                     {% if app.policy %}
-                    <div class="bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/20 dark:to-green-900/20 rounded-xl p-4">
+                    <div class="bg-orange-50 dark:bg-orange-900/10 rounded-xl p-4">
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-sm text-muted-foreground">Monthly Premium</span>
-                            <span class="text-lg font-bold text-blue-600 dark:text-blue-400">₹{{ app.policy.premium_per_month }}</span>
+                            <span class="text-lg font-bold text-orange-600">₹{{ app.policy.premium_per_month }}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-muted-foreground">Coverage</span>
@@ -277,21 +202,21 @@
                     
                     <div class="space-y-2 text-sm">
                         <div class="flex items-center space-x-2">
-                            <i class="fas fa-user text-gray-400 flex-shrink-0"></i>
+                            <i class="fas fa-user text-muted-foreground flex-shrink-0"></i>
                             <span class="truncate">{{ app.applicant_name }}</span>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <i class="fas fa-calendar text-gray-400 flex-shrink-0"></i>
+                            <i class="fas fa-calendar text-muted-foreground flex-shrink-0"></i>
                             <span>Applied: {{ app.created_at|date:"M d, Y" }}</span>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <i class="fas fa-map-marker-alt text-gray-400 flex-shrink-0"></i>
+                            <i class="fas fa-map-marker-alt text-muted-foreground flex-shrink-0"></i>
                             <span>{{ app.applicant_state }}</span>
                         </div>
                     </div>
                     
                     <a href="{% url 'insurance:track_application' app.application_id %}" 
-                       class="block w-full bg-gradient-to-r from-blue-600 to-green-600 text-white text-center py-3 rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all">
+                       class="block w-full bg-orange-600 hover:bg-orange-700 text-white text-center py-3 rounded-xl font-bold transition-colors">
                         <i class="fas fa-chart-line mr-2"></i>View Details
                     </a>
                 </div>
@@ -299,8 +224,8 @@
             </div>
             
             <div class="text-center mt-8">
-                <a href="{% url 'insurance:track_applications' %}" class="inline-block text-blue-600 dark:text-blue-400 font-semibold hover:underline">
-                    View All Applications <i class="fas fa-arrow-right ml-2"></i>
+                <a href="{% url 'insurance:track_applications' %}" class="inline-flex items-center gap-2 text-orange-600 font-semibold hover:underline">
+                    View All Applications <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
         </div>
@@ -309,35 +234,35 @@
         <!-- Government Schemes Tab -->
         <div id="government-schemes" class="tab-content {% if not user.is_authenticated or not my_applications %}active{% endif %}">
             <div class="text-center mb-8 sm:mb-12">
-                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4" id="government-schemes">Government Insurance Schemes</h2>
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-3 sm:mb-4" id="government-schemes">Government Insurance Schemes</h2>
                 <p class="text-base sm:text-lg text-muted-foreground">Explore verified government schemes and check your eligibility</p>
             </div>
             
-            <div class="mb-6 sm:mb-8">
+            <div class="bento-card p-4 sm:p-6 mb-6 sm:mb-8">
                 <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
                     <div class="flex-1">
-                        <input type="text" placeholder="Search schemes by name, category, state..." class="w-full px-4 sm:px-6 py-3 sm:py-4 rounded-xl border border-border bg-card focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm sm:text-base">
+                        <input type="text" placeholder="Search schemes by name, category, state..." class="w-full px-4 sm:px-6 py-3 sm:py-4 rounded-xl border-2 border-border bg-background focus:border-orange-400 focus:outline-none text-sm sm:text-base transition-colors">
                     </div>
-                    <button class="bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold hover:bg-blue-700 transition-colors">
+                    <button class="bg-orange-600 hover:bg-orange-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold transition-colors">
                         <i class="fas fa-search mr-2"></i>Search
                     </button>
                 </div>
                 
                 <!-- Filters -->
                 <div class="flex flex-wrap gap-2 sm:gap-3 mt-4">
-                    <select class="px-3 sm:px-4 py-2 rounded-lg border border-border bg-card text-sm flex-1 sm:flex-none">
+                    <select class="px-3 sm:px-4 py-2 rounded-xl border-2 border-border bg-background text-sm flex-1 sm:flex-none focus:border-orange-400 focus:outline-none transition-colors">
                         <option>All States</option>
                         <option>Maharashtra</option>
                         <option>Karnataka</option>
                         <option>Tamil Nadu</option>
                     </select>
-                    <select class="px-3 sm:px-4 py-2 rounded-lg border border-border bg-card text-sm flex-1 sm:flex-none">
+                    <select class="px-3 sm:px-4 py-2 rounded-xl border-2 border-border bg-background text-sm flex-1 sm:flex-none focus:border-orange-400 focus:outline-none transition-colors">
                         <option>All Types</option>
                         <option>Health Insurance</option>
                         <option>Life Insurance</option>
                         <option>Pension</option>
                     </select>
-                    <select class="px-3 sm:px-4 py-2 rounded-lg border border-border bg-card text-sm flex-1 sm:flex-none">
+                    <select class="px-3 sm:px-4 py-2 rounded-xl border-2 border-border bg-background text-sm flex-1 sm:flex-none focus:border-orange-400 focus:outline-none transition-colors">
                         <option>All Age Groups</option>
                         <option>18-30</option>
                         <option>30-50</option>
@@ -349,7 +274,7 @@
             <!-- Schemes Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {% for scheme in featured_schemes %}
-                <div class="card-insurance bg-card rounded-2xl p-5 sm:p-6 space-y-4">
+                <div class="bento-card p-5 sm:p-6 space-y-4">
                     <div class="flex items-start justify-between gap-3">
                         <h3 class="font-bold text-lg sm:text-xl flex-1 min-w-0">{{ scheme.name }}</h3>
                         <span class="scheme-badge">Verified</span>
@@ -359,7 +284,7 @@
                     
                     <div class="space-y-2 text-sm">
                         <div class="flex items-center space-x-2">
-                            <i class="fas fa-user-check text-blue-500 flex-shrink-0"></i>
+                            <i class="fas fa-user-check text-orange-500 flex-shrink-0"></i>
                             <span>Age: {{ scheme.eligibility_criteria.min_age }}-{{ scheme.eligibility_criteria.max_age }} years</span>
                         </div>
                         <div class="flex items-center space-x-2">
@@ -369,25 +294,27 @@
                     </div>
                     
                     <div class="flex gap-2 pt-4">
-                        <a href="{% url 'insurance:scheme_detail' scheme.id %}" class="flex-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-4 py-2.5 rounded-lg font-semibold text-center text-sm hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors">
+                        <a href="{% url 'insurance:scheme_detail' scheme.id %}" class="flex-1 bg-accent text-foreground px-4 py-2.5 rounded-xl font-semibold text-center text-sm hover:bg-accent/80 transition-colors">
                             View Details
                         </a>
-                        <a href="{% url 'insurance:apply_scheme' scheme.id %}" class="flex-1 bg-blue-600 text-white px-4 py-2.5 rounded-lg font-semibold text-center text-sm hover:bg-blue-700 transition-colors">
+                        <a href="{% url 'insurance:apply_scheme' scheme.id %}" class="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2.5 rounded-xl font-bold text-center text-sm transition-colors">
                             Apply Now
                         </a>
                     </div>
                 </div>
                 {% empty %}
                 <div class="col-span-full text-center py-12">
-                    <i class="fas fa-inbox text-6xl text-muted-foreground mb-4"></i>
+                    <div class="bento-icon bento-icon-orange w-16 h-16 mx-auto mb-4">
+                        <i class="fas fa-inbox text-2xl"></i>
+                    </div>
                     <p class="text-xl text-muted-foreground">No schemes available at the moment</p>
                 </div>
                 {% endfor %}
             </div>
             
             <div class="text-center mt-8">
-                <a href="{% url 'insurance:government_schemes' %}" class="inline-block bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors">
-                    View All Schemes <i class="fas fa-arrow-right ml-2"></i>
+                <a href="{% url 'insurance:government_schemes' %}" class="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-xl font-bold transition-colors">
+                    View All Schemes <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
         </div>
@@ -395,25 +322,25 @@
         <!-- Tab 2: Our Policies -->
         <div id="our-policies" class="tab-content">
             <div class="text-center mb-8 sm:mb-12">
-                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4" id="our-policies">Our Insurance Policies</h2>
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-3 sm:mb-4" id="our-policies">Our Insurance Policies</h2>
                 <p class="text-base sm:text-lg text-muted-foreground">Affordable and comprehensive insurance plans for everyone</p>
             </div>
             
             <!-- Category Buttons -->
             <div class="flex flex-wrap gap-2 sm:gap-3 mb-6 sm:mb-8 justify-center">
-                <button class="px-4 sm:px-6 py-2.5 sm:py-3 bg-blue-600 text-white rounded-xl font-semibold text-sm sm:text-base hover:bg-blue-700 transition-colors">
+                <button class="px-4 sm:px-6 py-2.5 sm:py-3 bg-orange-600 text-white rounded-xl font-bold text-sm sm:text-base hover:bg-orange-700 transition-colors">
                     <i class="fas fa-heartbeat mr-1 sm:mr-2"></i>Health
                 </button>
-                <button class="px-4 sm:px-6 py-2.5 sm:py-3 bg-card border border-border rounded-xl font-semibold text-sm sm:text-base hover:bg-accent transition-colors">
+                <button class="px-4 sm:px-6 py-2.5 sm:py-3 bento-card font-semibold text-sm sm:text-base hover:bg-accent transition-colors">
                     <i class="fas fa-user-shield mr-1 sm:mr-2"></i>Life
                 </button>
-                <button class="px-4 sm:px-6 py-2.5 sm:py-3 bg-card border border-border rounded-xl font-semibold text-sm sm:text-base hover:bg-accent transition-colors">
+                <button class="px-4 sm:px-6 py-2.5 sm:py-3 bento-card font-semibold text-sm sm:text-base hover:bg-accent transition-colors">
                     <i class="fas fa-ambulance mr-1 sm:mr-2"></i>Accident
                 </button>
-                <button class="px-4 sm:px-6 py-2.5 sm:py-3 bg-card border border-border rounded-xl font-semibold text-sm sm:text-base hover:bg-accent transition-colors">
+                <button class="px-4 sm:px-6 py-2.5 sm:py-3 bento-card font-semibold text-sm sm:text-base hover:bg-accent transition-colors">
                     <i class="fas fa-users mr-1 sm:mr-2"></i>Family
                 </button>
-                <button class="px-4 sm:px-6 py-2.5 sm:py-3 bg-card border border-border rounded-xl font-semibold text-sm sm:text-base hover:bg-accent transition-colors">
+                <button class="px-4 sm:px-6 py-2.5 sm:py-3 bento-card font-semibold text-sm sm:text-base hover:bg-accent transition-colors">
                     <i class="fas fa-walking mr-1 sm:mr-2"></i>Senior
                 </button>
             </div>
@@ -421,18 +348,18 @@
             <!-- Policies Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {% for policy in featured_policies %}
-                <div class="card-insurance bg-card rounded-2xl p-5 sm:p-6 space-y-4">
+                <div class="bento-card p-5 sm:p-6 space-y-4">
                     <div class="flex items-start justify-between gap-3">
                         <h3 class="font-bold text-lg sm:text-xl flex-1 min-w-0">{{ policy.name }}</h3>
-                        <div class="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-lg text-xs font-semibold flex-shrink-0">
+                        <div class="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-3 py-1 rounded-lg text-xs font-semibold flex-shrink-0">
                             {{ policy.get_policy_type_display }}
                         </div>
                     </div>
                     
                     <p class="text-sm text-muted-foreground">{{ policy.short_description }}</p>
                     
-                    <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4">
-                        <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">₹{{ policy.premium_per_month|floatformat:0 }}<span class="text-sm font-normal">/month</span></p>
+                    <div class="bg-orange-50 dark:bg-orange-900/10 rounded-xl p-4">
+                        <p class="text-2xl font-extrabold text-orange-600">₹{{ policy.premium_per_month|floatformat:0 }}<span class="text-sm font-normal text-muted-foreground">/month</span></p>
                         <p class="text-sm text-muted-foreground mt-1">Coverage up to ₹{{ policy.coverage_amount|floatformat:0 }}</p>
                     </div>
                     
@@ -452,25 +379,27 @@
                     </div>
                     
                     <div class="flex gap-2 pt-4">
-                        <a href="{% url 'insurance:policy_detail' policy.id %}" class="flex-1 bg-gray-100 dark:bg-gray-800 text-foreground px-4 py-2.5 rounded-lg font-semibold text-center text-sm hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        <a href="{% url 'insurance:policy_detail' policy.id %}" class="flex-1 bg-accent text-foreground px-4 py-2.5 rounded-xl font-semibold text-center text-sm hover:bg-accent/80 transition-colors">
                             Compare
                         </a>
-                        <a href="{% url 'insurance:apply_policy' policy.id %}" class="flex-1 bg-emerald-600 text-white px-4 py-2.5 rounded-lg font-semibold text-center text-sm hover:bg-emerald-700 transition-colors">
+                        <a href="{% url 'insurance:apply_policy' policy.id %}" class="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2.5 rounded-xl font-bold text-center text-sm transition-colors">
                             Buy Now
                         </a>
                     </div>
                 </div>
                 {% empty %}
                 <div class="col-span-full text-center py-12">
-                    <i class="fas fa-inbox text-6xl text-muted-foreground mb-4"></i>
+                    <div class="bento-icon bento-icon-purple w-16 h-16 mx-auto mb-4">
+                        <i class="fas fa-inbox text-2xl"></i>
+                    </div>
                     <p class="text-xl text-muted-foreground">No policies available at the moment</p>
                 </div>
                 {% endfor %}
             </div>
             
             <div class="text-center mt-8">
-                <a href="{% url 'insurance:insurance_policies' %}" class="inline-block bg-emerald-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-emerald-700 transition-colors">
-                    View All Policies <i class="fas fa-arrow-right ml-2"></i>
+                <a href="{% url 'insurance:insurance_policies' %}" class="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-xl font-bold transition-colors">
+                    View All Policies <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
         </div>
@@ -478,30 +407,30 @@
 </section>
 
 <!-- How It Works -->
-<section class="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900/50">
+<section class="py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
-        <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-12">How It Works</h2>
+        <h2 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-center mb-8 sm:mb-12">How It Works</h2>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-            <div class="text-center space-y-4">
-                <div class="bg-blue-100 dark:bg-blue-900/30 w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto">
-                    <span class="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400">1</span>
+            <div class="bento-card p-6 sm:p-8 text-center space-y-4">
+                <div class="bento-icon bento-icon-blue w-14 h-14 sm:w-16 sm:h-16 mx-auto">
+                    <span class="text-xl sm:text-2xl font-extrabold">1</span>
                 </div>
                 <h3 class="text-lg sm:text-xl font-bold">Choose Scheme / Policy</h3>
                 <p class="text-sm sm:text-base text-muted-foreground">Browse government schemes or our insurance policies and select the one that fits your needs</p>
             </div>
             
-            <div class="text-center space-y-4">
-                <div class="bg-emerald-100 dark:bg-emerald-900/30 w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto">
-                    <span class="text-2xl sm:text-3xl font-bold text-emerald-600 dark:text-emerald-400">2</span>
+            <div class="bento-card p-6 sm:p-8 text-center space-y-4">
+                <div class="bento-icon bento-icon-green w-14 h-14 sm:w-16 sm:h-16 mx-auto">
+                    <span class="text-xl sm:text-2xl font-extrabold">2</span>
                 </div>
                 <h3 class="text-lg sm:text-xl font-bold">Upload Documents Securely</h3>
                 <p class="text-sm sm:text-base text-muted-foreground">Submit required documents through our secure, encrypted platform</p>
             </div>
             
-            <div class="text-center space-y-4">
-                <div class="bg-purple-100 dark:bg-purple-900/30 w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto">
-                    <span class="text-2xl sm:text-3xl font-bold text-purple-600 dark:text-purple-400">3</span>
+            <div class="bento-card p-6 sm:p-8 text-center space-y-4">
+                <div class="bento-icon bento-icon-purple w-14 h-14 sm:w-16 sm:h-16 mx-auto">
+                    <span class="text-xl sm:text-2xl font-extrabold">3</span>
                 </div>
                 <h3 class="text-lg sm:text-xl font-bold">Track Approval & Get Coverage</h3>
                 <p class="text-sm sm:text-base text-muted-foreground">Monitor your application status in real-time and get covered quickly</p>
@@ -513,47 +442,57 @@
 <!-- Trust & Security -->
 <section class="py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
-        <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-12">Why Trust SurakshaCare?</h2>
+        <h2 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-center mb-8 sm:mb-12">Why Trust ArogyaX Insurance?</h2>
         
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-10 sm:mb-12">
-            <div class="card-insurance bg-card rounded-2xl p-4 sm:p-6 text-center space-y-2 sm:space-y-3">
-                <i class="fas fa-lock text-3xl sm:text-4xl text-blue-600"></i>
+            <div class="bento-card p-4 sm:p-6 text-center space-y-3">
+                <div class="bento-icon bento-icon-blue w-12 h-12 mx-auto">
+                    <i class="fas fa-lock"></i>
+                </div>
                 <h3 class="font-bold text-sm sm:text-lg">End-to-End Encryption</h3>
                 <p class="text-xs sm:text-sm text-muted-foreground hidden sm:block">Your data is secured with bank-grade encryption</p>
             </div>
             
-            <div class="card-insurance bg-card rounded-2xl p-4 sm:p-6 text-center space-y-2 sm:space-y-3">
-                <i class="fas fa-certificate text-3xl sm:text-4xl text-emerald-600"></i>
+            <div class="bento-card p-4 sm:p-6 text-center space-y-3">
+                <div class="bento-icon bento-icon-green w-12 h-12 mx-auto">
+                    <i class="fas fa-certificate"></i>
+                </div>
                 <h3 class="font-bold text-sm sm:text-lg">Verified Information</h3>
                 <p class="text-xs sm:text-sm text-muted-foreground hidden sm:block">All schemes verified from official government sources</p>
             </div>
             
-            <div class="card-insurance bg-card rounded-2xl p-4 sm:p-6 text-center space-y-2 sm:space-y-3">
-                <i class="fas fa-rupee-sign text-3xl sm:text-4xl text-purple-600"></i>
+            <div class="bento-card p-4 sm:p-6 text-center space-y-3">
+                <div class="bento-icon bento-icon-purple w-12 h-12 mx-auto">
+                    <i class="fas fa-rupee-sign"></i>
+                </div>
                 <h3 class="font-bold text-sm sm:text-lg">Transparent Pricing</h3>
                 <p class="text-xs sm:text-sm text-muted-foreground hidden sm:block">No hidden charges, clear premium breakdowns</p>
             </div>
             
-            <div class="card-insurance bg-card rounded-2xl p-4 sm:p-6 text-center space-y-2 sm:space-y-3">
-                <i class="fas fa-headset text-3xl sm:text-4xl text-orange-600"></i>
+            <div class="bento-card p-4 sm:p-6 text-center space-y-3">
+                <div class="bento-icon bento-icon-orange w-12 h-12 mx-auto">
+                    <i class="fas fa-headset"></i>
+                </div>
                 <h3 class="font-bold text-sm sm:text-lg">24/7 Support</h3>
                 <p class="text-xs sm:text-sm text-muted-foreground hidden sm:block">Dedicated customer support in multiple languages</p>
             </div>
         </div>
         
         <!-- Stats -->
-        <div class="grid grid-cols-3 gap-4 sm:gap-8 text-center">
-            <div>
-                <p class="trust-stat">1,00,000+</p>
-                <p class="text-xs sm:text-base text-muted-foreground">Users Helped</p>
-            </div>
-            <div>
-                <p class="trust-stat">500+</p>
-                <p class="text-xs sm:text-base text-muted-foreground">Government Schemes</p>
-            </div>
-            <div>
-                <p class="trust-stat">24/7</p>
-                <p class="text-xs sm:text-base text-muted-foreground">Customer Support</p>
+        <div class="bento-card bento-accent-orange p-8 sm:p-10">
+            <div class="grid grid-cols-3 gap-4 sm:gap-8 text-center">
+                <div>
+                    <p class="text-2xl sm:text-4xl font-extrabold">1,00,000+</p>
+                    <p class="text-xs sm:text-base text-white/80 mt-1">Users Helped</p>
+                </div>
+                <div>
+                    <p class="text-2xl sm:text-4xl font-extrabold">500+</p>
+                    <p class="text-xs sm:text-base text-white/80 mt-1">Government Schemes</p>
+                </div>
+                <div>
+                    <p class="text-2xl sm:text-4xl font-extrabold">24/7</p>
+                    <p class="text-xs sm:text-base text-white/80 mt-1">Customer Support</p>
+                </div>
             </div>
         </div>
     </div>

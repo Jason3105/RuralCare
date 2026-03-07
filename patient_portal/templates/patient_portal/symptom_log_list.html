@@ -26,19 +26,19 @@
         <!-- Summary Stats -->
         {% if logs %}
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div class="bg-card border border-border/50 rounded-xl p-4 text-center">
+            <div class="bento-card p-4 text-center">
                 <p class="text-2xl font-bold text-foreground">{{ logs|length }}</p>
                 <p class="text-sm text-muted-foreground">Total Logs</p>
             </div>
-            <div class="bg-card border border-border/50 rounded-xl p-4 text-center">
+            <div class="bento-card p-4 text-center">
                 <p class="text-2xl font-bold text-primary">{{ avg_wellness|floatformat:1 }}</p>
                 <p class="text-sm text-muted-foreground">Avg Wellness</p>
             </div>
-            <div class="bg-card border border-border/50 rounded-xl p-4 text-center">
+            <div class="bento-card p-4 text-center">
                 <p class="text-2xl font-bold text-foreground">{{ avg_pain|floatformat:1 }}</p>
                 <p class="text-sm text-muted-foreground">Avg Pain</p>
             </div>
-            <div class="bg-card border border-border/50 rounded-xl p-4 text-center">
+            <div class="bento-card p-4 text-center">
                 <p class="text-2xl font-bold text-foreground">{{ days_logged }}</p>
                 <p class="text-sm text-muted-foreground">Days Logged</p>
             </div>
@@ -46,7 +46,7 @@
         {% endif %}
 
         <!-- Filter -->
-        <div class="bg-card border border-border/50 rounded-xl p-4 mb-6">
+        <div class="bento-card p-4 mb-6">
             <form method="get" class="flex flex-wrap items-center gap-4">
                 <div>
                     <select name="period" class="px-4 py-2 bg-background border border-border rounded-lg text-foreground">
@@ -65,7 +65,7 @@
         <!-- Logs List -->
         <div class="space-y-4">
             {% for log in logs %}
-            <div class="bg-card border border-border/50 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+            <div class="bento-card overflow-hidden transition-all">
                 <div class="p-5">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center space-x-3">
@@ -131,7 +131,7 @@
                 </div>
             </div>
             {% empty %}
-            <div class="bg-card border border-border/50 rounded-xl p-12 text-center">
+            <div class="bento-card p-12 text-center">
                 <i class="fas fa-clipboard-list text-4xl text-muted-foreground mb-4"></i>
                 <h3 class="text-lg font-medium text-foreground mb-2">No Symptom Logs Yet</h3>
                 <p class="text-muted-foreground mb-4">Start tracking your symptoms to help your care team monitor your progress</p>

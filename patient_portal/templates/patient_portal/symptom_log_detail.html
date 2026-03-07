@@ -34,7 +34,7 @@
         </div>
 
         <!-- Main Symptoms -->
-        <div class="bg-card border border-border/50 rounded-xl p-6 mb-6">
+        <div class="bento-card p-6 mb-6">
             <h2 class="text-xl font-semibold text-foreground mb-6">Symptom Summary</h2>
             
             <!-- Pain -->
@@ -60,25 +60,25 @@
 
             <!-- Symptom Grid -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="text-center p-4 bg-accent/30 rounded-xl">
+                <div class="text-center p-4 bg-accent/30 rounded-bento">
                     <i class="fas fa-battery-quarter text-xl mb-2
                         {% if log.fatigue >= 4 %}text-red-500{% elif log.fatigue >= 3 %}text-amber-500{% else %}text-green-500{% endif %}"></i>
                     <p class="text-2xl font-bold text-foreground">{{ log.fatigue }}/5</p>
                     <p class="text-sm text-muted-foreground">Fatigue</p>
                 </div>
-                <div class="text-center p-4 bg-accent/30 rounded-xl">
+                <div class="text-center p-4 bg-accent/30 rounded-bento">
                     <i class="fas fa-dizzy text-xl mb-2
                         {% if log.nausea >= 4 %}text-red-500{% elif log.nausea >= 3 %}text-amber-500{% else %}text-green-500{% endif %}"></i>
                     <p class="text-2xl font-bold text-foreground">{{ log.nausea }}/5</p>
                     <p class="text-sm text-muted-foreground">Nausea</p>
                 </div>
-                <div class="text-center p-4 bg-accent/30 rounded-xl">
+                <div class="text-center p-4 bg-accent/30 rounded-bento">
                     <i class="fas fa-head-side-cough text-xl mb-2
                         {% if log.vomiting >= 4 %}text-red-500{% elif log.vomiting >= 3 %}text-amber-500{% else %}text-green-500{% endif %}"></i>
                     <p class="text-2xl font-bold text-foreground">{{ log.vomiting }}/5</p>
                     <p class="text-sm text-muted-foreground">Vomiting</p>
                 </div>
-                <div class="text-center p-4 bg-accent/30 rounded-xl">
+                <div class="text-center p-4 bg-accent/30 rounded-bento">
                     <i class="fas fa-utensils text-xl mb-2
                         {% if log.appetite_loss >= 4 %}text-red-500{% elif log.appetite_loss >= 3 %}text-amber-500{% else %}text-green-500{% endif %}"></i>
                     <p class="text-2xl font-bold text-foreground">{{ log.appetite_loss }}/5</p>
@@ -88,7 +88,7 @@
         </div>
 
         <!-- Additional Symptoms -->
-        <div class="bg-card border border-border/50 rounded-xl p-6 mb-6">
+        <div class="bento-card p-6 mb-6">
             <h2 class="text-xl font-semibold text-foreground mb-4">Other Symptoms</h2>
             
             <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -152,14 +152,14 @@
 
         <!-- Notes -->
         {% if log.additional_symptoms %}
-        <div class="bg-card border border-border/50 rounded-xl p-6 mb-6">
+        <div class="bento-card p-6 mb-6">
             <h2 class="text-xl font-semibold text-foreground mb-4">Additional Notes</h2>
             <p class="text-foreground">{{ log.additional_symptoms }}</p>
         </div>
         {% endif %}
 
         <!-- Medications -->
-        <div class="bg-card border border-border/50 rounded-xl p-6 mb-6">
+        <div class="bento-card p-6 mb-6">
             <h2 class="text-xl font-semibold text-foreground mb-4">Medications</h2>
             <div class="flex items-center space-x-3">
                 {% if log.medications_taken %}

@@ -9,7 +9,7 @@
         <!-- Header -->
         <div class="mb-8">
             <div class="flex items-center space-x-4 mb-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-primary to-primary/70 rounded-2xl flex items-center justify-center">
+                <div class="w-12 h-12 bento-icon bento-icon-orange flex items-center justify-center">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
@@ -22,22 +22,22 @@
         </div>
 
         <!-- Analysis Summary -->
-        <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm mb-8">
+        <div class="bento-card p-8  mb-8">
             <h2 class="text-xl font-semibold text-slate-900 mb-6">Cancer Analysis Summary</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="p-4 bg-slate-50 rounded-xl border border-border/30">
+                <div class="p-4 bg-slate-50 rounded-bento border border-border/30">
                     <p class="text-sm text-slate-600">Cancer Type</p>
                     <p class="text-lg font-semibold text-slate-900 mt-1">{{ analysis.tumor_type|title }}</p>
                 </div>
-                <div class="p-4 bg-slate-50 rounded-xl border border-border/30">
+                <div class="p-4 bg-slate-50 rounded-bento border border-border/30">
                     <p class="text-sm text-slate-600">Cancer Stage</p>
                     <p class="text-lg font-semibold text-slate-900 mt-1">Stage {{ analysis.tumor_stage }}</p>
                 </div>
-                <div class="p-4 bg-slate-50 rounded-xl border border-border/30">
+                <div class="p-4 bg-slate-50 rounded-bento border border-border/30">
                     <p class="text-sm text-slate-600">Tumor Size</p>
                     <p class="text-lg font-semibold text-slate-900 mt-1">{{ analysis.tumor_size_mm|default:"Not specified" }} mm</p>
                 </div>
-                <div class="p-4 bg-slate-50 rounded-xl border border-border/30">
+                <div class="p-4 bg-slate-50 rounded-bento border border-border/30">
                     <p class="text-sm text-slate-600">Location</p>
                     <p class="text-lg font-semibold text-slate-900 mt-1">{{ analysis.tumor_location|default:"Not specified" }}</p>
                 </div>
@@ -49,7 +49,7 @@
             {% csrf_token %}
 
             <!-- Patient Health Profile -->
-            <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+            <div class="bento-card p-8 ">
                 <h2 class="text-xl font-semibold text-slate-900 mb-6 flex items-center">
                     <span class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold mr-3">1</span>
                     Patient Health Profile
@@ -59,12 +59,12 @@
                     <div>
                         <label class="block text-sm font-medium text-slate-900 mb-2">Age</label>
                         <input type="number" name="age" value="{{ patient_profile.age|default:50 }}" min="18" max="120" 
-                               class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
+                               class="w-full px-4 py-3 bg-muted border border-border/50 rounded-bento focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-slate-900 mb-2">Sex</label>
-                        <select name="sex" class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
+                        <select name="sex" class="w-full px-4 py-3 bg-muted border border-border/50 rounded-bento focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
                             <option value="Other">Other</option>
@@ -73,7 +73,7 @@
 
                     <div>
                         <label class="block text-sm font-medium text-slate-900 mb-2">Performance Status (ECOG)</label>
-                        <select name="performance_status" class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
+                        <select name="performance_status" class="w-full px-4 py-3 bg-muted border border-border/50 rounded-bento focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
                             <option value="0">0 - Fully Active</option>
                             <option value="1" selected>1 - Restricted Strenuous Activity</option>
                             <option value="2">2 - Ambulatory, Self-Care Only</option>
@@ -85,43 +85,43 @@
                     <div>
                         <label class="block text-sm font-medium text-slate-900 mb-2">Ejection Fraction (%)</label>
                         <input type="number" name="ejection_fraction" value="55" min="0" max="100" step="0.1"
-                               class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
+                               class="w-full px-4 py-3 bg-muted border border-border/50 rounded-bento focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-slate-900 mb-2">Creatinine (mg/dL)</label>
                         <input type="number" name="creatinine" value="1.0" min="0" step="0.1"
-                               class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
+                               class="w-full px-4 py-3 bg-muted border border-border/50 rounded-bento focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-slate-900 mb-2">GFR (mL/min)</label>
                         <input type="number" name="gfr" value="90" min="0" max="150"
-                               class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
+                               class="w-full px-4 py-3 bg-muted border border-border/50 rounded-bento focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-slate-900 mb-2">Hemoglobin (g/dL)</label>
                         <input type="number" name="hemoglobin" value="12.0" min="0" step="0.1"
-                               class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
+                               class="w-full px-4 py-3 bg-muted border border-border/50 rounded-bento focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-slate-900 mb-2">Bilirubin (mg/dL)</label>
                         <input type="number" name="bilirubin" value="0.7" min="0" step="0.1"
-                               class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
+                               class="w-full px-4 py-3 bg-muted border border-border/50 rounded-bento focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-slate-900 mb-2">WBC (K/µL)</label>
                         <input type="number" name="wbc" value="7.0" min="0" step="0.1"
-                               class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
+                               class="w-full px-4 py-3 bg-muted border border-border/50 rounded-bento focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-slate-900 mb-2">Platelets (K/µL)</label>
                         <input type="number" name="platelets" value="200" min="0"
-                               class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
+                               class="w-full px-4 py-3 bg-muted border border-border/50 rounded-bento focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
                     </div>
                 </div>
 
@@ -141,7 +141,7 @@
             </div>
 
             <!-- Tumor Characteristics -->
-            <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+            <div class="bento-card p-8 ">
                 <h2 class="text-xl font-semibold text-slate-900 mb-6 flex items-center">
                     <span class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold mr-3">2</span>
                     Tumor Characteristics
@@ -150,7 +150,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-slate-900 mb-2">Grade</label>
-                        <select name="grade" class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
+                        <select name="grade" class="w-full px-4 py-3 bg-muted border border-border/50 rounded-bento focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
                             <option value="unknown">Unknown</option>
                             <option value="1">Grade 1 (Well Differentiated)</option>
                             <option value="2" selected>Grade 2 (Moderately Differentiated)</option>
@@ -162,18 +162,18 @@
                     <div>
                         <label class="block text-sm font-medium text-slate-900 mb-2">Primary Location</label>
                         <input type="text" name="location" placeholder="e.g., Left Upper Lobe"
-                               class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
+                               class="w-full px-4 py-3 bg-muted border border-border/50 rounded-bento focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-slate-900 mb-2">Size (mm)</label>
                         <input type="number" name="size_mm" value="{{ analysis.tumor_size_mm|default:0 }}" min="0"
-                               class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
+                               class="w-full px-4 py-3 bg-muted border border-border/50 rounded-bento focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-slate-900 mb-2">PD-L1 Status</label>
-                        <select name="pd_l1_status" class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
+                        <select name="pd_l1_status" class="w-full px-4 py-3 bg-muted border border-border/50 rounded-bento focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
                             <option value="unknown">Unknown</option>
                             <option value="negative">Negative (&lt;1%)</option>
                             <option value="low">Low (1-49%)</option>
@@ -184,7 +184,7 @@
 
                     <div>
                         <label class="block text-sm font-medium text-slate-900 mb-2">MSI Status</label>
-                        <select name="msi_status" class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
+                        <select name="msi_status" class="w-full px-4 py-3 bg-muted border border-border/50 rounded-bento focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
                             <option value="unknown">Unknown</option>
                             <option value="mss">MSS (Microsatellite Stable)</option>
                             <option value="msi_h">MSI-H (High)</option>
@@ -194,7 +194,7 @@
 
                     <div>
                         <label class="block text-sm font-medium text-slate-900 mb-2">Tumor Mutational Burden</label>
-                        <select name="tmb" class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
+                        <select name="tmb" class="w-full px-4 py-3 bg-muted border border-border/50 rounded-bento focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
                             <option value="unknown">Unknown</option>
                             <option value="low">Low TMB</option>
                             <option value="moderate">Moderate TMB</option>
@@ -244,7 +244,7 @@
             </div>
 
             <!-- Genetic Profile -->
-            <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+            <div class="bento-card p-8 ">
                 <h2 class="text-xl font-semibold text-slate-900 mb-6 flex items-center">
                     <span class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold mr-3">3</span>
                     Genetic & Biomarker Profile
@@ -263,7 +263,7 @@
 
                 <div class="mt-6">
                     <label class="block text-sm font-medium text-slate-900 mb-2">Immune Infiltration</label>
-                    <select name="immune_infiltration" class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
+                    <select name="immune_infiltration" class="w-full px-4 py-3 bg-muted border border-border/50 rounded-bento focus:ring-2 focus:ring-primary/20 focus:border-primary transition">
                         <option value="unknown">Unknown</option>
                         <option value="low">Low</option>
                         <option value="moderate">Moderate</option>
@@ -273,18 +273,18 @@
             </div>
 
             <!-- Special Considerations -->
-            <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+            <div class="bento-card p-8 ">
                 <h2 class="text-xl font-semibold text-slate-900 mb-6 flex items-center">
                     <span class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold mr-3">4</span>
                     Special Considerations
                 </h2>
 
                 <textarea name="special_considerations" rows="5" placeholder="Any additional clinical considerations, patient preferences, contraindications, or special circumstances to consider for this treatment plan..."
-                          class="w-full px-4 py-3 bg-muted border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition resize-none"></textarea>
+                          class="w-full px-4 py-3 bg-muted border border-border/50 rounded-bento focus:ring-2 focus:ring-primary/20 focus:border-primary transition resize-none"></textarea>
             </div>
 
             <!-- AI Processing Notice -->
-            <div class="bg-gradient-to-r from-primary/10 to-primary/5 border-2 border-primary/20 rounded-2xl p-6">
+            <div class="bento-card p-6 border-orange-300">
                 <div class="flex items-start space-x-4">
                     <div class="flex-shrink-0">
                         <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -333,13 +333,13 @@
 
             <!-- Action Buttons -->
             <div class="flex flex-col sm:flex-row gap-4">
-                <button type="submit" class="flex-1 bg-gradient-to-r from-primary to-primary/90 hover:shadow-lg text-white font-semibold py-3 px-6 rounded-xl transition duration-200">
+                <button type="submit" class="flex-1 bg-orange-600 hover:shadow-lg text-white font-semibold py-3 px-6 rounded-bento transition duration-200">
                     <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                     </svg>
                     Generate AI-Powered Treatment Plan
                 </button>
-                <a href="{% url 'cancer_detection:analysis_detail' analysis.id %}" class="flex-1 bg-muted hover:bg-slate-200 text-slate-900 font-semibold py-3 px-6 rounded-xl transition duration-200 text-center">
+                <a href="{% url 'cancer_detection:analysis_detail' analysis.id %}" class="flex-1 bg-muted hover:bg-slate-200 text-slate-900 font-semibold py-3 px-6 rounded-bento transition duration-200 text-center">
                     Cancel
                 </a>
             </div>

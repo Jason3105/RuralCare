@@ -1,71 +1,104 @@
 {% extends 'base.html' %}
-{% load static %}
 
-{% block title %}Government Schemes - Insurance Portal{% endblock %}
+{% block title %}Government Schemes — ArogyaX Insurance{% endblock %}
 
-{% block content %}
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-12">
-            <h2 class="mb-4">Government Insurance Schemes</h2>
-            
-            <!-- Filters -->
-            <div class="card mb-4">
-                <div class="card-body">
-                    <form method="get" class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Scheme Type</label>
-                            <select name="type" class="form-select">
-                                <option value="">All Types</option>
-                                {% for value, label in scheme_types %}
-                                <option value="{{ value }}" {% if request.GET.type == value %}selected{% endif %}>{{ label }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">State</label>
-                            <input type="text" name="state" class="form-control" placeholder="Enter state" value="{{ request.GET.state }}">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Search</label>
-                            <input type="text" name="search" class="form-control" placeholder="Search schemes..." value="{{ request.GET.search }}">
-                        </div>
-                        <div class="col-12">
-                            <button type="submit" class="btn btn-primary">Apply Filters</button>
-                            <a href="{% url 'insurance:government_schemes' %}" class="btn btn-secondary">Clear</a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Schemes List -->
-            <div class="row">
-                {% for scheme in schemes %}
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ scheme.name }}</h5>
-                            <p class="card-text">{{ scheme.short_description }}</p>
-                            <div class="mb-2">
-                                <span class="badge bg-primary">{{ scheme.get_scheme_type_display }}</span>
-                                {% if scheme.state %}<span class="badge bg-secondary">{{ scheme.state }}</span>{% endif %}
-                            </div>
-                            <p class="text-muted mb-2">
-                                <strong>Coverage:</strong> ₹{{ scheme.coverage_amount|floatformat:0 }}
-                            </p>
-                        </div>
-                        <div class="card-footer">
-                            <a href="{% url 'insurance:scheme_detail' scheme.id %}" class="btn btn-sm btn-primary">View Details</a>
-                        </div>
-                    </div>
-                </div>
-                {% empty %}
-                <div class="col-12">
-                    <div class="alert alert-info">No schemes found matching your criteria.</div>
-                </div>
-                {% endfor %}
-            </div>
+{% block main_content %}
+<!-- Hero -->
+<div class="py-10 sm:py-14 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+        <div class="bento-card bento-accent-orange p-8 sm:p-10 text-center">
+            <h1 class="text-2xl sm:text-4xl font-extrabold mb-3">Government Insurance Schemes</h1>
+            <p class="text-base sm:text-lg text-white/80 max-w-2xl mx-auto">Explore verified government health and insurance schemes. Check eligibility and apply online.</p>
         </div>
     </div>
 </div>
+
+<!-- Filters -->
+<section class="px-4 sm:px-6 lg:px-8 pb-6">
+    <div class="max-w-7xl mx-auto">
+        <form method="get" class="bento-card p-5 sm:p-6">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-semibold mb-1.5">Scheme Type</label>
+                    <select name="type" class="w-full px-4 py-2.5 rounded-xl border-2 border-border bg-background text-sm focus:border-orange-400 focus:outline-none transition-colors">
+                        <option value="">All Types</option>
+                        {% for value, label in scheme_types %}
+                        <option value="{{ value }}" {% if request.GET.type == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1.5">State</label>
+                    <input type="text" name="state" placeholder="Enter state" value="{{ request.GET.state }}"
+                           class="w-full px-4 py-2.5 rounded-xl border-2 border-border bg-background text-sm focus:border-orange-400 focus:outline-none transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1.5">Search</label>
+                    <input type="text" name="search" placeholder="Search schemes..." value="{{ request.GET.search }}"
+                           class="w-full px-4 py-2.5 rounded-xl border-2 border-border bg-background text-sm focus:border-orange-400 focus:outline-none transition-colors">
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-3">
+                <button type="submit" class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm transition-colors">
+                    <i class="fas fa-search mr-2"></i>Apply Filters
+                </button>
+                <a href="{% url 'insurance:government_schemes' %}" class="bg-accent text-foreground px-6 py-2.5 rounded-xl font-semibold text-sm hover:bg-accent/80 transition-colors">
+                    <i class="fas fa-times mr-2"></i>Clear
+                </a>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Schemes Grid -->
+<section class="px-4 sm:px-6 lg:px-8 pb-12 sm:pb-16">
+    <div class="max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {% for scheme in schemes %}
+            <div class="bento-card p-5 sm:p-6 flex flex-col space-y-4">
+                <div>
+                    <h3 class="font-bold text-lg sm:text-xl mb-2">{{ scheme.name }}</h3>
+                    <p class="text-sm text-muted-foreground">{{ scheme.short_description }}</p>
+                </div>
+                
+                <div class="flex flex-wrap gap-2">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
+                        {{ scheme.get_scheme_type_display }}
+                    </span>
+                    {% if scheme.state %}
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                        {{ scheme.state }}
+                    </span>
+                    {% endif %}
+                </div>
+                
+                <div class="flex items-center space-x-2 text-sm">
+                    <div class="bento-icon bento-icon-green w-8 h-8">
+                        <i class="fas fa-rupee-sign text-xs"></i>
+                    </div>
+                    <span class="font-semibold">Coverage: ₹{{ scheme.coverage_amount|floatformat:0 }}</span>
+                </div>
+                
+                <div class="mt-auto pt-4">
+                    <a href="{% url 'insurance:scheme_detail' scheme.id %}" class="block w-full bg-orange-600 hover:bg-orange-700 text-white text-center py-2.5 rounded-xl font-bold text-sm transition-colors">
+                        <i class="fas fa-arrow-right mr-2"></i>View Details
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full">
+                <div class="bento-card p-10 text-center space-y-4">
+                    <div class="bento-icon bento-icon-orange w-16 h-16 mx-auto">
+                        <i class="fas fa-search text-2xl"></i>
+                    </div>
+                    <p class="text-xl font-semibold text-muted-foreground">No schemes found matching your criteria</p>
+                    <a href="{% url 'insurance:government_schemes' %}" class="inline-flex items-center gap-2 text-orange-600 font-semibold hover:underline">
+                        Clear filters and try again <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
 {% endblock %}

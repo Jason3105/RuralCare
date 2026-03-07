@@ -9,7 +9,7 @@
         <p class="text-base sm:text-lg text-muted-foreground">Enter genomic test results for advanced mutation analysis and treatment eligibility assessment</p>
     </div>
 
-    <div class="bg-card border border-border/50 rounded-2xl p-6 sm:p-10 transition-all">
+    <div class="bento-card p-6 sm:p-10 transition-all">
         <form method="post" class="space-y-8">
             {% csrf_token %}
             
@@ -194,11 +194,11 @@
 
             <!-- Submit Button -->
             <div class="flex flex-col sm:flex-row gap-4 pt-4">
-                <button type="submit" class="flex-1 bg-gradient-to-r from-primary to-primary/90 hover:shadow-xl text-primary-foreground font-bold py-3 sm:py-4 px-6 rounded-lg transition-all duration-300 flex items-center justify-center hover:scale-105">
+                <button type="submit" class="flex-1 bg-orange-600 hover:shadow-lg text-primary-foreground font-bold py-3 sm:py-4 px-6 rounded-lg transition-all duration-300 flex items-center justify-center">
                     <i class="fas fa-dna mr-2"></i>
                     Analyze Genomic Profile
                 </button>
-                <a href="{% url 'cancer_detection:dashboard' %}" class="bg-card border-2 border-border hover:border-primary text-foreground font-bold py-3 sm:py-4 px-6 rounded-lg transition-all duration-300 flex items-center justify-center">
+                <a href="{% url 'cancer_detection:dashboard' %}" class="bento-card hover:border-primary text-foreground font-bold py-3 sm:py-4 px-6 rounded-lg transition-all duration-300 flex items-center justify-center">
                     <i class="fas fa-times mr-2"></i>
                     Cancel
                 </a>
@@ -207,7 +207,7 @@
     </div>
 
     <!-- Information Box -->
-    <div class="mt-8 bg-gradient-to-br from-purple-50 to-purple-50/50 dark:from-purple-900/20 dark:to-purple-900/10 border border-purple-200 dark:border-purple-800/50 rounded-xl p-6 sm:p-8">
+    <div class="mt-8 bg-gradient-to-br from-purple-50 to-purple-50/50 dark:from-purple-900/20 dark:to-purple-900/10 border border-purple-200 dark:border-purple-800/50 rounded-bento p-6 sm:p-8">
         <h3 class="text-lg sm:text-xl font-bold text-purple-900 dark:text-purple-300 mb-4 flex items-center">
             <i class="fas fa-info-circle mr-2"></i>
             Genomic Analysis Benefits

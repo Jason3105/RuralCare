@@ -11,9 +11,9 @@
     </div>
 
     <!-- Tabs -->
-    <div class="flex space-x-1 bg-muted/50 p-1 rounded-xl mb-8 w-fit">
+    <div class="flex space-x-1 bg-muted/50 p-1 rounded-bento mb-8 w-fit">
         <button onclick="switchImageTab('upload')" id="imageTab-upload"
-            class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-card text-foreground shadow-sm">
+            class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-card text-foreground ">
             <i class="fas fa-cloud-upload-alt mr-2"></i>Upload Image
         </button>
         <button onclick="switchImageTab('history')" id="imageTab-history"
@@ -25,7 +25,7 @@
     <!-- Upload Tab -->
     <div id="imagePanel-upload">
         <div class="max-w-5xl">
-            <div class="bg-card border border-border/50 rounded-2xl p-6 sm:p-10 transition-all">
+            <div class="bento-card p-6 sm:p-10 transition-all">
                 <form method="post" action="{% url 'cancer_detection:upload_image' %}" enctype="multipart/form-data" class="space-y-8">
                     {% csrf_token %}
                     
@@ -47,7 +47,7 @@
                         <label for="image" class="block text-sm sm:text-base font-semibold text-foreground mb-3">
                             <i class="fas fa-file-upload mr-2 text-primary"></i>Upload Image
                         </label>
-                        <div id="upload-area" class="mt-2 flex justify-center px-4 sm:px-6 pt-6 sm:pt-8 pb-6 sm:pb-8 border-2 border-dashed border-border rounded-xl hover:border-primary hover:bg-accent/20 transition-all duration-300 bg-accent/5 cursor-pointer group">
+                        <div id="upload-area" class="mt-2 flex justify-center px-4 sm:px-6 pt-6 sm:pt-8 pb-6 sm:pb-8 border-2 border-dashed border-border rounded-bento hover:border-primary hover:bg-accent/20 transition-all duration-300 bg-accent/5 cursor-pointer group">
                             <div class="space-y-2 sm:space-y-3 text-center w-full">
                                 <i class="fas fa-cloud-upload-alt text-5xl sm:text-6xl text-primary/40 group-hover:text-primary/60 mx-auto block mb-3 transition-colors"></i>
                                 <div class="flex flex-col text-sm sm:text-base text-muted-foreground justify-center items-center">
@@ -62,13 +62,13 @@
                         </div>
                         <div id="image-preview" class="mt-6 hidden">
                             <p class="text-sm font-semibold text-foreground mb-3">Image Preview:</p>
-                            <img id="preview-img" src="" alt="Preview" class="max-w-full h-auto rounded-xl border border-border/50 shadow-lg">
+                            <img id="preview-img" src="" alt="Preview" class="max-w-full h-auto rounded-bento border border-border/50 shadow-lg">
                         </div>
                     </div>
 
                     <!-- Submit Button -->
                     <div class="flex flex-col sm:flex-row gap-4 pt-4">
-                        <button type="submit" class="flex-1 bg-gradient-to-r from-primary to-primary/90 hover:shadow-xl text-primary-foreground font-bold py-3 sm:py-4 px-6 rounded-lg transition-all duration-300 flex items-center justify-center hover:scale-105">
+                        <button type="submit" class="flex-1 bg-orange-600 hover:shadow-lg text-primary-foreground font-bold py-3 sm:py-4 px-6 rounded-lg transition-all duration-300 flex items-center justify-center">
                             <i class="fas fa-brain mr-2"></i>
                             Analyze Image
                         </button>
@@ -77,7 +77,7 @@
             </div>
 
             <!-- Information Box -->
-            <div class="mt-8 bg-gradient-to-br from-blue-50 to-blue-50/50 dark:from-blue-900/20 dark:to-blue-900/10 border border-blue-200 dark:border-blue-800/50 rounded-xl p-6 sm:p-8">
+            <div class="mt-8 bg-gradient-to-br from-blue-50 to-blue-50/50 dark:from-blue-900/20 dark:to-blue-900/10 border border-blue-200 dark:border-blue-800/50 rounded-bento p-6 sm:p-8">
                 <h3 class="text-lg sm:text-xl font-bold text-blue-900 dark:text-blue-300 mb-4 flex items-center">
                     <i class="fas fa-info-circle mr-2"></i>How Our Analysis Works
                 </h3>
@@ -109,7 +109,7 @@
 
     <!-- History Tab -->
     <div id="imagePanel-history" class="hidden">
-        <div class="bg-card border border-border/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
+        <div class="bento-card overflow-hidden">
             {% if page_obj %}
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-border/50">
@@ -130,7 +130,7 @@
                             {% for analysis in page_obj %}
                             <tr class="hover:bg-accent/30 transition-colors duration-200">
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <img src="{{ analysis.image|local_media_url }}" alt="Analysis" class="h-20 w-20 object-cover rounded-xl ring-2 ring-primary/20">
+                                    <img src="{{ analysis.image|local_media_url }}" alt="Analysis" class="h-20 w-20 object-cover rounded-bento ring-2 ring-primary/20">
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">{{ analysis.get_image_type_display }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -192,7 +192,7 @@
                             </p>
                         </div>
                         <div>
-                            <nav class="relative z-0 inline-flex rounded-lg shadow-sm gap-1" aria-label="Pagination">
+                            <nav class="relative z-0 inline-flex rounded-lg  gap-1" aria-label="Pagination">
                                 {% if page_obj.has_previous %}
                                     <a href="?page={{ page_obj.previous_page_number }}#history" class="px-3 py-2 rounded-lg border border-border/50 bg-card text-sm font-semibold text-foreground hover:bg-muted/50 transition-colors">Previous</a>
                                 {% endif %}
@@ -212,7 +212,7 @@
                     </div>
                     <h3 class="text-2xl font-bold text-foreground mb-2">No analyses yet</h3>
                     <p class="text-muted-foreground mb-8 text-lg">Get started by uploading your first medical image for AI analysis.</p>
-                    <button onclick="switchImageTab('upload')" class="inline-flex items-center gap-2 px-6 sm:px-8 py-3 bg-gradient-to-r from-primary to-primary/90 hover:shadow-xl text-primary-foreground font-bold rounded-xl transition-all duration-200 hover:scale-105">
+                    <button onclick="switchImageTab('upload')" class="inline-flex items-center gap-2 px-6 sm:px-8 py-3 bg-orange-600 hover:shadow-lg text-primary-foreground font-bold rounded-bento transition-all duration-200">
                         <i class="fas fa-upload"></i>
                         Upload Image
                     </button>
@@ -227,11 +227,11 @@
     function switchImageTab(tab) {
         // Update tab buttons
         document.querySelectorAll('[id^="imageTab-"]').forEach(btn => {
-            btn.classList.remove('bg-card', 'text-foreground', 'shadow-sm');
+            btn.classList.remove('bg-card', 'text-foreground', '');
             btn.classList.add('text-muted-foreground', 'hover:text-foreground');
         });
         const activeBtn = document.getElementById('imageTab-' + tab);
-        activeBtn.classList.add('bg-card', 'text-foreground', 'shadow-sm');
+        activeBtn.classList.add('bg-card', 'text-foreground', '');
         activeBtn.classList.remove('text-muted-foreground', 'hover:text-foreground');
 
         // Update panels

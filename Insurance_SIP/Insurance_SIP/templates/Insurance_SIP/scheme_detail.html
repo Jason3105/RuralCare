@@ -17,8 +17,8 @@
             <!-- Main Content -->
             <div class="lg:col-span-2 space-y-6">
                 <!-- Header Card -->
-                <div class="bg-card border border-border/50 rounded-xl shadow-sm overflow-hidden">
-                    <div class="bg-gradient-to-r from-primary/10 to-primary/5 px-6 py-8 border-b border-border/50">
+                <div class="bento-card  overflow-hidden">
+                    <div class="bg-orange-50 dark:bg-orange-900/10 px-6 py-8 border-b border-border/50">
                         <div class="flex items-start justify-between">
                             <div>
                                 <h1 class="text-3xl font-bold text-foreground mb-2">{{ scheme.name }}</h1>
@@ -49,7 +49,7 @@
                 </div>
 
                 <!-- Benefits Card -->
-                <div class="bg-card border border-border/50 rounded-xl shadow-sm p-6">
+                <div class="bento-card  p-6">
                     <h3 class="text-lg font-semibold text-foreground mb-4">
                         <i class="fas fa-gift mr-2 text-green-500"></i>Benefits
                     </h3>
@@ -59,7 +59,7 @@
                 </div>
 
                 <!-- Required Documents Card -->
-                <div class="bg-card border border-border/50 rounded-xl shadow-sm p-6">
+                <div class="bento-card  p-6">
                     <h3 class="text-lg font-semibold text-foreground mb-4">
                         <i class="fas fa-file-alt mr-2 text-blue-500"></i>Required Documents
                     </h3>
@@ -69,7 +69,7 @@
                 </div>
 
                 <!-- Application Steps Card -->
-                <div class="bg-card border border-border/50 rounded-xl shadow-sm p-6">
+                <div class="bento-card  p-6">
                     <h3 class="text-lg font-semibold text-foreground mb-4">
                         <i class="fas fa-list-ol mr-2 text-purple-500"></i>Application Steps
                     </h3>
@@ -80,7 +80,7 @@
 
                 {% if scheme.official_website %}
                 <!-- Official Website Card -->
-                <div class="bg-card border border-border/50 rounded-xl shadow-sm p-6">
+                <div class="bento-card  p-6">
                     <h3 class="text-lg font-semibold text-foreground mb-3">
                         <i class="fas fa-external-link-alt mr-2 text-primary"></i>Official Website
                     </h3>
@@ -97,7 +97,7 @@
             <div class="space-y-6">
                 <!-- Eligibility Card -->
                 {% if eligibility %}
-                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200/50 dark:border-blue-800/50 rounded-xl shadow-sm overflow-hidden">
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200/50 dark:border-blue-800/50 rounded-bento  overflow-hidden">
                     <div class="bg-blue-500 text-white px-6 py-4">
                         <h3 class="text-lg font-semibold flex items-center">
                             <i class="fas fa-check-circle mr-2"></i>Eligibility Criteria
@@ -159,7 +159,7 @@
                 {% if user.is_authenticated %}
                     {% if user_application %}
                     <!-- Existing Application Status -->
-                    <div class="bg-card border border-border/50 rounded-xl shadow-sm overflow-hidden">
+                    <div class="bento-card  overflow-hidden">
                         <div class="px-6 py-4 border-b border-border/50 bg-accent/30">
                             <h3 class="text-lg font-semibold text-foreground">
                                 <i class="fas fa-file-alt mr-2"></i>Your Application
@@ -215,13 +215,13 @@
                     </div>
                     {% else %}
                     <!-- Apply Button -->
-                    <div class="bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-xl shadow-sm overflow-hidden">
+                    <div class="bento-card overflow-hidden border-orange-300">
                         <div class="p-6 text-center space-y-4">
                             <i class="fas fa-file-signature text-4xl text-primary"></i>
                             <h3 class="text-xl font-bold text-foreground">Ready to Apply?</h3>
                             <p class="text-sm text-muted-foreground">Start your application process now and get covered</p>
                             <a href="{% url 'insurance:apply_scheme' scheme.id %}" 
-                               class="block w-full px-6 py-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all transform hover:scale-105 font-semibold text-lg shadow-lg">
+                               class="block w-full px-6 py-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all transform font-semibold text-lg shadow-lg">
                                 <i class="fas fa-paper-plane mr-2"></i>Apply Now
                             </a>
                         </div>
@@ -229,7 +229,7 @@
                     {% endif %}
                 {% else %}
                 <!-- Login Required -->
-                <div class="bg-card border border-border/50 rounded-xl shadow-sm overflow-hidden">
+                <div class="bento-card  overflow-hidden">
                     <div class="p-6 text-center space-y-4">
                         <i class="fas fa-lock text-4xl text-muted-foreground"></i>
                         <h3 class="text-lg font-semibold text-foreground">Login Required</h3>
@@ -243,7 +243,7 @@
                 {% endif %}
 
                 <!-- Quick Info Card -->
-                <div class="bg-card border border-border/50 rounded-xl shadow-sm p-6">
+                <div class="bento-card  p-6">
                     <h3 class="text-lg font-semibold text-foreground mb-4">
                         <i class="fas fa-question-circle mr-2 text-primary"></i>Need Help?
                     </h3>

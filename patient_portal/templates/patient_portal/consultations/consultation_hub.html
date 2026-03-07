@@ -10,9 +10,9 @@
         </div>
 
         <!-- Tabs -->
-        <div class="flex space-x-1 bg-muted/50 p-1 rounded-xl mb-8 w-fit">
+        <div class="flex space-x-1 bg-muted/50 p-1 rounded-bento mb-8 w-fit">
             <button onclick="switchConsultTab('doctors')" id="consultTab-doctors"
-                class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-card text-foreground shadow-sm">
+                class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-card text-foreground ">
                 <i class="fas fa-user-md mr-2"></i>Find a Doctor
             </button>
             <button onclick="switchConsultTab('mine')" id="consultTab-mine"
@@ -24,7 +24,7 @@
         <!-- Find a Doctor Tab -->
         <div id="consultPanel-doctors">
             <!-- Search & Filter -->
-            <div class="bg-card border border-border/50 rounded-xl p-6 mb-6">
+            <div class="bento-card p-6 mb-6">
                 <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <input type="hidden" name="tab" value="doctors">
                     <div>
@@ -88,7 +88,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% for item in doctor_page %}
                 {% with doctor=item.doctor profile=item.profile %}
-                <div class="bg-card border border-border/50 rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
+                <div class="bento-card overflow-hidden hover:shadow-lg transition-shadow">
                     <div class="p-6">
                         <div class="flex items-start space-x-4 mb-4">
                             {% if doctor.profile_picture %}
@@ -140,7 +140,7 @@
                 {% endwith %}
                 {% empty %}
                 <div class="col-span-full">
-                    <div class="bg-card border border-border/50 rounded-xl p-12 text-center">
+                    <div class="bento-card p-12 text-center">
                         <i class="fas fa-user-md text-4xl text-muted-foreground mb-4"></i>
                         <h3 class="text-lg font-medium text-foreground mb-2">No Doctors Found</h3>
                         <p class="text-muted-foreground">Try adjusting your search criteria</p>
@@ -181,7 +181,7 @@
                     <h2 class="text-xl font-semibold text-foreground mb-4">Upcoming Consultations</h2>
                     <div class="space-y-4">
                         {% for consultation in upcoming_consultations %}
-                        <div class="bg-card border border-primary/50 rounded-xl p-6">
+                        <div class="bento-card p-6">
                             <div class="flex justify-between items-start">
                                 <div class="flex-1">
                                     <h3 class="text-lg font-semibold text-foreground">
@@ -276,7 +276,7 @@
                             </div>
                         </div>
                         {% empty %}
-                        <div class="bg-card border border-border/50 rounded-xl p-8 text-center">
+                        <div class="bento-card p-8 text-center">
                             <p class="text-muted-foreground">No upcoming consultations</p>
                             <button onclick="switchConsultTab('doctors')" class="mt-4 inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
                                 <i class="fas fa-user-md mr-2"></i>Find a Doctor
@@ -291,7 +291,7 @@
                     <h2 class="text-xl font-semibold text-foreground mb-4">Past Consultations</h2>
                     <div class="space-y-4">
                         {% for consultation in past_consultations %}
-                        <div class="bg-card border border-border/50 rounded-xl p-6">
+                        <div class="bento-card p-6">
                             <div class="flex justify-between items-start">
                                 <div class="flex-1">
                                     <h3 class="text-lg font-semibold text-foreground">
@@ -365,7 +365,7 @@
                             </div>
                         </div>
                         {% empty %}
-                        <div class="bg-card border border-border/50 rounded-xl p-8 text-center">
+                        <div class="bento-card p-8 text-center">
                             <p class="text-muted-foreground">No past consultations</p>
                         </div>
                         {% endfor %}
@@ -380,11 +380,11 @@
 <script>
     function switchConsultTab(tab) {
         document.querySelectorAll('[id^="consultTab-"]').forEach(btn => {
-            btn.classList.remove('bg-card', 'text-foreground', 'shadow-sm');
+            btn.classList.remove('bg-card', 'text-foreground', '');
             btn.classList.add('text-muted-foreground', 'hover:text-foreground');
         });
         const activeBtn = document.getElementById('consultTab-' + tab);
-        activeBtn.classList.add('bg-card', 'text-foreground', 'shadow-sm');
+        activeBtn.classList.add('bg-card', 'text-foreground', '');
         activeBtn.classList.remove('text-muted-foreground', 'hover:text-foreground');
 
         document.querySelectorAll('[id^="consultPanel-"]').forEach(panel => {

@@ -11,12 +11,12 @@
         </div>
         <div class="mt-4 sm:mt-0 flex gap-3">
             <a href="{% url 'cancer_detection:histopathology_list' %}" 
-               class="bg-card border-2 border-border hover:border-primary text-foreground font-semibold py-2 px-4 rounded-lg transition-all">
+               class="bento-card hover:border-primary text-foreground font-semibold py-2 px-4 rounded-lg transition-all">
                 <i class="fas fa-arrow-left mr-2"></i>Back to List
             </a>
             {% if report.status == 'analyzed' %}
             <a href="{% url 'cancer_detection:create_comprehensive_plan' %}" 
-               class="bg-gradient-to-r from-green-500 to-green-600 hover:shadow-xl text-white font-semibold py-2 px-4 rounded-lg transition-all">
+               class="bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 px-4 rounded-lg transition-all">
                 <i class="fas fa-project-diagram mr-2"></i>Use in Plan
             </a>
             {% endif %}
@@ -45,7 +45,7 @@
     <!-- Extracted Information -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <!-- Cancer Information -->
-        <div class="bg-card border border-border/50 rounded-2xl p-6">
+        <div class="bento-card p-6">
             <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
                 <i class="fas fa-info-circle text-primary mr-2"></i>Cancer Information
             </h2>
@@ -90,7 +90,7 @@
         </div>
 
         <!-- Surgical Information -->
-        <div class="bg-card border border-border/50 rounded-2xl p-6">
+        <div class="bento-card p-6">
             <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
                 <i class="fas fa-cut text-primary mr-2"></i>Surgical Information
             </h2>
@@ -121,7 +121,7 @@
 
     <!-- Biomarkers -->
     {% if report.biomarkers %}
-    <div class="bg-card border border-border/50 rounded-2xl p-6 mb-8">
+    <div class="bento-card p-6 mb-8">
         <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
             <i class="fas fa-dna text-primary mr-2"></i>Biomarkers
         </h2>
@@ -146,7 +146,7 @@
 
     <!-- Additional Findings -->
     {% if analysis_data.additional_findings %}
-    <div class="bg-card border border-border/50 rounded-2xl p-6 mb-8">
+    <div class="bento-card p-6 mb-8">
         <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
             <i class="fas fa-search text-primary mr-2"></i>Additional Findings
         </h2>
@@ -162,7 +162,7 @@
 
     <!-- Raw Report Text -->
     {% if report.report_text %}
-    <div class="bg-card border border-border/50 rounded-2xl p-6">
+    <div class="bento-card p-6">
         <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
             <i class="fas fa-file-alt text-primary mr-2"></i>Report Text
         </h2>
@@ -173,7 +173,7 @@
     {% endif %}
 
     {% else %}
-    <div class="bg-card border border-border/50 rounded-2xl p-12 text-center">
+    <div class="bento-card p-12 text-center">
         <i class="fas fa-exclamation-circle text-4xl text-yellow-500 mb-4"></i>
         <h3 class="text-xl font-bold text-foreground mb-2">Report Not Found</h3>
         <p class="text-muted-foreground">The report could not be loaded</p>

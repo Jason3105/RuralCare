@@ -11,25 +11,25 @@
 
     <!-- Quick Stats -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div class="bg-card border border-border/50 rounded-xl shadow-sm p-6 hover:shadow-xl transition-all duration-300">
+        <div class="bento-card  p-6 hover:shadow-lg transition-all duration-300">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-muted-foreground font-medium mb-2">Histopathology Reports</p>
                     <p class="text-4xl font-bold text-primary">{{ histopathology_reports.count }}</p>
                 </div>
-                <div class="bg-primary/10 rounded-xl p-4">
+                <div class="bg-primary/10 rounded-bento p-4">
                     <i class="fas fa-microscope text-3xl text-primary"></i>
                 </div>
             </div>
         </div>
 
-        <div class="bg-card border border-border/50 rounded-xl shadow-sm p-6 hover:shadow-xl transition-all duration-300">
+        <div class="bento-card  p-6 hover:shadow-lg transition-all duration-300">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-muted-foreground font-medium mb-2">Genomic Profiles</p>
                     <p class="text-4xl font-bold text-primary">{{ genomic_profiles.count }}</p>
                 </div>
-                <div class="bg-primary/10 rounded-xl p-4">
+                <div class="bg-primary/10 rounded-bento p-4">
                     <i class="fas fa-dna text-3xl text-primary"></i>
                 </div>
             </div>
@@ -50,7 +50,7 @@
         {% if histopathology_reports %}
             <div class="grid grid-cols-1 gap-4">
                 {% for report in histopathology_reports %}
-                <div class="bg-card border border-border/50 rounded-xl shadow-sm p-6 hover:shadow-xl transition-all duration-300">
+                <div class="bento-card  p-6 hover:shadow-lg transition-all duration-300">
                     <div class="flex items-start justify-between">
                         <div class="flex-1">
                             <div class="flex items-center space-x-3 mb-3">
@@ -114,7 +114,7 @@
                 </a>
             </div>
         {% else %}
-            <div class="bg-card border border-border/50 rounded-xl shadow-sm p-12 text-center">
+            <div class="bento-card  p-12 text-center">
                 <i class="fas fa-microscope text-6xl text-muted-foreground/30 mb-4"></i>
                 <p class="text-muted-foreground mb-4">No histopathology reports found</p>
                 <a href="{% url 'cancer_detection:upload_histopathology' %}" 
@@ -139,7 +139,7 @@
         {% if genomic_profiles %}
             <div class="grid grid-cols-1 gap-4">
                 {% for profile in genomic_profiles %}
-                <div class="bg-card border border-border/50 rounded-xl shadow-sm p-6 hover:shadow-xl transition-all duration-300">
+                <div class="bento-card  p-6 hover:shadow-lg transition-all duration-300">
                     <div class="flex items-start justify-between">
                         <div class="flex-1">
                             <div class="flex items-center space-x-3 mb-4">
@@ -222,7 +222,7 @@
                 </a>
             </div>
         {% else %}
-            <div class="bg-card border border-border/50 rounded-xl shadow-sm p-12 text-center">
+            <div class="bento-card  p-12 text-center">
                 <i class="fas fa-dna text-6xl text-muted-foreground/30 mb-4"></i>
                 <p class="text-muted-foreground mb-4">No genomic profiles found</p>
                 <a href="{% url 'cancer_detection:upload_genomic' %}" 

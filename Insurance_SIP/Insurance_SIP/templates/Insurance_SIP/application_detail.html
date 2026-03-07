@@ -82,13 +82,13 @@
                 </a>
                 
                 {% if application.status == 'approved' %}
-                <button class="flex items-center gap-2 text-xs font-bold text-emerald-400 bg-emerald-500/10 px-4 py-2 rounded-full border border-emerald-500/20 hover:bg-emerald-500/20 transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-lg shadow-emerald-500/10">
+                <button class="flex items-center gap-2 text-xs font-bold text-emerald-400 bg-emerald-500/10 px-4 py-2 rounded-full border border-emerald-500/20 hover:bg-emerald-500/20 transition-all active:scale-95 cursor-pointer shadow-lg shadow-emerald-500/10">
                     <i class="fa-solid fa-print"></i> Download Policy
                 </button>
                 {% endif %}
             </div>
 
-            <div class="glass-panel rounded-3xl p-8 relative overflow-hidden animate-slide-up delay-100">
+            <div class="glass-panel rounded-bento-xl p-8 relative overflow-hidden animate-slide-up delay-100">
                 <div class="absolute top-0 right-0 w-96 h-96 bg-accent-600/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
 
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
@@ -124,9 +124,9 @@
                 
                 <div class="lg:col-span-2 space-y-8">
                     
-                    <div class="glass-panel rounded-3xl p-8 animate-slide-up delay-200">
+                    <div class="glass-panel rounded-bento-xl p-8 animate-slide-up delay-200">
                         <div class="flex items-center gap-3 mb-8">
-                            <div class="p-2.5 rounded-xl bg-accent-600/20 text-accent-500">
+                            <div class="p-2.5 rounded-bento bg-accent-600/20 text-accent-500">
                                 <i class="fa-solid fa-shield-halved text-xl"></i>
                             </div>
                             <h2 class="text-xl font-bold text-white">Coverage Details</h2>
@@ -139,21 +139,21 @@
                                 </h3>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="p-5 rounded-2xl bg-midnight-800/50 border border-white/5 hover:border-accent-500/30 transition-colors group">
+                                <div class="p-5 rounded-bento-lg bg-midnight-800/50 border border-white/5 hover:border-accent-500/30 transition-colors group">
                                     <span class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2 block">Monthly Premium</span>
                                     <div class="flex items-baseline gap-1">
                                         <span class="text-slate-400 text-sm">₹</span>
                                         <span class="text-2xl font-bold text-white group-hover:text-accent-400 transition-colors">{{ application.policy.premium_amount }}</span>
                                     </div>
                                 </div>
-                                <div class="p-5 rounded-2xl bg-midnight-800/50 border border-white/5 hover:border-emerald-500/30 transition-colors group">
+                                <div class="p-5 rounded-bento-lg bg-midnight-800/50 border border-white/5 hover:border-emerald-500/30 transition-colors group">
                                     <span class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2 block">Total Coverage</span>
                                     <div class="flex items-baseline gap-1">
                                         <span class="text-slate-400 text-sm">₹</span>
                                         <span class="text-2xl font-bold text-emerald-400 group-hover:text-emerald-300 transition-colors">{{ application.policy.coverage_amount }}</span>
                                     </div>
                                 </div>
-                                <div class="md:col-span-2 p-5 rounded-2xl bg-midnight-800/50 border border-white/5 flex items-center justify-between">
+                                <div class="md:col-span-2 p-5 rounded-bento-lg bg-midnight-800/50 border border-white/5 flex items-center justify-between">
                                     <div>
                                         <span class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1 block">Policy Type</span>
                                         <span class="text-base font-semibold text-white">{{ application.policy.get_policy_type_display }}</span>
@@ -166,11 +166,11 @@
                                 <h3 class="text-2xl font-bold text-white">{{ application.scheme.name }}</h3>
                             </div>
                             <div class="grid grid-cols-2 gap-4">
-                                <div class="p-5 rounded-2xl bg-midnight-800/50 border border-white/5">
+                                <div class="p-5 rounded-bento-lg bg-midnight-800/50 border border-white/5">
                                     <span class="text-slate-500 text-xs uppercase font-bold tracking-wider block mb-1">Scheme Type</span>
                                     <span class="text-lg font-bold text-white">{{ application.scheme.get_scheme_type_display }}</span>
                                 </div>
-                                <div class="p-5 rounded-2xl bg-midnight-800/50 border border-white/5">
+                                <div class="p-5 rounded-bento-lg bg-midnight-800/50 border border-white/5">
                                     <span class="text-slate-500 text-xs uppercase font-bold tracking-wider block mb-1">Applicable Region</span>
                                     <span class="text-lg font-bold text-white">{{ application.scheme.state|default:"All India" }}</span>
                                 </div>
@@ -178,9 +178,9 @@
                         {% endif %}
                     </div>
 
-                    <div class="glass-panel rounded-3xl p-8 animate-slide-up delay-300">
+                    <div class="glass-panel rounded-bento-xl p-8 animate-slide-up delay-300">
                         <div class="flex items-center gap-3 mb-8">
-                            <div class="p-2.5 rounded-xl bg-purple-600/20 text-purple-400">
+                            <div class="p-2.5 rounded-bento bg-purple-600/20 text-purple-400">
                                 <i class="fa-solid fa-folder-tree text-xl"></i>
                             </div>
                             <h2 class="text-xl font-bold text-white">Attached Documents</h2>
@@ -190,12 +190,12 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 
                                 {% if application.aadhaar_card %}
-                                <a href="{{ application.aadhaar_card.url }}" target="_blank" class="group relative overflow-hidden rounded-2xl bg-midnight-800/50 border border-white/5 p-4 hover:bg-midnight-800 transition-all duration-300 hover:shadow-glow-blue hover:-translate-y-1">
+                                <a href="{{ application.aadhaar_card.url }}" target="_blank" class="group relative overflow-hidden rounded-bento-lg bg-midnight-800/50 border border-white/5 p-4 hover:bg-midnight-800 transition-all duration-300 hover:shadow-glow-blue hover:-translate-y-1">
                                     <div class="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <i class="fa-solid fa-arrow-up-right-from-square text-white text-xs"></i>
                                     </div>
                                     <div class="flex items-center gap-4">
-                                        <div class="w-12 h-12 rounded-xl bg-red-500 bg-opacity-10 flex items-center justify-center text-xl shrink-0">
+                                        <div class="w-12 h-12 rounded-bento bg-red-500 bg-opacity-10 flex items-center justify-center text-xl shrink-0">
                                             <i class="fa-solid fa-fingerprint text-red-500"></i>
                                         </div>
                                         <div>
@@ -207,12 +207,12 @@
                                 {% endif %}
                                 
                                 {% if application.pan_card %}
-                                <a href="{{ application.pan_card.url }}" target="_blank" class="group relative overflow-hidden rounded-2xl bg-midnight-800/50 border border-white/5 p-4 hover:bg-midnight-800 transition-all duration-300 hover:shadow-glow-blue hover:-translate-y-1">
+                                <a href="{{ application.pan_card.url }}" target="_blank" class="group relative overflow-hidden rounded-bento-lg bg-midnight-800/50 border border-white/5 p-4 hover:bg-midnight-800 transition-all duration-300 hover:shadow-glow-blue hover:-translate-y-1">
                                     <div class="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <i class="fa-solid fa-arrow-up-right-from-square text-white text-xs"></i>
                                     </div>
                                     <div class="flex items-center gap-4">
-                                        <div class="w-12 h-12 rounded-xl bg-blue-500 bg-opacity-10 flex items-center justify-center text-xl shrink-0">
+                                        <div class="w-12 h-12 rounded-bento bg-blue-500 bg-opacity-10 flex items-center justify-center text-xl shrink-0">
                                             <i class="fa-solid fa-id-card text-blue-500"></i>
                                         </div>
                                         <div>
@@ -224,12 +224,12 @@
                                 {% endif %}
 
                                 {% if application.income_proof %}
-                                <a href="{{ application.income_proof.url }}" target="_blank" class="group relative overflow-hidden rounded-2xl bg-midnight-800/50 border border-white/5 p-4 hover:bg-midnight-800 transition-all duration-300 hover:shadow-glow-blue hover:-translate-y-1">
+                                <a href="{{ application.income_proof.url }}" target="_blank" class="group relative overflow-hidden rounded-bento-lg bg-midnight-800/50 border border-white/5 p-4 hover:bg-midnight-800 transition-all duration-300 hover:shadow-glow-blue hover:-translate-y-1">
                                     <div class="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <i class="fa-solid fa-arrow-up-right-from-square text-white text-xs"></i>
                                     </div>
                                     <div class="flex items-center gap-4">
-                                        <div class="w-12 h-12 rounded-xl bg-green-500 bg-opacity-10 flex items-center justify-center text-xl shrink-0">
+                                        <div class="w-12 h-12 rounded-bento bg-green-500 bg-opacity-10 flex items-center justify-center text-xl shrink-0">
                                             <i class="fa-solid fa-file-invoice-dollar text-green-500"></i>
                                         </div>
                                         <div>
@@ -241,12 +241,12 @@
                                 {% endif %}
 
                                 {% if application.medical_records %}
-                                <a href="{{ application.medical_records.url }}" target="_blank" class="group relative overflow-hidden rounded-2xl bg-midnight-800/50 border border-white/5 p-4 hover:bg-midnight-800 transition-all duration-300 hover:shadow-glow-blue hover:-translate-y-1">
+                                <a href="{{ application.medical_records.url }}" target="_blank" class="group relative overflow-hidden rounded-bento-lg bg-midnight-800/50 border border-white/5 p-4 hover:bg-midnight-800 transition-all duration-300 hover:shadow-glow-blue hover:-translate-y-1">
                                     <div class="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <i class="fa-solid fa-arrow-up-right-from-square text-white text-xs"></i>
                                     </div>
                                     <div class="flex items-center gap-4">
-                                        <div class="w-12 h-12 rounded-xl bg-purple-500 bg-opacity-10 flex items-center justify-center text-xl shrink-0">
+                                        <div class="w-12 h-12 rounded-bento bg-purple-500 bg-opacity-10 flex items-center justify-center text-xl shrink-0">
                                             <i class="fa-solid fa-heart-pulse text-purple-500"></i>
                                         </div>
                                         <div>
@@ -259,7 +259,7 @@
 
                             </div>
                         {% else %}
-                            <div class="flex flex-col items-center justify-center py-10 border border-dashed border-slate-700 rounded-2xl bg-white/5">
+                            <div class="flex flex-col items-center justify-center py-10 border border-dashed border-slate-700 rounded-bento-lg bg-white/5">
                                 <i class="fa-regular fa-folder-open text-slate-600 text-4xl mb-4"></i>
                                 <p class="text-slate-500 font-medium">No documents uploaded</p>
                             </div>
@@ -269,9 +269,9 @@
 
                 <div class="lg:col-span-1 space-y-8">
                     
-                    <div class="glass-panel rounded-3xl p-8 h-full animate-slide-up delay-400 flex flex-col">
+                    <div class="glass-panel rounded-bento-xl p-8 h-full animate-slide-up delay-400 flex flex-col">
                         <div class="flex items-center gap-3 mb-8">
-                            <div class="p-2.5 rounded-xl bg-orange-500/20 text-orange-500">
+                            <div class="p-2.5 rounded-bento bg-orange-500/20 text-orange-500">
                                 <i class="fa-solid fa-clock-rotate-left text-xl"></i>
                             </div>
                             <h2 class="text-xl font-bold text-white">Timeline</h2>
@@ -321,7 +321,7 @@
                         </div>
 
                         {% if application.admin_notes %}
-                            <div class="mt-6 p-4 rounded-xl bg-slate-900 border border-slate-700 relative">
+                            <div class="mt-6 p-4 rounded-bento bg-slate-900 border border-slate-700 relative">
                                 <div class="absolute -top-3 left-4 bg-slate-800 text-xs text-slate-300 px-2 py-0.5 rounded border border-slate-600">
                                     Admin Note
                                 </div>
@@ -331,7 +331,7 @@
                     </div>
 
                     {% if application.status == 'draft' %}
-                    <div class="glass-panel rounded-3xl p-6 text-center shadow-2xl shadow-black/50">
+                    <div class="glass-panel rounded-bento-xl p-6 text-center shadow-2xl shadow-black/50">
                         <div class="w-12 h-12 rounded-full bg-amber-500/20 text-amber-500 flex items-center justify-center mx-auto mb-4">
                             <i class="fa-solid fa-triangle-exclamation text-xl"></i>
                         </div>
@@ -339,8 +339,8 @@
                         <p class="text-slate-400 text-xs mb-6 px-4">Your application is currently saved as a draft. Please complete it to proceed.</p>
                         
                         <a href="{% url 'insurance:apply_policy' application.policy.id %}" class="relative w-full block group">
-                            <div class="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl blur opacity-60 group-hover:opacity-100 transition duration-500"></div>
-                            <div class="relative bg-[#0b1120] rounded-xl flex items-center justify-center px-6 py-4 border border-white/10 group-hover:bg-[#0f172a] transition-all duration-200">
+                            <div class="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-bento blur opacity-60 group-hover:opacity-100 transition duration-500"></div>
+                            <div class="relative bg-[#0b1120] rounded-bento flex items-center justify-center px-6 py-4 border border-white/10 group-hover:bg-[#0f172a] transition-all duration-200">
                                 <span class="text-sm font-bold text-white mr-2">Complete Application</span>
                                 <i class="fa-solid fa-arrow-right text-accent-500 group-hover:translate-x-1 transition-transform"></i>
                             </div>

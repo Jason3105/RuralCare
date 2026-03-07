@@ -17,7 +17,7 @@
         <!-- Scanner Area -->
         <div class="lg:col-span-2">
             <!-- Camera Stream -->
-            <div class="bg-card border border-border/50 rounded-2xl overflow-hidden shadow-sm">
+            <div class="bento-card overflow-hidden ">
                 <div id="scanner-container" class="bg-black relative">
                     <video id="camera-stream" autoplay playsinline muted style="width: 100%; height: auto; max-height: 600px; display: none;"></video>
                     <div id="no-camera" class="text-center py-24 text-white">
@@ -44,15 +44,15 @@
 
                 <!-- Controls -->
                 <div class="p-6 border-t border-border/20 space-y-3">
-                    <button id="start-btn" class="w-full bg-gradient-to-r from-primary to-primary/90 hover:shadow-lg text-primary-foreground px-6 py-3 rounded-lg transition-all duration-300 font-semibold flex items-center justify-center group hover:scale-105">
+                    <button id="start-btn" class="w-full bg-orange-600 hover:shadow-lg text-primary-foreground px-6 py-3 rounded-lg transition-all duration-300 font-semibold flex items-center justify-center group">
                         <i class="fas fa-play mr-2"></i>
                         Start Camera
                     </button>
-                    <button id="stop-btn" class="w-full bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg transition-all duration-300 font-semibold flex items-center justify-center group hover:scale-105 hidden">
+                    <button id="stop-btn" class="w-full bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg transition-all duration-300 font-semibold flex items-center justify-center group hidden">
                         <i class="fas fa-stop mr-2"></i>
                         Stop Camera
                     </button>
-                    <button id="upload-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-all duration-300 font-semibold flex items-center justify-center group hover:scale-105">
+                    <button id="upload-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-all duration-300 font-semibold flex items-center justify-center group">
                         <i class="fas fa-image mr-2"></i>
                         Upload QR Image
                     </button>
@@ -62,7 +62,7 @@
 
             <!-- Scanned Patient Profile (will be populated after scan) -->
             <div id="patient-profile" class="mt-8 hidden">
-                <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+                <div class="bento-card p-8 ">
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="text-2xl font-bold text-foreground">Patient Profile</h2>
                         <a href="{% url 'doctor_qr_scanner' %}" class="text-primary hover:text-primary/80 text-sm font-semibold">Scan Another</a>
@@ -128,7 +128,7 @@
 
                     <!-- Full Profile Button -->
                     <div class="mt-8 pt-8 border-t border-border/20">
-                        <a id="full-profile-btn" href="#" class="w-full bg-gradient-to-r from-primary to-primary/90 hover:shadow-lg text-primary-foreground px-6 py-3 rounded-lg transition-all duration-300 font-semibold flex items-center justify-center group hover:scale-105">
+                        <a id="full-profile-btn" href="#" class="w-full bg-orange-600 hover:shadow-lg text-primary-foreground px-6 py-3 rounded-lg transition-all duration-300 font-semibold flex items-center justify-center group">
                             <i class="fas fa-expand mr-2"></i>
                             View Complete Profile
                         </a>
@@ -140,7 +140,7 @@
         <!-- Info Sidebar -->
         <div class="space-y-6">
             <!-- Instructions Card -->
-            <div class="bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 border border-primary/20 rounded-2xl p-6">
+            <div class="bento-card p-6 border-orange-300">
                 <h3 class="text-lg font-bold text-foreground mb-4 flex items-center">
                     <i class="fas fa-info-circle mr-2 text-primary"></i>
                     How to Use
@@ -166,7 +166,7 @@
             </div>
 
             <!-- Security Info -->
-            <div class="bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/30 rounded-2xl p-6">
+            <div class="bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/30 rounded-bento-lg p-6">
                 <h3 class="font-bold text-foreground mb-3 flex items-center">
                     <i class="fas fa-shield-alt mr-2 text-blue-600 dark:text-blue-400"></i>
                     Security & Privacy
@@ -192,7 +192,7 @@
             </div>
 
             <!-- Tech Details -->
-            <div class="bg-card border border-border/50 rounded-2xl p-6">
+            <div class="bento-card p-6">
                 <h3 class="font-bold text-foreground mb-3">Supported Browsers</h3>
                 <ul class="text-sm text-muted-foreground space-y-2">
                     <li><i class="fas fa-check-circle text-green-600 mr-2"></i>Chrome/Edge (recommended)</li>

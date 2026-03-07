@@ -11,7 +11,7 @@
                 <h1 class="text-3xl sm:text-4xl font-bold text-foreground mb-2">Medical Records</h1>
                 <p class="text-sm sm:text-base text-muted-foreground">Manage and view your medical documents with AI-powered insights</p>
             </div>
-            <a href="{% url 'upload_medical_record' %}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-primary to-primary/90 hover:shadow-xl text-primary-foreground font-bold rounded-xl transition-all duration-200 hover:scale-105">
+            <a href="{% url 'upload_medical_record' %}" class="inline-flex items-center px-6 py-3 bg-orange-600 hover:shadow-lg text-primary-foreground font-bold rounded-bento transition-all duration-200">
                 <i class="fas fa-plus mr-2"></i>
                 Upload Record
             </a>
@@ -21,37 +21,37 @@
     {% if records %}
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
+            <div class="bento-card p-6  hover:shadow-md transition-all">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-muted-foreground mb-1">Total Records</p>
                         <p class="text-3xl font-bold text-foreground">{{ total_records }}</p>
                     </div>
-                    <div class="bg-blue-500/10 dark:bg-blue-500/20 p-3 rounded-xl">
-                        <i class="fas fa-file-medical text-2xl text-blue-600 dark:text-blue-400"></i>
+                    <div class="bento-icon bento-icon-blue">
+                        <i class="fas fa-file-medical text-2xl"></i>
                     </div>
                 </div>
             </div>
             
-            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
+            <div class="bento-card p-6  hover:shadow-md transition-all">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-muted-foreground mb-1">Processed</p>
                         <p class="text-3xl font-bold text-foreground">{{ completed_records }}</p>
                     </div>
-                    <div class="bg-green-500/10 dark:bg-green-500/20 p-3 rounded-xl">
-                        <i class="fas fa-check-circle text-2xl text-green-600 dark:text-green-400"></i>
+                    <div class="bento-icon bento-icon-green">
+                        <i class="fas fa-check-circle text-2xl"></i>
                     </div>
                 </div>
             </div>
             
-            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
+            <div class="bento-card p-6  hover:shadow-md transition-all">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-muted-foreground mb-1">Processing</p>
                         <p class="text-3xl font-bold text-foreground">{{ processing_records }}</p>
                     </div>
-                    <div class="bg-yellow-500/10 dark:bg-yellow-500/20 p-3 rounded-xl">
+                    <div class="bg-yellow-500/10 dark:bg-yellow-500/20 p-3 rounded-bento">
                         <i class="fas fa-spinner text-2xl text-yellow-600 dark:text-yellow-400"></i>
                     </div>
                 </div>
@@ -61,9 +61,9 @@
         <!-- Records Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {% for record in records %}
-            <a href="{% url 'medical_record_detail' record.id %}" class="block bg-card border border-border/50 rounded-2xl overflow-hidden hover:shadow-lg hover:border-primary transition-all duration-200 group">
+            <a href="{% url 'medical_record_detail' record.id %}" class="block bento-card overflow-hidden hover:shadow-lg hover:border-primary transition-all duration-200 group">
                 <!-- Card Header -->
-                <div class="bg-gradient-to-r from-primary/10 to-primary/5 p-4 border-b border-border/50">
+                <div class="bg-orange-50 dark:bg-orange-900/10 p-4 border-b border-border/50">
                     <div class="flex items-start justify-between">
                         <div class="flex items-center space-x-3 flex-1 min-w-0">
                             <div class="bg-primary/20 p-2.5 rounded-lg flex-shrink-0">
@@ -151,23 +151,23 @@
 
     {% else %}
         <!-- Empty State -->
-        <div class="bg-card border border-border/50 rounded-2xl p-12 text-center shadow-sm">
+        <div class="bento-card p-12 text-center ">
             <div class="max-w-md mx-auto">
-                <div class="bg-primary/10 dark:bg-primary/20 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <div class="bg-primary/10 dark:bg-primary/20 w-20 h-20 rounded-bento-lg flex items-center justify-center mx-auto mb-6">
                     <i class="fas fa-folder-open text-4xl text-primary"></i>
                 </div>
                 <h3 class="text-xl sm:text-2xl font-bold text-foreground mb-3">No Medical Records Yet</h3>
                 <p class="text-sm sm:text-base text-muted-foreground mb-8">
                     Start building your health record by uploading your first medical document. Our AI will automatically extract and organize the information for you.
                 </p>
-                <a href="{% url 'upload_medical_record' %}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-primary to-primary/90 hover:shadow-xl text-primary-foreground font-bold rounded-xl transition-all duration-200 hover:scale-105">
+                <a href="{% url 'upload_medical_record' %}" class="inline-flex items-center px-6 py-3 bg-orange-600 hover:shadow-lg text-primary-foreground font-bold rounded-bento transition-all duration-200">
                     <i class="fas fa-upload mr-2"></i>
                     Upload Your First Record
                 </a>
                 
                 <div class="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
                     <div class="flex items-start space-x-3">
-                        <div class="bg-blue-500/10 dark:bg-blue-500/20 p-2 rounded-xl flex-shrink-0">
+                        <div class="bg-blue-500/10 dark:bg-blue-500/20 p-2 rounded-bento flex-shrink-0">
                             <i class="fas fa-shield-alt text-blue-600 dark:text-blue-400"></i>
                         </div>
                         <div>
@@ -177,7 +177,7 @@
                     </div>
                     
                     <div class="flex items-start space-x-3">
-                        <div class="bg-green-500/10 dark:bg-green-500/20 p-2 rounded-xl flex-shrink-0">
+                        <div class="bg-green-500/10 dark:bg-green-500/20 p-2 rounded-bento flex-shrink-0">
                             <i class="fas fa-robot text-green-600 dark:text-green-400"></i>
                         </div>
                         <div>
@@ -187,7 +187,7 @@
                     </div>
                     
                     <div class="flex items-start space-x-3">
-                        <div class="bg-purple-500/10 dark:bg-purple-500/20 p-2 rounded-xl flex-shrink-0">
+                        <div class="bg-purple-500/10 dark:bg-purple-500/20 p-2 rounded-bento flex-shrink-0">
                             <i class="fas fa-chart-line text-purple-600 dark:text-purple-400"></i>
                         </div>
                         <div>

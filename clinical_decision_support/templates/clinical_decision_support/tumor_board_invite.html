@@ -16,7 +16,7 @@
         </div>
 
         <!-- Current Members -->
-        <div class="bg-card border border-border/50 rounded-xl p-6 mb-6">
+        <div class="bento-card p-6 mb-6">
             <h2 class="text-lg font-semibold text-foreground mb-4">Current Members ({{ current_members|length }})</h2>
             <div class="space-y-3">
                 {% for member in current_members %}
@@ -44,7 +44,7 @@
         <form method="post" action="{% url 'clinical_decision_support:tumor_board_invite_add' session.id %}" class="space-y-6">
             {% csrf_token %}
             
-            <div class="bg-card border border-border/50 rounded-xl p-6 space-y-6">
+            <div class="bento-card p-6 space-y-6">
                 <h2 class="text-lg font-semibold text-foreground">Add New Member</h2>
                 
                 <!-- Doctor Selection -->
@@ -80,7 +80,7 @@
             </div>
 
             <!-- Recommended Specialties Info -->
-            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-bento p-4">
                 <div class="flex items-start space-x-3">
                     <i class="fas fa-lightbulb text-blue-500 mt-0.5"></i>
                     <div class="text-sm text-blue-800 dark:text-blue-400">

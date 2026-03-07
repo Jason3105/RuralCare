@@ -3,21 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}RuralCare{% endblock %}</title>
+    <title>{% block title %}ArogyaX{% endblock %}</title>
     
     <!-- Favicon -->
     {% load static %}
     <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
     
     <!-- Preconnect to CDNs -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    
+    <!-- Inter Font (Next.js style) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <!-- Font Awesome from jsDelivr -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" crossorigin="anonymous">
     
-    <!-- Tailwind CSS - CDN for development (switch to build process for production) -->
-    <!-- For production: run 'npm install -D tailwindcss' and build CSS file -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
@@ -25,6 +29,14 @@
             darkMode: 'class',
             theme: {
                 extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'bento': '16px',
+                        'bento-lg': '20px',
+                        'bento-xl': '24px',
+                    },
                     colors: {
                         border: "hsl(var(--border))",
                         input: "hsl(var(--input))",
@@ -51,6 +63,14 @@
                             DEFAULT: "hsl(var(--card))",
                             foreground: "hsl(var(--card-foreground))",
                         },
+                        cream: '#FFF8DC',
+                        'warm-white': '#FEFCF3',
+                        'bento-orange': '#F97316',
+                        'bento-purple': '#8B5CF6',
+                        'bento-blue': '#3B82F6',
+                        'bento-green': '#10B981',
+                        'bento-pink': '#EC4899',
+                        'bento-yellow': '#F59E0B',
                     },
                 }
             }
@@ -58,30 +78,30 @@
     </script>
     <style>
         :root {
-            --background: 0 0% 100%;
-            --foreground: 222.2 84% 4.9%;
+            --background: 20 40% 96%;
+            --foreground: 20 14.3% 11%;
             --card: 0 0% 100%;
-            --card-foreground: 222.2 84% 4.9%;
-            --primary: 221.2 83.2% 53.3%;
-            --primary-foreground: 210 40% 98%;
-            --secondary: 210 40% 96.1%;
-            --secondary-foreground: 222.2 47.4% 11.2%;
-            --muted: 210 40% 96.1%;
-            --muted-foreground: 215.4 16.3% 46.9%;
-            --accent: 210 40% 96.1%;
-            --accent-foreground: 222.2 47.4% 11.2%;
-            --border: 214.3 31.8% 91.4%;
-            --input: 214.3 31.8% 91.4%;
-            --ring: 221.2 83.2% 53.3%;
+            --card-foreground: 20 14.3% 11%;
+            --primary: 24 95% 53%;
+            --primary-foreground: 0 0% 100%;
+            --secondary: 45 30% 94%;
+            --secondary-foreground: 20 14.3% 11%;
+            --muted: 45 20% 93%;
+            --muted-foreground: 25 5.3% 44.7%;
+            --accent: 45 30% 94%;
+            --accent-foreground: 20 14.3% 11%;
+            --border: 20 10% 20%;
+            --input: 40 15% 89%;
+            --ring: 24 95% 53%;
         }
         
         .dark {
             --background: 222.2 84% 4.9%;
-            --foreground: 210 40% 98%;
-            --card: 222.2 84% 4.9%;
-            --card-foreground: 210 40% 98%;
-            --primary: 217.2 91.2% 59.8%;
-            --primary-foreground: 222.2 47.4% 11.2%;
+            --foreground: 45 30% 94%;
+            --card: 224 30% 10%;
+            --card-foreground: 45 30% 94%;
+            --primary: 24 95% 58%;
+            --primary-foreground: 0 0% 100%;
             --secondary: 217.2 32.6% 17.5%;
             --secondary-foreground: 210 40% 98%;
             --muted: 217.2 32.6% 17.5%;
@@ -90,8 +110,63 @@
             --accent-foreground: 210 40% 98%;
             --border: 217.2 32.6% 17.5%;
             --input: 217.2 32.6% 17.5%;
-            --ring: 224.3 76.3% 48%;
+            --ring: 24 95% 58%;
         }
+
+        * { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        
+        /* Bento Grid System */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            gap: 1rem;
+        }
+        @media (min-width: 768px) {
+            .bento-grid { grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+        }
+        @media (min-width: 1024px) {
+            .bento-grid { grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+        }
+        .bento-card {
+            background: hsl(var(--card));
+            border: 2.5px solid hsl(var(--border));
+            border-radius: 20px;
+            padding: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 6px 6px 0px 0px hsl(var(--border));
+        }
+        .bento-card:hover, .bento-card:active {
+            box-shadow: none;
+            transform: translate(3px, 3px);
+        }
+        /* Colored icon badges */
+        .bento-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.25rem;
+            font-size: 1.25rem;
+        }
+        .bento-icon-orange { background: #F97316; color: white; }
+        .bento-icon-purple { background: #8B5CF6; color: white; }
+        .bento-icon-blue { background: #3B82F6; color: white; }
+        .bento-icon-green { background: #10B981; color: white; }
+        .bento-icon-pink { background: #EC4899; color: white; }
+        .bento-icon-cyan { background: #06B6D4; color: white; }
+        .bento-icon-red { background: #EF4444; color: white; }
+        .bento-icon-yellow { background: #EAB308; color: white; }
+        .bento-card.span-2 { grid-column: span 1; }
+        @media (min-width: 768px) { .bento-card.span-2 { grid-column: span 2; } }
+        .bento-card.span-full { grid-column: 1 / -1; }
+        
+        .bento-accent-orange { background: #F97316; color: white; border-color: #C2590F; }
+        .bento-accent-purple { background: #8B5CF6; color: white; border-color: #6D3FD0; }
+        .bento-accent-blue { background: #3B82F6; color: white; border-color: #2563EB; }
+        .bento-accent-green { background: #10B981; color: white; border-color: #0D9668; }
+        .bento-accent-pink { background: #EC4899; color: white; border-color: #DB2777; }
         
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -179,10 +254,11 @@
         /* Card hover effects */
         .card-hover {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 16px;
         }
         .card-hover:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px -4px rgba(0,0,0,0.08), 0 4px 8px -2px rgba(0,0,0,0.04);
         }
         
         /* Backdrop blur support */
@@ -590,7 +666,7 @@
     {% if messages %}
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 space-y-3">
             {% for message in messages %}
-                <div class="bg-{{ message.tags }}-50 border border-{{ message.tags }}-200 text-{{ message.tags }}-800 px-4 py-3 rounded-lg relative scale-in shadow-sm flex items-start space-x-3" role="alert">
+                <div class="bg-{{ message.tags }}-50 border border-{{ message.tags }}-200 text-{{ message.tags }}-800 px-4 py-3 rounded-lg relative scale-in  flex items-start space-x-3" role="alert">
                     {% if message.tags == 'success' %}
                         <i class="fas fa-check-circle text-{{ message.tags }}-600 mt-0.5 flex-shrink-0"></i>
                     {% elif message.tags == 'error' %}

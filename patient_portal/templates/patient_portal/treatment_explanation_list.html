@@ -18,7 +18,7 @@
         <!-- Explanations List -->
         <div class="space-y-6">
             {% for item in explanations %}
-            <div class="bg-card border border-border/50 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+            <div class="bento-card overflow-hidden transition-all">
                 <div class="p-6">
                     <div class="flex items-start justify-between mb-4">
                         <div>
@@ -90,7 +90,7 @@
                 </div>
             </div>
             {% empty %}
-            <div class="bg-card border border-border/50 rounded-xl p-12 text-center">
+            <div class="bento-card p-12 text-center">
                 <i class="fas fa-book-reader text-4xl text-muted-foreground mb-4"></i>
                 <h3 class="text-lg font-medium text-foreground mb-2">No Treatment Plans Yet</h3>
                 <p class="text-muted-foreground">Treatment plans will appear here once your doctor creates them for you.</p>

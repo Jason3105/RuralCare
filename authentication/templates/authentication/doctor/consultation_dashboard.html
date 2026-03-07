@@ -29,36 +29,36 @@
 
         <!-- Stats Overview -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-            <div class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-md transition-all">
+            <div class="bento-card p-6 hover:shadow-md transition-all">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-muted-foreground mb-1">Pending Requests</p>
                         <p class="text-3xl font-bold text-foreground">{{ pending_count }}</p>
                     </div>
-                    <div class="bg-yellow-600/10 p-3 rounded-xl">
-                        <i class="fas fa-clock text-yellow-600 text-2xl"></i>
+                    <div class="bento-icon bento-icon-yellow">
+                        <i class="fas fa-clock"></i>
                     </div>
                 </div>
             </div>
-            <div class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-md transition-all">
+            <div class="bento-card p-6 hover:shadow-md transition-all">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-muted-foreground mb-1">Today's Schedule</p>
                         <p class="text-3xl font-bold text-foreground">{{ today_consultations|length }}</p>
                     </div>
-                    <div class="bg-green-600/10 p-3 rounded-xl">
-                        <i class="fas fa-calendar-day text-green-600 text-2xl"></i>
+                    <div class="bento-icon bento-icon-green">
+                        <i class="fas fa-calendar-day"></i>
                     </div>
                 </div>
             </div>
-            <div class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-md transition-all">
+            <div class="bento-card p-6 hover:shadow-md transition-all">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-muted-foreground mb-1">Upcoming</p>
                         <p class="text-3xl font-bold text-foreground">{{ upcoming_consultations|length }}</p>
                     </div>
-                    <div class="bg-blue-600/10 p-3 rounded-xl">
-                        <i class="fas fa-calendar-alt text-blue-600 text-2xl"></i>
+                    <div class="bento-icon bento-icon-blue">
+                        <i class="fas fa-calendar-alt"></i>
                     </div>
                 </div>
             </div>
@@ -67,7 +67,7 @@
         <!-- Two-Column: Pending Requests + Today's Schedule -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <!-- Pending Requests -->
-            <div class="bg-card border border-border/50 rounded-xl p-6">
+            <div class="bento-card p-6">
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-xl font-semibold text-foreground flex items-center">
                         <i class="fas fa-bell text-yellow-600 mr-2"></i>
@@ -117,7 +117,7 @@
             </div>
 
             <!-- Today's Schedule -->
-            <div class="bg-card border border-border/50 rounded-xl p-6">
+            <div class="bento-card p-6">
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-xl font-semibold text-foreground flex items-center">
                         <i class="fas fa-calendar-check text-green-600 mr-2"></i>
@@ -189,7 +189,7 @@
         <!-- Filter Tabs -->
         <div class="mb-6 flex flex-wrap items-center gap-4">
             <!-- Status Filters -->
-            <div class="bg-card border border-border/50 rounded-xl p-1.5 inline-flex gap-1">
+            <div class="bento-card p-1.5 inline-flex gap-1">
                 <a href="?status={% if selected_mode %}&mode={{ selected_mode }}{% endif %}" 
                    class="px-4 py-2 rounded-lg text-sm font-medium transition-all {% if not selected_status %}bg-primary text-primary-foreground{% else %}text-muted-foreground hover:bg-accent{% endif %}">
                     All
@@ -209,7 +209,7 @@
             </div>
 
             <!-- Mode Filters -->
-            <div class="bg-card border border-border/50 rounded-xl p-1.5 inline-flex gap-1">
+            <div class="bento-card p-1.5 inline-flex gap-1">
                 <a href="?mode={% if selected_status %}&status={{ selected_status }}{% endif %}" 
                    class="px-3 py-2 rounded-lg text-sm font-medium transition-all {% if not selected_mode %}bg-primary/10 text-primary{% else %}text-muted-foreground hover:bg-accent{% endif %}">
                     All Modes
@@ -231,17 +231,17 @@
 
         <!-- Upcoming Consultations -->
         {% if upcoming_consultations %}
-        <div class="bg-card border border-border/50 rounded-2xl p-6 sm:p-8 mb-8 shadow-sm">
+        <div class="bento-card p-6 sm:p-8 mb-8 ">
             <h2 class="text-2xl font-bold text-foreground mb-6 flex items-center gap-3">
-                <div class="bg-green-600/10 p-3 rounded-xl">
-                    <i class="fas fa-calendar-check text-green-600 text-xl"></i>
+                <div class="bento-icon bento-icon-green">
+                    <i class="fas fa-calendar-check"></i>
                 </div>
                 Upcoming Consultations
                 <span class="text-sm font-normal text-muted-foreground ml-2">({{ upcoming_consultations|length }})</span>
             </h2>
             <div class="space-y-4">
                 {% for consultation in upcoming_consultations %}
-                <div class="bg-accent/30 border border-border/50 rounded-xl p-6 hover:shadow-md transition-all">
+                <div class="bg-accent/30 border border-border/50 rounded-bento p-6 hover:shadow-md transition-all">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div class="flex items-start gap-4 flex-1">
                             {% if consultation.patient.profile_picture %}
@@ -320,17 +320,17 @@
 
         <!-- Past Consultations -->
         {% if past_consultations %}
-        <div class="bg-card border border-border/50 rounded-2xl p-6 sm:p-8 shadow-sm">
+        <div class="bento-card p-6 sm:p-8 ">
             <h2 class="text-2xl font-bold text-foreground mb-6 flex items-center gap-3">
-                <div class="bg-blue-600/10 p-3 rounded-xl">
-                    <i class="fas fa-history text-blue-600 text-xl"></i>
+                <div class="bento-icon bento-icon-blue">
+                    <i class="fas fa-history"></i>
                 </div>
                 Past Consultations
                 <span class="text-sm font-normal text-muted-foreground ml-2">({{ past_consultations|length }})</span>
             </h2>
             <div class="space-y-4">
                 {% for consultation in past_consultations %}
-                <div class="bg-accent/30 border border-border/50 rounded-xl p-6 hover:shadow-md transition-all opacity-80">
+                <div class="bg-accent/30 border border-border/50 rounded-bento p-6 hover:shadow-md transition-all opacity-80">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div class="flex items-start gap-4 flex-1">
                             {% if consultation.patient.profile_picture %}
@@ -405,7 +405,7 @@
 
         <!-- No Consultations -->
         {% if not upcoming_consultations and not past_consultations %}
-        <div class="bg-card border border-border/50 rounded-2xl p-12 text-center shadow-sm">
+        <div class="bento-card p-12 text-center ">
             <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-muted/50 mb-6">
                 <i class="fas fa-calendar-times text-4xl text-muted-foreground"></i>
             </div>
@@ -434,7 +434,7 @@
 
 <!-- Incoming Call Corner Notification -->
 <div id="incomingCallNotification" class="fixed bottom-6 right-6 z-50 hidden transform transition-all duration-300 ease-out">
-    <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-2xl max-w-sm animate-bounce-subtle">
+    <div class="bg-green-600 rounded-bento-lg shadow-2xl max-w-sm animate-bounce-subtle">
         <div class="p-6 text-white">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center space-x-3">
@@ -450,12 +450,12 @@
             
             <div class="flex space-x-3">
                 <button onclick="answerCall()" 
-                        class="flex-1 bg-white text-green-600 px-4 py-3 rounded-xl font-bold hover:bg-green-50 transition-all hover:scale-105 flex items-center justify-center gap-2">
+                        class="flex-1 bg-white text-green-600 px-4 py-3 rounded-bento font-bold hover:bg-green-50 transition-all flex items-center justify-center gap-2">
                     <i class="fas fa-check"></i>
                     <span>Answer</span>
                 </button>
                 <button onclick="dismissCallNotification()" 
-                        class="flex-1 bg-red-500 text-white px-4 py-3 rounded-xl font-bold hover:bg-red-600 transition-all hover:scale-105 flex items-center justify-center gap-2">
+                        class="flex-1 bg-red-500 text-white px-4 py-3 rounded-bento font-bold hover:bg-red-600 transition-all flex items-center justify-center gap-2">
                     <i class="fas fa-times"></i>
                     <span>Dismiss</span>
                 </button>

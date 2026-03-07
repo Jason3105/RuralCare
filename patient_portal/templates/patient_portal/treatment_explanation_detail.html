@@ -17,7 +17,7 @@
 
         <!-- AI Generated Explanation -->
         {% if ai_explanation %}
-        <div class="bg-primary/5 border border-primary/20 rounded-xl p-6 mb-6">
+        <div class="bg-primary/5 border border-primary/20 rounded-bento p-6 mb-6">
             <h2 class="text-lg font-semibold text-foreground mb-3">
                 <i class="fas fa-lightbulb text-primary mr-2"></i>Your Treatment in Simple Terms
             </h2>
@@ -30,7 +30,7 @@
         <!-- Outcome Predictions -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             {% if survival_rate %}
-            <div class="bg-card border border-border/50 rounded-xl p-4 text-center">
+            <div class="bento-card p-4 text-center">
                 <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
                     <span class="text-2xl font-bold text-green-600">{{ survival_rate|floatformat:0 }}%</span>
                 </div>
@@ -39,7 +39,7 @@
             </div>
             {% endif %}
             {% if remission_rate %}
-            <div class="bg-card border border-border/50 rounded-xl p-4 text-center">
+            <div class="bento-card p-4 text-center">
                 <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
                     <span class="text-2xl font-bold text-blue-600">{{ remission_rate|floatformat:0 }}%</span>
                 </div>
@@ -48,7 +48,7 @@
             </div>
             {% endif %}
             {% if qol_score %}
-            <div class="bg-card border border-border/50 rounded-xl p-4 text-center">
+            <div class="bento-card p-4 text-center">
                 <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
                     <span class="text-2xl font-bold text-purple-600">{{ qol_score }}</span>
                 </div>
@@ -62,7 +62,7 @@
         <div class="space-y-6">
             <!-- Primary Treatments -->
             {% if treatments %}
-            <div class="bg-card border border-border/50 rounded-xl p-6">
+            <div class="bento-card p-6">
                 <h2 class="text-xl font-semibold text-foreground mb-4 flex items-center">
                     <span class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mr-3">
                         <i class="fas fa-pills text-green-600"></i>
@@ -91,7 +91,7 @@
 
             <!-- Targeted Therapies -->
             {% if targeted_therapies %}
-            <div class="bg-card border border-border/50 rounded-xl p-6">
+            <div class="bento-card p-6">
                 <h2 class="text-xl font-semibold text-foreground mb-4 flex items-center">
                     <span class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mr-3">
                         <i class="fas fa-crosshairs text-blue-600"></i>
@@ -121,7 +121,7 @@
 
             <!-- Adjuvant Treatments -->
             {% if adjuvant_treatments %}
-            <div class="bg-card border border-border/50 rounded-xl p-6">
+            <div class="bento-card p-6">
                 <h2 class="text-xl font-semibold text-foreground mb-4 flex items-center">
                     <span class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mr-3">
                         <i class="fas fa-hand-holding-medical text-amber-600"></i>
@@ -151,7 +151,7 @@
 
             <!-- Treatment Milestones -->
             {% if milestones %}
-            <div class="bg-card border border-border/50 rounded-xl p-6">
+            <div class="bento-card p-6">
                 <h2 class="text-xl font-semibold text-foreground mb-4 flex items-center">
                     <span class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mr-3">
                         <i class="fas fa-flag-checkered text-purple-600"></i>
@@ -182,7 +182,7 @@
 
             <!-- Monitoring Plan -->
             {% if monitoring_plan %}
-            <div class="bg-card border border-border/50 rounded-xl p-6">
+            <div class="bento-card p-6">
                 <h2 class="text-xl font-semibold text-foreground mb-4 flex items-center">
                     <span class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mr-3">
                         <i class="fas fa-stethoscope text-indigo-600"></i>
@@ -202,21 +202,21 @@
         </div>
 
         <!-- Related Actions -->
-        <div class="mt-8 bg-accent/30 rounded-xl p-6">
+        <div class="mt-8 bg-accent/30 rounded-bento p-6">
             <h3 class="font-semibold text-foreground mb-4">Related Resources</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <a href="{% url 'patient_portal:side_effects_detail' plan.id %}" 
-                   class="flex items-center space-x-3 p-3 bg-card rounded-lg hover:shadow-md transition-shadow">
+                   class="flex items-center space-x-3 p-3 bento-card">
                     <i class="fas fa-pills text-amber-500"></i>
                     <span class="text-foreground text-sm">View Side Effects</span>
                 </a>
                 <a href="{% url 'patient_portal:symptom_log_create' %}" 
-                   class="flex items-center space-x-3 p-3 bg-card rounded-lg hover:shadow-md transition-shadow">
+                   class="flex items-center space-x-3 p-3 bento-card">
                     <i class="fas fa-clipboard-list text-green-500"></i>
                     <span class="text-foreground text-sm">Log Symptoms</span>
                 </a>
                 <a href="{% url 'patient_portal:confidence_view' %}" 
-                   class="flex items-center space-x-3 p-3 bg-card rounded-lg hover:shadow-md transition-shadow">
+                   class="flex items-center space-x-3 p-3 bento-card">
                     <i class="fas fa-chart-pie text-blue-500"></i>
                     <span class="text-foreground text-sm">Confidence Details</span>
                 </a>

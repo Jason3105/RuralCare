@@ -11,11 +11,11 @@
         </div>
         <div class="mt-4 sm:mt-0 flex gap-3">
             <a href="{% url 'cancer_detection:genomic_list' %}" 
-               class="bg-card border-2 border-border hover:border-primary text-foreground font-semibold py-2 px-4 rounded-lg transition-all">
+               class="bento-card hover:border-primary text-foreground font-semibold py-2 px-4 rounded-lg transition-all">
                 <i class="fas fa-arrow-left mr-2"></i>Back to List
             </a>
             <a href="{% url 'cancer_detection:create_comprehensive_plan' %}" 
-               class="bg-gradient-to-r from-green-500 to-green-600 hover:shadow-xl text-white font-semibold py-2 px-4 rounded-lg transition-all">
+               class="bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 px-4 rounded-lg transition-all">
                 <i class="fas fa-project-diagram mr-2"></i>Use in Plan
             </a>
         </div>
@@ -24,7 +24,7 @@
     {% if profile %}
     <!-- Actionable Mutations -->
     {% if profile.actionable_mutations %}
-    <div class="bg-card border border-border/50 rounded-2xl p-6 mb-8">
+    <div class="bento-card p-6 mb-8">
         <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
             <i class="fas fa-star text-yellow-500 mr-2"></i>Actionable Mutations
         </h2>
@@ -57,7 +57,7 @@
     <!-- Eligibility Assessment -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <!-- Targeted Therapy -->
-        <div class="bg-card border border-border/50 rounded-2xl p-6">
+        <div class="bento-card p-6">
             <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
                 <i class="fas fa-bullseye text-primary mr-2"></i>Targeted Therapy Eligibility
             </h2>
@@ -91,7 +91,7 @@
         </div>
 
         <!-- Immunotherapy -->
-        <div class="bg-card border border-border/50 rounded-2xl p-6">
+        <div class="bento-card p-6">
             <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
                 <i class="fas fa-shield-alt text-primary mr-2"></i>Immunotherapy Eligibility
             </h2>
@@ -134,7 +134,7 @@
 
     <!-- Mutations & Biomarkers -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div class="bg-card border border-border/50 rounded-2xl p-6">
+        <div class="bento-card p-6">
             <h2 class="text-xl font-bold text-foreground mb-4">Mutations</h2>
             {% if profile.mutations %}
             <div class="space-y-2">
@@ -150,7 +150,7 @@
             {% endif %}
         </div>
 
-        <div class="bg-card border border-border/50 rounded-2xl p-6">
+        <div class="bento-card p-6">
             <h2 class="text-xl font-bold text-foreground mb-4">Biomarkers</h2>
             <div class="space-y-2">
                 {% if profile.pd_l1_status %}
@@ -185,7 +185,7 @@
 
     <!-- Prognostic Profile -->
     {% if profile.prognostic_profile %}
-    <div class="bg-card border border-border/50 rounded-2xl p-6 mb-8">
+    <div class="bento-card p-6 mb-8">
         <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
             <i class="fas fa-chart-line text-primary mr-2"></i>Prognostic Profile
         </h2>
@@ -222,7 +222,7 @@
     {% endif %}
 
     <!-- Test Information -->
-    <div class="bg-card border border-border/50 rounded-2xl p-6">
+    <div class="bento-card p-6">
         <h2 class="text-xl font-bold text-foreground mb-4">Test Information</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             {% if profile.test_type %}

@@ -17,17 +17,17 @@
         <!-- Left Column - QR Code Display -->
         <div class="lg:col-span-2">
             <!-- QR Code Card -->
-            <div class="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+            <div class="bento-card p-8 ">
                 <div class="flex flex-col items-center">
                     <!-- QR Code Image -->
                     {% if qr_code %}
                         {% if qr_code.qr_code_image or qr_code.encrypted_token %}
-                            <div class="bg-white p-6 rounded-xl border-2 border-primary/20 mb-6 shadow-lg">
+                            <div class="bento-card p-6 mb-6">
                                 <img src="{% url 'serve_qr_image' %}" alt="Patient QR Code" class="w-64 h-64 object-contain" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'text-center p-12\'><i class=\'fas fa-exclamation-triangle text-4xl text-yellow-600 mb-4\'></i><p class=\'text-muted-foreground\'>QR code image not found. Please regenerate.</p></div>'">
                             </div>
                             <p class="text-sm text-muted-foreground text-center mb-6">Scan this code with a doctor's device to share your medical profile instantly</p>
                         {% else %}
-                            <div class="bg-muted/50 rounded-xl border-2 border-dashed border-border p-12 mb-6 text-center">
+                            <div class="bg-muted/50 rounded-bento border-2 border-dashed border-border p-12 mb-6 text-center">
                                 <i class="fas fa-qrcode text-5xl text-muted-foreground/50 mb-4 inline-block"></i>
                                 <p class="text-muted-foreground mb-4">QR code image not available</p>
                                 <form method="POST" action="{% url 'regenerate_qr_code' %}" class="inline-block">
@@ -39,7 +39,7 @@
                             </div>
                         {% endif %}
                     {% else %}
-                        <div class="bg-muted/50 rounded-xl border-2 border-dashed border-border p-12 mb-6 text-center">
+                        <div class="bg-muted/50 rounded-bento border-2 border-dashed border-border p-12 mb-6 text-center">
                             <i class="fas fa-qrcode text-5xl text-muted-foreground/50 mb-4 inline-block"></i>
                             <p class="text-muted-foreground mb-4">No QR code generated yet</p>
                             <button onclick="location.reload()" class="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg transition-all">
@@ -120,12 +120,12 @@
 
                     <!-- Action Buttons -->
                     <div class="w-full space-y-3">
-                        <button class="w-full bg-gradient-to-r from-primary to-primary/90 hover:shadow-lg text-primary-foreground px-6 py-3 rounded-lg transition-all duration-300 font-semibold flex items-center justify-center group hover:scale-105" onclick="downloadQRCode()">
+                        <button class="w-full bg-orange-600 hover:shadow-lg text-primary-foreground px-6 py-3 rounded-lg transition-all duration-300 font-semibold flex items-center justify-center group" onclick="downloadQRCode()">
                             <i class="fas fa-download mr-2 group-hover:translate-y-1 transition-transform"></i>
                             Download QR Code
                         </button>
 
-                        <button class="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-all duration-300 font-semibold flex items-center justify-center group hover:scale-105" onclick="copyToClipboard()">
+                        <button class="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-all duration-300 font-semibold flex items-center justify-center group" onclick="copyToClipboard()">
                             <i class="fas fa-copy mr-2"></i>
                             Copy to Share
                         </button>
@@ -133,7 +133,7 @@
                         {% if qr_code and qr_code.is_active %}
                         <form method="POST" action="{% url 'disable_qr_code' %}" class="w-full">
                             {% csrf_token %}
-                            <button type="submit" class="w-full bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg transition-all duration-300 font-semibold flex items-center justify-center group hover:scale-105" onclick="return confirm('Disable this QR code? Doctors won\'t be able to scan it until re-enabled.')">
+                            <button type="submit" class="w-full bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg transition-all duration-300 font-semibold flex items-center justify-center group" onclick="return confirm('Disable this QR code? Doctors won\'t be able to scan it until re-enabled.')">
                                 <i class="fas fa-ban mr-2"></i>
                                 Disable QR Code
                             </button>
@@ -141,7 +141,7 @@
                         {% elif qr_code and not qr_code.is_active %}
                         <form method="POST" action="{% url 'enable_qr_code' %}" class="w-full">
                             {% csrf_token %}
-                            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-all duration-300 font-semibold flex items-center justify-center group hover:scale-105">
+                            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-all duration-300 font-semibold flex items-center justify-center group">
                                 <i class="fas fa-check-circle mr-2"></i>
                                 Re-enable QR Code
                             </button>
@@ -150,7 +150,7 @@
 
                         <form method="POST" action="{% url 'regenerate_qr_code' %}" class="w-full">
                             {% csrf_token %}
-                            <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg transition-all duration-300 font-semibold flex items-center justify-center group hover:scale-105" onclick="return confirm('Regenerate QR code? This will invalidate the previous code and create a new one.')">
+                            <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg transition-all duration-300 font-semibold flex items-center justify-center group" onclick="return confirm('Regenerate QR code? This will invalidate the previous code and create a new one.')">
                                 <i class="fas fa-sync-alt mr-2"></i>
                                 Regenerate Code
                             </button>
@@ -160,7 +160,7 @@
             </div>
 
             <!-- Security Info -->
-            <div class="bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/30 rounded-2xl p-6 mt-8">
+            <div class="bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/30 rounded-bento-lg p-6 mt-8">
                 <h3 class="text-lg font-bold text-foreground mb-3 flex items-center">
                     <i class="fas fa-shield-alt mr-2 text-blue-600 dark:text-blue-400"></i>
                     Security Features
@@ -189,7 +189,7 @@
         <!-- Right Column - Scan History -->
         <div>
             <!-- Scan Analytics Card -->
-            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm mb-6">
+            <div class="bento-card p-6  mb-6">
                 <h3 class="text-lg font-bold text-foreground mb-4 flex items-center">
                     <i class="fas fa-history mr-2 text-primary"></i>
                     Recent Scans
@@ -275,7 +275,7 @@
             </div>
 
             <!-- Info Card -->
-            <div class="bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 border border-primary/20 rounded-2xl p-6">
+            <div class="bento-card p-6 border-orange-300">
                 <h3 class="font-bold text-foreground mb-3 flex items-center">
                     <i class="fas fa-lightbulb mr-2 text-primary"></i>
                     How It Works

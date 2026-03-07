@@ -10,14 +10,14 @@
             <p class="text-muted-foreground">{{ plan.plan_name }}</p>
         </div>
         <a href="{% url 'cancer_detection:treatment_plan_detail' plan_id=plan.id %}" 
-           class="mt-4 sm:mt-0 bg-card border-2 border-border hover:border-primary text-foreground font-semibold py-2 px-4 rounded-lg transition-all">
+           class="mt-4 sm:mt-0 bento-card hover:border-primary text-foreground font-semibold py-2 px-4 rounded-lg transition-all">
             <i class="fas fa-arrow-left mr-2"></i>Back to Plan
         </a>
     </div>
 
     <!-- Treatment Overview -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="bg-card border border-border/50 rounded-2xl p-6">
+        <div class="bento-card p-6">
             <div class="text-sm text-muted-foreground mb-2">5-Year Survival</div>
             <div class="text-3xl font-bold text-primary">
                 {% if plan.predicted_5yr_survival %}
@@ -27,7 +27,7 @@
                 {% endif %}
             </div>
         </div>
-        <div class="bg-card border border-border/50 rounded-2xl p-6">
+        <div class="bento-card p-6">
             <div class="text-sm text-muted-foreground mb-2">Response Probability</div>
             <div class="text-3xl font-bold text-primary">
                 {% if plan.remission_probability %}
@@ -37,7 +37,7 @@
                 {% endif %}
             </div>
         </div>
-        <div class="bg-card border border-border/50 rounded-2xl p-6">
+        <div class="bento-card p-6">
             <div class="text-sm text-muted-foreground mb-2">Quality of Life</div>
             <div class="text-3xl font-bold text-primary">
                 {% if plan.quality_of_life_score %}
@@ -50,7 +50,7 @@
     </div>
 
     <!-- Treatment Recommendations -->
-    <div class="bg-card border border-border/50 rounded-2xl p-6 sm:p-10 mb-8">
+    <div class="bento-card p-6 sm:p-10 mb-8">
         <h2 class="text-2xl font-bold text-foreground mb-6 flex items-center">
             <i class="fas fa-prescription text-primary mr-2"></i>Recommended Treatments
         </h2>
@@ -106,7 +106,7 @@
 
     <!-- Side Effects -->
     {% if plan.side_effects %}
-    <div class="bg-card border border-border/50 rounded-2xl p-6 sm:p-10 mb-8">
+    <div class="bento-card p-6 sm:p-10 mb-8">
         <h2 class="text-2xl font-bold text-foreground mb-6 flex items-center">
             <i class="fas fa-exclamation-triangle text-yellow-500 mr-2"></i>Expected Side Effects
         </h2>
@@ -132,7 +132,7 @@
     <!-- Decision Support Tools -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <!-- Benefits vs Risks -->
-        <div class="bg-card border border-border/50 rounded-2xl p-6">
+        <div class="bento-card p-6">
             <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
                 <i class="fas fa-balance-scale text-primary mr-2"></i>Benefits vs Risks
             </h2>
@@ -175,7 +175,7 @@
         </div>
 
         <!-- Questions to Discuss -->
-        <div class="bg-card border border-border/50 rounded-2xl p-6">
+        <div class="bento-card p-6">
             <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
                 <i class="fas fa-question-circle text-primary mr-2"></i>Questions to Discuss
             </h2>
@@ -207,7 +207,7 @@
     <!-- Action Buttons -->
     <div class="flex flex-col sm:flex-row gap-4">
         <a href="{% url 'cancer_detection:visualize_pathway' plan_id=plan.id %}" 
-           class="flex-1 bg-gradient-to-r from-primary to-primary/90 hover:shadow-xl text-primary-foreground font-bold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center hover:scale-105">
+           class="flex-1 bg-orange-600 hover:shadow-lg text-primary-foreground font-bold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center">
             <i class="fas fa-route mr-2"></i>
             View Treatment Pathway
         </a>
@@ -215,7 +215,7 @@
         <form method="post" action="{% url 'cancer_detection:submit_treatment_plan_review' plan_id=plan.id %}" class="flex-1">
             {% csrf_token %}
             <button type="submit" 
-                class="w-full bg-card border-2 border-primary hover:bg-primary hover:text-primary-foreground text-primary font-bold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center">
+                class="w-full bento-card bento-accent-orange hover:bg-primary hover:text-primary-foreground text-primary font-bold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center">
                 <i class="fas fa-paper-plane mr-2"></i>
                 Submit for Review
             </button>

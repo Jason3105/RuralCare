@@ -10,9 +10,9 @@
     </div>
 
     <!-- Tabs -->
-    <div class="flex space-x-1 bg-muted/50 p-1 rounded-xl mb-8 w-fit">
+    <div class="flex space-x-1 bg-muted/50 p-1 rounded-bento mb-8 w-fit">
         <button onclick="switchHistoTab('upload')" id="histoTab-upload"
-            class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-card text-foreground shadow-sm">
+            class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-card text-foreground ">
             <i class="fas fa-file-upload mr-2"></i>Upload Report
         </button>
         <button onclick="switchHistoTab('reports')" id="histoTab-reports"
@@ -27,7 +27,7 @@
     <!-- Upload Tab -->
     <div id="histoPanel-upload">
         <div class="max-w-5xl">
-            <div class="bg-card border border-border/50 rounded-2xl p-6 sm:p-10 transition-all">
+            <div class="bento-card p-6 sm:p-10 transition-all">
                 <form method="post" action="{% url 'cancer_detection:upload_histopathology' %}" enctype="multipart/form-data" class="space-y-8">
                     {% csrf_token %}
                     
@@ -57,7 +57,7 @@
                         <label for="report_file" class="block text-sm sm:text-base font-semibold text-foreground mb-3">
                             <i class="fas fa-file-upload mr-2 text-primary"></i>Upload Report File
                         </label>
-                        <div id="histoDropZone" class="mt-2 flex justify-center px-4 sm:px-6 pt-6 sm:pt-8 pb-6 sm:pb-8 border-2 border-dashed border-border rounded-xl hover:border-primary hover:bg-accent/20 transition-all duration-300 bg-accent/5 cursor-pointer group">
+                        <div id="histoDropZone" class="mt-2 flex justify-center px-4 sm:px-6 pt-6 sm:pt-8 pb-6 sm:pb-8 border-2 border-dashed border-border rounded-bento hover:border-primary hover:bg-accent/20 transition-all duration-300 bg-accent/5 cursor-pointer group">
                             <div class="space-y-2 sm:space-y-3 text-center w-full">
                                 <i class="fas fa-file-pdf text-5xl sm:text-6xl text-primary/40 group-hover:text-primary/60 mx-auto block mb-3 transition-colors" id="histoUploadIcon"></i>
                                 <div id="histoUploadPlaceholder" class="flex flex-col text-sm sm:text-base text-muted-foreground justify-center items-center">
@@ -83,7 +83,7 @@
 
                     <!-- Submit Button -->
                     <div class="flex flex-col sm:flex-row gap-4 pt-4">
-                        <button type="submit" id="histoSubmitBtn" class="flex-1 bg-gradient-to-r from-primary to-primary/90 hover:shadow-xl text-primary-foreground font-bold py-3 sm:py-4 px-6 rounded-lg transition-all duration-300 flex items-center justify-center hover:scale-105">
+                        <button type="submit" id="histoSubmitBtn" class="flex-1 bg-orange-600 hover:shadow-lg text-primary-foreground font-bold py-3 sm:py-4 px-6 rounded-lg transition-all duration-300 flex items-center justify-center">
                             <i class="fas fa-microscope mr-2"></i>
                             <span id="histoSubmitText">Analyze Report</span>
                             <span id="histoLoadingText" class="hidden"><i class="fas fa-spinner fa-spin mr-2"></i>Analyzing...</span>
@@ -93,7 +93,7 @@
             </div>
 
             <!-- Information Box -->
-            <div class="mt-8 bg-gradient-to-br from-blue-50 to-blue-50/50 dark:from-blue-900/20 dark:to-blue-900/10 border border-blue-200 dark:border-blue-800/50 rounded-xl p-6 sm:p-8">
+            <div class="mt-8 bg-gradient-to-br from-blue-50 to-blue-50/50 dark:from-blue-900/20 dark:to-blue-900/10 border border-blue-200 dark:border-blue-800/50 rounded-bento p-6 sm:p-8">
                 <h3 class="text-lg sm:text-xl font-bold text-blue-900 dark:text-blue-300 mb-4 flex items-center">
                     <i class="fas fa-info-circle mr-2"></i>What We Extract
                 </h3>
@@ -128,10 +128,10 @@
         {% if page_obj %}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for report in page_obj %}
-            <div class="bg-card border border-border/50 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 card-hover">
+            <div class="bento-card p-6 hover:shadow-lg transition-all duration-300 card-hover">
                 <div class="flex items-start justify-between mb-4">
                     <div class="flex items-center space-x-3">
-                        <div class="h-12 w-12 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
+                        <div class="h-12 w-12 rounded-lg bento-accent-orange flex items-center justify-center">
                             <i class="fas fa-microscope text-primary-foreground text-xl"></i>
                         </div>
                         <div>
@@ -200,7 +200,7 @@
             <nav class="flex space-x-2">
                 {% if page_obj.has_previous %}
                 <a href="?page={{ page_obj.previous_page_number }}#reports" 
-                   class="px-4 py-2 bg-card border border-border rounded-lg hover:bg-accent transition-all">
+                   class="px-4 py-2 bento-card hover:bg-accent transition-all">
                     <i class="fas fa-chevron-left"></i>
                 </a>
                 {% endif %}
@@ -211,7 +211,7 @@
                 
                 {% if page_obj.has_next %}
                 <a href="?page={{ page_obj.next_page_number }}#reports" 
-                   class="px-4 py-2 bg-card border border-border rounded-lg hover:bg-accent transition-all">
+                   class="px-4 py-2 bento-card hover:bg-accent transition-all">
                     <i class="fas fa-chevron-right"></i>
                 </a>
                 {% endif %}
@@ -220,12 +220,12 @@
         {% endif %}
 
         {% else %}
-        <div class="bg-card border border-border/50 rounded-2xl p-12 text-center">
+        <div class="bento-card p-12 text-center">
             <i class="fas fa-microscope text-6xl text-muted-foreground/30 mb-4"></i>
             <h3 class="text-xl font-bold text-foreground mb-2">No Reports Yet</h3>
             <p class="text-muted-foreground mb-6">Upload your first histopathology report to get started</p>
             <button onclick="switchHistoTab('upload')" 
-               class="inline-flex items-center bg-gradient-to-r from-primary to-primary/90 text-primary-foreground font-bold py-3 px-6 rounded-lg hover:shadow-lg transition-all">
+               class="inline-flex items-center bg-orange-600 text-primary-foreground font-bold py-3 px-6 rounded-lg hover:shadow-lg transition-all">
                 <i class="fas fa-plus mr-2"></i>
                 Upload Report
             </button>
@@ -239,11 +239,11 @@
     function switchHistoTab(tab) {
         // Update tab buttons
         document.querySelectorAll('[id^="histoTab-"]').forEach(btn => {
-            btn.classList.remove('bg-card', 'text-foreground', 'shadow-sm');
+            btn.classList.remove('bg-card', 'text-foreground', '');
             btn.classList.add('text-muted-foreground', 'hover:text-foreground');
         });
         const activeBtn = document.getElementById('histoTab-' + tab);
-        activeBtn.classList.add('bg-card', 'text-foreground', 'shadow-sm');
+        activeBtn.classList.add('bg-card', 'text-foreground', '');
         activeBtn.classList.remove('text-muted-foreground', 'hover:text-foreground');
 
         // Update panels

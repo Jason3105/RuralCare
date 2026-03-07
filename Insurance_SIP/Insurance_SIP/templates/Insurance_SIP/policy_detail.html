@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ policy.name }} - RuralCare{% endblock %}
+{% block title %}{{ policy.name }} - ArogyaX{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-12">
+<div class="min-h-screen py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Back Button -->
         <div class="mb-6">
@@ -15,8 +15,8 @@
         </div>
 
         <!-- Policy Header -->
-        <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
-            <div class="bg-gradient-to-r from-blue-600 to-green-600 px-8 py-12 text-white">
+        <div class="bento-card mb-8">
+            <div class="bg-orange-600 px-8 py-12 text-white">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between">
                     <div class="flex-1">
                         <h1 class="text-4xl font-bold mb-4">{{ policy.name }}</h1>
@@ -36,7 +36,7 @@
                     
                     <div class="mt-6 md:mt-0 md:ml-8">
                         <a href="{% url 'insurance:apply_policy' policy.id %}" 
-                           class="inline-block bg-white text-blue-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transform hover:scale-105 transition-all shadow-xl">
+                           class="inline-block bg-white text-blue-600 px-8 py-4 rounded-bento font-bold text-lg hover:bg-blue-50 transform transition-all shadow-xl">
                             <i class="fas fa-shopping-cart mr-2"></i>Buy Now
                         </a>
                     </div>
@@ -48,7 +48,7 @@
             <!-- Main Content -->
             <div class="lg:col-span-2 space-y-8">
                 <!-- Description -->
-                <div class="bg-white rounded-xl shadow-lg p-8">
+                <div class="bento-card p-8">
                     <h2 class="text-2xl font-bold text-gray-900 mb-4">
                         <i class="fas fa-info-circle text-blue-600 mr-2"></i>About This Policy
                     </h2>
@@ -56,7 +56,7 @@
                 </div>
 
                 <!-- Key Features -->
-                <div class="bg-white rounded-xl shadow-lg p-8">
+                <div class="bento-card p-8">
                     <h2 class="text-2xl font-bold text-gray-900 mb-6">
                         <i class="fas fa-star text-yellow-500 mr-2"></i>Key Features
                     </h2>
@@ -72,13 +72,13 @@
 
                 <!-- Add-ons -->
                 {% if policy.add_ons_available %}
-                <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl shadow-lg p-8">
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-bento shadow-lg p-8">
                     <h2 class="text-2xl font-bold text-gray-900 mb-6">
                         <i class="fas fa-plus-circle text-purple-600 mr-2"></i>Available Add-ons
                     </h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {% for addon in policy.add_ons_available.splitlines %}
-                        <div class="bg-white rounded-lg p-4 flex items-center shadow-sm">
+                        <div class="bento-card p-4 flex items-center ">
                             <i class="fas fa-gift text-purple-500 mr-3"></i>
                             <span class="text-gray-700">{{ addon|slice:"2:" }}</span>
                         </div>
@@ -88,7 +88,7 @@
                 {% endif %}
 
                 <!-- How to Apply -->
-                <div class="bg-blue-50 rounded-xl shadow-lg p-8">
+                <div class="bg-blue-50 rounded-bento shadow-lg p-8">
                     <h2 class="text-2xl font-bold text-gray-900 mb-6">
                         <i class="fas fa-clipboard-list text-blue-600 mr-2"></i>How to Apply
                     </h2>
@@ -128,7 +128,7 @@
             <!-- Sidebar -->
             <div class="space-y-6">
                 <!-- Quick Info -->
-                <div class="bg-white rounded-xl shadow-lg p-6 sticky top-6">
+                <div class="bento-card p-6 sticky top-6">
                     <h3 class="text-xl font-bold text-gray-900 mb-4">Policy Details</h3>
                     
                     <div class="space-y-4">
@@ -167,14 +167,14 @@
 
                     <div class="mt-6 pt-6 border-t">
                         <a href="{% url 'insurance:apply_policy' policy.id %}" 
-                           class="block w-full bg-gradient-to-r from-blue-600 to-green-600 text-white text-center py-3 rounded-lg font-bold hover:shadow-lg transform hover:scale-105 transition-all">
+                           class="block w-full bg-orange-600 text-white text-center py-3 rounded-lg font-bold hover:shadow-lg transform transition-all">
                             <i class="fas fa-shopping-cart mr-2"></i>Buy This Policy
                         </a>
                     </div>
                 </div>
 
                 <!-- Need Help -->
-                <div class="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-xl shadow-lg p-6">
+                <div class="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-bento shadow-lg p-6">
                     <h3 class="text-xl font-bold text-gray-900 mb-3">Need Help?</h3>
                     <p class="text-gray-600 mb-4">Our insurance experts are here to assist you</p>
                     <div class="space-y-2">
@@ -184,7 +184,7 @@
                         </div>
                         <div class="flex items-center text-gray-700">
                             <i class="fas fa-envelope text-orange-500 mr-3"></i>
-                            <span>support@ruralcare.in</span>
+                            <span>support@ArogyaX.in</span>
                         </div>
                         <div class="flex items-center text-gray-700">
                             <i class="fas fa-clock text-orange-500 mr-3"></i>

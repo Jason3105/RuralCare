@@ -64,18 +64,18 @@
     }
     
     #mhpanel-assistant .session-selector select:focus {
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        border-color: #ea580c;
+        box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
     }
     
     #mhpanel-assistant .new-chat-btn,
     #mhpanel-assistant .manage-sessions-btn {
-        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        background: #ea580c;
         color: #fff;
         border: none;
         padding: 0.625rem 1.25rem;
-        border-radius: 0.5rem;
-        font-weight: 600;
+        border-radius: 0.75rem;
+        font-weight: 700;
         font-size: 0.875rem;
         cursor: pointer;
         transition: all 0.3s;
@@ -93,20 +93,19 @@
     
     #mhpanel-assistant .manage-sessions-btn:hover {
         background: var(--accent);
-        border-color: #3b82f6;
-        color: #3b82f6;
+        border-color: #ea580c;
+        color: #ea580c;
     }
     
     #mhpanel-assistant .new-chat-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        background: #c2410c;
     }
     
     /* Medical Context Badge */
     #hubContextIndicator {
         padding: 0.75rem 1rem;
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
-        border: 1px solid rgba(59, 130, 246, 0.2);
+        background: rgba(234, 88, 12, 0.08);
+        border: 2px solid rgba(234, 88, 12, 0.2);
         border-radius: 0.75rem;
         color: var(--foreground);
         font-size: 0.8125rem;
@@ -117,7 +116,7 @@
     }
     
     #hubContextIndicator i {
-        color: #3b82f6;
+        color: #ea580c;
         font-size: 0.875rem;
     }
     
@@ -154,7 +153,7 @@
     
     #mhpanel-assistant .chat-header {
         padding: 1rem 1.5rem;
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05));
+        background: rgba(234, 88, 12, 0.04);
         border-bottom: 2px solid var(--border);
         display: flex;
         align-items: center;
@@ -171,7 +170,7 @@
     }
     
     #mhpanel-assistant .chat-header-title i {
-        color: #3b82f6;
+        color: #ea580c;
     }
     
     #mhpanel-assistant .chat-header-actions {
@@ -259,10 +258,10 @@
     }
     
     #mhpanel-assistant .chat-msg.user .chat-bubble {
-        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+        background: #ea580c;
         color: #fff;
         border-bottom-right-radius: 0.375rem;
-        box-shadow: 0 3px 12px rgba(59, 130, 246, 0.35);
+        box-shadow: 0 3px 12px rgba(234, 88, 12, 0.35);
         border: 2px solid rgba(255, 255, 255, 0.2);
     }
     
@@ -337,7 +336,7 @@
         border-radius: 8px;
         overflow-x: auto;
         margin: 1em 0;
-        border-left: 4px solid #3b82f6;
+        border-left: 4px solid #ea580c;
     }
     #mhpanel-assistant .chat-msg.assistant .chat-bubble pre code {
         background: transparent;
@@ -345,14 +344,14 @@
         color: inherit;
     }
     #mhpanel-assistant .chat-msg.assistant .chat-bubble blockquote {
-        border-left: 4px solid #3b82f6;
+        border-left: 4px solid #ea580c;
         padding-left: 16px;
         margin: 1em 0;
         color: var(--muted-foreground);
         font-style: italic;
     }
     #mhpanel-assistant .chat-msg.assistant .chat-bubble a {
-        color: #3b82f6;
+        color: #ea580c;
         text-decoration: underline;
     }
     
@@ -371,12 +370,12 @@
     }
     
     #mhpanel-assistant .chat-msg.user .chat-avatar {
-        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        background: #ea580c;
         color: #fff;
     }
     
     #mhpanel-assistant .chat-msg.assistant .chat-avatar {
-        background: linear-gradient(135deg, #10b981, #059669);
+        background: #16a34a;
         color: #fff;
     }
     
@@ -439,8 +438,8 @@
     }
     
     #mhpanel-assistant .chat-input-bar textarea:focus {
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        border-color: #ea580c;
+        box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
     }
     
     #mhpanel-assistant .chat-input-bar button {
@@ -448,11 +447,11 @@
         border: none;
         border-radius: 0.75rem;
         cursor: pointer;
-        font-weight: 600;
-        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        font-weight: 700;
+        background: #ea580c;
         color: #fff;
         transition: all 0.3s;
-        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        box-shadow: 0 2px 8px rgba(234, 88, 12, 0.3);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -460,8 +459,7 @@
     }
     
     #mhpanel-assistant .chat-input-bar button:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        background: #c2410c;
     }
     
     #mhpanel-assistant .chat-input-bar button:disabled {
@@ -488,14 +486,12 @@
     }
     
     #mhpanel-assistant .suggestion-btn:hover {
-        border-color: #3b82f6;
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05));
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        border-color: #ea580c;
+        background: rgba(234, 88, 12, 0.05);
     }
     
     #mhpanel-assistant .suggestion-btn i {
-        color: #3b82f6;
+        color: #ea580c;
         font-size: 1.25rem;
         width: 24px;
         text-align: center;
@@ -559,7 +555,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.06), rgba(139, 92, 246, 0.06));
+        background: rgba(234, 88, 12, 0.04);
     }
     
     .session-modal-header h3 {
@@ -573,7 +569,7 @@
     }
     
     .session-modal-header h3 i {
-        color: #3b82f6;
+        color: #ea580c;
     }
     
     .session-modal-close {
@@ -636,15 +632,14 @@
     
     .session-item:hover {
         background: var(--accent);
-        border-color: #3b82f6;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
-        transform: translateY(-1px);
+        border-color: #ea580c;
+        box-shadow: 0 4px 12px rgba(234, 88, 12, 0.15);
     }
     
     .session-item.active {
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.10));
-        border-color: #3b82f6;
-        box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25), inset 0 0 0 1px rgba(59, 130, 246, 0.1);
+        background: rgba(234, 88, 12, 0.08);
+        border-color: #ea580c;
+        box-shadow: 0 4px 16px rgba(234, 88, 12, 0.2);
     }
     
     .session-item-info {
@@ -663,7 +658,7 @@
     }
     
     .session-item.active .session-item-title {
-        color: #3b82f6;
+        color: #ea580c;
     }
     
     .session-item-meta {
@@ -768,17 +763,15 @@
 </style>
 {% endblock %}
 
-{% block content %}
+{% block main_content %}
 <div class="min-h-screen bg-background py-8 fade-in">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        <!-- Header -->
+        <!-- Hero Header -->
         <div class="mb-8">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                    <h1 class="text-3xl font-bold text-foreground">Medicine &amp; AI Hub</h1>
-                    <p class="text-muted-foreground mt-1">Identify medicines, review history, and chat with your Medical AI Assistant</p>
-                </div>
+            <div class="bento-card bento-accent-orange p-8 sm:p-10">
+                <h1 class="text-2xl sm:text-4xl font-extrabold mb-2">Medicine &amp; AI Hub</h1>
+                <p class="text-base sm:text-lg text-white/80">Identify medicines, review history, and chat with your Medical AI Assistant</p>
             </div>
         </div>
 
@@ -808,13 +801,13 @@
 
             <div class="max-w-4xl mx-auto">
                 <!-- Upload Card -->
-                <div class="bg-card border border-border/50 rounded-2xl shadow-xl overflow-hidden mb-8">
+                <div class="bento-card shadow-xl overflow-hidden mb-8">
                     <div class="p-8">
                         <form method="POST" action="{% url 'medicine_identifier:upload' %}" enctype="multipart/form-data" id="medUploadForm" class="space-y-6">
                             {% csrf_token %}
 
                             <!-- Drop Zone -->
-                            <div id="medDropZone" class="relative border-2 border-dashed border-border rounded-xl p-12 text-center hover:border-primary transition-all cursor-pointer bg-accent/20">
+                            <div id="medDropZone" class="relative border-2 border-dashed border-border rounded-bento p-12 text-center hover:border-primary transition-all cursor-pointer bg-accent/20">
                                 <input type="file" name="image" id="medImageInput" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required>
 
                                 <div id="medUploadPlaceholder">
@@ -841,8 +834,8 @@
                             </div>
 
                             <!-- Supported Medicines Info -->
-                            <div class="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-4">
-                                <h4 class="font-medium text-blue-800 dark:text-blue-300 mb-2">
+                            <div class="bento-card p-4 bg-blue-50 dark:bg-blue-900/20">
+                                <h4 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">
                                     <i class="fas fa-info-circle mr-2"></i>Supported Medicine Types
                                 </h4>
                                 <div class="flex flex-wrap gap-2">
@@ -856,8 +849,8 @@
                             </div>
 
                             <!-- Tips -->
-                            <div class="bg-amber-50 dark:bg-amber-900/30 rounded-xl p-4">
-                                <h4 class="font-medium text-amber-800 dark:text-amber-300 mb-2">
+                            <div class="bento-card p-4 bg-amber-50 dark:bg-amber-900/20">
+                                <h4 class="font-semibold text-amber-800 dark:text-amber-300 mb-2">
                                     <i class="fas fa-lightbulb mr-2"></i>Tips for Better Results
                                 </h4>
                                 <ul class="text-sm text-amber-700 dark:text-amber-400 space-y-1">
@@ -869,7 +862,7 @@
                             </div>
 
                             <!-- Submit -->
-                            <button type="submit" id="medSubmitBtn" class="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                            <button type="submit" id="medSubmitBtn" class="w-full py-4 px-6 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-bento transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
                                 <span id="medSubmitText"><i class="fas fa-search mr-2"></i>Identify Medicine</span>
                                 <span id="medLoadingText" class="hidden"><i class="fas fa-spinner fa-spin mr-2"></i>Analyzing image...</span>
                             </button>
@@ -878,29 +871,29 @@
                 </div>
 
                 <!-- How It Works -->
-                <div class="bg-card border border-border/50 rounded-2xl shadow-xl overflow-hidden mb-8">
+                <div class="bento-card shadow-xl overflow-hidden mb-8">
                     <div class="p-8">
                         <h2 class="text-xl font-bold text-foreground mb-6 text-center">How It Works</h2>
                         <div class="grid md:grid-cols-3 gap-6">
                             <div class="text-center">
-                                <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                                    <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">1</span>
+                                <div class="bento-icon bento-icon-blue w-14 h-14 mx-auto mb-4">
+                                    <span class="text-2xl font-extrabold">1</span>
                                 </div>
-                                <h3 class="font-semibold text-foreground mb-2">Upload Image</h3>
+                                <h3 class="font-bold text-foreground mb-2">Upload Image</h3>
                                 <p class="text-sm text-muted-foreground">Take a clear photo of your medicine package, tablet strip, or bottle label</p>
                             </div>
                             <div class="text-center">
-                                <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
-                                    <span class="text-2xl font-bold text-purple-600 dark:text-purple-400">2</span>
+                                <div class="bento-icon bento-icon-purple w-14 h-14 mx-auto mb-4">
+                                    <span class="text-2xl font-extrabold">2</span>
                                 </div>
-                                <h3 class="font-semibold text-foreground mb-2">AI Analysis</h3>
+                                <h3 class="font-bold text-foreground mb-2">AI Analysis</h3>
                                 <p class="text-sm text-muted-foreground">Our OpenCV &amp; AI system extracts text and analyzes visual features</p>
                             </div>
                             <div class="text-center">
-                                <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
-                                    <span class="text-2xl font-bold text-green-600 dark:text-green-400">3</span>
+                                <div class="bento-icon bento-icon-green w-14 h-14 mx-auto mb-4">
+                                    <span class="text-2xl font-extrabold">3</span>
                                 </div>
-                                <h3 class="font-semibold text-foreground mb-2">Get Details</h3>
+                                <h3 class="font-bold text-foreground mb-2">Get Details</h3>
                                 <p class="text-sm text-muted-foreground">Receive comprehensive info about uses, side effects, warnings &amp; more</p>
                             </div>
                         </div>
@@ -909,7 +902,7 @@
 
                 <!-- Recent Identifications -->
                 {% if recent_identifications %}
-                <div class="bg-card border border-border/50 rounded-2xl shadow-xl overflow-hidden">
+                <div class="bento-card shadow-xl overflow-hidden">
                     <div class="p-6 border-b border-border/50">
                         <div class="flex justify-between items-center">
                             <h2 class="text-lg font-bold text-foreground"><i class="fas fa-history mr-2 text-muted-foreground"></i>Recent Identifications</h2>
@@ -952,7 +945,7 @@
                 {% endif %}
 
                 <!-- Disclaimer -->
-                <div class="mt-8 p-4 bg-yellow-50 dark:bg-yellow-900/30 rounded-xl">
+                <div class="mt-8 p-4 bg-yellow-50 dark:bg-yellow-900/30 rounded-bento">
                     <p class="text-sm text-yellow-800 dark:text-yellow-300 text-center">
                         <i class="fas fa-exclamation-triangle mr-2"></i>
                         <strong>Important:</strong> This tool is for informational purposes only. Always consult a healthcare professional before taking any medication.
@@ -969,13 +962,13 @@
         <div id="mhpanel-history" class="mh-panel hidden">
 
             {% if history_identifications %}
-            <div class="bg-card border border-border/50 rounded-2xl shadow-xl overflow-hidden">
+            <div class="bento-card shadow-xl overflow-hidden">
                 <div class="divide-y divide-border/50">
                     {% for item in history_identifications %}
                     <div class="p-4 sm:p-6 hover:bg-accent/30 transition-colors">
                         <div class="flex flex-col sm:flex-row gap-4">
                             <!-- Image Thumbnail -->
-                            <div class="w-full sm:w-24 h-40 sm:h-24 rounded-xl overflow-hidden bg-accent flex-shrink-0">
+                            <div class="w-full sm:w-24 h-40 sm:h-24 rounded-bento overflow-hidden bg-accent flex-shrink-0">
                                 {% if item.image %}
                                 <img src="{{ item.image.url }}" alt="Medicine" class="w-full h-full object-cover">
                                 {% else %}
@@ -1062,13 +1055,13 @@
 
             {% else %}
             <!-- Empty State -->
-            <div class="bg-card border border-border/50 rounded-2xl p-12 text-center">
+            <div class="bento-card p-12 text-center">
                 <div class="w-20 h-20 bg-accent rounded-full flex items-center justify-center mx-auto mb-6">
                     <i class="fas fa-pills text-4xl text-muted-foreground"></i>
                 </div>
                 <h2 class="text-2xl font-bold text-foreground mb-4">No Identifications Yet</h2>
                 <p class="text-muted-foreground mb-8 max-w-md mx-auto">Upload an image of a medicine on the Identify tab to get started!</p>
-                <button onclick="switchMedTab('identify')" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all">
+                <button onclick="switchMedTab('identify')" class="inline-flex items-center px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-all">
                     <i class="fas fa-camera mr-2"></i>Upload Your First Medicine
                 </button>
             </div>
@@ -1135,11 +1128,11 @@
                     <div id="hubMessagesContainer" class="chat-messages">
                         {% if not chat_messages %}
                         <div id="hubEmptyState" class="flex flex-col items-center justify-center h-full text-center px-6 py-8">
-                            <div class="mb-6 w-24 h-24 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 flex items-center justify-center">
-                                <i class="fas fa-robot text-5xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"></i>
+                            <div class="bento-icon bento-icon-blue w-24 h-24 mb-6">
+                                <i class="fas fa-robot text-5xl"></i>
                             </div>
-                            <h3 class="text-2xl font-bold mb-3 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                                🏥 Your Medical AI Assistant
+                            <h3 class="text-2xl font-extrabold mb-3 text-orange-600">
+                                Your Medical AI Assistant
                             </h3>
                             <p class="text-muted-foreground max-w-md mb-6 text-sm leading-relaxed">
                                 I have complete access to your medical records including diagnoses, treatments, medications, symptoms, lab results, and consultation history. Ask me anything about your health journey!

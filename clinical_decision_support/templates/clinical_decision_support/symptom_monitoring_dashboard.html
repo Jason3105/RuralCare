@@ -11,7 +11,7 @@
         </div>
 
         <!-- Summary Card -->
-        <div class="bg-card border border-border/50 rounded-xl p-6 mb-8">
+        <div class="bento-card p-6 mb-8">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-muted-foreground">Total Patients with Logs</p>
@@ -27,7 +27,7 @@
         <h2 class="text-xl font-semibold text-foreground mb-4">Patients with Symptom Logs ({{ total_patients }})</h2>
         <div class="grid grid-cols-1 gap-4">
             {% for item in page_obj %}
-            <div class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-md transition-shadow">
+            <div class="bento-card p-6 transition-all">
                 <div class="flex items-start justify-between mb-4">
                     <div class="flex items-center space-x-3">
                         <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
@@ -71,7 +71,7 @@
                 </a>
             </div>
             {% empty %}
-            <div class="bg-card border border-border/50 rounded-xl p-12 text-center">
+            <div class="bento-card p-12 text-center">
                 <i class="fas fa-heartbeat text-4xl text-muted-foreground mb-4"></i>
                 <h3 class="text-lg font-medium text-foreground mb-2">No Patient Symptom Logs Yet</h3>
                 <p class="text-muted-foreground">Patient symptom logs will appear here when patients log symptoms and assign them to you</p>

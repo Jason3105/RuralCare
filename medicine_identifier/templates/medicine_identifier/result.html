@@ -4,7 +4,7 @@
 {% block title %}Medicine Details - {{ identification.medicine_name|default:"Analysis Result" }}{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8">
+<div class="min-h-screen py-8">
     <div class="container mx-auto px-4 max-w-5xl">
         <!-- Back Button -->
         <div class="mb-6 fade-in">
@@ -17,12 +17,12 @@
         <!-- Success Header -->
         <div class="text-center mb-8 fade-in">
             {% if identification.identification_confidence >= 0.6 %}
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 mb-4">
+            <div class="bento-icon bento-icon-green w-16 h-16 mb-4">
                 <i class="fas fa-check text-3xl text-white"></i>
             </div>
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Medicine Identified!</h1>
             {% else %}
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 mb-4">
+            <div class="bento-icon bento-icon-orange w-16 h-16 mb-4">
                 <i class="fas fa-question text-3xl text-white"></i>
             </div>
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Partial Identification</h1>
@@ -36,7 +36,7 @@
             <!-- Left Column: Image & Basic Info -->
             <div class="lg:col-span-1 space-y-6">
                 <!-- Medicine Image -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden fade-in">
+                <div class="bento-card fade-in">
                     <div class="aspect-square bg-gray-100 dark:bg-gray-700 relative">
                         {% if identification.image %}
                         <img src="{{ identification.image.url }}" alt="Medicine Image" class="w-full h-full object-contain">
@@ -57,7 +57,7 @@
                 </div>
 
                 <!-- Quick Info Card -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden fade-in">
+                <div class="bento-card fade-in">
                     <div class="p-6">
                         <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Quick Info</h2>
                         <dl class="space-y-3">
@@ -102,7 +102,7 @@
                 </div>
 
                 <!-- OCR Confidence -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden fade-in">
+                <div class="bento-card fade-in">
                     <div class="p-6">
                         <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Analysis Quality</h2>
                         <div class="space-y-4">
@@ -132,7 +132,7 @@
             <!-- Right Column: Detailed Info -->
             <div class="lg:col-span-2 space-y-6">
                 <!-- Medicine Name Card -->
-                <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl overflow-hidden fade-in">
+                <div class="bg-blue-600 rounded-bento-lg shadow-xl overflow-hidden fade-in">
                     <div class="p-8 text-white">
                         <h1 class="text-3xl font-bold mb-2">{{ identification.medicine_name|default:"Unknown Medicine" }}</h1>
                         {% if identification.generic_name %}
@@ -155,7 +155,7 @@
 
                 {% if identification.description %}
                 <!-- Description -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden fade-in">
+                <div class="bento-card fade-in">
                     <div class="p-6">
                         <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
                             <i class="fas fa-info-circle mr-2 text-blue-500"></i>Description
@@ -167,7 +167,7 @@
 
                 {% if identification.uses %}
                 <!-- Uses -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden fade-in">
+                <div class="bento-card fade-in">
                     <div class="p-6">
                         <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
                             <i class="fas fa-check-circle mr-2 text-green-500"></i>Uses & Indications
@@ -186,7 +186,7 @@
 
                 {% if identification.dosage_instructions %}
                 <!-- Dosage -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden fade-in">
+                <div class="bento-card fade-in">
                     <div class="p-6">
                         <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
                             <i class="fas fa-clock mr-2 text-purple-500"></i>Dosage Instructions
@@ -198,7 +198,7 @@
 
                 {% if identification.side_effects %}
                 <!-- Side Effects -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden fade-in">
+                <div class="bento-card fade-in">
                     <div class="p-6">
                         <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
                             <i class="fas fa-exclamation-circle mr-2 text-yellow-500"></i>Side Effects
@@ -217,7 +217,7 @@
 
                 {% if identification.warnings %}
                 <!-- Warnings -->
-                <div class="bg-red-50 dark:bg-red-900/30 rounded-2xl shadow-xl overflow-hidden fade-in">
+                <div class="bg-red-50 dark:bg-red-900/30 rounded-bento-lg shadow-xl overflow-hidden fade-in">
                     <div class="p-6">
                         <h2 class="text-lg font-bold text-red-800 dark:text-red-300 mb-4">
                             <i class="fas fa-exclamation-triangle mr-2"></i>Warnings
@@ -236,7 +236,7 @@
 
                 {% if identification.contraindications %}
                 <!-- Contraindications -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden fade-in">
+                <div class="bento-card fade-in">
                     <div class="p-6">
                         <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
                             <i class="fas fa-ban mr-2 text-red-500"></i>Contraindications
@@ -255,7 +255,7 @@
 
                 {% if identification.drug_interactions %}
                 <!-- Drug Interactions -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden fade-in">
+                <div class="bento-card fade-in">
                     <div class="p-6">
                         <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
                             <i class="fas fa-pills mr-2 text-orange-500"></i>Drug Interactions
@@ -274,7 +274,7 @@
 
                 {% if identification.active_ingredients %}
                 <!-- Ingredients -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden fade-in">
+                <div class="bento-card fade-in">
                     <div class="p-6">
                         <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
                             <i class="fas fa-flask mr-2 text-cyan-500"></i>Active Ingredients
@@ -292,7 +292,7 @@
 
                 {% if identification.storage_instructions %}
                 <!-- Storage -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden fade-in">
+                <div class="bento-card fade-in">
                     <div class="p-6">
                         <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
                             <i class="fas fa-box mr-2 text-gray-500"></i>Storage Instructions
@@ -304,7 +304,7 @@
 
                 <!-- Extracted Text (Collapsible) -->
                 {% if identification.extracted_text %}
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden fade-in">
+                <div class="bento-card fade-in">
                     <details class="group">
                         <summary class="p-6 cursor-pointer list-none">
                             <div class="flex items-center justify-between">
@@ -325,7 +325,7 @@
 
         {% else %}
         <!-- Failed or Invalid Image Analysis -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden fade-in">
+        <div class="bento-card fade-in">
             <div class="p-12 text-center">
                 {% if identification.status == 'invalid_image' %}
                 <!-- Invalid Image - Not Medicine -->
@@ -337,7 +337,7 @@
                     <p class="text-gray-600 dark:text-gray-400 mb-6">{{ identification.error_message|default:"The uploaded image does not appear to be a medicine." }}</p>
                     
                     {% if identification.ai_analysis.validation_suggestions %}
-                    <div class="text-left bg-blue-50 dark:bg-blue-900/20 p-6 rounded-xl mb-6">
+                    <div class="text-left bg-blue-50 dark:bg-blue-900/20 p-6 rounded-bento mb-6">
                         <h4 class="font-semibold text-blue-800 dark:text-blue-300 mb-3">
                             <i class="fas fa-lightbulb mr-2"></i>Tips for better results:
                         </h4>
@@ -351,7 +351,7 @@
                         </ul>
                     </div>
                     {% else %}
-                    <div class="text-left bg-blue-50 dark:bg-blue-900/20 p-6 rounded-xl mb-6">
+                    <div class="text-left bg-blue-50 dark:bg-blue-900/20 p-6 rounded-bento mb-6">
                         <h4 class="font-semibold text-blue-800 dark:text-blue-300 mb-3">
                             <i class="fas fa-lightbulb mr-2"></i>What to upload:
                         </h4>
@@ -399,7 +399,7 @@
         {% endif %}
 
         <!-- Safety Disclaimer -->
-        <div class="mt-8 p-6 bg-yellow-50 dark:bg-yellow-900/30 rounded-2xl fade-in">
+        <div class="mt-8 p-6 bg-yellow-50 dark:bg-yellow-900/30 rounded-bento-lg fade-in">
             <div class="flex items-start">
                 <div class="flex-shrink-0">
                     <i class="fas fa-exclamation-triangle text-2xl text-yellow-500"></i>

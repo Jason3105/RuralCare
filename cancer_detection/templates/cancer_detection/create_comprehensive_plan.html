@@ -22,7 +22,7 @@
     </div>
 
     {% if not has_data %}
-    <div class="bg-yellow-500/10 border-2 border-yellow-500/50 rounded-2xl p-8 mb-8">
+    <div class="bg-yellow-500/10 border-2 border-yellow-500/50 rounded-bento-lg p-8 mb-8">
         <div class="flex items-start gap-4">
             <i class="fas fa-exclamation-triangle text-yellow-600 dark:text-yellow-400 text-3xl"></i>
             <div>
@@ -51,7 +51,7 @@
     </div>
     {% endif %}
 
-    <div class="bg-card border border-border/50 rounded-2xl p-6 sm:p-10 transition-all shadow-lg">
+    <div class="bento-card p-6 sm:p-10 transition-all shadow-lg">
         <form method="post" class="space-y-10" id="comprehensive-plan-form">
             {% csrf_token %}
             
@@ -66,14 +66,14 @@
                 
                 <!-- Cancer Image Analyses -->
                 {% if analyses %}
-                <div class="bg-background/50 rounded-xl p-6 border border-border/30">
+                <div class="bg-background/50 rounded-bento p-6 border border-border/30">
                     <h3 class="text-lg font-semibold text-foreground mb-4 flex items-center">
                         <i class="fas fa-image text-blue-500 mr-2"></i>Cancer Image Analyses
                         <span class="ml-auto text-sm font-normal text-muted-foreground">{{ analyses.count }} available</span>
                     </h3>
                     <div class="space-y-3 max-h-64 overflow-y-auto">
                         {% for analysis in analyses %}
-                        <label class="flex items-start p-4 bg-card hover:bg-accent rounded-lg cursor-pointer border-2 border-transparent hover:border-primary/50 transition-all">
+                        <label class="flex items-start p-4 bento-card cursor-pointer hover:border-primary/50 transition-all">
                             <input type="checkbox" name="analyses" value="{{ analysis.id }}" 
                                 class="mt-1 mr-3 rounded border-input text-primary focus:ring-primary">
                             <div class="flex-1">
@@ -107,14 +107,14 @@
 
                 <!-- Histopathology Reports -->
                 {% if histopathology_reports %}
-                <div class="bg-background/50 rounded-xl p-6 border border-border/30">
+                <div class="bg-background/50 rounded-bento p-6 border border-border/30">
                     <h3 class="text-lg font-semibold text-foreground mb-4 flex items-center">
                         <i class="fas fa-microscope text-green-500 mr-2"></i>Histopathology Reports
                         <span class="ml-auto text-sm font-normal text-muted-foreground">{{ histopathology_reports.count }} available</span>
                     </h3>
                     <div class="space-y-3 max-h-64 overflow-y-auto">
                         {% for report in histopathology_reports %}
-                        <label class="flex items-start p-4 bg-card hover:bg-accent rounded-lg cursor-pointer border-2 border-transparent hover:border-primary/50 transition-all">
+                        <label class="flex items-start p-4 bento-card cursor-pointer hover:border-primary/50 transition-all">
                             <input type="checkbox" name="histopathology_reports" value="{{ report.id }}" 
                                 class="mt-1 mr-3 rounded border-input text-primary focus:ring-primary">
                             <div class="flex-1">
@@ -149,14 +149,14 @@
 
                 <!-- Genomic Profiles -->
                 {% if genomic_profiles %}
-                <div class="bg-background/50 rounded-xl p-6 border border-border/30">
+                <div class="bg-background/50 rounded-bento p-6 border border-border/30">
                     <h3 class="text-lg font-semibold text-foreground mb-4 flex items-center">
                         <i class="fas fa-dna text-purple-500 mr-2"></i>Genomic Profiles
                         <span class="ml-auto text-sm font-normal text-muted-foreground">{{ genomic_profiles.count }} available</span>
                     </h3>
                     <div class="space-y-3 max-h-64 overflow-y-auto">
                         {% for profile in genomic_profiles %}
-                        <label class="flex items-start p-4 bg-card hover:bg-accent rounded-lg cursor-pointer border-2 border-transparent hover:border-primary/50 transition-all">
+                        <label class="flex items-start p-4 bento-card cursor-pointer hover:border-primary/50 transition-all">
                             <input type="checkbox" name="genomic_profiles" value="{{ profile.id }}" 
                                 class="mt-1 mr-3 rounded border-input text-primary focus:ring-primary">
                             <div class="flex-1">
@@ -247,7 +247,7 @@
             </div>
 
             <!-- AI Generation Notice -->
-            <div class="bg-blue-500/10 border-2 border-blue-500/50 rounded-xl p-6">
+            <div class="bg-blue-500/10 border-2 border-blue-500/50 rounded-bento p-6">
                 <div class="flex items-start gap-4">
                     <i class="fas fa-robot text-blue-600 dark:text-blue-400 text-3xl"></i>
                     <div>

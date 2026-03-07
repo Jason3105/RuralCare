@@ -15,11 +15,11 @@
                 </div>
                 <div class="flex flex-col sm:flex-row gap-3">
                     <a href="{% url 'cancer_detection:create_comprehensive_plan' %}"
-                       class="inline-flex items-center justify-center px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all hover:scale-105 text-sm">
+                       class="inline-flex items-center justify-center px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all text-sm">
                         <i class="fas fa-project-diagram mr-2"></i>Comprehensive Plan
                     </a>
                     <a href="{% url 'cancer_detection:analysis_list' %}"
-                       class="inline-flex items-center justify-center px-5 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-all hover:scale-105 text-sm">
+                       class="inline-flex items-center justify-center px-5 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-all text-sm">
                         <i class="fas fa-plus mr-2"></i>Generate Plan
                     </a>
                 </div>
@@ -52,36 +52,36 @@
 
             <!-- Stats -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-lg transition-shadow">
+                <div class="bento-card p-6 hover:shadow-lg transition-shadow">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-muted-foreground mb-1">Total Plans</p>
                             <p class="text-3xl font-bold text-foreground">{{ total_plans|default:0 }}</p>
                         </div>
-                        <div class="bg-primary/10 p-3 rounded-lg">
-                            <i class="fas fa-clipboard-list text-primary text-2xl"></i>
+                        <div class="bento-icon bento-icon-orange">
+                            <i class="fas fa-clipboard-list"></i>
                         </div>
                     </div>
                 </div>
-                <div class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-lg transition-shadow">
+                <div class="bento-card p-6 hover:shadow-lg transition-shadow">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-muted-foreground mb-1">Active Plans</p>
                             <p class="text-3xl font-bold text-green-600">{{ active_plans|default:0 }}</p>
                         </div>
-                        <div class="bg-green-600/10 p-3 rounded-lg">
-                            <i class="fas fa-heartbeat text-green-600 text-2xl"></i>
+                        <div class="bento-icon bento-icon-green">
+                            <i class="fas fa-heartbeat"></i>
                         </div>
                     </div>
                 </div>
-                <div class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-lg transition-shadow">
+                <div class="bento-card p-6 hover:shadow-lg transition-shadow">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-muted-foreground mb-1">Pending Review</p>
                             <p class="text-3xl font-bold text-blue-600">{{ pending_review|default:0 }}</p>
                         </div>
-                        <div class="bg-blue-600/10 p-3 rounded-lg">
-                            <i class="fas fa-hourglass-half text-blue-600 text-2xl"></i>
+                        <div class="bento-icon bento-icon-blue">
+                            <i class="fas fa-hourglass-half"></i>
                         </div>
                     </div>
                 </div>
@@ -91,7 +91,7 @@
             {% if page_obj %}
             <div class="space-y-4">
                 {% for plan in page_obj %}
-                <div class="bg-card border border-border/50 rounded-xl p-6 hover:shadow-lg transition-all">
+                <div class="bento-card p-6 hover:shadow-lg transition-all">
                     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                         <div class="flex-1">
                             <div class="flex items-center flex-wrap gap-3 mb-3">
@@ -150,12 +150,12 @@
 
                         <div class="flex flex-col gap-2 lg:min-w-[200px]">
                             <a href="{% url 'cancer_detection:treatment_plan_detail' plan.id %}"
-                               class="inline-flex items-center justify-center px-6 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-all hover:scale-105">
+                               class="inline-flex items-center justify-center px-6 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-all">
                                 <i class="fas fa-eye mr-2"></i>View Details
                             </a>
                             {% if plan.status == 'draft' %}
                             <a href="{% url 'cancer_detection:treatment_plan_detail' plan.id %}"
-                               class="inline-flex items-center justify-center px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all hover:scale-105">
+                               class="inline-flex items-center justify-center px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all">
                                 <i class="fas fa-edit mr-2"></i>Edit Plan
                             </a>
                             {% endif %}
@@ -169,10 +169,10 @@
             {% if page_obj.has_other_pages %}
             <div class="mt-8 flex flex-wrap items-center justify-center gap-2">
                 {% if page_obj.has_previous %}
-                <a href="?page=1" class="px-4 py-2 rounded-lg bg-card border border-border/50 hover:bg-accent transition-all text-foreground font-medium">
+                <a href="?page=1" class="px-4 py-2 rounded-lg bento-card hover:bg-accent transition-all text-foreground font-medium">
                     <i class="fas fa-angle-double-left mr-1"></i>First
                 </a>
-                <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-2 rounded-lg bg-card border border-border/50 hover:bg-accent transition-all text-foreground font-medium">
+                <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-2 rounded-lg bento-card hover:bg-accent transition-all text-foreground font-medium">
                     <i class="fas fa-angle-left mr-1"></i>Previous
                 </a>
                 {% endif %}
@@ -181,15 +181,15 @@
                 {% if page_obj.number == num %}
                 <span class="px-4 py-2 rounded-lg bg-primary text-primary-foreground font-semibold">{{ num }}</span>
                 {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                <a href="?page={{ num }}" class="px-4 py-2 rounded-lg bg-card border border-border/50 hover:bg-accent transition-all text-foreground font-medium">{{ num }}</a>
+                <a href="?page={{ num }}" class="px-4 py-2 rounded-lg bento-card hover:bg-accent transition-all text-foreground font-medium">{{ num }}</a>
                 {% endif %}
                 {% endfor %}
 
                 {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-2 rounded-lg bg-card border border-border/50 hover:bg-accent transition-all text-foreground font-medium">
+                <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-2 rounded-lg bento-card hover:bg-accent transition-all text-foreground font-medium">
                     Next<i class="fas fa-angle-right ml-1"></i>
                 </a>
-                <a href="?page={{ page_obj.paginator.num_pages }}" class="px-4 py-2 rounded-lg bg-card border border-border/50 hover:bg-accent transition-all text-foreground font-medium">
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="px-4 py-2 rounded-lg bento-card hover:bg-accent transition-all text-foreground font-medium">
                     Last<i class="fas fa-angle-double-right ml-1"></i>
                 </a>
                 {% endif %}
@@ -198,7 +198,7 @@
 
             {% else %}
             <!-- Empty State -->
-            <div class="bg-card border border-border/50 rounded-xl p-12 text-center">
+            <div class="bento-card p-12 text-center">
                 <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
                     <i class="fas fa-clipboard-list text-primary text-3xl"></i>
                 </div>
@@ -206,11 +206,11 @@
                 <p class="text-muted-foreground mb-8 max-w-md mx-auto">Start by analyzing a cancer image to generate your first personalized treatment plan.</p>
                 <div class="flex flex-col sm:flex-row gap-3 justify-center">
                     <a href="{% url 'cancer_detection:analysis_list' %}"
-                       class="inline-flex items-center justify-center px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-all hover:scale-105">
+                       class="inline-flex items-center justify-center px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-all">
                         <i class="fas fa-microscope mr-2"></i>View Analyses
                     </a>
                     <a href="{% url 'cancer_detection:upload_image' %}"
-                       class="inline-flex items-center justify-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all hover:scale-105">
+                       class="inline-flex items-center justify-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all">
                         <i class="fas fa-upload mr-2"></i>Upload New Scan
                     </a>
                 </div>
@@ -227,7 +227,7 @@
 
             {% if confidence_records %}
             {% for item in confidence_records %}
-            <div class="bg-card border border-border/50 rounded-xl p-6 mb-6">
+            <div class="bento-card p-6 mb-6">
                 <!-- Plan Info -->
                 <div class="mb-6">
                     <h2 class="text-xl font-semibold text-foreground">{{ item.analysis_type }}</h2>
@@ -253,7 +253,7 @@
                 </div>
 
                 <!-- What This Means -->
-                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-5 mb-6">
+                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-bento p-5 mb-6">
                     <h3 class="font-semibold text-blue-800 dark:text-blue-400 mb-3">
                         <i class="fas fa-info-circle mr-2"></i>What This Means For You
                     </h3>
@@ -296,7 +296,7 @@
                 </div>
 
                 <!-- Simple Breakdown -->
-                <div class="border border-border rounded-xl p-5">
+                <div class="border border-border rounded-bento p-5">
                     <h3 class="font-semibold text-foreground mb-4">What Supports Your Plan</h3>
                     <div class="space-y-4">
                         <div class="flex items-start space-x-3">
@@ -330,7 +330,7 @@
                 </div>
 
                 <!-- Questions to Ask -->
-                <div class="mt-6 bg-accent/30 rounded-xl p-5">
+                <div class="mt-6 bg-accent/30 rounded-bento p-5">
                     <h3 class="font-semibold text-foreground mb-3">
                         <i class="fas fa-question-circle text-primary mr-2"></i>Questions You Can Ask Your Doctor
                     </h3>
@@ -352,7 +352,7 @@
             </div>
             {% endfor %}
             {% else %}
-            <div class="bg-card border border-border/50 rounded-xl p-12 text-center">
+            <div class="bento-card p-12 text-center">
                 <i class="fas fa-chart-pie text-4xl text-muted-foreground mb-4"></i>
                 <h3 class="text-lg font-medium text-foreground mb-2">No Treatment Plans Available</h3>
                 <p class="text-muted-foreground">Confidence information will appear once your doctor creates a treatment plan for you</p>
@@ -369,7 +369,7 @@
 
             <div class="space-y-6">
                 {% for item in explanations %}
-                <div class="bg-card border border-border/50 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+                <div class="bento-card overflow-hidden transition-all">
                     <div class="p-6">
                         <div class="flex items-start justify-between mb-4">
                             <div>
@@ -441,7 +441,7 @@
                     </div>
                 </div>
                 {% empty %}
-                <div class="bg-card border border-border/50 rounded-xl p-12 text-center">
+                <div class="bento-card p-12 text-center">
                     <i class="fas fa-book-reader text-4xl text-muted-foreground mb-4"></i>
                     <h3 class="text-lg font-medium text-foreground mb-2">No Treatment Plans Yet</h3>
                     <p class="text-muted-foreground">Treatment plans will appear here once your doctor creates them for you.</p>

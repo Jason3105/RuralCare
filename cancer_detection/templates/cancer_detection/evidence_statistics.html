@@ -4,7 +4,7 @@
 {% block title %}Evidence Statistics{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4 sm:p-6 lg:p-8">
+<div class="min-h-screen p-4 sm:p-6 lg:p-8">
     <div class="max-w-5xl mx-auto">
         <!-- Back Link -->
         <div class="mb-6">
@@ -14,7 +14,7 @@
         </div>
         
         <!-- Header -->
-        <div class="bg-gradient-to-r from-primary to-primary/80 dark:from-primary/80 dark:to-primary/60 rounded-lg p-8 text-primary-foreground mb-8 shadow-lg">
+        <div class="bento-accent-orange p-8">
             <h1 class="text-3xl sm:text-4xl font-bold mb-3 flex items-center gap-3">
                 <i class="fas fa-chart-bar"></i> Evidence Statistics
             </h1>
@@ -23,7 +23,7 @@
         
         <!-- Key Metrics Stats Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div class="bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 rounded-lg p-6 text-white shadow-lg">
+            <div class="bento-accent-blue p-6">
                 <div class="text-sm font-medium opacity-90 mb-2">Total Recommendations</div>
                 <div class="text-3xl font-bold">{{ total_recommendations }}</div>
             </div>
@@ -33,12 +33,12 @@
                 <div class="text-3xl font-bold">{{ high_strength_count }}</div>
             </div>
             
-            <div class="bg-gradient-to-br from-amber-500 to-amber-600 dark:from-amber-600 dark:to-amber-700 rounded-lg p-6 text-white shadow-lg">
+            <div class="bento-accent-orange p-6">
                 <div class="text-sm font-medium opacity-90 mb-2">Moderate Strength</div>
                 <div class="text-3xl font-bold">{{ moderate_strength_count }}</div>
             </div>
             
-            <div class="bg-gradient-to-br from-red-500 to-red-600 dark:from-red-600 dark:to-red-700 rounded-lg p-6 text-white shadow-lg">
+            <div class="bg-red-600 dark:from-red-600 dark:to-red-700 rounded-lg p-6 text-white shadow-lg">
                 <div class="text-sm font-medium opacity-90 mb-2">Low Strength</div>
                 <div class="text-3xl font-bold">{{ low_strength_count }}</div>
             </div>
@@ -47,7 +47,7 @@
         <!-- Evidence Distribution Section -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <!-- Strength Distribution -->
-            <div class="bg-card border border-border rounded-lg p-6 shadow-sm">
+            <div class="bento-card p-6 ">
                 <h3 class="text-xl font-bold text-foreground mb-6 flex items-center gap-2">
                     <i class="fas fa-chart-line text-primary"></i> Evidence Strength Distribution
                 </h3>
@@ -98,7 +98,7 @@
             </div>
             
             <!-- Evidence Type Breakdown -->
-            <div class="bg-card border border-border rounded-lg p-6 shadow-sm">
+            <div class="bento-card p-6 ">
                 <h3 class="text-xl font-bold text-foreground mb-6 flex items-center gap-2">
                     <i class="fas fa-layer-group text-primary"></i> Evidence Type Breakdown
                 </h3>
@@ -118,7 +118,7 @@
         </div>
         
         <!-- User Feedback Section -->
-        <div class="bg-card border border-border rounded-lg p-6 shadow-sm mb-8">
+        <div class="bento-card p-6  mb-8">
             <h3 class="text-xl font-bold text-foreground mb-6 flex items-center gap-2">
                 <i class="fas fa-thumbs-up text-primary"></i> User Feedback
             </h3>
@@ -148,7 +148,7 @@
         </div>
         
         <!-- Recent Access History -->
-        <div class="bg-card border border-border rounded-lg p-6 shadow-sm mb-8">
+        <div class="bento-card p-6  mb-8">
             <h3 class="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
                 <i class="fas fa-history text-primary"></i> Recent Access
             </h3>
@@ -179,7 +179,7 @@
         </div>
         
         <!-- Summary Narrative -->
-        <div class="bg-gradient-to-r from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 border border-primary/30 rounded-lg p-6 mb-8">
+        <div class="bento-card p-6 mb-8 border-orange-300">
             <h3 class="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
                 <i class="fas fa-book-reader text-primary"></i> Summary
             </h3>
@@ -200,7 +200,7 @@
         <!-- Action Buttons -->
         <div class="flex flex-col sm:flex-row gap-3 justify-center">
             <a href="javascript:history.back()" 
-               class="inline-flex items-center justify-center px-6 py-3 bg-card border border-primary/30 rounded-lg hover:bg-accent/50 transition-colors text-foreground font-medium">
+               class="inline-flex items-center justify-center px-6 py-3 bento-card hover:bg-accent/50 transition-colors text-foreground font-medium">
                 <i class="fas fa-arrow-left mr-2"></i> Back
             </a>
             <a href="{% url 'cancer_detection:evidence_audit_trail' treatment_plan_id %}" 

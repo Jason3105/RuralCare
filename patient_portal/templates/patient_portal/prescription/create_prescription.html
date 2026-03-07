@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="fade-in max-w-6xl mx-auto">
-    <div class="bg-card border border-border/50 rounded-2xl p-6 sm:p-8 mb-6 shadow-sm">
+    <div class="bento-card p-6 sm:p-8 mb-6 ">
         <div class="flex items-center justify-between mb-6">
             <h1 class="text-3xl font-bold text-foreground">
                 {% if prescription %}Edit{% else %}Create{% endif %} Prescription
@@ -15,7 +15,7 @@
         </div>
 
         <!-- Patient Info -->
-        <div class="bg-accent/30 rounded-xl p-4 mb-6">
+        <div class="bg-accent/30 rounded-bento p-4 mb-6">
             <h3 class="font-semibold text-lg mb-2">Patient Information</h3>
             <div class="grid grid-cols-2 gap-4">
                 <div>
@@ -122,7 +122,7 @@ function addMedicine(med = null) {
     };
     
     const medicineHTML = `
-        <div class="bg-accent/30 rounded-xl p-4 border border-border" id="medicine-${index}">
+        <div class="bg-accent/30 rounded-bento p-4 border border-border" id="medicine-${index}">
             <div class="flex items-center justify-between mb-4">
                 <h4 class="font-semibold">Medicine #${index + 1}</h4>
                 <button type="button" onclick="removeMedicine(${index})" class="text-red-600 hover:text-red-700">

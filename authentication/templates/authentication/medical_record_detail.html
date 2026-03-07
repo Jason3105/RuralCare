@@ -38,7 +38,7 @@
                     {% endif %}
                 </div>
             </div>
-            <a href="{{ record.document_file|local_media_url }}" target="_blank" download class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-primary to-primary/90 hover:shadow-xl text-primary-foreground font-bold rounded-xl transition-all duration-200 hover:scale-105 text-sm">
+            <a href="{{ record.document_file|local_media_url }}" target="_blank" download class="inline-flex items-center px-6 py-3 bg-orange-600 hover:shadow-lg text-primary-foreground font-bold rounded-bento transition-all duration-200 text-sm">
                 <i class="fas fa-download mr-2"></i>
                 Download
             </a>
@@ -49,7 +49,7 @@
         <!-- Main Content Area -->
         <div class="lg:col-span-2 space-y-6">
             <!-- Record Information -->
-            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+            <div class="bento-card p-6 ">
                 <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
                     <i class="fas fa-info-circle text-primary mr-2"></i>
                     Record Information
@@ -86,49 +86,49 @@
 
             <!-- Extracted Patient Information -->
             {% if record.ocr_status == 'completed' and record.extracted_data %}
-            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+            <div class="bento-card p-6 ">
                 <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
                     <i class="fas fa-user-md text-primary mr-2"></i>
                     Extracted Patient Information
                 </h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {% if record.extracted_data.patient_name %}
-                    <div class="bg-accent/50 rounded-xl p-4 border border-border/50">
+                    <div class="bg-accent/50 rounded-bento p-4 border border-border/50">
                         <label class="text-sm font-medium text-muted-foreground">Patient Name</label>
                         <p class="text-foreground font-semibold mt-1">{{ record.extracted_data.patient_name }}</p>
                     </div>
                     {% endif %}
                     
                     {% if record.extracted_data.age %}
-                    <div class="bg-accent/50 rounded-xl p-4 border border-border/50">
+                    <div class="bg-accent/50 rounded-bento p-4 border border-border/50">
                         <label class="text-sm font-medium text-muted-foreground">Age</label>
                         <p class="text-foreground font-semibold mt-1">{{ record.extracted_data.age }}</p>
                     </div>
                     {% endif %}
                     
                     {% if record.extracted_data.gender %}
-                    <div class="bg-accent/50 rounded-xl p-4 border border-border/50">
+                    <div class="bg-accent/50 rounded-bento p-4 border border-border/50">
                         <label class="text-sm font-medium text-muted-foreground">Gender</label>
                         <p class="text-foreground font-semibold mt-1">{{ record.extracted_data.gender }}</p>
                     </div>
                     {% endif %}
                     
                     {% if record.extracted_data.date %}
-                    <div class="bg-accent/50 rounded-xl p-4 border border-border/50">
+                    <div class="bg-accent/50 rounded-bento p-4 border border-border/50">
                         <label class="text-sm font-medium text-muted-foreground">Report Date</label>
                         <p class="text-foreground font-semibold mt-1">{{ record.extracted_data.date }}</p>
                     </div>
                     {% endif %}
                     
                     {% if record.extracted_data.hospital_name %}
-                    <div class="bg-accent/50 rounded-xl p-4 border border-border/50">
+                    <div class="bg-accent/50 rounded-bento p-4 border border-border/50">
                         <label class="text-sm font-medium text-muted-foreground">Hospital</label>
                         <p class="text-foreground font-semibold mt-1">{{ record.extracted_data.hospital_name }}</p>
                     </div>
                     {% endif %}
                     
                     {% if record.extracted_data.doctor_name %}
-                    <div class="bg-accent/50 rounded-xl p-4 border border-border/50">
+                    <div class="bg-accent/50 rounded-bento p-4 border border-border/50">
                         <label class="text-sm font-medium text-muted-foreground">Doctor</label>
                         <p class="text-foreground font-semibold mt-1">{{ record.extracted_data.doctor_name }}</p>
                     </div>
@@ -138,7 +138,7 @@
 
             <!-- Test Results -->
             {% if record.extracted_data.test_results %}
-            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+            <div class="bento-card p-6 ">
                 <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
                     <i class="fas fa-flask text-primary mr-2"></i>
                     Laboratory Test Results
@@ -210,12 +210,12 @@
 
             <!-- Full Extracted Text -->
             {% if record.ocr_status == 'completed' and record.extracted_text %}
-            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+            <div class="bento-card p-6 ">
                 <h2 class="text-xl font-bold text-foreground mb-4 flex items-center">
                     <i class="fas fa-file-alt text-primary mr-2"></i>
                     Full Extracted Text
                 </h2>
-                <div class="bg-accent/50 rounded-xl p-4 max-h-96 overflow-y-auto border border-border/50">
+                <div class="bg-accent/50 rounded-bento p-4 max-h-96 overflow-y-auto border border-border/50">
                     <pre class="text-sm text-foreground whitespace-pre-wrap font-mono">{{ record.extracted_text }}</pre>
                 </div>
             </div>
@@ -223,8 +223,8 @@
 
             <!-- Processing Message -->
             {% if record.ocr_status == 'processing' %}
-            <div class="bg-card border border-border/50 rounded-2xl p-8 text-center shadow-sm">
-                <div class="bg-yellow-500/10 dark:bg-yellow-500/20 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-yellow-500/20">
+            <div class="bento-card p-8 text-center ">
+                <div class="bg-yellow-500/10 dark:bg-yellow-500/20 w-20 h-20 rounded-bento-lg flex items-center justify-center mx-auto mb-4 border border-yellow-500/20">
                     <i class="fas fa-spinner fa-spin text-4xl text-yellow-600 dark:text-yellow-400"></i>
                 </div>
                 <h3 class="text-xl font-bold text-foreground mb-2">Processing Your Document</h3>
@@ -237,8 +237,8 @@
 
             <!-- Failed Message -->
             {% if record.ocr_status == 'failed' %}
-            <div class="bg-card border border-border/50 rounded-2xl p-8 text-center shadow-sm">
-                <div class="bg-red-500/10 dark:bg-red-500/20 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-500/20">
+            <div class="bento-card p-8 text-center ">
+                <div class="bg-red-500/10 dark:bg-red-500/20 w-20 h-20 rounded-bento-lg flex items-center justify-center mx-auto mb-4 border border-red-500/20">
                     <i class="fas fa-exclamation-triangle text-4xl text-red-600 dark:text-red-400"></i>
                 </div>
                 <h3 class="text-xl font-bold text-foreground mb-2">Processing Failed</h3>
@@ -253,7 +253,7 @@
         <div class="space-y-6">
             <!-- OCR Confidence -->
             {% if record.ocr_status == 'completed' and record.ocr_confidence %}
-            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+            <div class="bento-card p-6 ">
                 <h3 class="text-lg font-bold text-foreground mb-4 flex items-center">
                     <i class="fas fa-chart-bar text-primary mr-2"></i>
                     OCR Confidence
@@ -273,7 +273,7 @@
             {% endif %}
 
             <!-- File Details -->
-            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+            <div class="bento-card p-6 ">
                 <h3 class="text-lg font-bold text-foreground mb-4 flex items-center">
                     <i class="fas fa-file text-primary mr-2"></i>
                     File Details
@@ -291,21 +291,21 @@
             </div>
 
             <!-- Quick Actions -->
-            <div class="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+            <div class="bento-card p-6 ">
                 <h3 class="text-lg font-bold text-foreground mb-4 flex items-center">
                     <i class="fas fa-bolt text-primary mr-2"></i>
                     Quick Actions
                 </h3>
                 <div class="space-y-2">
-                    <a href="{{ record.document_file|local_media_url }}" target="_blank" class="block w-full bg-accent hover:bg-accent/70 text-foreground py-2 px-4 rounded-xl transition-colors text-center text-sm font-medium">
+                    <a href="{{ record.document_file|local_media_url }}" target="_blank" class="block w-full bg-accent hover:bg-accent/70 text-foreground py-2 px-4 rounded-bento transition-colors text-center text-sm font-medium">
                         <i class="fas fa-eye mr-2"></i>View File
                     </a>
-                    <a href="{{ record.document_file|local_media_url }}" download class="block w-full bg-accent hover:bg-accent/70 text-foreground py-2 px-4 rounded-xl transition-colors text-center text-sm font-medium">
+                    <a href="{{ record.document_file|local_media_url }}" download class="block w-full bg-accent hover:bg-accent/70 text-foreground py-2 px-4 rounded-bento transition-colors text-center text-sm font-medium">
                         <i class="fas fa-download mr-2"></i>Download
                     </a>
                     <form method="post" action="{% url 'delete_medical_record' record.id %}" onsubmit="return confirm('Are you sure you want to permanently delete this medical record? This action cannot be undone.');" class="w-full">
                         {% csrf_token %}
-                        <button type="submit" class="block w-full bg-red-500/10 dark:bg-red-500/20 hover:bg-red-500/20 dark:hover:bg-red-500/30 text-red-700 dark:text-red-400 py-2 px-4 rounded-xl transition-colors text-center text-sm font-medium border border-red-500/20">
+                        <button type="submit" class="block w-full bg-red-500/10 dark:bg-red-500/20 hover:bg-red-500/20 dark:hover:bg-red-500/30 text-red-700 dark:text-red-400 py-2 px-4 rounded-bento transition-colors text-center text-sm font-medium border border-red-500/20">
                             <i class="fas fa-trash mr-2"></i>Delete
                         </button>
                     </form>

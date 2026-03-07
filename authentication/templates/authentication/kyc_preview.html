@@ -20,9 +20,9 @@
         </div>
 
         <!-- Personal Information -->
-        <section class="bg-card border border-border/50 rounded-2xl p-8 sm:p-10 mb-6 shadow-sm">
+        <section class="bento-card p-8 sm:p-10 mb-6 ">
             <div class="flex items-center mb-8">
-                <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center mr-3">
+                <div class="w-10 h-10 bg-primary/10 rounded-bento flex items-center justify-center mr-3">
                     <i class="fas fa-user text-primary"></i>
                 </div>
                 <h2 class="text-2xl sm:text-3xl font-bold text-foreground">Personal Information</h2>
@@ -48,9 +48,9 @@
         </section>
 
         <!-- Contact Information -->
-        <section class="bg-card border border-border/50 rounded-2xl p-8 sm:p-10 mb-6 shadow-sm">
+        <section class="bento-card p-8 sm:p-10 mb-6 ">
             <div class="flex items-center mb-8">
-                <div class="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center mr-3">
+                <div class="w-10 h-10 bg-blue-500/10 rounded-bento flex items-center justify-center mr-3">
                     <i class="fas fa-phone text-blue-600"></i>
                 </div>
                 <h2 class="text-2xl sm:text-3xl font-bold text-foreground">Contact Information</h2>
@@ -88,9 +88,9 @@
         </section>
 
         <!-- Medical License -->
-        <section class="bg-card border border-border/50 rounded-2xl p-8 sm:p-10 mb-6 shadow-sm">
+        <section class="bento-card p-8 sm:p-10 mb-6 ">
             <div class="flex items-center mb-8">
-                <div class="w-10 h-10 bg-green-500/10 rounded-xl flex items-center justify-center mr-3">
+                <div class="w-10 h-10 bg-green-500/10 rounded-bento flex items-center justify-center mr-3">
                     <i class="fas fa-certificate text-green-600"></i>
                 </div>
                 <h2 class="text-2xl sm:text-3xl font-bold text-foreground">Medical License Information</h2>
@@ -115,7 +115,7 @@
                 {% if kyc.license_document %}
                 <div class="md:col-span-2">
                     <p class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">License Document</p>
-                    <div class="flex items-center p-4 bg-green-500/10 rounded-xl border border-green-500/30 group hover:shadow-md transition-all duration-200">
+                    <div class="flex items-center p-4 bg-green-500/10 rounded-bento border border-green-500/30 group hover:shadow-md transition-all duration-200">
                         <i class="fas fa-file-check text-green-600 text-lg mr-3"></i>
                         <div>
                             <p class="text-sm font-semibold text-foreground">{{ kyc.license_document.name }}</p>
@@ -128,9 +128,9 @@
         </section>
 
         <!-- Education -->
-        <section class="bg-card border border-border/50 rounded-2xl p-8 sm:p-10 mb-6 shadow-sm">
+        <section class="bento-card p-8 sm:p-10 mb-6 ">
             <div class="flex items-center mb-8">
-                <div class="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center mr-3">
+                <div class="w-10 h-10 bg-purple-500/10 rounded-bento flex items-center justify-center mr-3">
                     <i class="fas fa-graduation-cap text-purple-600"></i>
                 </div>
                 <h2 class="text-2xl sm:text-3xl font-bold text-foreground">Educational Qualification</h2>
@@ -151,7 +151,7 @@
                 {% if kyc.degree_certificate %}
                 <div class="md:col-span-2">
                     <p class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Degree Certificate</p>
-                    <div class="flex items-center p-4 bg-green-500/10 rounded-xl border border-green-500/30 group hover:shadow-md transition-all duration-200">
+                    <div class="flex items-center p-4 bg-green-500/10 rounded-bento border border-green-500/30 group hover:shadow-md transition-all duration-200">
                         <i class="fas fa-file-check text-green-600 text-lg mr-3"></i>
                         <div>
                             <p class="text-sm font-semibold text-foreground">{{ kyc.degree_certificate.name }}</p>
@@ -164,9 +164,9 @@
         </section>
 
         <!-- Professional Information -->
-        <section class="bg-card border border-border/50 rounded-2xl p-8 sm:p-10 mb-6 shadow-sm">
+        <section class="bento-card p-8 sm:p-10 mb-6 ">
             <div class="flex items-center mb-8">
-                <div class="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center mr-3">
+                <div class="w-10 h-10 bg-amber-500/10 rounded-bento flex items-center justify-center mr-3">
                     <i class="fas fa-briefcase text-amber-600"></i>
                 </div>
                 <h2 class="text-2xl sm:text-3xl font-bold text-foreground">Professional Information</h2>
@@ -193,7 +193,7 @@
                 {% if kyc.employment_document %}
                 <div class="md:col-span-2">
                     <p class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Employment Document</p>
-                    <div class="flex items-center p-4 bg-green-500/10 rounded-xl border border-green-500/30 group hover:shadow-md transition-all duration-200">
+                    <div class="flex items-center p-4 bg-green-500/10 rounded-bento border border-green-500/30 group hover:shadow-md transition-all duration-200">
                         <i class="fas fa-file-check text-green-600 text-lg mr-3"></i>
                         <div>
                             <p class="text-sm font-semibold text-foreground">{{ kyc.employment_document.name }}</p>
@@ -206,9 +206,9 @@
         </section>
 
         <!-- Identity Verification -->
-        <section class="bg-card border border-border/50 rounded-2xl p-8 sm:p-10 mb-6 shadow-sm">
+        <section class="bento-card p-8 sm:p-10 mb-6 ">
             <div class="flex items-center mb-8">
-                <div class="w-10 h-10 bg-red-500/10 rounded-xl flex items-center justify-center mr-3">
+                <div class="w-10 h-10 bg-red-500/10 rounded-bento flex items-center justify-center mr-3">
                     <i class="fas fa-id-card text-red-600"></i>
                 </div>
                 <h2 class="text-2xl sm:text-3xl font-bold text-foreground">Identity Verification</h2>
@@ -225,7 +225,7 @@
                 {% if kyc.identity_document_file %}
                 <div class="md:col-span-2">
                     <p class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Identity Document</p>
-                    <div class="flex items-center p-4 bg-green-500/10 rounded-xl border border-green-500/30 group hover:shadow-md transition-all duration-200">
+                    <div class="flex items-center p-4 bg-green-500/10 rounded-bento border border-green-500/30 group hover:shadow-md transition-all duration-200">
                         <i class="fas fa-file-check text-green-600 text-lg mr-3"></i>
                         <div>
                             <p class="text-sm font-semibold text-foreground">{{ kyc.identity_document_file.name }}</p>
@@ -238,9 +238,9 @@
         </section>
 
         <!-- Address Proof -->
-        <section class="bg-card border border-border/50 rounded-2xl p-8 sm:p-10 mb-6 shadow-sm">
+        <section class="bento-card p-8 sm:p-10 mb-6 ">
             <div class="flex items-center mb-8">
-                <div class="w-10 h-10 bg-cyan-500/10 rounded-xl flex items-center justify-center mr-3">
+                <div class="w-10 h-10 bg-cyan-500/10 rounded-bento flex items-center justify-center mr-3">
                     <i class="fas fa-map-location-dot text-cyan-600"></i>
                 </div>
                 <h2 class="text-2xl sm:text-3xl font-bold text-foreground">Address Proof</h2>
@@ -253,7 +253,7 @@
                 {% if kyc.address_proof_file %}
                 <div class="md:col-span-2">
                     <p class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Address Proof Document</p>
-                    <div class="flex items-center p-4 bg-green-500/10 rounded-xl border border-green-500/30 group hover:shadow-md transition-all duration-200">
+                    <div class="flex items-center p-4 bg-green-500/10 rounded-bento border border-green-500/30 group hover:shadow-md transition-all duration-200">
                         <i class="fas fa-file-check text-green-600 text-lg mr-3"></i>
                         <div>
                             <p class="text-sm font-semibold text-foreground">{{ kyc.address_proof_file.name }}</p>
@@ -267,9 +267,9 @@
 
         <!-- Admin Notes (if any) -->
         {% if kyc.admin_notes %}
-        <section class="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-8 sm:p-10 mb-6 shadow-sm">
+        <section class="bg-blue-500/10 border border-blue-500/30 rounded-bento-lg p-8 sm:p-10 mb-6 ">
             <div class="flex items-center mb-4">
-                <div class="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center mr-3">
+                <div class="w-10 h-10 bg-blue-500/20 rounded-bento flex items-center justify-center mr-3">
                     <i class="fas fa-comment text-blue-600"></i>
                 </div>
                 <h3 class="text-lg font-bold text-foreground">Admin Notes</h3>
@@ -279,9 +279,9 @@
         {% endif %}
 
         <!-- Submission Info -->
-        <section class="bg-card border border-border/50 rounded-2xl p-8 sm:p-10 mb-8 shadow-sm">
+        <section class="bento-card p-8 sm:p-10 mb-8 ">
             <div class="flex items-center mb-8">
-                <div class="w-10 h-10 bg-muted/50 rounded-xl flex items-center justify-center mr-3">
+                <div class="w-10 h-10 bg-muted/50 rounded-bento flex items-center justify-center mr-3">
                     <i class="fas fa-clock text-muted-foreground"></i>
                 </div>
                 <h2 class="text-2xl sm:text-3xl font-bold text-foreground">Timeline</h2>
@@ -308,11 +308,11 @@
 
         <!-- Action Buttons -->
         <div class="flex flex-col sm:flex-row gap-4 pt-8 border-t border-border/50">
-            <a href="{% url 'kyc_status' %}" class="px-8 py-3 bg-gradient-to-r from-primary to-primary/90 hover:shadow-xl text-primary-foreground font-bold rounded-xl transition-all duration-200 hover:scale-105 inline-flex items-center justify-center gap-2 flex-shrink-0">
+            <a href="{% url 'kyc_status' %}" class="px-8 py-3 bg-orange-600 hover:shadow-lg text-primary-foreground font-bold rounded-bento transition-all duration-200 inline-flex items-center justify-center gap-2 flex-shrink-0">
                 <i class="fas fa-arrow-left"></i>
                 Back to Status
             </a>
-            <a href="{% url 'doctor_dashboard' %}" class="px-8 py-3 bg-muted hover:bg-muted/80 text-foreground font-bold rounded-xl transition-all duration-200 inline-flex items-center justify-center gap-2 flex-shrink-0">
+            <a href="{% url 'doctor_dashboard' %}" class="px-8 py-3 bg-muted hover:bg-muted/80 text-foreground font-bold rounded-bento transition-all duration-200 inline-flex items-center justify-center gap-2 flex-shrink-0">
                 <i class="fas fa-home"></i>
                 Back to Dashboard
             </a>

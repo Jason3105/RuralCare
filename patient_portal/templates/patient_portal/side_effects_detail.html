@@ -21,7 +21,7 @@
 
         <!-- AI Generated Info Overview -->
         {% if ai_info.overview %}
-        <div class="bg-primary/5 border border-primary/20 rounded-xl p-6 mb-6">
+        <div class="bg-primary/5 border border-primary/20 rounded-bento p-6 mb-6">
             <h2 class="text-lg font-semibold text-foreground mb-3">
                 <i class="fas fa-lightbulb text-primary mr-2"></i>Overview
             </h2>
@@ -33,7 +33,7 @@
         <div class="space-y-6">
             <!-- Side Effects from Treatment Plan -->
             {% if plan_side_effects %}
-            <div class="bg-card border border-border/50 rounded-xl p-6">
+            <div class="bento-card p-6">
                 <h2 class="text-xl font-semibold text-foreground mb-4 flex items-center">
                     <span class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mr-3">
                         <i class="fas fa-exclamation-triangle text-amber-600"></i>
@@ -76,7 +76,7 @@
 
             <!-- AI-Generated Side Effects Info -->
             {% if ai_info.side_effects %}
-            <div class="bg-card border border-border/50 rounded-xl p-6">
+            <div class="bento-card p-6">
                 <h2 class="text-xl font-semibold text-foreground mb-4 flex items-center">
                     <span class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mr-3">
                         <i class="fas fa-robot text-blue-600"></i>
@@ -125,7 +125,7 @@
 
             <!-- Treatment Info -->
             {% if treatments %}
-            <div class="bg-card border border-border/50 rounded-xl p-6">
+            <div class="bento-card p-6">
                 <h2 class="text-xl font-semibold text-foreground mb-4 flex items-center">
                     <span class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mr-3">
                         <i class="fas fa-pills text-purple-600"></i>
@@ -152,7 +152,7 @@
 
             <!-- General Tips -->
             {% if ai_info.general_tips %}
-            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-bento p-6">
                 <h2 class="text-xl font-semibold text-blue-800 dark:text-blue-400 mb-4 flex items-center">
                     <span class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mr-3">
                         <i class="fas fa-lightbulb text-blue-600"></i>
@@ -174,7 +174,7 @@
 
             <!-- When to Call Doctor -->
             {% if info.when_to_call_doctor %}
-            <div class="bg-red-50 dark:bg-red-900/10 border-2 border-red-300 dark:border-red-700 rounded-xl p-6">
+            <div class="bg-red-50 dark:bg-red-900/10 border-2 border-red-300 dark:border-red-700 rounded-bento p-6">
                 <h2 class="text-xl font-semibold text-red-800 dark:text-red-400 mb-4 flex items-center">
                     <span class="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mr-3">
                         <i class="fas fa-phone-alt text-red-600"></i>
@@ -192,7 +192,7 @@
                 </div>
             </div>
             {% else %}
-            <div class="bg-red-50 dark:bg-red-900/10 border-2 border-red-300 dark:border-red-700 rounded-xl p-6">
+            <div class="bg-red-50 dark:bg-red-900/10 border-2 border-red-300 dark:border-red-700 rounded-bento p-6">
                 <h2 class="text-xl font-semibold text-red-800 dark:text-red-400 mb-4 flex items-center">
                     <span class="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mr-3">
                         <i class="fas fa-phone-alt text-red-600"></i>

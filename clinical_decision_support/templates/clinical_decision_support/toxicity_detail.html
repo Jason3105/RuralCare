@@ -40,7 +40,7 @@
             <div class="lg:col-span-2 space-y-6">
                 <!-- High Risk Alert -->
                 {% if prediction.high_risk_toxicities %}
-                <div class="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-700 rounded-xl p-6">
+                <div class="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-700 rounded-bento p-6">
                     <div class="flex items-start space-x-4">
                         <div class="w-12 h-12 bg-red-100 dark:bg-red-800/50 rounded-full flex items-center justify-center flex-shrink-0">
                             <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
@@ -61,7 +61,7 @@
 
                 <!-- Dose Adjustment Alert -->
                 {% if prediction.dose_adjustments %}
-                <div class="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-300 dark:border-amber-700 rounded-xl p-6">
+                <div class="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-300 dark:border-amber-700 rounded-bento p-6">
                     <div class="flex items-start space-x-4">
                         <div class="w-12 h-12 bg-amber-100 dark:bg-amber-800/50 rounded-full flex items-center justify-center flex-shrink-0">
                             <i class="fas fa-prescription-bottle-alt text-amber-600 text-xl"></i>
@@ -84,7 +84,7 @@
                 {% endif %}
 
                 <!-- Predicted Toxicities -->
-                <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="bento-card p-6">
                     <h2 class="text-xl font-semibold text-foreground mb-6">All Predicted Toxicities</h2>
                     
                     <div class="space-y-4">
@@ -150,7 +150,7 @@
 
                 <!-- Patient Summary -->
                 {% if prediction.patient_summary %}
-                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-bento p-6">
                     <div class="flex items-start space-x-3">
                         <i class="fas fa-info-circle text-blue-500 mt-1"></i>
                         <div>
@@ -165,7 +165,7 @@
             <!-- Sidebar -->
             <div class="space-y-6">
                 <!-- Prediction Info -->
-                <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="bento-card p-6">
                     <h3 class="text-lg font-semibold text-foreground mb-4">Prediction Details</h3>
                     <div class="space-y-4 text-sm">
                         <div>
@@ -196,7 +196,7 @@
 
                 <!-- Correlated Lab Values -->
                 {% if prediction.correlated_lab_values %}
-                <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="bento-card p-6">
                     <h3 class="text-lg font-semibold text-foreground mb-4">Lab Value Correlations</h3>
                     <div class="space-y-3">
                         {% for lab_name, lab_data in prediction.correlated_lab_values.items %}
@@ -219,7 +219,7 @@
                 {% endif %}
 
                 <!-- CTCAE Grading Reference -->
-                <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="bento-card p-6">
                     <h3 class="text-lg font-semibold text-foreground mb-4">CTCAE Grading Scale</h3>
                     <div class="space-y-2 text-xs">
                         <div class="flex items-center space-x-2">
@@ -243,14 +243,14 @@
 
                 <!-- Doctor Notes -->
                 {% if prediction.doctor_notes %}
-                <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="bento-card p-6">
                     <h3 class="text-lg font-semibold text-foreground mb-4">Doctor Notes</h3>
                     <p class="text-sm text-muted-foreground">{{ prediction.doctor_notes }}</p>
                 </div>
                 {% endif %}
 
                 <!-- Actions -->
-                <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="bento-card p-6">
                     <h3 class="text-lg font-semibold text-foreground mb-4">Actions</h3>
                     <div class="space-y-3">
                         <a href="{% url 'clinical_decision_support:toxicity_predict' %}?patient={{ prediction.patient.id }}" 

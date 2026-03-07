@@ -25,7 +25,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Patient Selector -->
             <div class="lg:col-span-1">
-                <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="bento-card p-6">
                     <h2 class="text-lg font-semibold text-foreground mb-4">Select Patient</h2>
                     
                     <!-- Search Box -->
@@ -81,7 +81,7 @@
                 </div>
 
                 <!-- Recent Sent Alerts -->
-                <div class="bg-card border border-border/50 rounded-xl p-6 mt-6">
+                <div class="bento-card p-6 mt-6">
                     <h2 class="text-lg font-semibold text-foreground mb-4">Recently Sent by You</h2>
                     <div class="space-y-3">
                         {% for alert in recent_sent %}
@@ -111,7 +111,7 @@
             <!-- Patient Alerts -->
             <div class="lg:col-span-2">
                 {% if selected_patient %}
-                <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="bento-card p-6">
                     <h2 class="text-lg font-semibold text-foreground mb-4">
                         Alerts for {{ selected_patient.get_full_name|default:selected_patient.username }}
                     </h2>
@@ -160,7 +160,7 @@
                     </div>
                 </div>
                 {% else %}
-                <div class="bg-card border border-border/50 rounded-xl p-12 text-center">
+                <div class="bento-card p-12 text-center">
                     <i class="fas fa-users text-5xl text-muted-foreground mb-4"></i>
                     <h2 class="text-xl font-semibold text-foreground mb-2">Select a Patient</h2>
                     <p class="text-muted-foreground mb-6">Choose a patient from the list to view their alerts or send a new notification.</p>

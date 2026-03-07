@@ -4,7 +4,7 @@
 {% block title %}Complete Your Profile - Doctor{% endblock %}
 
 {% block content %}
-<div class="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-background to-background">
+<div class="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-4xl mx-auto">
         <!-- Header Card -->
         <div class="fade-in mb-6">
@@ -13,7 +13,7 @@
                 <p class="text-lg text-muted-foreground">Help patients find and connect with you by completing your professional details</p>
             </div>
 
-            <div class="bg-primary/10 border border-primary/20 rounded-2xl px-6 sm:px-8 py-5 flex items-start gap-4">
+            <div class="bg-primary/10 border border-primary/20 rounded-bento-lg px-6 sm:px-8 py-5 flex items-start gap-4">
                 <i class="fas fa-info-circle text-primary mt-1 flex-shrink-0"></i>
                 <p class="text-foreground">
                     Fields marked with <span class="text-red-600 font-bold">*</span> are mandatory.
@@ -24,7 +24,7 @@
         <!-- Messages -->
         {% if messages %}
             {% for message in messages %}
-                <div class="mb-6 bg-{{ message.tags }}-500/10 border border-{{ message.tags }}-500/30 text-{{ message.tags }}-700 px-6 py-4 rounded-xl shadow-sm fade-in" role="alert">
+                <div class="mb-6 bg-{{ message.tags }}-500/10 border border-{{ message.tags }}-500/30 text-{{ message.tags }}-700 px-6 py-4 rounded-bento  fade-in" role="alert">
                     <div class="flex justify-between items-center">
                         <p>{{ message }}</p>
                         <button type="button" class="text-{{ message.tags }}-700 hover:text-{{ message.tags }}-900" onclick="this.parentElement.parentElement.remove()">
@@ -36,16 +36,16 @@
         {% endif %}
 
         <!-- Form Card -->
-        <div class="bg-card border border-border/50 rounded-2xl p-8 sm:p-12 shadow-sm fade-in">
+        <div class="bento-card p-8 sm:p-12  fade-in">
         <!-- Form Card -->
-        <div class="bg-card border border-border/50 rounded-2xl p-8 sm:p-12 shadow-sm fade-in">
+        <div class="bento-card p-8 sm:p-12  fade-in">
             <form method="POST" id="profileForm" class="space-y-10">
                 {% csrf_token %}
                 
                 <!-- Basic Information -->
                 <div>
                     <div class="mb-8 flex items-center">
-                        <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mr-4">
+                        <div class="w-12 h-12 bg-primary/10 rounded-bento flex items-center justify-center mr-4">
                             <i class="fas fa-user text-primary text-lg"></i>
                         </div>
                         <h2 class="text-2xl sm:text-3xl font-bold text-foreground">Basic Information</h2>
@@ -73,7 +73,7 @@
                 <!-- Professional Information -->
                 <div>
                     <div class="mb-8 flex items-center">
-                        <div class="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center mr-4">
+                        <div class="w-12 h-12 bg-green-500/10 rounded-bento flex items-center justify-center mr-4">
                             <i class="fas fa-certificate text-green-600 text-lg"></i>
                         </div>
                         <h2 class="text-2xl sm:text-3xl font-bold text-foreground">Professional Information</h2>
@@ -131,7 +131,7 @@
                 <!-- Work Information -->
                 <div>
                     <div class="mb-8 flex items-center">
-                        <div class="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mr-4">
+                        <div class="w-12 h-12 bg-blue-500/10 rounded-bento flex items-center justify-center mr-4">
                             <i class="fas fa-hospital text-blue-600 text-lg"></i>
                         </div>
                         <h2 class="text-2xl sm:text-3xl font-bold text-foreground">Work Information</h2>
@@ -159,7 +159,7 @@
                 <!-- Location Information -->
                 <div>
                     <div class="mb-8 flex items-center">
-                        <div class="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center mr-4">
+                        <div class="w-12 h-12 bg-amber-500/10 rounded-bento flex items-center justify-center mr-4">
                             <i class="fas fa-map-marker-alt text-amber-600 text-lg"></i>
                         </div>
                         <h2 class="text-2xl sm:text-3xl font-bold text-foreground">Location Information</h2>
@@ -214,7 +214,7 @@
                 <!-- Professional Details -->
                 <div>
                     <div class="mb-8 flex items-center">
-                        <div class="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center mr-4">
+                        <div class="w-12 h-12 bg-purple-500/10 rounded-bento flex items-center justify-center mr-4">
                             <i class="fas fa-briefcase text-purple-600 text-lg"></i>
                         </div>
                         <h2 class="text-2xl sm:text-3xl font-bold text-foreground">Professional Details</h2>
@@ -252,7 +252,7 @@
 
                 <!-- Submit Button -->
                 <div class="flex items-center justify-end pt-8 border-t border-border/50">
-                    <button type="submit" class="px-8 sm:px-10 py-3 bg-gradient-to-r from-primary-600 to-primary-500 hover:shadow-xl text-white font-bold rounded-xl transition-all duration-200 hover:scale-105 inline-flex items-center gap-3">
+                    <button type="submit" class="px-8 sm:px-10 py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-bento transition-all duration-200 inline-flex items-center gap-3">
                         <i class="fas fa-check-circle"></i>
                         <span>Save Profile</span>
                     </button>

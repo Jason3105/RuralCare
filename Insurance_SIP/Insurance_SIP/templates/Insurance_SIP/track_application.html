@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Track Application - RuralCare{% endblock %}
+{% block title %}Track Application - ArogyaX{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-12">
+<div class="min-h-screen py-12">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Success Message -->
-        <div class="bg-green-50 border-2 border-green-200 rounded-2xl p-8 mb-8 text-center">
+        <div class="bg-green-50 border-2 border-green-200 rounded-bento-lg p-8 mb-8 text-center">
             <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
                 <i class="fas fa-check-circle text-green-600 text-3xl"></i>
             </div>
@@ -17,8 +17,8 @@
         </div>
 
         <!-- Application Details -->
-        <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
-            <div class="bg-gradient-to-r from-blue-600 to-green-600 px-8 py-6 text-white">
+        <div class="bento-card mb-8">
+            <div class="bg-orange-600 px-8 py-6 text-white">
                 <h2 class="text-2xl font-bold">Application Details</h2>
             </div>
             
@@ -80,7 +80,7 @@
                 {% if application.notes %}
                 <div class="mt-6 pt-6 border-t">
                     <div class="text-sm text-gray-500 mb-2">Your Notes</div>
-                    <div class="bg-gray-50 rounded-lg p-4 text-gray-700">{{ application.notes }}</div>
+                    <div class="bg-accent/30 rounded-lg p-4 text-gray-700">{{ application.notes }}</div>
                 </div>
                 {% endif %}
             </div>
@@ -88,8 +88,8 @@
 
         <!-- Uploaded Documents -->
         {% if application.documents_uploaded %}
-        <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
-            <div class="bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-6 text-white">
+        <div class="bento-card mb-8">
+            <div class="bento-accent-purple px-8 py-6">
                 <h2 class="text-2xl font-bold">Uploaded Documents</h2>
             </div>
             
@@ -115,8 +115,8 @@
         {% endif %}
 
         <!-- Application Timeline -->
-        <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
-            <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-6 text-white">
+        <div class="bento-card mb-8">
+            <div class="bento-accent-purple px-8 py-6">
                 <h2 class="text-2xl font-bold">Application Timeline</h2>
             </div>
             
@@ -181,10 +181,10 @@
 
         <!-- Action Buttons -->
         <div class="flex flex-col sm:flex-row gap-4">
-            <a href="{% url 'insurance:landing' %}" class="flex-1 bg-white text-gray-900 border-2 border-gray-300 px-6 py-3 rounded-xl font-semibold text-center hover:bg-gray-50 transition-colors">
+            <a href="{% url 'insurance:landing' %}" class="flex-1 bg-white text-gray-900 border-2 border-gray-300 px-6 py-3 rounded-bento font-semibold text-center hover:bg-gray-50 transition-colors">
                 <i class="fas fa-arrow-left mr-2"></i>Back to Insurance
             </a>
-            <a href="{% url 'patient_dashboard' %}" class="flex-1 bg-gradient-to-r from-blue-600 to-green-600 text-white px-6 py-3 rounded-xl font-semibold text-center hover:shadow-lg transition-all">
+            <a href="{% url 'patient_dashboard' %}" class="flex-1 bg-orange-600 text-white px-6 py-3 rounded-bento font-semibold text-center hover:shadow-lg transition-all">
                 <i class="fas fa-home mr-2"></i>Go to Dashboard
             </a>
         </div>

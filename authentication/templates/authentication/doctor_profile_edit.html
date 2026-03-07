@@ -7,8 +7,8 @@
 <div class="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-4xl mx-auto">
         <!-- Header Card -->
-        <div class="bg-card border border-border rounded-lg overflow-hidden mb-6 fade-in transition-colors">
-            <div class="bg-gradient-to-r from-primary to-primary/80 px-4 sm:px-6 py-4 sm:py-6">
+        <div class="bento-card overflow-hidden mb-6 fade-in transition-colors">
+            <div class="bento-accent-orange px-4 sm:px-6 py-4 sm:py-6">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div class="flex items-center">
                         <i class="fas fa-user-edit text-2xl sm:text-3xl text-primary-foreground"></i>
@@ -48,7 +48,7 @@
         {% endif %}
 
         <!-- Form Card -->
-        <div class="bg-card border border-border rounded-lg overflow-hidden fade-in transition-colors">
+        <div class="bento-card overflow-hidden fade-in transition-colors">
             <form method="POST" id="profileForm" class="p-4 sm:p-8">
                 {% csrf_token %}
                 
@@ -81,7 +81,7 @@
                 <!-- Professional Information -->
                 <div class="mb-8">
                     <div class="mb-8 flex items-center">
-                        <div class="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center mr-4">
+                        <div class="w-12 h-12 bg-green-500/10 rounded-bento flex items-center justify-center mr-4">
                             <i class="fas fa-certificate text-green-600 text-lg"></i>
                         </div>
                         <h2 class="text-xl sm:text-2xl font-bold text-foreground flex items-center">
@@ -142,7 +142,7 @@
                 <!-- Work Information -->
                 <div class="mb-8">
                     <div class="mb-8 flex items-center">
-                        <div class="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mr-4">
+                        <div class="w-12 h-12 bg-blue-500/10 rounded-bento flex items-center justify-center mr-4">
                             <i class="fas fa-hospital text-blue-600 text-lg"></i>
                         </div>
                         <h2 class="text-xl sm:text-2xl font-bold text-foreground flex items-center">
@@ -173,7 +173,7 @@
                 <!-- Location Information -->
                 <div class="mb-8">
                     <div class="mb-8 flex items-center">
-                        <div class="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center mr-4">
+                        <div class="w-12 h-12 bg-amber-500/10 rounded-bento flex items-center justify-center mr-4">
                             <i class="fas fa-map-marker-alt text-amber-600 text-lg"></i>
                         </div>
                         <h2 class="text-xl sm:text-2xl font-bold text-foreground flex items-center">
@@ -231,7 +231,7 @@
                 <!-- Professional Details -->
                 <div class="mb-8">
                     <div class="mb-8 flex items-center">
-                        <div class="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center mr-4">
+                        <div class="w-12 h-12 bg-purple-500/10 rounded-bento flex items-center justify-center mr-4">
                             <i class="fas fa-briefcase text-purple-600 text-lg"></i>
                         </div>
                         <h2 class="text-xl sm:text-2xl font-bold text-foreground flex items-center">
@@ -272,10 +272,10 @@
 
                 <!-- Submit Button -->
                 <div class="flex items-center justify-between pt-8 border-t border-border/50">
-                    <a href="{% url 'doctor_dashboard' %}" class="px-6 py-3 bg-muted text-foreground font-semibold rounded-xl hover:bg-muted/80 transition-all duration-200">
+                    <a href="{% url 'doctor_dashboard' %}" class="px-6 py-3 bg-muted text-foreground font-semibold rounded-bento hover:bg-muted/80 transition-all duration-200">
                         <i class="fas fa-times mr-2"></i>Cancel
                     </a>
-                    <button type="submit" class="px-8 sm:px-10 py-3 bg-gradient-to-r from-primary-600 to-primary-500 hover:shadow-xl text-white font-bold rounded-xl transition-all duration-200 hover:scale-105 inline-flex items-center gap-3">
+                    <button type="submit" class="px-8 sm:px-10 py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-bento transition-all duration-200 inline-flex items-center gap-3">
                         <i class="fas fa-check-circle"></i>
                         <span>Update Profile</span>
                     </button>

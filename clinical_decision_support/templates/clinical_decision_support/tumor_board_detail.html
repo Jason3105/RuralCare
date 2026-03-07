@@ -47,7 +47,7 @@
             <!-- Main Content -->
             <div class="lg:col-span-2 space-y-6">
                 <!-- Session Details -->
-                <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="bento-card p-6">
                     <h2 class="text-xl font-semibold text-foreground mb-4">Session Details</h2>
                     {% if session.description %}
                     <p class="text-muted-foreground mb-4">{{ session.description }}</p>
@@ -76,7 +76,7 @@
                 </div>
 
                 <!-- Consensus Progress -->
-                <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="bento-card p-6">
                     <h2 class="text-xl font-semibold text-foreground mb-4">Consensus Progress</h2>
                     <div class="mb-4">
                         <div class="flex justify-between text-sm mb-2">
@@ -112,7 +112,7 @@
                 </div>
 
                 <!-- Member Decisions -->
-                <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="bento-card p-6">
                     <h2 class="text-xl font-semibold text-foreground mb-4">Member Decisions</h2>
                     <div class="space-y-4">
                         {% for member in members %}
@@ -172,7 +172,7 @@
 
                 <!-- My Decision Form -->
                 {% if current_member and current_member.decision == 'pending' and session.status == 'in_review' %}
-                <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="bento-card p-6">
                     <h2 class="text-xl font-semibold text-foreground mb-4">Submit Your Decision</h2>
                     <form method="post" action="{% url 'clinical_decision_support:tumor_board_decision' session.id %}" class="space-y-4" id="decisionForm">
                         {% csrf_token %}
@@ -239,7 +239,7 @@
             <div class="space-y-6">
                 <!-- Quick Actions -->
                 {% if is_lead %}
-                <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="bento-card p-6">
                     <h3 class="text-lg font-semibold text-foreground mb-4">Lead Actions</h3>
                     <div class="space-y-3">
                         <a href="{% url 'clinical_decision_support:tumor_board_invite' session.id %}" 
@@ -259,7 +259,7 @@
                 {% endif %}
 
                 <!-- Treatment Plan Summary -->
-                <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="bento-card p-6">
                     <h3 class="text-lg font-semibold text-foreground mb-4">Treatment Plan</h3>
                     <div class="space-y-3 text-sm">
                         <div>
@@ -282,7 +282,7 @@
                 </div>
 
                 <!-- Audit Log -->
-                <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="bento-card p-6">
                     <h3 class="text-lg font-semibold text-foreground mb-4">Activity Log</h3>
                     <div class="space-y-3 max-h-64 overflow-y-auto">
                         {% for log in audit_logs %}

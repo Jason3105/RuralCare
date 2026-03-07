@@ -4,7 +4,7 @@
 {% block title %}Evidence Explanation - Treatment Plan{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4 sm:p-6 lg:p-8">
+<div class="min-h-screen p-4 sm:p-6 lg:p-8">
     <div class="max-w-4xl mx-auto">
         <!-- Back Link -->
         <div class="mb-6">
@@ -14,7 +14,7 @@
         </div>
         
         <!-- Header -->
-        <div class="bg-gradient-to-r from-primary to-primary/80 dark:from-primary/80 dark:to-primary/60 rounded-lg p-8 text-primary-foreground mb-8 shadow-lg">
+        <div class="bento-accent-orange p-8">
             <h1 class="text-3xl sm:text-4xl font-bold mb-3">{{ rec_evidence.recommendation_type }}</h1>
             <p class="text-primary-foreground/90 text-lg mb-4">{{ rec_evidence.recommendation_text|truncatewords:30 }}</p>
             
@@ -37,7 +37,7 @@
         </div>
         
         <!-- Recommendation Details -->
-        <div class="bg-card border border-border rounded-lg p-6 mb-6 shadow-sm">
+        <div class="bento-card p-6 mb-6 ">
             <h3 class="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
                 <i class="fas fa-clipboard-list text-primary"></i> Recommendation
             </h3>
@@ -57,7 +57,7 @@
         
         <!-- Clinical Rationale -->
         {% if explanation.rationale %}
-        <div class="bg-card border border-border rounded-lg p-6 mb-6 shadow-sm">
+        <div class="bento-card p-6 mb-6 ">
             <h3 class="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
                 <i class="fas fa-lightbulb text-primary"></i> Clinical Rationale
             </h3>
@@ -66,7 +66,7 @@
         {% endif %}
         
         <!-- Evidence Sources -->
-        <div class="bg-card border border-border rounded-lg p-6 mb-6 shadow-sm">
+        <div class="bento-card p-6 mb-6 ">
             <h3 class="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
                 <i class="fas fa-book text-primary"></i> Evidence Sources ({{ evidence_sources|length }})
             </h3>
@@ -135,7 +135,7 @@
         </div>
         
         <!-- Decision Factors -->
-        <div class="bg-card border border-border rounded-lg p-6 mb-6 shadow-sm">
+        <div class="bento-card p-6 mb-6 ">
             <h3 class="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
                 <i class="fas fa-chart-bar text-primary"></i> Decision Factors
             </h3>
@@ -193,7 +193,7 @@
         </div>
         
         <!-- Explanation History -->
-        <div class="bg-card border border-border rounded-lg p-6 mb-6 shadow-sm">
+        <div class="bento-card p-6 mb-6 ">
             <h3 class="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
                 <i class="fas fa-history text-primary"></i> Explanation History
             </h3>
@@ -232,7 +232,7 @@
         
         <!-- Statistics -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-            <div class="bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 rounded-lg p-6 text-white shadow-lg">
+            <div class="bento-accent-blue p-6">
                 <div class="text-sm font-medium opacity-90 mb-2">Total Views</div>
                 <div class="text-3xl font-bold">{{ total_views }}</div>
             </div>
@@ -242,7 +242,7 @@
                 <div class="text-3xl font-bold">{{ helpful_percentage|floatformat:0 }}%</div>
             </div>
             
-            <div class="bg-gradient-to-br from-amber-500 to-amber-600 dark:from-amber-600 dark:to-amber-700 rounded-lg p-6 text-white shadow-lg">
+            <div class="bento-accent-orange p-6">
                 <div class="text-sm font-medium opacity-90 mb-2">Evidence Sources</div>
                 <div class="text-3xl font-bold">{{ evidence_sources|length }}</div>
             </div>
@@ -251,7 +251,7 @@
         <!-- Action Buttons -->
         <div class="flex flex-col sm:flex-row gap-3 justify-center">
             <a href="{% url 'cancer_detection:treatment_plan_with_evidence' treatment_plan.id %}" 
-               class="inline-flex items-center justify-center px-6 py-3 bg-card border border-primary/30 rounded-lg hover:bg-accent/50 transition-colors text-foreground font-medium">
+               class="inline-flex items-center justify-center px-6 py-3 bento-card hover:bg-accent/50 transition-colors text-foreground font-medium">
                 <i class="fas fa-arrow-left mr-2"></i> Back to Plan
             </a>
             <a href="{% url 'cancer_detection:decision_factors_breakdown' treatment_plan.id rec_evidence.id %}" 

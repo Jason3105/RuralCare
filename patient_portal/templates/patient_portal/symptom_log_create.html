@@ -20,7 +20,7 @@
             {% csrf_token %}
             
             <!-- Doctor Selection -->
-            <div class="bg-card border border-border/50 rounded-xl p-6">
+            <div class="bento-card p-6">
                 <h2 class="text-lg font-semibold text-foreground mb-4">Select Doctor</h2>
                 <p class="text-muted-foreground mb-4">Choose the doctor you want to share these symptoms with</p>
                 <select name="doctor" id="doctor" class="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground" required>
@@ -38,14 +38,14 @@
             </div>
             
             <!-- Overall Wellness -->
-            <div class="bg-card border border-border/50 rounded-xl p-6">
+            <div class="bento-card p-6">
                 <h2 class="text-lg font-semibold text-foreground mb-4">Overall Wellness</h2>
                 <p class="text-muted-foreground mb-4">How would you rate your overall feeling today?</p>
                 <div class="flex justify-between gap-2">
                     {% for i in "12345" %}
                     <label class="flex-1 cursor-pointer">
                         <input type="radio" name="overall_wellness" value="{{ i }}" class="peer sr-only" {% if i == "3" %}checked{% endif %}>
-                        <div class="p-4 border-2 border-border rounded-xl text-center peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+                        <div class="p-4 border-2 border-border rounded-bento text-center peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
                             <span class="text-3xl mb-2 block">
                                 {% if i == "1" %}😫{% elif i == "2" %}😔{% elif i == "3" %}😐{% elif i == "4" %}🙂{% else %}😄{% endif %}
                             </span>
@@ -61,7 +61,7 @@
             </div>
 
             <!-- Pain Level -->
-            <div class="bg-card border border-border/50 rounded-xl p-6">
+            <div class="bento-card p-6">
                 <h2 class="text-lg font-semibold text-foreground mb-4">Pain Level</h2>
                 <p class="text-muted-foreground mb-4">Rate your pain on a scale of 0-10</p>
                 <div class="space-y-4">
@@ -83,7 +83,7 @@
             </div>
 
             <!-- Common Symptoms Grid -->
-            <div class="bg-card border border-border/50 rounded-xl p-6">
+            <div class="bento-card p-6">
                 <h2 class="text-lg font-semibold text-foreground mb-4">Common Symptoms</h2>
                 <p class="text-muted-foreground mb-4">Rate each symptom (1 = None, 5 = Severe)</p>
                 
@@ -176,7 +176,7 @@
             </div>
 
             <!-- Additional Symptoms -->
-            <div class="bg-card border border-border/50 rounded-xl p-6">
+            <div class="bento-card p-6">
                 <h2 class="text-lg font-semibold text-foreground mb-4">Other Symptoms</h2>
                 
                 <div class="grid grid-cols-2 gap-4 mb-4">
@@ -243,7 +243,7 @@
             </div>
 
             <!-- Medications -->
-            <div class="bg-card border border-border/50 rounded-xl p-6">
+            <div class="bento-card p-6">
                 <h2 class="text-lg font-semibold text-foreground mb-4">Medications Today</h2>
                 <label class="flex items-center space-x-3 cursor-pointer">
                     <input type="checkbox" name="medications_taken" checked class="rounded border-border w-5 h-5">

@@ -34,7 +34,7 @@
             <div class="lg:col-span-2 space-y-6">
                 <!-- Current Status Overview -->
                 {% if latest_log %}
-                <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="bento-card p-6">
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-xl font-semibold text-foreground">Latest Symptom Report</h2>
                         <span class="text-sm text-muted-foreground">{{ latest_log.logged_at|date:"M d, Y H:i" }}</span>
@@ -146,7 +146,7 @@
                 {% endif %}
 
                 <!-- Symptom Trend Chart Placeholder -->
-                <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="bento-card p-6">
                     <h2 class="text-xl font-semibold text-foreground mb-4">Symptom Trends (Last 7 Days)</h2>
                     <div class="h-64 flex items-center justify-center bg-accent/20 rounded-lg">
                         <div class="text-center">
@@ -174,7 +174,7 @@
                 </div>
 
                 <!-- Symptom History -->
-                <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="bento-card p-6">
                     <h2 class="text-xl font-semibold text-foreground mb-4">Symptom History</h2>
                     <div class="space-y-3 max-h-96 overflow-y-auto">
                         {% for log in symptom_logs %}
@@ -200,7 +200,7 @@
             <!-- Sidebar -->
             <div class="space-y-6">
                 <!-- Doctor Intervention Form -->
-                <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="bento-card p-6">
                     <h3 class="text-lg font-semibold text-foreground mb-4">Record Intervention</h3>
                     <form method="post" action="{% url 'clinical_decision_support:add_intervention' patient.id %}" class="space-y-4">
                         {% csrf_token %}
@@ -233,7 +233,7 @@
 
                 <!-- Previous Interventions -->
                 {% if interventions %}
-                <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="bento-card p-6">
                     <h3 class="text-lg font-semibold text-foreground mb-4">Previous Interventions</h3>
                     <div class="space-y-3 max-h-64 overflow-y-auto">
                         {% for intervention in interventions %}
@@ -248,7 +248,7 @@
                 {% endif %}
 
                 <!-- Quick Actions -->
-                <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="bento-card p-6">
                     <h3 class="text-lg font-semibold text-foreground mb-4">Quick Actions</h3>
                     <div class="space-y-3">
                         <a href="{% url 'clinical_decision_support:toxicity_predict' %}?patient={{ patient.id }}" 
@@ -268,7 +268,7 @@
                 </div>
 
                 <!-- Patient Info -->
-                <div class="bg-card border border-border/50 rounded-xl p-6">
+                <div class="bento-card p-6">
                     <h3 class="text-lg font-semibold text-foreground mb-4">Patient Info</h3>
                     <div class="space-y-3 text-sm">
                         <div>
