@@ -15,13 +15,10 @@
             class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-card text-foreground ">
             <i class="fas fa-file-upload mr-2"></i>Upload Report
         </button>
-        <button onclick="switchHistoTab('reports')" id="histoTab-reports"
+        <a href="{% url 'cancer_detection:histopathology_list' %}" id="histoTab-reports"
             class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 text-muted-foreground hover:text-foreground">
             <i class="fas fa-file-medical mr-2"></i>View Reports
-            {% if page_obj.paginator.count %}
-            <span class="ml-1.5 inline-flex items-center justify-center w-5 h-5 text-xs font-bold rounded-full bg-primary/15 text-primary">{{ page_obj.paginator.count }}</span>
-            {% endif %}
-        </button>
+        </a>
     </div>
 
     <!-- Upload Tab -->

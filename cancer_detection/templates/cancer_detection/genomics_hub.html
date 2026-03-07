@@ -15,10 +15,10 @@
             class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-card text-foreground ">
             <i class="fas fa-dna mr-2"></i>Upload Profile
         </button>
-        <button onclick="switchGenomicTab('profiles')" id="genomicTab-profiles"
+        <a href="{% url 'cancer_detection:genomic_list' %}" id="genomicTab-profiles"
             class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 text-muted-foreground hover:text-foreground">
             <i class="fas fa-flask mr-2"></i>Profiles
-        </button>
+        </a>
     </div>
 
     <!-- Upload Tab -->
@@ -354,6 +354,7 @@
         {% endif %}
     </div>
 </div>
+{% endblock %}
 
 {% block extra_js %}
 <script>
@@ -385,5 +386,4 @@
         }
     });
 </script>
-{% endblock %}
-{% endblock %}
+{% endblock extra_js %}

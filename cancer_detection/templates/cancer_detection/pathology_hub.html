@@ -15,10 +15,10 @@
             class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-card text-foreground ">
             <i class="fas fa-file-upload mr-2"></i>Upload Report
         </button>
-        <button onclick="switchPathTab('reports')" id="pathTab-reports"
+        <a href="{% url 'cancer_detection:histopathology_list' %}" id="pathTab-reports"
             class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 text-muted-foreground hover:text-foreground">
             <i class="fas fa-file-medical mr-2"></i>Reports
-        </button>
+        </a>
     </div>
 
     <!-- Upload Tab -->
@@ -220,6 +220,7 @@
         {% endif %}
     </div>
 </div>
+{% endblock %}
 
 {% block extra_js %}
 <script>
@@ -251,5 +252,4 @@
         }
     });
 </script>
-{% endblock %}
-{% endblock %}
+{% endblock extra_js %}

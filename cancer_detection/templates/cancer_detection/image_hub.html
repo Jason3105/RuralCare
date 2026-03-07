@@ -4,7 +4,7 @@
 {% block title %}Image Analysis Hub{% endblock %}
 
 {% block content %}
-<div class="fade-in max-w-7xl mx-auto">
+<div class="fade-in">
     <div class="mb-8 sm:mb-10">
         <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-3">Image Analysis Hub</h1>
         <p class="text-base sm:text-lg text-muted-foreground">Upload medical images and view your analysis history</p>
@@ -16,10 +16,10 @@
             class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-card text-foreground ">
             <i class="fas fa-cloud-upload-alt mr-2"></i>Upload Image
         </button>
-        <button onclick="switchImageTab('history')" id="imageTab-history"
+        <a href="{% url 'cancer_detection:analysis_list' %}" id="imageTab-history"
             class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 text-muted-foreground hover:text-foreground">
             <i class="fas fa-chart-bar mr-2"></i>Analysis History
-        </button>
+        </a>
     </div>
 
     <!-- Upload Tab -->
@@ -221,6 +221,7 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
 {% block extra_js %}
 <script>
@@ -295,5 +296,4 @@
         }
     });
 </script>
-{% endblock %}
-{% endblock %}
+{% endblock extra_js %}
