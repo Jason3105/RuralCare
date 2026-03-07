@@ -20,12 +20,7 @@ from utils.geocoding import get_lat_lng_from_address
 
 
 def home(request):
-    """Home page"""
-    if request.user.is_authenticated:
-        if request.user.user_type == 'patient':
-            return redirect('patient_dashboard')
-        elif request.user.user_type == 'doctor':
-            return redirect('doctor_dashboard')
+    """Home page - accessible to everyone"""
     return render(request, 'authentication/home.html')
 
 def login_page(request):

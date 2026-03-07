@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}ArogyaX — AI-Powered Healthcare{% endblock %}
+{% block title %}ArogyaX — AI-Powered Rural Healthcare Platform{% endblock %}
 
 {% block content %}
 <div class="fade-in">
@@ -13,12 +13,25 @@
                     <i class="fas fa-heartbeat"></i>
                 </div>
                 <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-4 tracking-tight">
-                    Personalized Cancer Treatment with AI
+                    AI-Powered Healthcare for Everyone
                 </h1>
                 <p class="text-base sm:text-lg text-white/85 max-w-xl leading-relaxed mb-8">
-                    Advanced ML algorithms analyze clinical, genomic, and historical patient data to design optimal treatment plans.
+                    ArogyaX brings advanced diagnostics, telemedicine, digital prescriptions, and AI medical assistance to patients and doctors — bridging the rural healthcare gap.
                 </p>
                 <div class="flex flex-col sm:flex-row gap-3">
+                    {% if user.is_authenticated %}
+                        {% if user.user_type == 'patient' %}
+                        <a href="{% url 'patient_dashboard' %}" class="inline-flex items-center justify-center px-7 py-3 bg-white text-orange-600 font-bold rounded-xl hover:shadow-lg transition-all text-sm">
+                            <i class="fas fa-columns mr-2"></i> Go to Dashboard
+                            <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                        </a>
+                        {% elif user.user_type == 'doctor' %}
+                        <a href="{% url 'doctor_dashboard' %}" class="inline-flex items-center justify-center px-7 py-3 bg-white text-orange-600 font-bold rounded-xl hover:shadow-lg transition-all text-sm">
+                            <i class="fas fa-columns mr-2"></i> Go to Dashboard
+                            <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                        </a>
+                        {% endif %}
+                    {% else %}
                     <a href="{% url 'patient_login' %}" class="inline-flex items-center justify-center px-7 py-3 bg-white text-orange-600 font-bold rounded-xl hover:shadow-lg transition-all text-sm">
                         <i class="fas fa-user-injured mr-2"></i> Patient Portal
                         <i class="fas fa-arrow-right ml-2 text-xs"></i>
@@ -26,6 +39,7 @@
                     <a href="{% url 'doctor_login' %}" class="inline-flex items-center justify-center px-7 py-3 bg-white/15 border-2 border-white/30 text-white font-bold rounded-xl hover:bg-white/25 transition-all text-sm">
                         <i class="fas fa-user-md mr-2"></i> Doctor Portal
                     </a>
+                    {% endif %}
                 </div>
             </div>
 
@@ -35,145 +49,219 @@
                     <div class="bento-icon bento-icon-green">
                         <i class="fas fa-chart-line"></i>
                     </div>
-                    <h3 class="text-lg font-bold text-foreground mb-1">Trusted Results</h3>
-                    <p class="text-sm text-muted-foreground">Proven accuracy across thousands of cases</p>
+                    <h3 class="text-lg font-bold text-foreground mb-1">Platform at a Glance</h3>
+                    <p class="text-sm text-muted-foreground">Comprehensive healthcare ecosystem</p>
                 </div>
                 <div class="mt-6 grid grid-cols-2 gap-3">
                     <div class="bg-green-50 dark:bg-green-900/20 rounded-xl p-3 text-center">
-                        <div class="text-2xl font-extrabold text-green-600">95%</div>
-                        <div class="text-xs text-muted-foreground mt-0.5">Accuracy</div>
+                        <div class="text-2xl font-extrabold text-green-600">15+</div>
+                        <div class="text-xs text-muted-foreground mt-0.5">Modules</div>
                     </div>
                     <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3 text-center">
-                        <div class="text-2xl font-extrabold text-blue-600">10K+</div>
-                        <div class="text-xs text-muted-foreground mt-0.5">Patients</div>
+                        <div class="text-2xl font-extrabold text-blue-600">AI</div>
+                        <div class="text-xs text-muted-foreground mt-0.5">Powered</div>
                     </div>
                     <div class="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-3 text-center">
-                        <div class="text-2xl font-extrabold text-purple-600">500+</div>
-                        <div class="text-xs text-muted-foreground mt-0.5">Doctors</div>
+                        <div class="text-2xl font-extrabold text-purple-600">24/7</div>
+                        <div class="text-xs text-muted-foreground mt-0.5">Chatbot</div>
                     </div>
                     <div class="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-3 text-center">
-                        <div class="text-2xl font-extrabold text-orange-600">100+</div>
-                        <div class="text-xs text-muted-foreground mt-0.5">Hospitals</div>
+                        <div class="text-2xl font-extrabold text-orange-600">6+</div>
+                        <div class="text-xs text-muted-foreground mt-0.5">Languages</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Features Section — Bento Grid with Icon Badges -->
+    <!-- Core Platform Features — Bento Grid -->
     <div class="py-12 sm:py-16">
         <div class="mb-10">
-            <h2 class="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">Cutting-Edge Features</h2>
-            <p class="text-muted-foreground mt-2 text-lg">Technology designed to empower healthcare professionals</p>
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">Everything You Need</h2>
+            <p class="text-muted-foreground mt-2 text-lg">A complete healthcare platform — from diagnosis to treatment to follow-up</p>
         </div>
         
         <div class="bento-grid">
-            <!-- Feature 1 — Accent Card -->
+            <!-- Feature 1 — Telemedicine (Accent) -->
             <div class="bento-card bento-accent-blue p-8">
                 <div class="bento-icon" style="background: rgba(255,255,255,0.2);">
-                    <i class="fas fa-brain"></i>
+                    <i class="fas fa-video"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-2">AI-Powered Analysis</h3>
+                <h3 class="text-xl font-bold mb-2">Telemedicine & Consultations</h3>
                 <p class="text-white/80 text-sm leading-relaxed">
-                    Advanced ML algorithms analyze comprehensive patient data to generate evidence-based treatment recommendations.
+                    HD video/audio calls with verified doctors, bi-directional calling, appointment management, and consultation tokens on blockchain.
                 </p>
             </div>
 
-            <!-- Feature 2 -->
-            <div class="bento-card p-8">
-                <div class="bento-icon bento-icon-green">
-                    <i class="fas fa-dna"></i>
-                </div>
-                <h3 class="text-xl font-bold text-foreground mb-2">Genomic Integration</h3>
-                <p class="text-muted-foreground text-sm leading-relaxed">
-                    Leverage genomic data to identify targeted therapies and predict treatment responses with precision.
-                </p>
-            </div>
-
-            <!-- Feature 3 -->
-            <div class="bento-card p-8">
-                <div class="bento-icon bento-icon-purple">
-                    <i class="fas fa-file-medical-alt"></i>
-                </div>
-                <h3 class="text-xl font-bold text-foreground mb-2">Comprehensive Reports</h3>
-                <p class="text-muted-foreground text-sm leading-relaxed">
-                    Detailed treatment plans with outcome predictions, side effect analysis, and evidence-based recommendations.
-                </p>
-            </div>
-
-            <!-- Feature 4 -->
+            <!-- Feature 2 — AI Diagnostics -->
             <div class="bento-card p-8">
                 <div class="bento-icon bento-icon-red">
                     <i class="fas fa-microscope"></i>
                 </div>
-                <h3 class="text-xl font-bold text-foreground mb-2">Image Analysis</h3>
+                <h3 class="text-xl font-bold text-foreground mb-2">AI Cancer Detection</h3>
                 <p class="text-muted-foreground text-sm leading-relaxed">
-                    Advanced computer vision using OpenCV to detect tumors in medical images with high accuracy.
+                    Upload medical images, pathology reports, histopathology slides, and genomic data for AI-powered diagnostic analysis.
                 </p>
             </div>
 
-            <!-- Feature 5 -->
+            <!-- Feature 3 — Digital Prescriptions -->
+            <div class="bento-card p-8">
+                <div class="bento-icon bento-icon-green">
+                    <i class="fas fa-prescription"></i>
+                </div>
+                <h3 class="text-xl font-bold text-foreground mb-2">Digital Prescriptions</h3>
+                <p class="text-muted-foreground text-sm leading-relaxed">
+                    Blockchain-verified digital prescriptions with QR codes, PDF downloads, drug interaction checks, and tamper-proof verification.
+                </p>
+            </div>
+
+            <!-- Feature 4 — AI Medical Chatbot -->
+            <div class="bento-card p-8">
+                <div class="bento-icon bento-icon-purple">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h3 class="text-xl font-bold text-foreground mb-2">AI Medical Assistant</h3>
+                <p class="text-muted-foreground text-sm leading-relaxed">
+                    24/7 context-aware chatbot with access to your complete medical history — diagnoses, medications, lab results, and consultations.
+                </p>
+            </div>
+
+            <!-- Feature 5 — Medicine Identifier -->
             <div class="bento-card p-8">
                 <div class="bento-icon bento-icon-cyan">
-                    <i class="fas fa-users"></i>
+                    <i class="fas fa-pills"></i>
                 </div>
-                <h3 class="text-xl font-bold text-foreground mb-2">Collaborative Care</h3>
+                <h3 class="text-xl font-bold text-foreground mb-2">Medicine Identifier</h3>
                 <p class="text-muted-foreground text-sm leading-relaxed">
-                    Connect patients, oncologists, and care teams for coordinated treatment through seamless communication.
+                    Snap a photo of any pill or tablet for instant identification — dosage info, side effects, drug interactions, and allergy warnings.
                 </p>
             </div>
 
-            <!-- Feature 6 -->
+            <!-- Feature 6 — Health Tracking -->
             <div class="bento-card p-8">
                 <div class="bento-icon bento-icon-yellow">
-                    <i class="fas fa-chart-line"></i>
+                    <i class="fas fa-heartbeat"></i>
                 </div>
-                <h3 class="text-xl font-bold text-foreground mb-2">Outcome Prediction</h3>
+                <h3 class="text-xl font-bold text-foreground mb-2">Health Tracking Hub</h3>
                 <p class="text-muted-foreground text-sm leading-relaxed">
-                    ML models predict treatment outcomes and survival rates based on historical data and patient profiles.
+                    Log symptoms, track side effects, monitor pain, fatigue, mood, and activity levels — with photo documentation and doctor alerts.
                 </p>
             </div>
         </div>
     </div>
 
-    <!-- How It Works — Bento Grid Row -->
+    <!-- More Features — Bento Grid Row -->
     <div class="py-12 sm:py-16">
         <div class="mb-10">
-            <h2 class="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">How It Works</h2>
-            <p class="text-muted-foreground mt-2 text-lg">A simple, efficient process powered by cutting-edge technology</p>
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">And Much More</h2>
+            <p class="text-muted-foreground mt-2 text-lg">Built for rural India with security, accessibility, and inclusivity in mind</p>
         </div>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
             <div class="bento-card p-6">
                 <div class="bento-icon bento-icon-orange">
-                    <i class="fas fa-cloud-upload-alt"></i>
+                    <i class="fas fa-map-marker-alt"></i>
                 </div>
-                <h3 class="font-bold text-foreground mb-1.5">Upload Data</h3>
-                <p class="text-sm text-muted-foreground">Submit clinical data, images, and genomic info securely</p>
+                <h3 class="font-bold text-foreground mb-1.5">Nearby Clinics</h3>
+                <p class="text-sm text-muted-foreground">GPS-based discovery of nearby healthcare facilities and emergency services</p>
             </div>
             
             <div class="bento-card p-6">
                 <div class="bento-icon bento-icon-blue">
-                    <i class="fas fa-cogs"></i>
+                    <i class="fas fa-shield-alt"></i>
                 </div>
-                <h3 class="font-bold text-foreground mb-1.5">AI Analysis</h3>
-                <p class="text-sm text-muted-foreground">Our AI engine analyzes data using advanced ML algorithms</p>
+                <h3 class="font-bold text-foreground mb-1.5">Insurance & Schemes</h3>
+                <p class="text-sm text-muted-foreground">Explore government health schemes, check eligibility, and apply for insurance</p>
             </div>
             
             <div class="bento-card p-6">
                 <div class="bento-icon bento-icon-purple">
-                    <i class="fas fa-clipboard-check"></i>
+                    <i class="fas fa-qrcode"></i>
                 </div>
-                <h3 class="font-bold text-foreground mb-1.5">Get Recommendations</h3>
-                <p class="text-sm text-muted-foreground">Receive personalized treatment plans with insights</p>
+                <h3 class="font-bold text-foreground mb-1.5">Blockchain Security</h3>
+                <p class="text-sm text-muted-foreground">Encrypted QR-based patient ID, audit trails, and Ethereum-verified records</p>
             </div>
             
             <div class="bento-card p-6">
                 <div class="bento-icon bento-icon-green">
-                    <i class="fas fa-chart-bar"></i>
+                    <i class="fas fa-language"></i>
                 </div>
-                <h3 class="font-bold text-foreground mb-1.5">Monitor Progress</h3>
-                <p class="text-sm text-muted-foreground">Track outcomes and adjust plans based on response</p>
+                <h3 class="font-bold text-foreground mb-1.5">Voice Assistant</h3>
+                <p class="text-sm text-muted-foreground">Multi-lingual voice support in Hindi, Marathi, Telugu, Kannada, Gujarati & English</p>
+            </div>
+
+            <div class="bento-card p-6">
+                <div class="bento-icon bento-icon-red">
+                    <i class="fas fa-user-md"></i>
+                </div>
+                <h3 class="font-bold text-foreground mb-1.5">Clinical Decision Support</h3>
+                <p class="text-sm text-muted-foreground">Tumor board reviews, toxicity prediction, symptom monitoring, and patient alerts</p>
+            </div>
+
+            <div class="bento-card p-6">
+                <div class="bento-icon bento-icon-cyan">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <h3 class="font-bold text-foreground mb-1.5">Telegram Alerts</h3>
+                <p class="text-sm text-muted-foreground">Real-time notifications for medication reminders, appointments, and health tips</p>
+            </div>
+
+            <div class="bento-card p-6">
+                <div class="bento-icon bento-icon-yellow">
+                    <i class="fas fa-wifi"></i>
+                </div>
+                <h3 class="font-bold text-foreground mb-1.5">Offline Support</h3>
+                <p class="text-sm text-muted-foreground">Access medical records and use the platform even without internet connectivity</p>
+            </div>
+
+            <div class="bento-card p-6">
+                <div class="bento-icon bento-icon-green">
+                    <i class="fas fa-file-medical"></i>
+                </div>
+                <h3 class="font-bold text-foreground mb-1.5">Medical Records</h3>
+                <p class="text-sm text-muted-foreground">Upload, organize, and securely access all your test reports and documents</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works -->
+    <div class="py-12 sm:py-16">
+        <div class="mb-10">
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">How It Works</h2>
+            <p class="text-muted-foreground mt-2 text-lg">Getting started is simple — whether you're a patient or a doctor</p>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            <div class="bento-card p-6">
+                <div class="bento-icon bento-icon-orange">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h3 class="font-bold text-foreground mb-1.5">1. Sign Up</h3>
+                <p class="text-sm text-muted-foreground">Create your patient or doctor account in seconds</p>
+            </div>
+            
+            <div class="bento-card p-6">
+                <div class="bento-icon bento-icon-blue">
+                    <i class="fas fa-upload"></i>
+                </div>
+                <h3 class="font-bold text-foreground mb-1.5">2. Upload & Connect</h3>
+                <p class="text-sm text-muted-foreground">Add medical records, connect with doctors, and set up your health profile</p>
+            </div>
+            
+            <div class="bento-card p-6">
+                <div class="bento-icon bento-icon-purple">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h3 class="font-bold text-foreground mb-1.5">3. Get AI Insights</h3>
+                <p class="text-sm text-muted-foreground">Receive AI-powered diagnostics, treatment recommendations, and health guidance</p>
+            </div>
+            
+            <div class="bento-card p-6">
+                <div class="bento-icon bento-icon-green">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="font-bold text-foreground mb-1.5">4. Track & Improve</h3>
+                <p class="text-sm text-muted-foreground">Monitor symptoms, follow treatment plans, and stay on top of your health</p>
             </div>
         </div>
     </div>
@@ -181,17 +269,29 @@
     <!-- CTA Section — Bento Accent Card -->
     <div class="py-12 sm:py-16">
         <div class="bento-card bento-accent-orange p-8 sm:p-14 text-center">
-            <h2 class="text-3xl sm:text-4xl font-extrabold mb-4 tracking-tight">Ready to Transform Cancer Care?</h2>
+            <h2 class="text-3xl sm:text-4xl font-extrabold mb-4 tracking-tight">Healthcare Access for Every Indian</h2>
             <p class="text-lg text-white/85 mb-8 max-w-2xl mx-auto">
-                Join thousands of healthcare professionals and patients using AI to improve outcomes.
+                ArogyaX is built to bridge the healthcare divide — bringing AI diagnostics, telemedicine, and digital health tools to rural and underserved communities.
             </p>
             <div class="flex flex-col sm:flex-row justify-center gap-4">
+                {% if user.is_authenticated %}
+                    {% if user.user_type == 'patient' %}
+                    <a href="{% url 'patient_dashboard' %}" class="inline-flex items-center justify-center px-8 py-3.5 bg-white text-orange-600 font-bold rounded-xl hover:shadow-lg transition-all">
+                        <i class="fas fa-columns mr-2"></i> Go to Dashboard
+                    </a>
+                    {% elif user.user_type == 'doctor' %}
+                    <a href="{% url 'doctor_dashboard' %}" class="inline-flex items-center justify-center px-8 py-3.5 bg-white text-orange-600 font-bold rounded-xl hover:shadow-lg transition-all">
+                        <i class="fas fa-columns mr-2"></i> Go to Dashboard
+                    </a>
+                    {% endif %}
+                {% else %}
                 <a href="{% url 'patient_login' %}" class="inline-flex items-center justify-center px-8 py-3.5 bg-white text-orange-600 font-bold rounded-xl hover:shadow-lg transition-all">
                     <i class="fas fa-user-plus mr-2"></i> Get Started Free
                 </a>
                 <a href="{% url 'doctor_login' %}" class="inline-flex items-center justify-center px-8 py-3.5 bg-white/15 border-2 border-white/30 text-white font-bold rounded-xl hover:bg-white/25 transition-all">
                     <i class="fas fa-stethoscope mr-2"></i> For Doctors
                 </a>
+                {% endif %}
             </div>
         </div>
     </div>
